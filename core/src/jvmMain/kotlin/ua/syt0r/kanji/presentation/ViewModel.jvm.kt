@@ -8,7 +8,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.getKoin
 
 @Composable
-actual inline fun <reified T> getMultiplatformViewModel(): T {
+actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
     /***
      * Using custom coroutine scope instead of remember one since it can leave composition when
      * navigating so view model will have canceled scope after returning to the screen

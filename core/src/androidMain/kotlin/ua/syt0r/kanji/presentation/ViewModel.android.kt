@@ -39,7 +39,7 @@ class AndroidViewModelWrapper<T>(
 
 
 @Composable
-actual inline fun <reified T> getMultiplatformViewModel(): T {
+actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
     return getViewModel<AndroidViewModelWrapper<T>>(
         qualifier = named<T>()
     ).viewModel

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScreenUI
@@ -13,7 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScr
 fun KanjiInfoScreen(
     kanji: String,
     mainNavigationState: MainNavigationState,
-    viewModel: KanjiInfoScreenContract.ViewModel
+    viewModel: KanjiInfoScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
     LaunchedEffect(Unit) {
