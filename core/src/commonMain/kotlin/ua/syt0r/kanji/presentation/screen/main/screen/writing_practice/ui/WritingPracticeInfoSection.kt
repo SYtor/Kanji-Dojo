@@ -66,8 +66,9 @@ import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRo
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.KanaVoiceAutoPlayToggle
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
 import kotlin.math.min
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5
@@ -82,23 +83,37 @@ data class WritingPracticeInfoSectionData(
 )
 
 @Composable
-fun State<WritingReviewData>.asInfoSectionState(
+fun State<WritingReviewState>.asInfoSectionState(
     noTranslationsLayout: Boolean,
     radicalsHighlight: State<Boolean>,
     kanaSoundAutoPlay: State<Boolean>
 ): State<WritingPracticeInfoSectionData> {
     return remember {
         derivedStateOf {
-            val currentState = value
-            currentState.run {
-                WritingPracticeInfoSectionData(
-                    characterData = characterData,
-                    isStudyMode = isStudyMode,
-                    isCharacterDrawn = drawnStrokesCount.value == characterData.strokes.size,
-                    shouldHighlightRadicals = radicalsHighlight.value,
-                    isNoTranslationLayout = noTranslationsLayout,
-                    kanaSoundAutoPlay = kanaSoundAutoPlay
-                )
+            when (val currentState = value) {
+                is WritingReviewState.MultipleStrokeInput -> {
+                    WritingPracticeInfoSectionData(
+                        characterData = currentState.characterDetails,
+                        isStudyMode = false,
+                        isCharacterDrawn = currentState.inputState
+                            .value is MultipleStrokeInputState.Processed,
+                        shouldHighlightRadicals = radicalsHighlight.value,
+                        isNoTranslationLayout = noTranslationsLayout,
+                        kanaSoundAutoPlay = kanaSoundAutoPlay
+                    )
+                }
+
+                is WritingReviewState.SingleStrokeInput -> {
+                    WritingPracticeInfoSectionData(
+                        characterData = currentState.characterDetails,
+                        isStudyMode = currentState.isStudyMode,
+                        isCharacterDrawn = currentState.drawnStrokesCount.value ==
+                                currentState.characterDetails.strokes.size,
+                        shouldHighlightRadicals = radicalsHighlight.value,
+                        isNoTranslationLayout = noTranslationsLayout,
+                        kanaSoundAutoPlay = kanaSoundAutoPlay
+                    )
+                }
             }
         }
     }

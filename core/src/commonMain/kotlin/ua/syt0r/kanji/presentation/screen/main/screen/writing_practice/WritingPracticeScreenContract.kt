@@ -9,11 +9,11 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import kotlin.time.Duration
@@ -41,7 +41,10 @@ interface WritingPracticeScreenContract {
 
         fun init(configuration: MainDestination.Practice.Writing)
         fun onPracticeConfigured(configuration: WritingScreenConfiguration)
-        suspend fun submitUserDrawnPath(inputData: StrokeInputData): StrokeProcessingResult
+
+        fun submitStroke(inputData: SingleStrokeInputData)
+        fun submitStrokes(inputData: MultipleStrokesInputData)
+
         fun loadNextCharacter(userAction: ReviewUserAction)
         fun savePractice(result: PracticeSavingResult)
 
@@ -68,7 +71,7 @@ interface WritingPracticeScreenContract {
 
         data class Review(
             val layoutConfiguration: WritingScreenLayoutConfiguration,
-            val reviewState: StateFlow<WritingReviewData>
+            val reviewState: StateFlow<WritingReviewState>
         ) : ScreenState()
 
         data class Saving(

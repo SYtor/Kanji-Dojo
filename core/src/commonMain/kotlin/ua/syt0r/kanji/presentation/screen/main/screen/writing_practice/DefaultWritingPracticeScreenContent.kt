@@ -31,7 +31,8 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
                 mainNavigationState.navigate(destination)
             },
             onConfigured = { viewModel.onPracticeConfigured(it) },
-            submitUserInput = { viewModel.submitUserDrawnPath(it) },
+            onSingleStrokeSubmit = { viewModel.submitStroke(it) },
+            onMultipleStokeSubmit = { viewModel.submitStrokes(it) },
             onHintClick = { viewModel.onHintClick() },
             onPracticeSaveClick = { viewModel.savePractice(it) },
             onPracticeCompleteButtonClick = { mainNavigationState.navigateBack() },

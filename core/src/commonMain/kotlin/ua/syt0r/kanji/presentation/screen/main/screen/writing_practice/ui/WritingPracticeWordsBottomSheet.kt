@@ -30,7 +30,8 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
 
 
 data class BottomSheetStateData(
@@ -39,17 +40,31 @@ data class BottomSheetStateData(
 )
 
 @Composable
-fun State<WritingReviewData>.asWordsBottomSheetState(): State<BottomSheetStateData> {
+fun State<WritingReviewState>.asWordsBottomSheetState(): State<BottomSheetStateData> {
     return remember {
         derivedStateOf {
-            val reviewData = value
-            val words = reviewData.run {
-                if (isStudyMode || drawnStrokesCount.value == characterData.strokes.size) characterData.words
-                else characterData.encodedWords
+            val currentState = value
+            val shouldRevealCharacter = when (currentState) {
+                is WritingReviewState.MultipleStrokeInput -> {
+                    currentState.inputState.value is MultipleStrokeInputState.Processed
+                }
+
+                is WritingReviewState.SingleStrokeInput -> {
+                    currentState.isStudyMode || currentState.drawnStrokesCount
+                        .value == currentState.characterDetails.strokes.size
+                }
             }
+
+            val words = if (shouldRevealCharacter) {
+                currentState.characterDetails.words
+            } else {
+                currentState.characterDetails.encodedWords
+            }
+
             val limitedWords = words.take(WritingPracticeScreenContract.WordsLimit)
+
             BottomSheetStateData(
-                reviewCount = reviewData.progress.totalReviews,
+                reviewCount = currentState.practiceProgress.totalReviews,
                 words = limitedWords
             )
         }

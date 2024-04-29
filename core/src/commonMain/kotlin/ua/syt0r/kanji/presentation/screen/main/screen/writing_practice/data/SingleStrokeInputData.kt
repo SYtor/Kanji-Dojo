@@ -2,7 +2,13 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
 
 import androidx.compose.ui.graphics.Path
 
-data class StrokeInputData(
+
+data class MultipleStrokesInputData(
+    val characterStrokes: List<Path>,
+    val inputStrokes: List<Path>
+)
+
+data class SingleStrokeInputData(
     val userPath: Path,
     val kanjiPath: Path
 )

@@ -4,7 +4,9 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -13,9 +15,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +27,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +45,14 @@ import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,61 +73,85 @@ import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedStroke
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
+import ua.syt0r.kanji.presentation.common.ui.kanji.Stroke
 import ua.syt0r.kanji.presentation.common.ui.kanji.StrokeInput
 import ua.syt0r.kanji.presentation.common.ui.kanji.defaultStrokeColor
+import ua.syt0r.kanji.presentation.common.ui.kanji.rememberStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
 import kotlin.math.max
 
 private const val CharacterMistakesToRepeat = 3
 
-data class WritingPracticeInputSectionData(
-    val characterData: WritingReviewCharacterDetails,
-    val isStudyMode: Boolean,
-    val drawnStrokesCount: State<Int>,
-    val currentStrokeMistakes: State<Int>,
-    val currentCharacterMistakes: State<Int>
-)
+private sealed interface AnswerButtonsState {
+    object Hidden : AnswerButtonsState
+    object StudyButtonShown : AnswerButtonsState
+    data class Shown(
+        val showNextButton: Boolean
+    ) : AnswerButtonsState
+}
 
-@Composable
-fun State<WritingReviewData>.asInputSectionState(): State<WritingPracticeInputSectionData> {
-    return remember {
-        derivedStateOf {
-            value.run {
-                WritingPracticeInputSectionData(
-                    characterData = characterData,
-                    isStudyMode = isStudyMode,
-                    drawnStrokesCount = drawnStrokesCount,
-                    currentStrokeMistakes = currentStrokeMistakes,
-                    currentCharacterMistakes = currentCharacterMistakes
-                )
+
+private fun State<WritingReviewState>.toAnswerButtonsState(): State<AnswerButtonsState> {
+    return derivedStateOf {
+        when (val currentState = value) {
+
+            is WritingReviewState.MultipleStrokeInput -> {
+                val processed = currentState.inputState.value as? MultipleStrokeInputState.Processed
+                if (processed == null) {
+                    AnswerButtonsState.Hidden
+                } else {
+                    AnswerButtonsState.Shown(
+                        showNextButton = processed.mistakes < CharacterMistakesToRepeat
+                    )
+                }
             }
+
+            is WritingReviewState.SingleStrokeInput -> {
+                val visible = currentState.run {
+                    drawnStrokesCount.value == characterDetails.strokes.size
+                }
+                if (visible) {
+                    if (currentState.isStudyMode) AnswerButtonsState.StudyButtonShown
+                    else AnswerButtonsState.Shown(
+                        showNextButton = currentState.currentCharacterMistakes.value < CharacterMistakesToRepeat
+                    )
+                } else {
+                    AnswerButtonsState.Hidden
+                }
+            }
+
         }
     }
 }
 
 @Composable
 fun WritingPracticeInputSection(
-    state: State<WritingPracticeInputSectionData>,
-    onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
+    state: State<WritingReviewState>,
+    onSingleStrokeSubmit: (SingleStrokeInputData) -> Unit,
+    onMultipleStokeSubmit: (MultipleStrokesInputData) -> Unit,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    InputDecorations(modifier = modifier) {
+    InputDecorations(
+        modifier = modifier
+    ) {
 
         val coroutineScope = rememberCoroutineScope()
         val hintClicksSharedFlow = remember { MutableSharedFlow<Unit>() }
 
-        val newCharacterTransition = updateTransition(
+        val transition = updateTransition(
             targetState = state.value,
             label = "Different Stokes transition"
         )
-        newCharacterTransition.AnimatedContent(
+
+        transition.AnimatedContent(
             modifier = Modifier.fillMaxSize(),
             transitionSpec = {
                 ContentTransform(
@@ -127,135 +159,323 @@ fun WritingPracticeInputSection(
                     initialContentExit = fadeOut()
                 )
             }
-        ) { state ->
+        ) { data ->
 
-            val isAnimatingCorrectStroke = remember { mutableStateOf(false) }
-            val correctStrokeAnimations = remember { Channel<StrokeProcessingResult.Correct>() }
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                when (data) {
+                    is WritingReviewState.MultipleStrokeInput -> {
+                        MultipleStrokeInputContent(
+                            state = data,
+                            submit = onMultipleStokeSubmit
+                        )
+                    }
 
-            val mistakeStrokeAnimations = remember { Channel<StrokeProcessingResult.Mistake>() }
+                    is WritingReviewState.SingleStrokeInput -> {
+                        SingleStrokeInputContent(
+                            data = data,
+                            onStrokeDrawn = onSingleStrokeSubmit,
+                            hintClicksFlow = hintClicksSharedFlow
+                        )
 
-            val adjustedDrawnStrokesCount = remember {
-                derivedStateOf {
-                    max(
-                        a = 0,
-                        b = state.drawnStrokesCount.value -
-                                if (isAnimatingCorrectStroke.value) 1 else 0
-                    )
+                        val isHintButtonVisible = remember {
+                            derivedStateOf {
+                                data.run { drawnStrokesCount.value < characterDetails.strokes.size }
+                            }
+                        }
+
+                        HintButton(
+                            onHintClick = {
+                                coroutineScope.launch {
+                                    onHintClick()
+                                    hintClicksSharedFlow.emit(Unit)
+                                }
+                            },
+                            visible = isHintButtonVisible
+                        )
+                    }
                 }
             }
 
+        }
+
+        AnswerButtons(
+            answerButtonsState = state.toAnswerButtonsState(),
+            onNextClick = onNextClick
+        )
+
+    }
+
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun BoxScope.MultipleStrokeInputContent(
+    state: WritingReviewState.MultipleStrokeInput,
+    submit: (MultipleStrokesInputData) -> Unit
+) {
+
+    var strokes by state.inputStrokes
+
+    when (val currentState = state.inputState.value) {
+
+        is MultipleStrokeInputState.Processed -> {
+
+            val lerpProgress = remember { Animatable(0f) }
+
+            LaunchedEffect(Unit) {
+                lerpProgress.animateTo(1f)
+            }
+
+            currentState.results.forEach { strokeResult ->
+                when (strokeResult) {
+                    is StrokeProcessingResult.Correct -> {
+                        AnimatedStroke(
+                            fromPath = strokeResult.userPath,
+                            toPath = strokeResult.kanjiPath,
+                            progress = { lerpProgress.value },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    is StrokeProcessingResult.Mistake -> {
+                        Stroke(
+                            path = strokeResult.hintStroke,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+            }
+        }
+
+        else -> {
+
             Kanji(
-                strokes = state.characterData.strokes.take(adjustedDrawnStrokesCount.value),
+                strokes = strokes,
                 modifier = Modifier.fillMaxSize()
             )
 
-            when (state.isStudyMode) {
-                true -> {
-                    StudyStroke(
-                        strokes = state.characterData.strokes,
-                        drawnStrokesCount = adjustedDrawnStrokesCount,
-                        hintClicksFlow = hintClicksSharedFlow
+        }
+
+    }
+
+    val transition = updateTransition(targetState = state.inputState.value)
+
+    transition.AnimatedContent(
+        contentKey = { it::class.simpleName },
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        modifier = Modifier.align(Alignment.TopEnd)
+    ) {
+        val mistakesCount = it.let { it as? MultipleStrokeInputState.Processed }
+            ?.mistakes
+            ?: -1
+
+        val visible = remember { mutableStateOf(value = it is MultipleStrokeInputState.Processed) }
+        val contentAlpha = animateFloatAsState(if (visible.value) 1f else 0f)
+
+        val interactable = it is MultipleStrokeInputState.Processed
+
+        Column(
+            modifier = Modifier
+                .focusable(enabled = interactable)
+                .graphicsLayer(alpha = contentAlpha.value)
+                .padding(12.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.777f))
+                .clickable(enabled = interactable) { visible.value = !visible.value }
+                .padding(12.dp)
+        ) {
+            Text("Character Strokes: ${state.characterDetails.strokes.size}")
+            Text("Written Strokes: ${strokes.size}")
+            Text("Mistakes: $mistakesCount")
+        }
+
+    }
+
+    val inputEnabledState = remember {
+        derivedStateOf { state.inputState.value == MultipleStrokeInputState.Writing }
+    }
+
+    if (inputEnabledState.value) {
+        StrokeInput(
+            onUserPathDrawn = { path -> strokes = strokes.plus(path) },
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+
+    transition.AnimatedVisibility(
+        visible = { it == MultipleStrokeInputState.Writing },
+        modifier = Modifier.align(Alignment.BottomEnd)
+    ) {
+        IconButton(
+            onClick = {
+                submit(
+                    MultipleStrokesInputData(
+                        characterStrokes = state.characterDetails.strokes,
+                        inputStrokes = strokes
                     )
-                }
-
-                false -> {
-                    HintStroke(
-                        inputState = state,
-                        hintClicksFlow = hintClicksSharedFlow
-                    )
-                }
-            }
-
-            ErrorFadeOutStroke(
-                data = remember { mistakeStrokeAnimations.consumeAsFlow() },
-                onAnimationEnd = { }
-            )
-
-            CorrectMovingStroke(
-                data = remember { correctStrokeAnimations.consumeAsFlow() },
-                onAnimationEnd = { isAnimatingCorrectStroke.value = false }
-            )
-
-            val shouldShowStrokeInput by remember {
-                derivedStateOf { state.characterData.strokes.size > state.drawnStrokesCount.value }
-            }
-
-            if (shouldShowStrokeInput) {
-                StrokeInput(
-                    onUserPathDrawn = { drawnPath ->
-                        val result = onStrokeDrawn(
-                            StrokeInputData(
-                                userPath = drawnPath,
-                                kanjiPath = state.characterData.strokes[state.drawnStrokesCount.value]
-                            )
-                        )
-                        when (result) {
-                            is StrokeProcessingResult.Correct -> {
-                                correctStrokeAnimations.trySend(result)
-                                isAnimatingCorrectStroke.value = true
-                            }
-
-                            is StrokeProcessingResult.Mistake -> {
-                                mistakeStrokeAnimations.trySend(result)
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
                 )
             }
-
-        }
-
-        val showHintButton by derivedStateOf {
-            state.value.run { drawnStrokesCount.value < characterData.strokes.size }
-        }
-        AnimatedVisibility(
-            visible = showHintButton,
-            modifier = Modifier.align(Alignment.TopEnd)
         ) {
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        onHintClick()
-                        hintClicksSharedFlow.emit(Unit)
-                    }
+            Icon(Icons.Default.Check, null)
+        }
+    }
+
+    transition.AnimatedVisibility(
+        visible = { it == MultipleStrokeInputState.Writing },
+        modifier = Modifier.align(Alignment.BottomStart)
+    ) {
+        IconButton(
+            onClick = { strokes = strokes.dropLast(1) }
+        ) {
+            Icon(Icons.Default.Undo, null)
+        }
+    }
+
+}
+
+@Composable
+private fun SingleStrokeInputContent(
+    data: WritingReviewState.SingleStrokeInput,
+    onStrokeDrawn: (SingleStrokeInputData) -> Unit,
+    hintClicksFlow: Flow<Unit>
+) {
+
+    val isAnimatingCorrectStroke = remember { mutableStateOf(false) }
+    val correctStrokeAnimations = remember { Channel<StrokeProcessingResult.Correct>() }
+    val inputState = rememberStrokeInputState(keepLastDrawnStroke = true)
+
+    val mistakeStrokeAnimations = remember { Channel<StrokeProcessingResult.Mistake>() }
+
+    val adjustedDrawnStrokesCount = remember {
+        derivedStateOf {
+            max(
+                a = 0,
+                b = data.drawnStrokesCount.value - if (isAnimatingCorrectStroke.value) 1 else 0
+            )
+        }
+    }
+
+    Kanji(
+        strokes = data.characterDetails.strokes.take(adjustedDrawnStrokesCount.value),
+        modifier = Modifier.fillMaxSize()
+    )
+
+    when (data.isStudyMode) {
+        true -> {
+            StudyStroke(
+                strokes = data.characterDetails.strokes,
+                drawnStrokesCount = adjustedDrawnStrokesCount,
+                hintClicksFlow = hintClicksFlow
+            )
+        }
+
+        false -> {
+            HintStroke(
+                inputState = data,
+                hintClicksFlow = hintClicksFlow
+            )
+        }
+    }
+
+    ErrorFadeOutStroke(
+        data = remember { mistakeStrokeAnimations.consumeAsFlow() },
+        onAnimationEnd = { }
+    )
+
+    CorrectMovingStroke(
+        data = remember { correctStrokeAnimations.consumeAsFlow() },
+        onAnimationEnd = { isAnimatingCorrectStroke.value = false }
+    )
+
+    val shouldShowStrokeInput by remember {
+        derivedStateOf { data.characterDetails.strokes.size > data.drawnStrokesCount.value }
+    }
+
+    LaunchedEffect(Unit) {
+        data.inputProcessingResults.collect {
+            inputState.hideStroke()
+            when (it) {
+                is StrokeProcessingResult.Correct -> {
+                    correctStrokeAnimations.trySend(it)
+                    isAnimatingCorrectStroke.value = true
                 }
-            ) {
-                Icon(ExtraIcons.Help, null)
+
+                is StrokeProcessingResult.Mistake -> {
+                    mistakeStrokeAnimations.trySend(it)
+                }
             }
         }
+    }
 
-        val buttonsSectionData = remember {
-            derivedStateOf {
-                state.value.run {
-                    ButtonsSectionData(
-                        visible = drawnStrokesCount.value == characterData.strokes.size,
-                        isStudy = isStudyMode,
-                        showNextButton = currentCharacterMistakes.value < CharacterMistakesToRepeat
+    if (shouldShowStrokeInput) {
+        StrokeInput(
+            onUserPathDrawn = { drawnPath ->
+                onStrokeDrawn(
+                    SingleStrokeInputData(
+                        userPath = drawnPath,
+                        kanjiPath = data.characterDetails.strokes[data.drawnStrokesCount.value]
                     )
-                }
-            }
-        }
+                )
 
-        val buttonsTransition = updateTransition(buttonsSectionData.value)
-        buttonsTransition.AnimatedContent(
-            transitionSpec = {
-                slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) + fadeIn() togetherWith
-                        slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) + fadeOut()
             },
-            contentKey = { it.visible },
-            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+            state = inputState,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+
+}
+
+@Composable
+private fun BoxScope.HintButton(
+    onHintClick: () -> Unit,
+    visible: State<Boolean>
+) {
+
+    AnimatedVisibility(
+        visible = visible.value,
+        modifier = Modifier.align(Alignment.TopEnd)
+    ) {
+        IconButton(
+            onClick = onHintClick
+        ) {
+            Icon(ExtraIcons.Help, null)
+        }
+    }
+
+}
+
+
+@Composable
+private fun BoxScope.AnswerButtons(
+    answerButtonsState: State<AnswerButtonsState>,
+    onNextClick: (ReviewUserAction) -> Unit
+) {
+
+    val buttonsTransition = updateTransition(answerButtonsState.value)
+    buttonsTransition.AnimatedContent(
+        transitionSpec = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) + fadeIn() togetherWith
+                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) + fadeOut()
+        },
+        contentKey = { it !is AnswerButtonsState.Hidden },
+        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
         ) {
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
+            when (it) {
+                AnswerButtonsState.Hidden -> {
 
-                if (!it.visible) return@AnimatedContent
+                }
 
-                if (it.isStudy) {
+                AnswerButtonsState.StudyButtonShown -> {
                     StyledTextButton(
                         text = resolveString { writingPractice.studyFinishedButton },
                         icon = Icons.Default.KeyboardArrowRight,
@@ -263,8 +483,9 @@ fun WritingPracticeInputSection(
                         backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         onClick = { onNextClick(ReviewUserAction.StudyNext) }
                     )
-                } else {
+                }
 
+                is AnswerButtonsState.Shown -> {
                     StyledTextButton(
                         text = resolveString { writingPractice.repeatButton },
                         icon = Icons.Default.Refresh,
@@ -289,12 +510,6 @@ fun WritingPracticeInputSection(
         }
     }
 }
-
-private data class ButtonsSectionData(
-    val visible: Boolean,
-    val isStudy: Boolean,
-    val showNextButton: Boolean
-)
 
 @Composable
 private fun StyledTextButton(
@@ -355,7 +570,7 @@ private fun InputDecorations(
 
 @Composable
 fun HintStroke(
-    inputState: WritingPracticeInputSectionData,
+    inputState: WritingReviewState.SingleStrokeInput,
     hintClicksFlow: Flow<Unit>
 ) {
 
@@ -369,7 +584,7 @@ fun HintStroke(
 
         hintClicksFlow.collectLatest {
             stroke.value = currentState.run {
-                characterData.strokes.getOrNull(drawnStrokesCount.value)
+                characterDetails.strokes.getOrNull(drawnStrokesCount.value)
             }
 
             strokeAlpha.snapTo(1f)

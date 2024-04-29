@@ -77,11 +77,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeTo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 
@@ -94,7 +94,8 @@ fun WritingPracticeScreenUI(
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
     speakKana: (KanaReading) -> Unit,
-    submitUserInput: suspend (StrokeInputData) -> StrokeProcessingResult,
+    onSingleStrokeSubmit: (SingleStrokeInputData) -> Unit,
+    onMultipleStokeSubmit: (MultipleStrokesInputData) -> Unit,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     onPracticeSaveClick: (PracticeSavingResult) -> Unit,
@@ -172,7 +173,8 @@ fun WritingPracticeScreenUI(
                     ReviewState(
                         configuration = screenState.layoutConfiguration,
                         reviewState = screenState.reviewState.collectAsState(),
-                        onStrokeDrawn = submitUserInput,
+                        onSingleStrokeSubmit = onSingleStrokeSubmit,
+                        onMultipleStokeSubmit = onMultipleStokeSubmit,
                         onHintClick = onHintClick,
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight,
@@ -221,7 +223,7 @@ private fun State<ScreenState>.toToolbarState(): State<PracticeToolbarState> {
                     ScreenState.Loading -> flowOf(PracticeToolbarState.Loading)
                     is ScreenState.Configuring -> flowOf(PracticeToolbarState.Configuration)
                     is ScreenState.Review -> screenState.reviewState.map {
-                        it.progress.run {
+                        it.practiceProgress.run {
                             PracticeToolbarState.Review(
                                 pending = pendingCount,
                                 repeat = repeatCount,
@@ -276,6 +278,7 @@ private fun ConfiguringState(
                 characters = characterSelectionState.result,
                 shuffle = characterSelectionState.selectedShuffle.value,
                 hintMode = selectedHintMode.value,
+                multiStrokeMode = false,
                 useRomajiForKanaWords = kanaRomaji,
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
@@ -399,8 +402,9 @@ private fun LoadingState() {
 @Composable
 private fun ReviewState(
     configuration: WritingScreenLayoutConfiguration,
-    reviewState: State<WritingReviewData>,
-    onStrokeDrawn: suspend (StrokeInputData) -> StrokeProcessingResult,
+    reviewState: State<WritingReviewState>,
+    onSingleStrokeSubmit: (SingleStrokeInputData) -> Unit,
+    onMultipleStokeSubmit: (MultipleStrokesInputData) -> Unit,
     onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
@@ -414,7 +418,6 @@ private fun ReviewState(
         radicalsHighlight = configuration.radicalsHighlight,
         kanaSoundAutoPlay = configuration.kanaAutoPlay
     )
-    val inputSectionState = reviewState.asInputSectionState()
     val wordsBottomSheetState = reviewState.asWordsBottomSheetState()
 
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -459,8 +462,9 @@ private fun ReviewState(
             )
 
             WritingPracticeInputSection(
-                state = inputSectionState,
-                onStrokeDrawn = onStrokeDrawn,
+                state = reviewState,
+                onSingleStrokeSubmit = onSingleStrokeSubmit,
+                onMultipleStokeSubmit = onMultipleStokeSubmit,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier
@@ -506,8 +510,9 @@ private fun ReviewState(
 
         val inputSection: @Composable RowScope.() -> Unit = {
             WritingPracticeInputSection(
-                state = inputSectionState,
-                onStrokeDrawn = onStrokeDrawn,
+                state = reviewState,
+                onSingleStrokeSubmit = onSingleStrokeSubmit,
+                onMultipleStokeSubmit = onMultipleStokeSubmit,
                 onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier
