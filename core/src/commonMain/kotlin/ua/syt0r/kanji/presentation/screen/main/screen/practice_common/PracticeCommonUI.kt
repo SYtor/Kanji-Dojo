@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -37,6 +40,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -67,6 +71,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -380,10 +385,36 @@ fun PracticeConfigurationOption(
     enabled: Boolean = true
 ) {
 
+    PracticeConfigurationItem(
+        title = title,
+        subtitle = subtitle,
+        onClick = { if (enabled) onChange(!checked) }
+    ) {
+
+        Switch(
+            checked = checked,
+            onCheckedChange = { onChange(it) },
+            colors = SwitchDefaults.colors(
+                uncheckedTrackColor = MaterialTheme.colorScheme.background
+            ),
+            enabled = enabled
+        )
+    }
+
+}
+
+@Composable
+fun PracticeConfigurationItem(
+    title: String,
+    subtitle: String,
+    onClick: (() -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+
     Row(
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = { if (enabled) onChange(!checked) })
+            .run { if (onClick != null) clickable(onClick = onClick) else this }
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -398,14 +429,32 @@ fun PracticeConfigurationOption(
             Text(text = subtitle, style = MaterialTheme.typography.bodySmall)
         }
 
-        Switch(
-            checked = checked,
-            onCheckedChange = { onChange(it) },
-            colors = SwitchDefaults.colors(
-                uncheckedTrackColor = MaterialTheme.colorScheme.background
-            ),
-            enabled = enabled
+        content()
+
+    }
+
+}
+
+@Composable
+fun PracticeConfigurationDropDownButton(
+    text: String,
+    onClick: () -> Unit
+) {
+
+    TextButton(
+        onClick = onClick,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        modifier = Modifier.width(IntrinsicSize.Max)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
+        Icon(Icons.Default.ArrowDropDown, null)
     }
 
 }

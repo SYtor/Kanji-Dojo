@@ -7,30 +7,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -46,8 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flatMapLatest
@@ -68,6 +58,8 @@ import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationDropDownButton
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
@@ -76,14 +68,15 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSa
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokesInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.SingleStrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeInputMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingScreenLayoutConfiguration
 
 @Composable
 fun WritingPracticeScreenUI(
@@ -272,13 +265,15 @@ private fun ConfiguringState(
 
     val selectedHintMode = remember { mutableStateOf(WritingPracticeHintMode.OnlyNew) }
 
+    val selectedInputMode = remember { mutableStateOf(state.inputMode) }
+
     PracticeConfigurationContainer(
         onClick = {
             val configuration = WritingScreenConfiguration(
                 characters = characterSelectionState.result,
                 shuffle = characterSelectionState.selectedShuffle.value,
                 hintMode = selectedHintMode.value,
-                multiStrokeMode = false,
+                inputMode = selectedInputMode.value,
                 useRomajiForKanaWords = kanaRomaji,
                 noTranslationsLayout = noTranslationLayout,
                 leftHandedMode = leftHandedMode,
@@ -294,6 +289,10 @@ private fun ConfiguringState(
 
         PracticeConfigurationHint(
             selectedHintMode = selectedHintMode
+        )
+
+        PracticeConfigurationInputMode(
+            selectedInputMode = selectedInputMode
         )
 
         PracticeConfigurationOption(
@@ -329,46 +328,23 @@ private fun ConfiguringState(
 }
 
 @Composable
-private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPracticeHintMode>) {
-    Row(
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
-            .fillMaxWidth()
-            .padding(vertical = 10.dp)
-            .padding(start = 20.dp, end = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+private fun PracticeConfigurationHint(
+    selectedHintMode: MutableState<WritingPracticeHintMode>
+) {
+    PracticeConfigurationItem(
+        title = resolveString { writingPractice.hintStrokesTitle },
+        subtitle = resolveString { writingPractice.hintStrokesMessage },
     ) {
-
-        Column(
-            modifier = Modifier.weight(2f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(text = resolveString { writingPractice.hintStrokesTitle })
-            Text(
-                text = resolveString { writingPractice.hintStrokesMessage },
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
 
         var expanded by remember { mutableStateOf(false) }
 
-        Box(Modifier.weight(1f)) {
-            TextButton(
-                onClick = { expanded = true },
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = resolveString(selectedHintMode.value.titleResolver),
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Icon(Icons.Default.ArrowDropDown, null)
-            }
+        Box {
+
+            PracticeConfigurationDropDownButton(
+                text = resolveString(selectedHintMode.value.titleResolver),
+                onClick = { expanded = true }
+            )
+
             MultiplatformPopup(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
@@ -387,6 +363,46 @@ private fun PracticeConfigurationHint(selectedHintMode: MutableState<WritingPrac
         }
 
     }
+}
+
+@Composable
+private fun PracticeConfigurationInputMode(
+    selectedInputMode: MutableState<WritingPracticeInputMode>
+) {
+
+    PracticeConfigurationItem(
+        title = "Input Mode",
+        subtitle = "Pick when input should be verified"
+    ) {
+
+        var expanded by remember { mutableStateOf(false) }
+
+        Box {
+
+            PracticeConfigurationDropDownButton(
+                text = resolveString(selectedInputMode.value.titleResolver),
+                onClick = { expanded = true }
+            )
+
+            MultiplatformPopup(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                WritingPracticeInputMode.values().forEach {
+                    PopupContentItem(
+                        onClick = {
+                            selectedInputMode.value = it
+                            expanded = false
+                        }
+                    ) {
+                        Text(resolveString(it.titleResolver))
+                    }
+                }
+            }
+        }
+
+    }
+
 }
 
 @Composable

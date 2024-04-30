@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
+import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 interface UserPreferencesRepository : SuspendedPropertyRegistry {
 
@@ -48,6 +49,7 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
     val highlightRadicals: SuspendedProperty<Boolean>
     val kanaAutoPlay: SuspendedProperty<Boolean>
 
+    val writingInputMethod: SuspendedProperty<WritingInputMethod>
     val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean>
     val writingToleratedMistakes: SuspendedProperty<Int>
 

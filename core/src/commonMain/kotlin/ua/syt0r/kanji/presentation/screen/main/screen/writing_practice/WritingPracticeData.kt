@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data
+package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -8,7 +8,88 @@ import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
+
+data class WritingScreenConfiguration(
+    val characters: List<String>,
+    val shuffle: Boolean,
+    val hintMode: WritingPracticeHintMode,
+    val inputMode: WritingPracticeInputMode,
+    val useRomajiForKanaWords: Boolean,
+    val noTranslationsLayout: Boolean,
+    val leftHandedMode: Boolean,
+    val altStrokeEvaluatorEnabled: Boolean,
+)
+
+data class WritingScreenLayoutConfiguration(
+    val noTranslationsLayout: Boolean,
+    val radicalsHighlight: State<Boolean>,
+    val kanaAutoPlay: State<Boolean>,
+    val leftHandedMode: Boolean
+)
+
+enum class WritingPracticeHintMode(
+    val titleResolver: StringResolveScope<String>,
+) {
+    OnlyNew(
+        titleResolver = { writingPractice.hintStrokeNewOnlyMode }
+    ),
+    All(
+        titleResolver = { writingPractice.hintStrokeAllMode }
+    ),
+    None(
+        titleResolver = { writingPractice.hintStrokeNoneMode }
+    )
+}
+
+enum class WritingPracticeInputMode(
+    val titleResolver: StringResolveScope<String>,
+    val inputMethod: WritingInputMethod
+) {
+    Stroke(
+        titleResolver = { "Each stroke" },
+        inputMethod = WritingInputMethod.Stroke
+    ),
+    Character(
+        titleResolver = { "Character" },
+        inputMethod = WritingInputMethod.Character
+    )
+}
+
+fun WritingInputMethod.toInputMode(): WritingPracticeInputMode = WritingPracticeInputMode.values()
+    .first { it.inputMethod == this }
+
+enum class ReviewUserAction {
+    StudyNext,
+    Next,
+    Repeat
+}
+
+data class MultipleStrokesInputData(
+    val characterStrokes: List<Path>,
+    val inputStrokes: List<Path>
+)
+
+data class SingleStrokeInputData(
+    val userPath: Path,
+    val kanjiPath: Path
+)
+
+sealed interface StrokeProcessingResult {
+
+    data class Correct(
+        val userPath: Path,
+        val kanjiPath: Path
+    ) : StrokeProcessingResult
+
+    data class Mistake(
+        val hintStroke: Path
+    ) : StrokeProcessingResult
+
+}
+
 
 sealed interface WritingReviewState {
 

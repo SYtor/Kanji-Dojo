@@ -30,8 +30,8 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
 
 
 data class BottomSheetStateData(

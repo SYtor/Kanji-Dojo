@@ -13,9 +13,9 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewCharacterDetails
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingScreenLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui.WritingPracticeScreenUI
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds

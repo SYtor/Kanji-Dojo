@@ -77,12 +77,12 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.Stroke
 import ua.syt0r.kanji.presentation.common.ui.kanji.StrokeInput
 import ua.syt0r.kanji.presentation.common.ui.kanji.defaultStrokeColor
 import ua.syt0r.kanji.presentation.common.ui.kanji.rememberStrokeInputState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokesInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.SingleStrokeInputData
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.StrokeProcessingResult
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
 import kotlin.math.max
 
 private const val CharacterMistakesToRepeat = 3
@@ -262,37 +262,6 @@ private fun BoxScope.MultipleStrokeInputContent(
     }
 
     val transition = updateTransition(targetState = state.inputState.value)
-
-    transition.AnimatedContent(
-        contentKey = { it::class.simpleName },
-        transitionSpec = { fadeIn() togetherWith fadeOut() },
-        modifier = Modifier.align(Alignment.TopEnd)
-    ) {
-        val mistakesCount = it.let { it as? MultipleStrokeInputState.Processed }
-            ?.mistakes
-            ?: -1
-
-        val visible = remember { mutableStateOf(value = it is MultipleStrokeInputState.Processed) }
-        val contentAlpha = animateFloatAsState(if (visible.value) 1f else 0f)
-
-        val interactable = it is MultipleStrokeInputState.Processed
-
-        Column(
-            modifier = Modifier
-                .focusable(enabled = interactable)
-                .graphicsLayer(alpha = contentAlpha.value)
-                .padding(12.dp)
-                .clip(MaterialTheme.shapes.medium)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.777f))
-                .clickable(enabled = interactable) { visible.value = !visible.value }
-                .padding(12.dp)
-        ) {
-            Text("Character Strokes: ${state.characterDetails.strokes.size}")
-            Text("Written Strokes: ${strokes.size}")
-            Text("Mistakes: $mistakesCount")
-        }
-
-    }
 
     val inputEnabledState = remember {
         derivedStateOf { state.inputState.value == MultipleStrokeInputState.Writing }

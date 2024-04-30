@@ -11,7 +11,7 @@ import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewCharacterDetails
 
 class LoadWritingPracticeCharacterDataUseCase(
     private val appDataRepository: AppDataRepository,

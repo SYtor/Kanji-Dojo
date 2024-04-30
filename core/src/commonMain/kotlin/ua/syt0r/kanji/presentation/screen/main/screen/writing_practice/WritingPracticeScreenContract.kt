@@ -9,13 +9,6 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import kotlin.time.Duration
 
 interface WritingPracticeScreenContract {
@@ -66,6 +59,7 @@ interface WritingPracticeScreenContract {
             val noTranslationsLayout: Boolean,
             val leftHandedMode: Boolean,
             val kanaRomaji: Boolean,
+            val inputMode: WritingPracticeInputMode,
             val altStrokeEvaluatorEnabled: Boolean,
         ) : ScreenState()
 

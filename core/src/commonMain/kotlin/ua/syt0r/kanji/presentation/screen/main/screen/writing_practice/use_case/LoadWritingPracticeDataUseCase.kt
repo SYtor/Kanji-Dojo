@@ -11,8 +11,8 @@ import ua.syt0r.kanji.core.app_state.CharacterProgressStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewHistory
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingPracticeHintMode
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingScreenConfiguration
 
 class LoadWritingPracticeDataUseCase(
     private val appStateManager: AppStateManager,

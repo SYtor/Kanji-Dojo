@@ -27,20 +27,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCh
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ReviewAction
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ReviewSummary
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction.Next
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction.Repeat
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction.StudyNext
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokesInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction.Next
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction.Repeat
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.ReviewUserAction.StudyNext
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.SingleStrokeInputData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.StrokeProcessingResult
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterSummaryDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingScreenLayoutConfiguration
 import kotlin.math.max
 
 
@@ -98,6 +88,7 @@ class WritingPracticeViewModel(
                 leftHandedMode = userPreferencesRepository.leftHandMode.get(),
                 kanaRomaji = userPreferencesRepository
                     .writingRomajiInsteadOfKanaWords.get(),
+                inputMode = userPreferencesRepository.writingInputMethod.get().toInputMode(),
                 altStrokeEvaluatorEnabled = userPreferencesRepository.altStrokeEvaluator.get(),
             )
         }
@@ -113,6 +104,7 @@ class WritingPracticeViewModel(
                 noTranslationLayout.set(configuration.noTranslationsLayout)
                 leftHandMode.set(configuration.leftHandedMode)
                 writingRomajiInsteadOfKanaWords.set(configuration.useRomajiForKanaWords)
+                writingInputMethod.set(configuration.inputMode.inputMethod)
                 altStrokeEvaluator.set(configuration.altStrokeEvaluatorEnabled)
             }
 
@@ -308,7 +300,7 @@ class WritingPracticeViewModel(
         val isStudyMode = history.last() == WritingCharacterReviewHistory.Study
 
         val (mutableState, reviewData) = when {
-            !isStudyMode && screenConfiguration.multiStrokeMode -> {
+            screenConfiguration.inputMode == WritingPracticeInputMode.Character && !isStudyMode -> {
                 val mutableState = MutableReviewData.MultipleStroke(
                     state = mutableStateOf(MultipleStrokeInputState.Writing)
                 )

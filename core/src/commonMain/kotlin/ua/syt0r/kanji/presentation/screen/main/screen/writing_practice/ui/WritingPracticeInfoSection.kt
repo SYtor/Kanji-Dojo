@@ -66,9 +66,9 @@ import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRo
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.KanaVoiceAutoPlayToggle
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.MultipleStrokeInputState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewCharacterDetails
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
 import kotlin.math.min
 
 private const val NoTranslationLayoutPreviewWordsLimit = 5

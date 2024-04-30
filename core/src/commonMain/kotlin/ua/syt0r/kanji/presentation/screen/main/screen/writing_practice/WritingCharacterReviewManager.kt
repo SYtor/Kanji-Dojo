@@ -4,8 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.BaseCharacterReviewManager
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterReviewData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.data.WritingReviewCharacterSummaryDetails
 
 enum class WritingCharacterReviewHistory { Study, Review, Repeat }
 

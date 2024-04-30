@@ -5,6 +5,8 @@ import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.createEnumProperty
+import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 class DefaultPracticeUserPreferencesRepository(
     provider: SuspendedPropertyProvider,
@@ -44,6 +46,13 @@ class DefaultPracticeUserPreferencesRepository(
         createBooleanProperty(
             key = "highlight_radicals",
             initialValueProvider = { true }
+        )
+    }
+
+    override val writingInputMethod: SuspendedProperty<WritingInputMethod> = registerProperty {
+        createEnumProperty(
+            key = "writing_input_method",
+            initialValueProvider = { WritingInputMethod.Stroke }
         )
     }
 
