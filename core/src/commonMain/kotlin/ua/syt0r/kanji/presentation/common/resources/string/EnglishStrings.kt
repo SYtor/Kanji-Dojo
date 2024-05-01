@@ -508,6 +508,10 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeNewOnlyMode: String = "New only"
     override val hintStrokeAllMode: String = "For all"
     override val hintStrokeNoneMode: String = "Never"
+    override val inputModeTitle: String = "Input Mode"
+    override val inputModeMessage: String = "Choose whether to validate each stroke or the entire character"
+    override val inputModeStroke: String = "Stroke"
+    override val inputModeCharacter: String = "Character"
     override val kanaRomajiTitle: String = "Show romaji in kana practice"
     override val kanaRomajiMessage: String =
         "When reviewing kana show romaji expressions instead of kana"

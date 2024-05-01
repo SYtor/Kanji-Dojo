@@ -434,6 +434,10 @@ interface WritingPracticeStrings {
     val hintStrokeNewOnlyMode: String
     val hintStrokeAllMode: String
     val hintStrokeNoneMode: String
+    val inputModeTitle: String
+    val inputModeMessage: String
+    val inputModeStroke: String
+    val inputModeCharacter: String
     val kanaRomajiTitle: String
     val kanaRomajiMessage: String
     val noTranslationLayoutTitle: String

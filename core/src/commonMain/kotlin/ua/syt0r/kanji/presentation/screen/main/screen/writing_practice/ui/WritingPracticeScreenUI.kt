@@ -371,8 +371,8 @@ private fun PracticeConfigurationInputMode(
 ) {
 
     PracticeConfigurationItem(
-        title = "Input Mode",
-        subtitle = "Pick when input should be verified"
+        title = resolveString { writingPractice.inputModeTitle },
+        subtitle = resolveString { writingPractice.inputModeMessage }
     ) {
 
         var expanded by remember { mutableStateOf(false) }

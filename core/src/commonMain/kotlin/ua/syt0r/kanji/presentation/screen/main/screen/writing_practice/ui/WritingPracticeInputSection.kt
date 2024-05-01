@@ -148,7 +148,7 @@ fun WritingPracticeInputSection(
 
         val transition = updateTransition(
             targetState = state.value,
-            label = "Different Stokes transition"
+            label = "Different Characters Transition"
         )
 
         transition.AnimatedContent(

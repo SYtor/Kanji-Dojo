@@ -486,6 +486,10 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeNewOnlyMode: String = "新規のみ"
     override val hintStrokeAllMode: String = "常時"
     override val hintStrokeNoneMode: String = "しない"
+    override val inputModeTitle: String = "入力モード"
+    override val inputModeMessage: String = "字画ごとに検証するか、文字全体を検証するかを選択する"
+    override val inputModeStroke: String = "字画"
+    override val inputModeCharacter: String = "文字"
     override val kanaRomajiTitle: String = "ローマ字を表示"
     override val kanaRomajiMessage: String =
         "かなを練習するときは、かなの代わりにローマ字単語を表示する"

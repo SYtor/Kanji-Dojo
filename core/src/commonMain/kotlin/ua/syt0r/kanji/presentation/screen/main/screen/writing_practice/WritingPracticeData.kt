@@ -49,11 +49,11 @@ enum class WritingPracticeInputMode(
     val inputMethod: WritingInputMethod
 ) {
     Stroke(
-        titleResolver = { "Each stroke" },
+        titleResolver = { writingPractice.inputModeStroke },
         inputMethod = WritingInputMethod.Stroke
     ),
     Character(
-        titleResolver = { "Character" },
+        titleResolver = { writingPractice.inputModeCharacter },
         inputMethod = WritingInputMethod.Character
     )
 }
