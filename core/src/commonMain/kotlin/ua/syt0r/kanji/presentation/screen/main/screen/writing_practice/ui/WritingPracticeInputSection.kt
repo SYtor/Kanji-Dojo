@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -15,11 +14,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -174,7 +170,7 @@ fun WritingPracticeInputSection(
 
                     is WritingReviewState.SingleStrokeInput -> {
                         SingleStrokeInputContent(
-                            data = data,
+                            reviewState = data,
                             onStrokeDrawn = onSingleStrokeSubmit,
                             hintClicksFlow = hintClicksSharedFlow
                         )
@@ -307,7 +303,7 @@ private fun BoxScope.MultipleStrokeInputContent(
 
 @Composable
 private fun SingleStrokeInputContent(
-    data: WritingReviewState.SingleStrokeInput,
+    reviewState: WritingReviewState.SingleStrokeInput,
     onStrokeDrawn: (SingleStrokeInputData) -> Unit,
     hintClicksFlow: Flow<Unit>
 ) {
@@ -322,20 +318,20 @@ private fun SingleStrokeInputContent(
         derivedStateOf {
             max(
                 a = 0,
-                b = data.drawnStrokesCount.value - if (isAnimatingCorrectStroke.value) 1 else 0
+                b = reviewState.drawnStrokesCount.value - if (isAnimatingCorrectStroke.value) 1 else 0
             )
         }
     }
 
     Kanji(
-        strokes = data.characterDetails.strokes.take(adjustedDrawnStrokesCount.value),
+        strokes = reviewState.characterDetails.strokes.take(adjustedDrawnStrokesCount.value),
         modifier = Modifier.fillMaxSize()
     )
 
-    when (data.isStudyMode) {
+    when (reviewState.isStudyMode) {
         true -> {
             StudyStroke(
-                strokes = data.characterDetails.strokes,
+                strokes = reviewState.characterDetails.strokes,
                 drawnStrokesCount = adjustedDrawnStrokesCount,
                 hintClicksFlow = hintClicksFlow
             )
@@ -343,28 +339,28 @@ private fun SingleStrokeInputContent(
 
         false -> {
             HintStroke(
-                inputState = data,
+                reviewState = reviewState,
                 hintClicksFlow = hintClicksFlow
             )
         }
     }
 
     ErrorFadeOutStroke(
-        data = remember { mistakeStrokeAnimations.consumeAsFlow() },
+        mistakeFlow = remember { mistakeStrokeAnimations.consumeAsFlow() },
         onAnimationEnd = { }
     )
 
     CorrectMovingStroke(
-        data = remember { correctStrokeAnimations.consumeAsFlow() },
+        correctFlow = remember { correctStrokeAnimations.consumeAsFlow() },
         onAnimationEnd = { isAnimatingCorrectStroke.value = false }
     )
 
     val shouldShowStrokeInput by remember {
-        derivedStateOf { data.characterDetails.strokes.size > data.drawnStrokesCount.value }
+        derivedStateOf { reviewState.characterDetails.strokes.size > reviewState.drawnStrokesCount.value }
     }
 
     LaunchedEffect(Unit) {
-        data.inputProcessingResults.collect {
+        reviewState.inputProcessingResults.collect {
             inputState.hideStroke()
             when (it) {
                 is StrokeProcessingResult.Correct -> {
@@ -385,7 +381,7 @@ private fun SingleStrokeInputContent(
                 onStrokeDrawn(
                     SingleStrokeInputData(
                         userPath = drawnPath,
-                        kanjiPath = data.characterDetails.strokes[data.drawnStrokesCount.value]
+                        kanjiPath = reviewState.characterDetails.strokes[reviewState.drawnStrokesCount.value]
                     )
                 )
 
@@ -539,11 +535,11 @@ private fun InputDecorations(
 
 @Composable
 fun HintStroke(
-    inputState: WritingReviewState.SingleStrokeInput,
+    reviewState: WritingReviewState.SingleStrokeInput,
     hintClicksFlow: Flow<Unit>
 ) {
 
-    val currentState by rememberUpdatedState(inputState)
+    val currentState by rememberUpdatedState(reviewState)
 
     val stroke = remember { mutableStateOf<Path?>(null, neverEqualPolicy()) }
     val strokeDrawProgress = remember { Animatable(initialValue = 0f) }
@@ -581,7 +577,7 @@ fun HintStroke(
 
 @Composable
 fun ErrorFadeOutStroke(
-    data: Flow<StrokeProcessingResult.Mistake>,
+    mistakeFlow: Flow<StrokeProcessingResult.Mistake>,
     onAnimationEnd: () -> Unit
 ) {
 
@@ -589,7 +585,7 @@ fun ErrorFadeOutStroke(
     val strokeAlpha = remember { Animatable(initialValue = 0f) }
 
     LaunchedEffect(Unit) {
-        data.collect {
+        mistakeFlow.collect {
             lastData.value = it
             strokeAlpha.snapTo(1f)
             strokeAlpha.animateTo(0f, tween(600))
@@ -611,7 +607,7 @@ fun ErrorFadeOutStroke(
 
 @Composable
 fun CorrectMovingStroke(
-    data: Flow<StrokeProcessingResult.Correct>,
+    correctFlow: Flow<StrokeProcessingResult.Correct>,
     onAnimationEnd: () -> Unit
 ) {
 
@@ -619,7 +615,7 @@ fun CorrectMovingStroke(
     val strokeLength = remember { Animatable(initialValue = 0f) }
 
     LaunchedEffect(Unit) {
-        data.collect {
+        correctFlow.collect {
             lastData.value = it
             strokeLength.snapTo(0f)
             strokeLength.animateTo(1f)

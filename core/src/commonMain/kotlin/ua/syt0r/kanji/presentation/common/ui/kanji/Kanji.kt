@@ -5,11 +5,9 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -71,6 +69,8 @@ class StrokeInputState(
 ) {
 
     val internalShowStroke = mutableStateOf(keepLastDrawnStroke)
+    val internalPath = mutableStateOf(Path(), neverEqualPolicy())
+    val internalDrawAreaSize = mutableStateOf(0)
 
     fun hideStroke() {
         internalShowStroke.value = false
@@ -94,26 +94,25 @@ fun StrokeInput(
     stokeWidth: Float = StrokeWidth
 ) {
 
-    val drawPathState = remember { mutableStateOf(Path(), neverEqualPolicy()) }
-    var areaSize by remember { mutableStateOf(0) }
-
     Canvas(
         modifier = modifier
             .then(ExcludeNavigationGesturesModifier)
-            .onGloballyPositioned { areaSize = it.size.height }
+            .onGloballyPositioned { state.internalDrawAreaSize.value = it.size.height }
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
-                        state.internalShowStroke.value = true
-                        drawPathState.value = Path().apply {
+                        val areaSize = state.internalDrawAreaSize.value
+                        state.internalPath.value = Path().apply {
                             moveTo(
                                 it.x / areaSize * KanjiSize,
                                 it.y / areaSize * KanjiSize
                             )
                         }
+                        state.internalShowStroke.value = true
                     },
                     onDrag = { _, dragAmount ->
-                        drawPathState.value = drawPathState.value.apply {
+                        val areaSize = state.internalDrawAreaSize.value
+                        state.internalPath.value = state.internalPath.value.apply {
                             relativeLineTo(
                                 dragAmount.x / areaSize * KanjiSize,
                                 dragAmount.y / areaSize * KanjiSize
@@ -121,7 +120,7 @@ fun StrokeInput(
                         }
                     },
                     onDragEnd = {
-                        onUserPathDrawn(drawPathState.value)
+                        onUserPathDrawn(state.internalPath.value)
                         if (!state.keepLastDrawnStroke) {
                             state.internalShowStroke.value = false
                         }
@@ -131,8 +130,11 @@ fun StrokeInput(
     ) {
         if (state.internalShowStroke.value) {
             clipRect {
-                val path = drawPathState.value
-                drawKanjiStroke(path, color, stokeWidth)
+                drawKanjiStroke(
+                    path = state.internalPath.value,
+                    color = color,
+                    width = stokeWidth
+                )
             }
         }
     }
@@ -165,19 +167,3 @@ fun parseKanjiStrokes(strokes: List<String>): List<Path> {
     return strokes.map { SvgCommandParser.parse(it) }
         .map { SvgPathCreator.convert(it) }
 }
-
-//@Preview(showBackground = true, showSystemUi = true)
-//@Composable
-//private fun KanjiPreview() {
-//    AppTheme {
-//        Column {
-//            Kanji(
-//                modifier = Modifier
-//                    .size(200.dp)
-//                    .background(MaterialTheme.colorScheme.background),
-//                strokes = PreviewKanji.strokes
-//            )
-//        }
-//
-//    }
-//}
