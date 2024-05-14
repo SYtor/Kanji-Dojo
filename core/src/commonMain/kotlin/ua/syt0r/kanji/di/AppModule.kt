@@ -1,4 +1,4 @@
-package ua.syt0r.kanji
+package ua.syt0r.kanji.di
 
 import org.koin.core.module.Module
 import ua.syt0r.kanji.core.coreModule

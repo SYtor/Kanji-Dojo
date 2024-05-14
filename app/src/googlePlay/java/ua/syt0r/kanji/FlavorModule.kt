@@ -11,7 +11,7 @@ import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
 import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.core.review.PlayServicesReviewManager
 import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
-import ua.syt0r.kanji.presentation.androidMultiplatformViewModel
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayReadingPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayWritingPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
@@ -47,7 +47,7 @@ val flavorModule = module {
 
     single<SettingsScreenContract.Content> { GooglePlaySettingsScreenContent }
 
-    factory<GooglePlaySettingsScreenContract.ViewModel> {
+    multiplatformViewModel<GooglePlaySettingsScreenContract.ViewModel> {
         GooglePlaySettingsViewModel(
             viewModelScope = it.component1(),
             userPreferencesRepository = get(),
@@ -55,7 +55,5 @@ val flavorModule = module {
             reminderScheduler = get()
         )
     }
-
-    androidMultiplatformViewModel<GooglePlaySettingsScreenContract.ViewModel>()
 
 }

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create
 
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.PracticeCreateDeletePracticeUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.PracticeCreateLoadDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case.PracticeCreateSavePracticeUseCase
@@ -32,7 +33,7 @@ val practiceCreateScreenModule = module {
         )
     }
 
-    factory<PracticeCreateScreenContract.ViewModel> {
+    multiplatformViewModel<PracticeCreateScreenContract.ViewModel> {
         PracticeCreateViewModel(
             viewModelScope = it.component1(),
             loadDataUseCase = get(),

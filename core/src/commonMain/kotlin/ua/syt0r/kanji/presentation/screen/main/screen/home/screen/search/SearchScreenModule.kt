@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.use_case.*
 
 val searchScreenModule = module {
@@ -35,7 +36,7 @@ val searchScreenModule = module {
         )
     }
 
-    factory<SearchScreenContract.ViewModel> {
+    multiplatformViewModel<SearchScreenContract.ViewModel> {
         SearchViewModel(
             viewModelScope = it.component1(),
             processInputUseCase = get(),

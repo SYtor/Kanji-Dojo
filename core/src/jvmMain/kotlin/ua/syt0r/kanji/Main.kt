@@ -14,6 +14,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
+import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.KanjiDojoApp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 

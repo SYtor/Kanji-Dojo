@@ -1,12 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabReadingReviewStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabReadingReviewStateUseCase
 
 val vocabPracticeScreenModule = module {
 
-    factory<VocabPracticeScreenContract.ViewModel> {
+    multiplatformViewModel<VocabPracticeScreenContract.ViewModel> {
         VocabPracticeViewModel(
             viewModelScope = it.component1(),
             reviewManager = get { it },

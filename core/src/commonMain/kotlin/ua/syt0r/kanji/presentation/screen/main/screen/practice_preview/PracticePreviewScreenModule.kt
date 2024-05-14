@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview
 
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.CreatePracticeGroupsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewFetchItemsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case.PracticePreviewFilterItemsUseCase
@@ -40,7 +41,7 @@ val practicePreviewScreenModule = module {
         CreatePracticeGroupsUseCase()
     }
 
-    factory<PracticePreviewScreenContract.ViewModel> {
+    multiplatformViewModel<PracticePreviewScreenContract.ViewModel> {
         PracticePreviewViewModel(
             viewModelScope = it.component1(),
             reloadDataUseCase = get(),

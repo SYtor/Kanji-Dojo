@@ -1,7 +1,7 @@
 package ua.syt0r.kanji
 
 import org.koin.dsl.module
-import ua.syt0r.kanji.presentation.androidMultiplatformViewModel
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract
@@ -11,7 +11,7 @@ val flavorModule = module {
 
     single<SettingsScreenContract.Content> { FdroidSettingsScreenContent }
 
-    factory<FdroidSettingsScreenContract.ViewModel> {
+    multiplatformViewModel<FdroidSettingsScreenContract.ViewModel> {
         FdroidSettingsViewModel(
             viewModelScope = it.component1(),
             userPreferencesRepository = get(),
@@ -19,7 +19,5 @@ val flavorModule = module {
             reminderScheduler = get()
         )
     }
-
-    androidMultiplatformViewModel<FdroidSettingsScreenContract.ViewModel>()
 
 }

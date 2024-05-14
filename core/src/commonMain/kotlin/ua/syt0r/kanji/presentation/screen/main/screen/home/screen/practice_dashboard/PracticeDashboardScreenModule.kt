@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
 
 import org.koin.dsl.module
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case.MergePracticeSetsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case.PracticeDashboardApplySortUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case.PracticeDashboardLoadDataUseCase
@@ -29,7 +30,7 @@ val practiceDashboardScreenModule = module {
         PracticeDashboardApplySortUseCase()
     }
 
-    factory<PracticeDashboardScreenContract.ViewModel> {
+    multiplatformViewModel<PracticeDashboardScreenContract.ViewModel> {
         PracticeDashboardViewModel(
             viewModelScope = it.component1(),
             loadDataUseCase = get(),

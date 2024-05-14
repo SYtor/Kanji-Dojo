@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import org.koin.core.definition.Definition
+import org.koin.core.module.Module
 import org.koin.core.parameter.parametersOf
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -14,4 +16,10 @@ actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
      * navigating so view model will have canceled scope after returning to the screen
      */
     return rememberSaveable { getKoin().get { parametersOf(CoroutineScope(Dispatchers.Unconfined)) } }
+}
+
+actual inline fun <reified T> Module.platformMultiplatformViewModel(
+    crossinline scope: Definition<T>
+) {
+    factory { scope(it) }
 }
