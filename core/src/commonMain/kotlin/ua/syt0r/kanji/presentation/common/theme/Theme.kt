@@ -156,6 +156,16 @@ fun ButtonDefaults.neutralButtonColors(): ButtonColors {
 }
 
 @Composable
+fun ButtonDefaults.neutralTextButtonColors(): ButtonColors {
+    return MaterialTheme.colorScheme.run {
+        textButtonColors(
+            contentColor = onSurfaceVariant
+        )
+    }
+}
+
+
+@Composable
 fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorScheme.run {
     val labelColor = onSurface.copy(alpha = 0.4f)
     colors(

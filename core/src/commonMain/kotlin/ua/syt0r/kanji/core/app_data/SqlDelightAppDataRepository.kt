@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
 import ua.syt0r.kanji.core.appdata.db.AppDataQueries
+import ua.syt0r.kanji.core.appdata.db.Expression_reading
 
 class SqlDelightAppDataRepository(
     private val deferredDatabase: Deferred<AppDataDatabase>
@@ -86,14 +87,7 @@ class SqlDelightAppDataRepository(
             .map { expressionId ->
                 val readings = getExpressionReadings(expressionId)
                     .executeAsList()
-                    .map {
-                        RankedReading(
-                            it.expression,
-                            it.kana_expression,
-                            it.rank.toInt(),
-                            it.furigana
-                        )
-                    }
+                    .map { it.toRankedReading() }
                     .sortedWith(readingComparator(text))
                     .map { entity -> entity.toReading() }
 
@@ -117,14 +111,7 @@ class SqlDelightAppDataRepository(
             .executeAsList()
             .map { id ->
                 val readings = getExpressionReadings(id).executeAsList()
-                    .map {
-                        RankedReading(
-                            kanjiExpression = it.expression,
-                            kanaExpression = it.kana_expression,
-                            rank = it.rank.toInt(),
-                            furigana = it.furigana
-                        )
-                    }
+                    .map { it.toRankedReading() }
                     .sortedWith(readingComparator(char, true))
                     .map { it.toReading(kanaOnly = true) }
                     .distinct()
@@ -139,6 +126,14 @@ class SqlDelightAppDataRepository(
                     meanings = meanings
                 )
             }
+    }
+
+    override suspend fun getWord(id: Long): JapaneseWord = runTransaction {
+        getWord(id)
+    }
+
+    override suspend fun getWordReadings(id: Long): List<FuriganaString> = runTransaction {
+        getExpressionReadings(id).executeAsList().map { it.toRankedReading().toReading() }
     }
 
     override suspend fun getRadicals(): List<RadicalData> = runTransaction {
@@ -182,6 +177,37 @@ class SqlDelightAppDataRepository(
                 !containsText
             },
             { it.rank }
+        )
+    }
+
+    private fun AppDataQueries.getWord(
+        id: Long,
+        comparator: Comparator<RankedReading> = compareBy { it.rank },
+        kanaOnly: Boolean = false
+    ): JapaneseWord {
+        val readings = getExpressionReadings(id).executeAsList()
+            .map { it.toRankedReading() }
+            .sortedWith(comparator)
+            .map { it.toReading(kanaOnly = kanaOnly) }
+            .distinct()
+
+        val meanings = getExpressionMeanings(id)
+            .executeAsList()
+            .map { it.meaning }
+
+        return JapaneseWord(
+            id = id,
+            readings = readings,
+            meanings = meanings
+        )
+    }
+
+    private fun Expression_reading.toRankedReading(): RankedReading {
+        return RankedReading(
+            kanjiExpression = expression,
+            kanaExpression = kana_expression,
+            rank = rank.toInt(),
+            furigana = furigana
         )
     }
 

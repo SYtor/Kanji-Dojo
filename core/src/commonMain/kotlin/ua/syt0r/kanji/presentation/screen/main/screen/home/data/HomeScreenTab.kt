@@ -1,7 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Settings
@@ -14,8 +15,12 @@ enum class HomeScreenTab(
 ) {
 
     PracticeDashboard(
-        imageVector = Icons.Default.List,
+        imageVector = Icons.AutoMirrored.Default.List,
         titleResolver = { home.dashboardTabLabel },
+    ),
+    VocabDashboard(
+        imageVector = Icons.Default.Construction,
+        titleResolver = { "Vocab" }
     ),
     Stats(
         imageVector = Icons.Default.QueryStats,
@@ -32,7 +37,7 @@ enum class HomeScreenTab(
 
     companion object {
         val Default = PracticeDashboard
-        val VisibleTabs = listOf(PracticeDashboard, Stats, Search, Settings)
+        val VisibleTabs: List<HomeScreenTab> = HomeScreenTab.values().toList()
     }
 
 }

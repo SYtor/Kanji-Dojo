@@ -14,6 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashb
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreen
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {
@@ -50,6 +51,10 @@ actual fun HomeNavigationContent(
                     mainNavigationState = mainNavigationState,
                     viewModel = getMultiplatformViewModel()
                 )
+            }
+
+            HomeScreenTab.VocabDashboard -> {
+                VocabDashboardScreen(mainNavigationState = mainNavigationState)
             }
 
             HomeScreenTab.Stats -> {

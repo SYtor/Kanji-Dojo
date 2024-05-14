@@ -5,6 +5,7 @@ import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -102,9 +103,11 @@ abstract class BaseUserDataDatabaseManager(
     }
 
     private suspend fun closeCurrentConnection() = coroutineScope.launch {
-        val currentConnection = currentDatabaseConnection.value?.await() ?: return@launch
-        currentConnection.sqlDriver.close()
-    }.join()
+        coroutineScope {
+            currentDatabaseConnection.value?.await()?.sqlDriver?.close()
+            currentDatabaseConnection.value = null
+        }
+    }
 
     private suspend fun getActiveDatabaseInfo(): UserDatabaseInfo {
         return UserDatabaseInfo(

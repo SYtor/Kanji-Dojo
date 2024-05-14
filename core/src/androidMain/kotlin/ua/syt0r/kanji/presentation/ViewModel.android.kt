@@ -19,10 +19,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 
@@ -57,6 +59,7 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<MainContract.ViewModel>()
     androidMultiplatformViewModel<HomeScreenContract.ViewModel>()
     androidMultiplatformViewModel<PracticeDashboardScreenContract.ViewModel>()
+    androidMultiplatformViewModel<VocabDashboardScreenContract.ViewModel>()
     androidMultiplatformViewModel<StatsScreenContract.ViewModel>()
     androidMultiplatformViewModel<SearchScreenContract.ViewModel>()
     androidMultiplatformViewModel<AboutScreenContract.ViewModel>()
@@ -65,6 +68,7 @@ val androidViewModelModule = module {
     androidMultiplatformViewModel<PracticePreviewScreenContract.ViewModel>()
     androidMultiplatformViewModel<WritingPracticeScreenContract.ViewModel>()
     androidMultiplatformViewModel<ReadingPracticeContract.ViewModel>()
+    androidMultiplatformViewModel<VocabPracticeScreenContract.ViewModel>()
     androidMultiplatformViewModel<KanjiInfoScreenContract.ViewModel>()
     androidMultiplatformViewModel<BackupContract.ViewModel>()
     androidMultiplatformViewModel<FeedbackScreenContract.ViewModel>()

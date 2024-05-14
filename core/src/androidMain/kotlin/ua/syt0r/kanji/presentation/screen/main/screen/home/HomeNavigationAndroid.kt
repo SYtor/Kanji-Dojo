@@ -19,6 +19,7 @@ import org.koin.androidx.compose.get
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
@@ -98,6 +99,13 @@ actual fun HomeNavigationContent(
                 StatsScreen(
                     viewModel = getMultiplatformViewModel()
                 )
+            }
+        )
+
+        composable(
+            route = HomeScreenTab.VocabDashboard.route,
+            content = {
+                VocabDashboardScreen(mainNavigationState = mainNavigationState)
             }
         )
 
