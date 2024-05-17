@@ -62,6 +62,13 @@ class SqlDelightAppDataRepository(
             }
     }
 
+    override suspend fun getCharacterReadingsOfLength(
+        length: Int,
+        limit: Int
+    ): List<String> = runTransaction {
+        getCharacterReadingsOfLength(length.toLong(), limit.toLong()).executeAsList()
+    }
+
     override suspend fun getData(kanji: String): KanjiData? = runTransaction {
         getKanjiData(kanji).executeAsOneOrNull()?.run {
             KanjiData(
@@ -130,10 +137,6 @@ class SqlDelightAppDataRepository(
 
     override suspend fun getWord(id: Long): JapaneseWord = runTransaction {
         getWord(id)
-    }
-
-    override suspend fun getWordReadings(id: Long): List<FuriganaString> = runTransaction {
-        getExpressionReadings(id).executeAsList().map { it.toRankedReading().toReading() }
     }
 
     override suspend fun getRadicals(): List<RadicalData> = runTransaction {

@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.use_case
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.ReadingType
-import ua.syt0r.kanji.core.app_data.data.encodeKanji
+import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.getWordWithExtraRomajiReading
@@ -78,7 +78,7 @@ class LoadWritingPracticeCharacterDataUseCase(
 
     private fun encodeWords(character: String, words: List<JapaneseWord>): List<JapaneseWord> {
         return words.map { word ->
-            word.copy(readings = word.readings.map { it.encodeKanji(character) })
+            word.copy(readings = word.readings.map { it.withEncodedText(character) })
         }
     }
 

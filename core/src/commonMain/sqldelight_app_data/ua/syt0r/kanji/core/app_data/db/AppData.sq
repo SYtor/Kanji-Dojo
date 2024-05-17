@@ -75,6 +75,9 @@ SELECT meaning FROM kanji_meaning WHERE kanji = ? ORDER BY priority;
 getKanjiReadings:
 SELECT * FROM kanji_reading WHERE kanji = ?;
 
+getCharacterReadingsOfLength:
+SELECT DISTINCT reading FROM kanji_reading WHERE LENGTH(reading) = ? LIMIT ?;
+
 getKanjiData:
 SELECT * FROM kanji_data WHERE kanji = ?;
 

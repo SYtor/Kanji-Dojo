@@ -24,7 +24,7 @@ class VocabPracticeReviewManager(
 
     private data class QueueItem(
         val item: VocabQueueItemDescriptor,
-        val data: Deferred<VocabReviewState>
+        val data: Deferred<VocabReviewManagingState>
     )
 
     private lateinit var queue: MutableList<QueueItem>
@@ -32,8 +32,11 @@ class VocabPracticeReviewManager(
 
     private val nextRequests = Channel<Unit>()
 
-    private val _currentState = MutableStateFlow<VocabReviewState>(value = VocabReviewState.Loading)
-    val currentState: StateFlow<VocabReviewState>
+    private val _currentState = MutableStateFlow<VocabReviewManagingState>(
+        value = VocabReviewManagingState.Loading
+    )
+
+    val currentState: StateFlow<VocabReviewManagingState>
         get() = _currentState
 
     init {
@@ -54,19 +57,19 @@ class VocabPracticeReviewManager(
     }
 
     private suspend fun handleNext() {
-        queue.removeAt(0)
+        queue.removeFirstOrNull() ?: return
         updateState()
     }
 
     private suspend fun updateState() {
         val item = queue.getOrNull(0)
         if (item == null) {
-            _currentState.value = VocabReviewState.Summary(
+            _currentState.value = VocabReviewManagingState.Summary(
                 duration = Clock.System.now() - practiceStartInstant
             )
         } else {
             if (!item.data.isCompleted) {
-                _currentState.value = VocabReviewState.Loading
+                _currentState.value = VocabReviewManagingState.Loading
             }
             _currentState.value = item.data.await()
             queue.getOrNull(1)?.data?.start()
@@ -82,7 +85,7 @@ class VocabPracticeReviewManager(
         }.toMutableList()
     }
 
-    private fun VocabQueueItemDescriptor.getData(): Deferred<VocabReviewState> {
+    private fun VocabQueueItemDescriptor.getData(): Deferred<VocabReviewManagingState> {
         return coroutineScope.async(start = CoroutineStart.LAZY) {
             getVocabReadingReviewStateUseCase(id)
         }

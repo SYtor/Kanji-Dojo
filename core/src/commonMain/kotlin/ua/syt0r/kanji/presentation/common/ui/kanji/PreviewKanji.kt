@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.app_data.data.encodeKanji
+import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.svg.SvgCommandParser
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import kotlin.random.Random
@@ -83,7 +83,7 @@ object PreviewKanji {
                 val charToEncode = reading.compounds.filter { it.text.length == 1 }.randomOrNull()
                     ?.text
                     ?: reading.compounds.first().text.random().toString()
-                reading.encodeKanji(charToEncode)
+                reading.withEncodedText(charToEncode)
             }
         )
     }

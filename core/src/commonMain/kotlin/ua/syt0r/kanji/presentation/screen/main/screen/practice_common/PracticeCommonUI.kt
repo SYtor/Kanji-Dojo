@@ -28,7 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
@@ -45,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -73,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
@@ -198,7 +200,7 @@ fun PracticeToolbar(
         },
         navigationIcon = {
             IconButton(onClick = onUpButtonClick) {
-                Icon(Icons.Default.ArrowBack, null)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
             }
         }
     )
@@ -680,22 +682,22 @@ fun PracticeSavedState(
             ) {
 
                 Column {
-                    SavedStateInfoLabel(
+                    PracticeSavedStateInfoLabel(
                         title = strings.savedReviewedCountLabel,
                         data = charactersReviewed.toString()
                     )
 
-                    SavedStateInfoLabel(
+                    PracticeSavedStateInfoLabel(
                         title = strings.savedTimeSpentLabel,
                         data = strings.savedTimeSpentValue(practiceDuration)
                     )
 
-                    SavedStateInfoLabel(
+                    PracticeSavedStateInfoLabel(
                         title = strings.savedAccuracyLabel,
                         data = "%.2f%%".format(accuracy)
                     )
 
-                    SavedStateInfoLabel(
+                    PracticeSavedStateInfoLabel(
                         title = strings.savedRepeatCharactersLabel,
                         data = failedCharacters.size.toString()
                     )
@@ -708,7 +710,7 @@ fun PracticeSavedState(
             item(
                 span = { GridItemSpan(maxLineSpan) }
             ) {
-                SavedStateInfoLabel(
+                PracticeSavedStateInfoLabel(
                     title = strings.savedRetainedCharactersLabel,
                     data = goodCharacters.size.toString()
                 )
@@ -739,9 +741,12 @@ fun PracticeSavedState(
 }
 
 @Composable
-private fun SavedStateInfoLabel(title: String, data: String) {
+fun PracticeSavedStateInfoLabel(title: String, data: String) {
+    // Fixes text with bigger size getting clipped at the top
+    val textStyle = LocalTextStyle.current.copy(lineHeight = TextUnit.Unspecified)
+
     Text(
-        buildAnnotatedString {
+        text = buildAnnotatedString {
             withStyle(
                 SpanStyle(
                     fontSize = 20.sp,
@@ -754,10 +759,16 @@ private fun SavedStateInfoLabel(title: String, data: String) {
 
             append(" ")
 
-            withStyle(SpanStyle(fontSize = 30.sp, fontWeight = FontWeight.Light)) {
+            withStyle(
+                SpanStyle(
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Light
+                )
+            ) {
                 append(data)
             }
-        }
+        },
+        style = textStyle
     )
 }
 

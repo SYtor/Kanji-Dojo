@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.MutableVocabReadingReviewState
 
 class VocabPracticeViewModel(
     private val viewModelScope: CoroutineScope,
@@ -39,9 +38,9 @@ class VocabPracticeViewModel(
         _state.value = ScreenState.Loading
         viewModelScope.launch {
             reviewManager.initialize(
-                expressions = expressions.map {
-                    VocabQueueItemDescriptor(it, configuration.practiceType)
-                }
+                expressions = expressions
+                    .map { VocabQueueItemDescriptor(it, configuration.practiceType) }
+                    .shuffled()
             )
 
             reviewManager.currentState
@@ -51,9 +50,12 @@ class VocabPracticeViewModel(
     }
 
     override fun submitAnswer(answer: String) {
-        val currentState = _reviewState.value as MutableVocabReadingReviewState
-        currentState.vocab.value = currentState.visibleVocab
-        currentState.selectedAnswer.value = answer
+        val currentState = _reviewState.value as VocabReviewManagingState.Reading
+        currentState.apply {
+            displayReading.value = currentState.revealedReading
+            selectedAnswer.value = SelectedReadingAnswer(answer, currentState.correctAnswer)
+        }
+
     }
 
     override fun next() {
@@ -64,13 +66,13 @@ class VocabPracticeViewModel(
         analyticsManager.setScreen("expression_practice")
     }
 
-    private fun VocabReviewState.applyToState() {
+    private fun VocabReviewManagingState.applyToState() {
         when (this) {
-            VocabReviewState.Loading -> {
+            VocabReviewManagingState.Loading -> {
                 _state.value = ScreenState.Loading
             }
 
-            is VocabReviewState.Reading -> {
+            is VocabReviewManagingState.Reading -> {
                 if (::_reviewState.isInitialized.not()) {
                     _reviewState = MutableStateFlow(this)
                 } else {
@@ -82,7 +84,7 @@ class VocabPracticeViewModel(
                 }
             }
 
-            is VocabReviewState.Summary -> {
+            is VocabReviewManagingState.Summary -> {
                 _state.value = ScreenState.Summary(
                     practiceDuration = duration
                 )

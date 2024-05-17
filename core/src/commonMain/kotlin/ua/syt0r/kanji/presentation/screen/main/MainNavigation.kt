@@ -158,7 +158,7 @@ interface MainDestination {
         @Composable
         override fun Draw(state: MainNavigationState) {
             VocabPracticeScreen(
-                expressionsIds = listOf(),
+                expressionsIds = expressionIds,
                 mainNavigationState = state
             )
         }

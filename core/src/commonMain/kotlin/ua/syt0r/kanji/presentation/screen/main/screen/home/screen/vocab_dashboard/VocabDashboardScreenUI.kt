@@ -55,12 +55,6 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 
 
-private val vocabPracticeSets: List<VocabPracticeSet> = listOf(
-    vocabSets,
-    vocabSets,
-    vocabSets
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabDashboardScreenUI(
@@ -91,7 +85,7 @@ fun VocabDashboardScreenUI(
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(paddingValues)
                 .padding(horizontal = 20.dp)
                 .fillMaxSize()
@@ -105,7 +99,7 @@ fun VocabDashboardScreenUI(
                 Spacer(Modifier.height(20.dp))
             }
 
-            items(vocabPracticeSets) { vocabPracticeSet ->
+            items(vocabSets) { vocabPracticeSet ->
                 PracticeGridItem(
                     title = vocabPracticeSet.title,
                     onClick = {
