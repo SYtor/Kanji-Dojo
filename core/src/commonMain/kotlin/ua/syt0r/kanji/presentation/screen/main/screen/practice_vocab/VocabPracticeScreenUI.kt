@@ -49,6 +49,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,8 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 
@@ -144,11 +147,44 @@ private fun ScreenConfiguration(
     onConfigured: (VocabPracticeConfiguration) -> Unit
 ) {
 
+    var practiceType by rememberSaveable { mutableStateOf(screenState.practiceType) }
+    var readingPriority by rememberSaveable { mutableStateOf(screenState.readingPriority) }
+    var showMeaning by rememberSaveable { mutableStateOf(false) }
+
     PracticeConfigurationContainer(
         onClick = {
-            onConfigured(VocabPracticeConfiguration(practiceType = VocabPracticeType.ReadingPicker))
+            onConfigured(
+                VocabPracticeConfiguration(
+                    practiceType = practiceType,
+                    readingPriority = readingPriority,
+                    showMeaning = showMeaning
+                )
+            )
         }
     ) {
+
+        PracticeConfigurationEnumSelector(
+            title = "Practice Type",
+            subtitle = "",
+            values = VocabPracticeType.values(),
+            selected = practiceType,
+            onSelected = { practiceType = it }
+        )
+
+        PracticeConfigurationEnumSelector(
+            title = "Reading Priority",
+            subtitle = "Choose readings you want to practice in case word has multiple readings",
+            values = VocabPracticeReadingPriority.values(),
+            selected = readingPriority,
+            onSelected = { readingPriority = it }
+        )
+
+        PracticeConfigurationOption(
+            title = "Show Meaning",
+            subtitle = "",
+            checked = showMeaning,
+            onChange = { showMeaning = it }
+        )
 
     }
 
@@ -195,7 +231,7 @@ private fun ScreenReview(
                         annotationTextStyle = MaterialTheme.typography.bodyLarge,
                     )
 
-                    if (selectedAnswer != null)
+                    if (selectedAnswer != null || screenState.showMeaning)
                         TextButton(
                             onClick = { alternativeWordsDialogWord = currentState.word },
                             colors = ButtonDefaults.neutralTextButtonColors()

@@ -80,10 +80,13 @@ import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
 import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
+import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import kotlin.time.Duration
 
 @Composable
@@ -259,7 +262,7 @@ fun PracticeConfigurationContainer(
 
 class PracticeConfigurationCharactersState(
     val characters: List<String>,
-    val shuffle: Boolean
+    shuffle: Boolean
 ) {
 
     val selectedCountState = mutableStateOf(characters.size)
@@ -406,7 +409,7 @@ fun PracticeConfigurationOption(
 }
 
 @Composable
-fun PracticeConfigurationItem(
+private fun PracticeConfigurationItem(
     title: String,
     subtitle: String,
     onClick: (() -> Unit)? = null,
@@ -438,7 +441,7 @@ fun PracticeConfigurationItem(
 }
 
 @Composable
-fun PracticeConfigurationDropDownButton(
+private fun PracticeConfigurationDropDownButton(
     text: String,
     onClick: () -> Unit
 ) {
@@ -457,6 +460,54 @@ fun PracticeConfigurationDropDownButton(
             overflow = TextOverflow.Ellipsis
         )
         Icon(Icons.Default.ArrowDropDown, null)
+    }
+
+}
+
+interface DisplayableEnum {
+    val titleResolver: StringResolveScope<String>
+}
+
+@Composable
+fun <T> PracticeConfigurationEnumSelector(
+    title: String,
+    subtitle: String,
+    values: Array<T>,
+    selected: T,
+    onSelected: (T) -> Unit
+) where T : Enum<T>, T : DisplayableEnum {
+
+    PracticeConfigurationItem(
+        title = title,
+        subtitle = subtitle,
+    ) {
+
+        var expanded by remember { mutableStateOf(false) }
+
+        Box {
+
+            PracticeConfigurationDropDownButton(
+                text = resolveString(selected.titleResolver),
+                onClick = { expanded = true }
+            )
+
+            MultiplatformPopup(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                values.forEach {
+                    PopupContentItem(
+                        onClick = {
+                            onSelected(it)
+                            expanded = false
+                        }
+                    ) {
+                        Text(resolveString(it.titleResolver))
+                    }
+                }
+            }
+        }
+
     }
 
 }

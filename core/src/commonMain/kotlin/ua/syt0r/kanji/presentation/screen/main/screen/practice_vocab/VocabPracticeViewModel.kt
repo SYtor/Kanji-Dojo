@@ -16,6 +16,7 @@ class VocabPracticeViewModel(
 ) : VocabPracticeScreenContract.ViewModel {
 
     private lateinit var expressions: List<Long>
+    private lateinit var configuration: VocabPracticeConfiguration
 
     private lateinit var _reviewState: MutableStateFlow<VocabReviewState>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -29,17 +30,26 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
-                practiceType = VocabPracticeType.ReadingPicker
+                practiceType = VocabPracticeType.ReadingPicker,
+                readingPriority = VocabPracticeReadingPriority.Default
             )
         }
     }
 
     override fun configure(configuration: VocabPracticeConfiguration) {
         _state.value = ScreenState.Loading
+        this.configuration = configuration
+
         viewModelScope.launch {
             reviewManager.initialize(
                 expressions = expressions
-                    .map { VocabQueueItemDescriptor(it, configuration.practiceType) }
+                    .map {
+                        VocabQueueItemDescriptor(
+                            id = it,
+                            practiceType = configuration.practiceType,
+                            priority = configuration.readingPriority
+                        )
+                    }
                     .shuffled()
             )
 
@@ -80,7 +90,10 @@ class VocabPracticeViewModel(
                 }
 
                 if (_state.value !is ScreenState.Review) {
-                    _state.value = ScreenState.Review(_reviewState)
+                    _state.value = ScreenState.Review(
+                        showMeaning = configuration.showMeaning,
+                        reviewState = _reviewState
+                    )
                 }
             }
 

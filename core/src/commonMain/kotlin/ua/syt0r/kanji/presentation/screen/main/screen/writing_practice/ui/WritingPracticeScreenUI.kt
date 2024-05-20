@@ -22,10 +22,8 @@ import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -52,14 +50,11 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationDropDownButton
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
@@ -287,12 +282,20 @@ private fun ConfiguringState(
             state = characterSelectionState
         )
 
-        PracticeConfigurationHint(
-            selectedHintMode = selectedHintMode
+        PracticeConfigurationEnumSelector(
+            title = resolveString { writingPractice.hintStrokesTitle },
+            subtitle = resolveString { writingPractice.hintStrokesMessage },
+            values = WritingPracticeHintMode.values(),
+            selected = selectedHintMode.value,
+            onSelected = { selectedHintMode.value = it }
         )
 
-        PracticeConfigurationInputMode(
-            selectedInputMode = selectedInputMode
+        PracticeConfigurationEnumSelector(
+            title = resolveString { writingPractice.inputModeTitle },
+            subtitle = resolveString { writingPractice.inputModeMessage },
+            values = WritingPracticeInputMode.values(),
+            selected = selectedInputMode.value,
+            onSelected = { selectedInputMode.value = it }
         )
 
         PracticeConfigurationOption(
@@ -322,84 +325,6 @@ private fun ConfiguringState(
             checked = altStrokeEvaluatorEnabled,
             onChange = { altStrokeEvaluatorEnabled = it }
         )
-
-    }
-
-}
-
-@Composable
-private fun PracticeConfigurationHint(
-    selectedHintMode: MutableState<WritingPracticeHintMode>
-) {
-    PracticeConfigurationItem(
-        title = resolveString { writingPractice.hintStrokesTitle },
-        subtitle = resolveString { writingPractice.hintStrokesMessage },
-    ) {
-
-        var expanded by remember { mutableStateOf(false) }
-
-        Box {
-
-            PracticeConfigurationDropDownButton(
-                text = resolveString(selectedHintMode.value.titleResolver),
-                onClick = { expanded = true }
-            )
-
-            MultiplatformPopup(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                WritingPracticeHintMode.values().forEach {
-                    PopupContentItem(
-                        onClick = {
-                            selectedHintMode.value = it
-                            expanded = false
-                        }
-                    ) {
-                        Text(resolveString(it.titleResolver))
-                    }
-                }
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun PracticeConfigurationInputMode(
-    selectedInputMode: MutableState<WritingPracticeInputMode>
-) {
-
-    PracticeConfigurationItem(
-        title = resolveString { writingPractice.inputModeTitle },
-        subtitle = resolveString { writingPractice.inputModeMessage }
-    ) {
-
-        var expanded by remember { mutableStateOf(false) }
-
-        Box {
-
-            PracticeConfigurationDropDownButton(
-                text = resolveString(selectedInputMode.value.titleResolver),
-                onClick = { expanded = true }
-            )
-
-            MultiplatformPopup(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                WritingPracticeInputMode.values().forEach {
-                    PopupContentItem(
-                        onClick = {
-                            selectedInputMode.value = it
-                            expanded = false
-                        }
-                    ) {
-                        Text(resolveString(it.titleResolver))
-                    }
-                }
-            }
-        }
 
     }
 

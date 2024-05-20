@@ -2,36 +2,55 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabReviewManagingState
 
 interface GetVocabReadingReviewStateUseCase {
-    suspend operator fun invoke(id: Long): VocabReviewManagingState.Reading
+    suspend operator fun invoke(
+        wordId: Long,
+        priority: VocabPracticeReadingPriority
+    ): VocabReviewManagingState.Reading
 }
 
 class DefaultGetVocabReadingReviewStateUseCase(
     private val appDataRepository: AppDataRepository
 ) : GetVocabReadingReviewStateUseCase {
 
-    override suspend fun invoke(id: Long): VocabReviewManagingState.Reading {
-        val word = appDataRepository.getWord(id)
+    override suspend fun invoke(
+        wordId: Long,
+        priority: VocabPracticeReadingPriority
+    ): VocabReviewManagingState.Reading {
+        val word = appDataRepository.getWord(wordId)
 
-        val kanjiReading = word.readings.find { it.compounds.any { it.annotation != null } }
-        val practiceReading = kanjiReading ?: word.readings.first()
+        val reading = when (priority) {
+            VocabPracticeReadingPriority.Default -> word.readings.first()
+            VocabPracticeReadingPriority.Kanji -> {
+                val readingWithKanji = word.readings.find {
+                    it.compounds.any { it.annotation != null }
+                }
+                readingWithKanji ?: word.readings.first()
+            }
 
-        val isKana = practiceReading.compounds.all { it.annotation == null } // TODO
+            VocabPracticeReadingPriority.Kana -> {
+                val kanaReading = word.readings.find {
+                    it.compounds.all { it.annotation == null }
+                }
+                kanaReading ?: word.readings.first()
+            }
+        }
+
+        val containsKanji = reading.compounds.any { it.annotation != null }
 
         val (questionCharacter, correctAnswer) = when {
-            isKana -> {
-                practiceReading.compounds.random().text.random().toString().let { it to it }
+            containsKanji -> {
+                reading.compounds
+                    .filter { it.annotation != null }
+                    .random()
+                    .let { it.text to it.annotation!! }
             }
 
             else -> {
-                practiceReading.compounds
-                    .filter { it.annotation != null }
-                    .random()
-                    .takeIf { it.annotation != null }
-                    ?.let { it.text to it.annotation!! }
-                    ?: practiceReading.compounds.random().text.random().toString().let { it to it }
+                reading.compounds.random().text.random().toString().let { it to it }
             }
         }
 
@@ -44,8 +63,8 @@ class DefaultGetVocabReadingReviewStateUseCase(
         return VocabReviewManagingState.Reading(
             word = word,
             questionCharacter = questionCharacter,
-            revealedReading = practiceReading,
-            hiddenReading = practiceReading.withEncodedText(correctAnswer),
+            revealedReading = reading,
+            hiddenReading = reading.withEncodedText(correctAnswer),
             answers = answers,
             correctAnswer = correctAnswer
         )

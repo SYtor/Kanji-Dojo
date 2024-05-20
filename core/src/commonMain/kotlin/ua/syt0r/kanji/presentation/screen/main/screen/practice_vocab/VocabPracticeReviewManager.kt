@@ -87,7 +87,7 @@ class VocabPracticeReviewManager(
 
     private fun VocabQueueItemDescriptor.getData(): Deferred<VocabReviewManagingState> {
         return coroutineScope.async(start = CoroutineStart.LAZY) {
-            getVocabReadingReviewStateUseCase(id)
+            getVocabReadingReviewStateUseCase(id, priority)
         }
     }
 

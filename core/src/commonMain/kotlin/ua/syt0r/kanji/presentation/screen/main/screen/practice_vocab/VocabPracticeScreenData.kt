@@ -4,14 +4,26 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import kotlin.time.Duration
 
-enum class VocabPracticeType {
-    ReadingPicker
+enum class VocabPracticeType : DisplayableEnum {
+    ReadingPicker;
+
+    override val titleResolver: StringResolveScope<String> = { name }
+}
+
+enum class VocabPracticeReadingPriority : DisplayableEnum {
+    Default, Kanji, Kana;
+
+    override val titleResolver: StringResolveScope<String> = { name }
 }
 
 data class VocabPracticeConfiguration(
-    val practiceType: VocabPracticeType
+    val practiceType: VocabPracticeType,
+    val readingPriority: VocabPracticeReadingPriority,
+    val showMeaning: Boolean
 )
 
 sealed interface VocabReviewState {
@@ -57,5 +69,6 @@ sealed interface VocabReviewManagingState {
 
 data class VocabQueueItemDescriptor(
     val id: Long,
-    val practiceType: VocabPracticeType
+    val practiceType: VocabPracticeType,
+    val priority: VocabPracticeReadingPriority
 )

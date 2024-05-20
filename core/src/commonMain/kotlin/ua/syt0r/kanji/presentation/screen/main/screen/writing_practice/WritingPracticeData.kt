@@ -10,6 +10,7 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
 data class WritingScreenConfiguration(
@@ -31,8 +32,8 @@ data class WritingScreenLayoutConfiguration(
 )
 
 enum class WritingPracticeHintMode(
-    val titleResolver: StringResolveScope<String>,
-) {
+    override val titleResolver: StringResolveScope<String>,
+) : DisplayableEnum {
     OnlyNew(
         titleResolver = { writingPractice.hintStrokeNewOnlyMode }
     ),
@@ -45,9 +46,9 @@ enum class WritingPracticeHintMode(
 }
 
 enum class WritingPracticeInputMode(
-    val titleResolver: StringResolveScope<String>,
+    override val titleResolver: StringResolveScope<String>,
     val inputMethod: WritingInputMethod
-) {
+) : DisplayableEnum {
     Stroke(
         titleResolver = { writingPractice.inputModeStroke },
         inputMethod = WritingInputMethod.Stroke

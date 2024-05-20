@@ -22,10 +22,12 @@ interface VocabPracticeScreenContract {
         object Loading : ScreenState
 
         data class Configuration(
-            val practiceType: VocabPracticeType
+            val practiceType: VocabPracticeType,
+            val readingPriority: VocabPracticeReadingPriority
         ) : ScreenState
 
         data class Review(
+            val showMeaning: Boolean,
             val reviewState: StateFlow<VocabReviewState>
         ) : ScreenState
 
