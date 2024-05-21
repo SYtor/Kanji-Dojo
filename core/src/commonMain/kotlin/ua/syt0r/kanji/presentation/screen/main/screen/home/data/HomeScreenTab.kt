@@ -1,37 +1,38 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.data
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
 enum class HomeScreenTab(
-    val imageVector: ImageVector,
+    val iconContent: @Composable () -> Unit,
     val titleResolver: StringResolveScope<String>
 ) {
 
     PracticeDashboard(
-        imageVector = Icons.AutoMirrored.Default.List,
-        titleResolver = { home.dashboardTabLabel },
+        iconContent = { Text(text = "字", style = MaterialTheme.typography.titleMedium) },
+        titleResolver = { "Letters" },
     ),
     VocabDashboard(
-        imageVector = Icons.Default.Construction,
+        iconContent = { Text(text = "語", style = MaterialTheme.typography.titleMedium) },
         titleResolver = { "Vocab" }
     ),
     Stats(
-        imageVector = Icons.Default.QueryStats,
+        iconContent = { Icon(Icons.Default.QueryStats, null) },
         titleResolver = { home.statsTabLabel }
     ),
     Search(
-        imageVector = Icons.Default.Search,
+        iconContent = { Icon(Icons.Default.Search, null) },
         titleResolver = { home.searchTabLabel }
     ),
     Settings(
-        imageVector = Icons.Outlined.Settings,
+        iconContent = { Icon(Icons.Outlined.Settings, null) },
         titleResolver = { home.settingsTabLabel }
     );
 

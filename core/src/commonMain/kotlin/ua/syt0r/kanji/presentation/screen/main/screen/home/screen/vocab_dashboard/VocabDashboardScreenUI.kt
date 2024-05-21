@@ -4,11 +4,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -23,24 +25,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,9 +50,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 
 
@@ -63,22 +65,9 @@ fun VocabDashboardScreenUI(
     navigateToPractice: (VocabPracticeSet) -> Unit
 ) {
 
-    val coroutineScope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            skipHiddenState = false
-        )
-    )
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetContent = { BottomSheetContent(state, navigateToPractice) },
-        sheetShape = MaterialTheme.shapes.medium,
-        sheetContainerColor = MaterialTheme.colorScheme.surface,
-        sheetTonalElevation = 0.dp,
-        sheetShadowElevation = 10.dp,
-        sheetPeekHeight = 0.dp,
+    Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
 
@@ -104,15 +93,22 @@ fun VocabDashboardScreenUI(
                     title = vocabPracticeSet.title,
                     onClick = {
                         select(vocabPracticeSet)
-                        coroutineScope.launch {
-                            scaffoldState.bottomSheetState.expand()
-                        }
+                        showBottomSheet = true
                     }
                 )
             }
 
         }
 
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            tonalElevation = 0.dp
+        ) {
+            BottomSheetContent(state, navigateToPractice)
+        }
     }
 
 }
@@ -145,7 +141,6 @@ private fun BottomSheetContent(
     navigateToPractice: (VocabPracticeSet) -> Unit
 ) {
 
-
     val currentState = state.value
 
     if (currentState == ScreenState.NothingSelected) {
@@ -155,86 +150,131 @@ private fun BottomSheetContent(
 
     currentState as ScreenState.SelectedSet
 
+    var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
+    selectedWord?.also {
+        AlternativeWordsDialog(
+            word = it,
+            onDismissRequest = { selectedWord = null }
+        )
+    }
+
     val wordsState = currentState.words.collectAsState()
-    var wordsVisible by rememberSaveable(currentState.set.title) { mutableStateOf(false) }
+    val wordsVisible = rememberSaveable(currentState.set.title) { mutableStateOf(false) }
     val wordsHidingOverlayAlpha = animateFloatAsState(
-        targetValue = if (wordsVisible) 0f else 1f
+        targetValue = if (wordsVisible.value) 0f else 1f
     )
 
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .heightIn(min = 400.dp),
     ) {
 
         item {
-
-            Row(
-                modifier = Modifier.padding(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = currentState.set.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                IconButton(
-                    onClick = { wordsVisible = !wordsVisible }
-                ) {
-                    Icon(
-                        imageVector = when {
-                            wordsVisible -> Icons.Default.Visibility
-                            else -> Icons.Default.VisibilityOff
-                        },
-                        contentDescription = null
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                TextButton(
-                    onClick = { navigateToPractice(currentState.set) },
-                    colors = ButtonDefaults.neutralTextButtonColors()
-                ) {
-                    Text("Review")
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                }
-            }
-
-        }
-
-        item {
-            Text(
-                text = "Expressions count: ${currentState.set.expressionIds.size}",
-                style = MaterialTheme.typography.bodySmall
+            ScreenBottomSheetHeader(
+                screenState = currentState,
+                showWords = wordsVisible,
+                onPracticeClick = navigateToPractice
             )
         }
 
-        item { Spacer(Modifier.height(8.dp)) }
-
         when (val vocabPracticePreviewState = wordsState.value) {
+
             is VocabPracticePreviewState.Loaded -> {
                 itemsIndexed(vocabPracticePreviewState.words) { index, word ->
-                    val hiddenColor = MaterialTheme.colorScheme.surfaceVariant
-                    FuriganaText(
-                        furiganaString = word.orderedPreview(index),
-                        modifier = Modifier.drawWithContent {
-                            drawContent()
-                            drawRoundRect(
-                                color = hiddenColor.copy(alpha = wordsHidingOverlayAlpha.value),
-                                size = size,
-                                cornerRadius = CornerRadius(4.dp.toPx())
-                            )
-                        }
-                    )
+                    VocabItem(
+                        listIndex = index,
+                        word = word,
+                        overlayAlpha = wordsHidingOverlayAlpha,
+                        onClick = { selectedWord = word })
                 }
             }
 
             VocabPracticePreviewState.Loading -> {
                 item { CircularProgressIndicator(Modifier.size(24.dp)) }
             }
+
         }
 
         item { Spacer(Modifier.height(20.dp)) }
 
     }
+
+}
+
+@Composable
+private fun ScreenBottomSheetHeader(
+    screenState: ScreenState.SelectedSet,
+    showWords: MutableState<Boolean>,
+    onPracticeClick: (VocabPracticeSet) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.padding(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = screenState.set.title,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            IconButton(
+                onClick = { showWords.value = !showWords.value }
+            ) {
+                Icon(
+                    imageVector = when {
+                        showWords.value -> Icons.Default.Visibility
+                        else -> Icons.Default.VisibilityOff
+                    },
+                    contentDescription = null
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            TextButton(
+                onClick = { onPracticeClick(screenState.set) },
+                colors = ButtonDefaults.neutralTextButtonColors()
+            ) {
+                Text("Review")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+            }
+        }
+
+        Text(
+            text = "Expressions count: ${screenState.set.expressionIds.size}",
+            style = MaterialTheme.typography.bodySmall
+        )
+
+    }
+}
+
+@Composable
+private fun VocabItem(
+    listIndex: Int,
+    word: JapaneseWord,
+    overlayAlpha: State<Float>,
+    onClick: () -> Unit
+) {
+    val hiddenColor = MaterialTheme.colorScheme.surfaceVariant
+    FuriganaText(
+        furiganaString = word.orderedPreview(listIndex),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.small)
+            .drawWithContent {
+                drawContent()
+                drawRoundRect(
+                    color = hiddenColor.copy(alpha = overlayAlpha.value),
+                    size = size,
+                    cornerRadius = CornerRadius(4.dp.toPx())
+                )
+            }
+            .clickable(enabled = overlayAlpha.value == 0f, onClick = onClick)
+            .padding(horizontal = 8.dp)
+    )
 }

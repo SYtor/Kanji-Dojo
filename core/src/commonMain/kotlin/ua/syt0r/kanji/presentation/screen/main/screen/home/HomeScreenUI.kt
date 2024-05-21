@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -22,7 +21,6 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.presentation.common.resources.string.LocalStrings
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
@@ -50,8 +48,8 @@ fun HomeScreenUI(
                     NavigationRailItem(
                         selected = tab == selectedTabState.value,
                         onClick = { onTabSelected(tab) },
-                        icon = { Icon(tab.imageVector, null) },
-                        label = { Text(text = tab.titleResolver.invoke(LocalStrings.current)) }
+                        icon = { tab.iconContent() },
+                        label = { Text(text = resolveString(tab.titleResolver)) }
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -74,8 +72,8 @@ fun HomeScreenUI(
                         NavigationBarItem(
                             selected = tab == selectedTabState.value,
                             onClick = { onTabSelected(tab) },
-                            icon = { Icon(tab.imageVector, null) },
-                            label = { Text(text = tab.titleResolver.invoke(LocalStrings.current)) },
+                            icon = { tab.iconContent() },
+                            label = { Text(text = resolveString(tab.titleResolver)) },
                             colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White)
                         )
                     }
