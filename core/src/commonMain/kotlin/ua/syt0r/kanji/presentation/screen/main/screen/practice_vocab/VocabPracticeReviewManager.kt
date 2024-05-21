@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -12,52 +13,114 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.debounceFirst
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabReadingReviewStateUseCase
+import kotlin.time.Duration
 
-class VocabPracticeReviewManager(
+
+interface VocabPracticeReviewManager {
+    val state: StateFlow<VocabReviewManagingState>
+    suspend fun initialize(expressions: List<VocabQueueItemDescriptor>)
+    suspend fun completeCurrentReview(isCorrectAnswer: Boolean)
+}
+
+data class VocabQueueItemDescriptor(
+    val id: Long,
+    val practiceType: VocabPracticeType,
+    val priority: VocabPracticeReadingPriority
+)
+
+sealed interface VocabReviewManagingState {
+
+    object Loading : VocabReviewManagingState
+
+    sealed interface Review : VocabReviewManagingState {
+
+        val asVocabReviewState: VocabReviewState
+
+        val word: JapaneseWord
+        val reading: FuriganaString
+        val questionCharacter: String
+
+        fun isCorrectAnswer(): Boolean
+
+        class Reading(
+            override val word: JapaneseWord,
+            override val questionCharacter: String,
+            val revealedReading: FuriganaString,
+            val hiddenReading: FuriganaString,
+            override val answers: List<String>,
+            override val correctAnswer: String,
+        ) : Review, VocabReviewState.Reading {
+
+            override val asVocabReviewState: VocabReviewState.Reading = this
+
+            override val reading: FuriganaString = revealedReading
+            override val displayReading = mutableStateOf<FuriganaString>(hiddenReading)
+            override val selectedAnswer = mutableStateOf<SelectedReadingAnswer?>(null)
+
+            override fun isCorrectAnswer(): Boolean = selectedAnswer.value!!.isCorrect
+
+        }
+
+    }
+
+    data class Summary(
+        val duration: Duration,
+        val items: List<VocabSummaryItem>
+    ) : VocabReviewManagingState
+
+}
+
+class DefaultVocabPracticeReviewManager(
     private val coroutineScope: CoroutineScope,
     private val timeUtils: TimeUtils,
     private val getVocabReadingReviewStateUseCase: GetVocabReadingReviewStateUseCase
-) {
+) : VocabPracticeReviewManager {
 
     private data class QueueItem(
         val item: VocabQueueItemDescriptor,
-        val data: Deferred<VocabReviewManagingState>
+        val state: Deferred<VocabReviewManagingState.Review>
     )
 
     private lateinit var queue: MutableList<QueueItem>
+    private val summaryItems = mutableListOf<VocabSummaryItem>()
     private lateinit var practiceStartInstant: Instant
 
-    private val nextRequests = Channel<Unit>()
+    private val nextRequests = Channel<Boolean>()
 
     private val _currentState = MutableStateFlow<VocabReviewManagingState>(
         value = VocabReviewManagingState.Loading
     )
 
-    val currentState: StateFlow<VocabReviewManagingState>
+    override val state: StateFlow<VocabReviewManagingState>
         get() = _currentState
 
     init {
         nextRequests.consumeAsFlow()
             .debounceFirst()
-            .onEach { handleNext() }
+            .onEach { handleAnswer(it) }
             .launchIn(coroutineScope)
     }
 
-    suspend fun initialize(expressions: List<VocabQueueItemDescriptor>) {
+    override suspend fun initialize(expressions: List<VocabQueueItemDescriptor>) {
         practiceStartInstant = timeUtils.now()
         queue = expressions.toQueue()
         updateState()
     }
 
-    suspend fun next() {
-        nextRequests.send(Unit)
+    override suspend fun completeCurrentReview(isCorrectAnswer: Boolean) {
+        nextRequests.send(isCorrectAnswer)
     }
 
-    private suspend fun handleNext() {
-        queue.removeFirstOrNull() ?: return
+    private suspend fun handleAnswer(isCorrectAnswer: Boolean) {
+        val item = queue.removeFirstOrNull() ?: return
+        val data = item.state.await()
+        summaryItems.add(data.toSummaryItem(isCorrectAnswer))
+
         updateState()
     }
 
@@ -65,14 +128,15 @@ class VocabPracticeReviewManager(
         val item = queue.getOrNull(0)
         if (item == null) {
             _currentState.value = VocabReviewManagingState.Summary(
-                duration = Clock.System.now() - practiceStartInstant
+                duration = Clock.System.now() - practiceStartInstant,
+                items = summaryItems
             )
         } else {
-            if (!item.data.isCompleted) {
+            if (!item.state.isCompleted) {
                 _currentState.value = VocabReviewManagingState.Loading
             }
-            _currentState.value = item.data.await()
-            queue.getOrNull(1)?.data?.start()
+            _currentState.value = item.state.await()
+            queue.getOrNull(1)?.state?.start()
         }
     }
 
@@ -80,15 +144,26 @@ class VocabPracticeReviewManager(
         return map {
             QueueItem(
                 item = it,
-                data = it.getData()
+                state = it.getData()
             )
         }.toMutableList()
     }
 
-    private fun VocabQueueItemDescriptor.getData(): Deferred<VocabReviewManagingState> {
+    private fun VocabQueueItemDescriptor.getData(): Deferred<VocabReviewManagingState.Review> {
         return coroutineScope.async(start = CoroutineStart.LAZY) {
-            getVocabReadingReviewStateUseCase(id, priority)
+            when (practiceType) {
+                VocabPracticeType.ReadingPicker -> getVocabReadingReviewStateUseCase(id, priority)
+            }
         }
     }
+
+    private fun VocabReviewManagingState.Review.toSummaryItem(
+        isCorrectAnswer: Boolean
+    ) = VocabSummaryItem(
+        word = word,
+        reading = reading,
+        character = questionCharacter,
+        isCorrect = isCorrectAnswer
+    )
 
 }

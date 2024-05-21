@@ -15,8 +15,8 @@ val vocabPracticeScreenModule = module {
         )
     }
 
-    factory {
-        VocabPracticeReviewManager(
+    factory<VocabPracticeReviewManager> {
+        DefaultVocabPracticeReviewManager(
             coroutineScope = it.component1(),
             timeUtils = get(),
             getVocabReadingReviewStateUseCase = get()

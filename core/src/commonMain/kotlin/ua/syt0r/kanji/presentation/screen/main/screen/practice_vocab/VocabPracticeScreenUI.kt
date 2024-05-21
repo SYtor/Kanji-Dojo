@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,9 +55,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
@@ -374,11 +379,22 @@ private fun ScreenSummary(
     onFinishClick: () -> Unit
 ) {
 
-    Column(
+    AutopaddedScrollableColumn(
         modifier = Modifier.fillMaxWidth()
             .wrapContentWidth()
             .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 20.dp),
+        bottomOverlayContent = {
+
+            Button(
+                onClick = onFinishClick,
+                colors = ButtonDefaults.neutralButtonColors(),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+            ) {
+                Text(text = resolveString { commonPractice.savedButton })
+            }
+
+        }
     ) {
 
         PracticeSavedStateInfoLabel(
@@ -388,14 +404,39 @@ private fun ScreenSummary(
             }
         )
 
-        Spacer(Modifier.weight(1f))
+        PracticeSavedStateInfoLabel(
+            title = resolveString { "Reviewed Words" },
+            data = resolveString { screenState.results.size.toString() }
+        )
 
-        Button(
-            onClick = onFinishClick,
-            colors = ButtonDefaults.neutralButtonColors(),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
-        ) {
-            Text(text = resolveString { commonPractice.savedButton })
+        screenState.results.forEachIndexed { index, item ->
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FuriganaText(
+                    furiganaString = buildFuriganaString {
+                        append("${index + 1}. ")
+                        append(item.reading)
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = item.character,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.clip(MaterialTheme.shapes.small)
+                        .clickable { }
+                        .border(
+                            width = 1.dp,
+                            color = if (item.isCorrect) MaterialTheme.extraColorScheme.success else MaterialTheme.colorScheme.error,
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .padding(vertical = 8.dp, horizontal = 12.dp)
+                )
+            }
+
         }
 
     }

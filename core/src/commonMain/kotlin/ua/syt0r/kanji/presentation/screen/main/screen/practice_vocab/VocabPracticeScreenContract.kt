@@ -32,7 +32,8 @@ interface VocabPracticeScreenContract {
         ) : ScreenState
 
         data class Summary(
-            val practiceDuration: Duration
+            val practiceDuration: Duration,
+            val results: List<VocabSummaryItem>
         ) : ScreenState
 
     }

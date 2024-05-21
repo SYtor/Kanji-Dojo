@@ -9,7 +9,7 @@ interface GetVocabReadingReviewStateUseCase {
     suspend operator fun invoke(
         wordId: Long,
         priority: VocabPracticeReadingPriority
-    ): VocabReviewManagingState.Reading
+    ): VocabReviewManagingState.Review.Reading
 }
 
 class DefaultGetVocabReadingReviewStateUseCase(
@@ -19,7 +19,7 @@ class DefaultGetVocabReadingReviewStateUseCase(
     override suspend fun invoke(
         wordId: Long,
         priority: VocabPracticeReadingPriority
-    ): VocabReviewManagingState.Reading {
+    ): VocabReviewManagingState.Review.Reading {
         val word = appDataRepository.getWord(wordId)
 
         val reading = when (priority) {
@@ -60,7 +60,7 @@ class DefaultGetVocabReadingReviewStateUseCase(
             .take(ANSWERS_COUNT)
             .shuffled()
 
-        return VocabReviewManagingState.Reading(
+        return VocabReviewManagingState.Review.Reading(
             word = word,
             questionCharacter = questionCharacter,
             revealedReading = reading,

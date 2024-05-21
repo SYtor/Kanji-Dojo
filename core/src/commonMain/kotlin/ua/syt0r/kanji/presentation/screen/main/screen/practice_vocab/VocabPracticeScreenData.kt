@@ -1,12 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
-import kotlin.time.Duration
 
 enum class VocabPracticeType : DisplayableEnum {
     ReadingPicker;
@@ -44,31 +42,9 @@ data class SelectedReadingAnswer(
     val isCorrect = selected == correct
 }
 
-
-sealed interface VocabReviewManagingState {
-
-    object Loading : VocabReviewManagingState
-
-    class Reading(
-        override val word: JapaneseWord,
-        override val questionCharacter: String,
-        val revealedReading: FuriganaString,
-        val hiddenReading: FuriganaString,
-        override val answers: List<String>,
-        override val correctAnswer: String,
-    ) : VocabReviewManagingState, VocabReviewState.Reading {
-        override val displayReading = mutableStateOf<FuriganaString>(hiddenReading)
-        override val selectedAnswer = mutableStateOf<SelectedReadingAnswer?>(null)
-    }
-
-    data class Summary(
-        val duration: Duration
-    ) : VocabReviewManagingState
-
-}
-
-data class VocabQueueItemDescriptor(
-    val id: Long,
-    val practiceType: VocabPracticeType,
-    val priority: VocabPracticeReadingPriority
+data class VocabSummaryItem(
+    val word: JapaneseWord,
+    val reading: FuriganaString,
+    val character: String,
+    val isCorrect: Boolean
 )
