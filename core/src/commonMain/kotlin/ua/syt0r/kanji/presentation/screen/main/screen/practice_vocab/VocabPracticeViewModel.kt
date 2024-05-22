@@ -1,27 +1,29 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 
 class VocabPracticeViewModel(
     private val viewModelScope: CoroutineScope,
-    private val reviewManager: VocabPracticeReviewManager,
+    private val userPreferencesRepository: PracticeUserPreferencesRepository,
+    private val practiceQueue: VocabPracticeQueue,
     private val analyticsManager: AnalyticsManager
 ) : VocabPracticeScreenContract.ViewModel {
 
     private lateinit var expressions: List<Long>
     private lateinit var configuration: VocabPracticeConfiguration
 
-    private lateinit var _reviewState: MutableStateFlow<VocabReviewManagingState.Review>
+    private lateinit var _reviewState: MutableState<VocabReviewManagingState.Review>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
 
     override val state: StateFlow<ScreenState>
@@ -34,7 +36,10 @@ class VocabPracticeViewModel(
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
                 practiceType = VocabPracticeType.ReadingPicker,
-                readingPriority = VocabPracticeReadingPriority.Default
+                shuffle = true,
+                readingPriority = userPreferencesRepository.vocabReadingPriority.get()
+                    .toScreenType(),
+                showMeaning = userPreferencesRepository.vocabShowMeaning.get()
             )
         }
     }
@@ -44,19 +49,24 @@ class VocabPracticeViewModel(
         this.configuration = configuration
 
         viewModelScope.launch {
-            reviewManager.initialize(
-                expressions = expressions
-                    .map {
-                        VocabQueueItemDescriptor(
-                            id = it,
-                            practiceType = configuration.practiceType,
-                            priority = configuration.readingPriority
-                        )
-                    }
-                    .shuffled()
-            )
+            userPreferencesRepository.apply {
+                vocabReadingPriority.set(configuration.readingPriority.repoType)
+                vocabShowMeaning.set(configuration.showMeaning)
+            }
 
-            reviewManager.state
+            val expressionDescriptors = expressions
+                .map {
+                    VocabQueueItemDescriptor(
+                        id = it,
+                        practiceType = configuration.practiceType,
+                        priority = configuration.readingPriority
+                    )
+                }
+                .run { if (configuration.shuffle) shuffled() else this }
+
+            practiceQueue.initialize(expressions = expressionDescriptors)
+
+            practiceQueue.state
                 .onEach { it.applyToState() }
                 .launchIn(viewModelScope)
         }
@@ -72,7 +82,7 @@ class VocabPracticeViewModel(
 
     override fun next() {
         val isCorrectAnswer = _reviewState.value.isCorrectAnswer()
-        viewModelScope.launch { reviewManager.completeCurrentReview(isCorrectAnswer) }
+        viewModelScope.launch { practiceQueue.completeCurrentReview(isCorrectAnswer) }
     }
 
     override fun reportScreenShown() {
@@ -87,7 +97,7 @@ class VocabPracticeViewModel(
 
             is VocabReviewManagingState.Review -> {
                 if (::_reviewState.isInitialized.not()) {
-                    _reviewState = MutableStateFlow(this)
+                    _reviewState = mutableStateOf(this)
                 } else {
                     _reviewState.value = this
                 }
@@ -95,12 +105,9 @@ class VocabPracticeViewModel(
                 if (_state.value !is ScreenState.Review) {
                     _state.value = ScreenState.Review(
                         showMeaning = configuration.showMeaning,
-                        reviewState = _reviewState.map { it.asVocabReviewState }
-                            .stateIn(
-                                viewModelScope,
-                                SharingStarted.Eagerly,
-                                _reviewState.value.asVocabReviewState
-                            )
+                        practiceState = derivedStateOf {
+                            _reviewState.value.toPracticeReviewState()
+                        }
                     )
                 }
             }
@@ -112,6 +119,15 @@ class VocabPracticeViewModel(
                 )
             }
         }
+    }
+
+    private fun VocabReviewManagingState.Review.toPracticeReviewState(): VocabPracticeReviewState {
+        val progress = practiceQueue.getProgress()
+        return VocabPracticeReviewState(
+            currentPositionInQueue = progress.current,
+            totalItemsInQueue = progress.total,
+            reviewState = asVocabReviewState
+        )
     }
 
 }

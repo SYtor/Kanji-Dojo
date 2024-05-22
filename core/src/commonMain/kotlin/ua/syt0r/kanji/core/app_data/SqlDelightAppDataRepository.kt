@@ -66,7 +66,9 @@ class SqlDelightAppDataRepository(
         length: Int,
         limit: Int
     ): List<String> = runTransaction {
-        getCharacterReadingsOfLength(length.toLong(), limit.toLong()).executeAsList()
+        getExpressionReadingsOfLength(length.toLong(), limit.toLong())
+            .executeAsList()
+            .map { it.kana_expression!! }
     }
 
     override suspend fun getData(kanji: String): KanjiData? = runTransaction {

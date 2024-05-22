@@ -8,3 +8,5 @@ enum class PracticePreviewLayout { Character, Groups }
 enum class SupportedTheme { System, Light, Dark }
 
 enum class WritingInputMethod { Stroke, Character }
+
+enum class VocabReadingPriority { Default, Kanji, Kana }

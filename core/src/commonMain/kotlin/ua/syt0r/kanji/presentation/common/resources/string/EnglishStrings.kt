@@ -475,7 +475,7 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     }
     override val configurationCharactersPreview: String = "Characters preview"
     override val shuffleConfigurationTitle: String = "Shuffle"
-    override val shuffleConfigurationMessage: String = "Randomizes characters review order"
+    override val shuffleConfigurationMessage: String = "Randomizes review order"
     override val configurationCompleteButton: String = "Start"
 
     override val additionalKanaReadingsNote: (List<String>) -> String = {

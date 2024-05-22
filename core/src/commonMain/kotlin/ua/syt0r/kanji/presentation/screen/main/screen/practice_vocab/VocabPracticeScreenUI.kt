@@ -46,7 +46,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,7 +88,7 @@ fun VocabPracticeScreenUI(
     }
 
     Scaffold(
-        topBar = { ScreenTopBar(navigateUp = tryNavigateBack) },
+        topBar = { ScreenTopBar(navigateUp = tryNavigateBack, state = state) },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
 
@@ -135,12 +134,37 @@ fun VocabPracticeScreenUI(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenTopBar(navigateUp: () -> Unit) {
+private fun ScreenTopBar(
+    navigateUp: () -> Unit,
+    state: State<ScreenState>
+) {
     TopAppBar(
-        title = { Text("") },
+        title = { },
         navigationIcon = {
             IconButton(onClick = navigateUp) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+            }
+        },
+        actions = {
+            val progressTextState = remember {
+                derivedStateOf {
+                    when (val practiceState = state.value) {
+                        is ScreenState.Review -> {
+                            practiceState.practiceState.value
+                                .run { "$currentPositionInQueue/$totalItemsInQueue" }
+                        }
+
+                        else -> null
+                    }
+                }
+            }
+
+            progressTextState.value?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
             }
         }
     )
@@ -153,14 +177,16 @@ private fun ScreenConfiguration(
 ) {
 
     var practiceType by rememberSaveable { mutableStateOf(screenState.practiceType) }
+    var shuffle by rememberSaveable { mutableStateOf(screenState.shuffle) }
     var readingPriority by rememberSaveable { mutableStateOf(screenState.readingPriority) }
-    var showMeaning by rememberSaveable { mutableStateOf(false) }
+    var showMeaning by rememberSaveable { mutableStateOf(screenState.showMeaning) }
 
     PracticeConfigurationContainer(
         onClick = {
             onConfigured(
                 VocabPracticeConfiguration(
                     practiceType = practiceType,
+                    shuffle = shuffle,
                     readingPriority = readingPriority,
                     showMeaning = showMeaning
                 )
@@ -168,17 +194,16 @@ private fun ScreenConfiguration(
         }
     ) {
 
-        PracticeConfigurationEnumSelector(
-            title = "Practice Type",
-            subtitle = "",
-            values = VocabPracticeType.values(),
-            selected = practiceType,
-            onSelected = { practiceType = it }
+        PracticeConfigurationOption(
+            title = resolveString { commonPractice.shuffleConfigurationTitle },
+            subtitle = resolveString { commonPractice.shuffleConfigurationMessage },
+            checked = shuffle,
+            onChange = { shuffle = it }
         )
 
         PracticeConfigurationEnumSelector(
             title = "Reading Priority",
-            subtitle = "Choose readings you want to practice in case word has multiple readings",
+            subtitle = "Choose which reading to use if the word has multiple readings",
             values = VocabPracticeReadingPriority.values(),
             selected = readingPriority,
             onSelected = { readingPriority = it }
@@ -186,7 +211,7 @@ private fun ScreenConfiguration(
 
         PracticeConfigurationOption(
             title = "Show Meaning",
-            subtitle = "",
+            subtitle = "Choose meaning visibility when answer is not selected",
             checked = showMeaning,
             onChange = { showMeaning = it }
         )
@@ -203,8 +228,6 @@ private fun ScreenReview(
     onNext: () -> Unit
 ) {
 
-    val reviewState = screenState.reviewState.collectAsState()
-
     var alternativeWordsDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
     alternativeWordsDialogWord?.also {
         AlternativeWordsDialog(
@@ -217,7 +240,7 @@ private fun ScreenReview(
         modifier = Modifier.fillMaxSize()
     ) {
 
-        when (val currentState = reviewState.value) {
+        when (val currentState = screenState.practiceState.value.reviewState) {
             is VocabReviewState.Reading -> {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -268,13 +291,8 @@ private fun ScreenReview(
                             Spacer(Modifier.weight(maxItemsInEachRow.toFloat() - lastLineItems))
 
                     }
-                    val shouldShowNextButton = remember {
-                        derivedStateOf {
-                            when (val currentState = reviewState.value) {
-                                is VocabReviewState.Reading -> currentState.selectedAnswer.value != null
-                            }
-                        }
-                    }
+
+                    val shouldShowNextButton = shouldShowNextButton(screenState.practiceState)
 
                     NextButton(
                         showNextButton = shouldShowNextButton,
@@ -289,6 +307,17 @@ private fun ScreenReview(
 
     }
 
+}
+
+@Composable
+private fun shouldShowNextButton(state: State<VocabPracticeReviewState>): State<Boolean> {
+    return remember {
+        derivedStateOf {
+            when (val currentState = state.value.reviewState) {
+                is VocabReviewState.Reading -> currentState.selectedAnswer.value != null
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

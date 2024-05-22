@@ -6,6 +6,7 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
+import ua.syt0r.kanji.core.user_data.model.VocabReadingPriority
 import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 class DefaultPracticeUserPreferencesRepository(
@@ -80,6 +81,20 @@ class DefaultPracticeUserPreferencesRepository(
         createIntProperty(
             key = "reading_tolerated_mistakes",
             initialValueProvider = { 0 }
+        )
+    }
+
+    override val vocabReadingPriority: SuspendedProperty<VocabReadingPriority> = registerProperty {
+        createEnumProperty(
+            key = "vocab_reading_priority",
+            initialValueProvider = { VocabReadingPriority.Default }
+        )
+    }
+
+    override val vocabShowMeaning: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = "vocab_show_meaning",
+            initialValueProvider = { true }
         )
     }
 

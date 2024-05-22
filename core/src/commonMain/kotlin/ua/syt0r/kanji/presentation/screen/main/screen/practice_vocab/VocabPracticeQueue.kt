@@ -21,16 +21,25 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.Ge
 import kotlin.time.Duration
 
 
-interface VocabPracticeReviewManager {
+interface VocabPracticeQueue {
+
     val state: StateFlow<VocabReviewManagingState>
+
     suspend fun initialize(expressions: List<VocabQueueItemDescriptor>)
     suspend fun completeCurrentReview(isCorrectAnswer: Boolean)
+    fun getProgress(): VocabQueueProgress
+
 }
 
 data class VocabQueueItemDescriptor(
     val id: Long,
     val practiceType: VocabPracticeType,
     val priority: VocabPracticeReadingPriority
+)
+
+data class VocabQueueProgress(
+    val current: Int,
+    val total: Int
 )
 
 sealed interface VocabReviewManagingState {
@@ -75,11 +84,11 @@ sealed interface VocabReviewManagingState {
 
 }
 
-class DefaultVocabPracticeReviewManager(
+class DefaultVocabPracticeQueue(
     private val coroutineScope: CoroutineScope,
     private val timeUtils: TimeUtils,
     private val getVocabReadingReviewStateUseCase: GetVocabReadingReviewStateUseCase
-) : VocabPracticeReviewManager {
+) : VocabPracticeQueue {
 
     private data class QueueItem(
         val item: VocabQueueItemDescriptor,
@@ -114,6 +123,12 @@ class DefaultVocabPracticeReviewManager(
 
     override suspend fun completeCurrentReview(isCorrectAnswer: Boolean) {
         nextRequests.send(isCorrectAnswer)
+    }
+
+    override fun getProgress(): VocabQueueProgress {
+        val total = queue.size + summaryItems.size
+        val current = total - queue.size + 1
+        return VocabQueueProgress(current, total)
     }
 
     private suspend fun handleAnswer(isCorrectAnswer: Boolean) {

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
+import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration
 
@@ -23,12 +24,14 @@ interface VocabPracticeScreenContract {
 
         data class Configuration(
             val practiceType: VocabPracticeType,
-            val readingPriority: VocabPracticeReadingPriority
+            val shuffle: Boolean,
+            val readingPriority: VocabPracticeReadingPriority,
+            val showMeaning: Boolean
         ) : ScreenState
 
         data class Review(
             val showMeaning: Boolean,
-            val reviewState: StateFlow<VocabReviewState>
+            val practiceState: State<VocabPracticeReviewState>
         ) : ScreenState
 
         data class Summary(

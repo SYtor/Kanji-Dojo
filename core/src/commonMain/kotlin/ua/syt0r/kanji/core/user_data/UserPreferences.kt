@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
 import ua.syt0r.kanji.core.user_data.model.PracticeType
 import ua.syt0r.kanji.core.user_data.model.SortOption
 import ua.syt0r.kanji.core.user_data.model.SupportedTheme
+import ua.syt0r.kanji.core.user_data.model.VocabReadingPriority
 import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 interface UserPreferencesRepository : SuspendedPropertyRegistry {
@@ -55,5 +56,8 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
 
     val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
     val readingToleratedMistakes: SuspendedProperty<Int>
+
+    val vocabReadingPriority: SuspendedProperty<VocabReadingPriority>
+    val vocabShowMeaning: SuspendedProperty<Boolean>
 
 }

@@ -455,7 +455,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     }
     override val configurationCharactersPreview: String = "文字のプレビュー"
     override val shuffleConfigurationTitle: String = "順序のシャッフル"
-    override val shuffleConfigurationMessage: String = "文字の復習順をランダムにする"
+    override val shuffleConfigurationMessage: String = "復習順をランダムにする"
     override val configurationCompleteButton: String = "開始"
 
     override val additionalKanaReadingsNote: (List<String>) -> String = {

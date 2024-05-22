@@ -10,13 +10,14 @@ val vocabPracticeScreenModule = module {
     multiplatformViewModel<VocabPracticeScreenContract.ViewModel> {
         VocabPracticeViewModel(
             viewModelScope = it.component1(),
-            reviewManager = get { it },
+            userPreferencesRepository = get(),
+            practiceQueue = get { it },
             analyticsManager = get()
         )
     }
 
-    factory<VocabPracticeReviewManager> {
-        DefaultVocabPracticeReviewManager(
+    factory<VocabPracticeQueue> {
+        DefaultVocabPracticeQueue(
             coroutineScope = it.component1(),
             timeUtils = get(),
             getVocabReadingReviewStateUseCase = get()

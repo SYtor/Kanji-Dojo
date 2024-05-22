@@ -75,9 +75,6 @@ SELECT meaning FROM kanji_meaning WHERE kanji = ? ORDER BY priority;
 getKanjiReadings:
 SELECT * FROM kanji_reading WHERE kanji = ?;
 
-getCharacterReadingsOfLength:
-SELECT DISTINCT reading FROM kanji_reading WHERE LENGTH(reading) = ? LIMIT ?;
-
 getKanjiData:
 SELECT * FROM kanji_data WHERE kanji = ?;
 
@@ -86,6 +83,13 @@ SELECT * FROM expression_meaning WHERE expression_id = ? ORDER BY priority;
 
 getExpressionReadings:
 SELECT * FROM expression_reading WHERE expression_id = ? ORDER BY rank;
+
+getExpressionReadingsOfLength:
+SELECT DISTINCT kana_expression
+FROM expression_reading
+WHERE kana_expression NOT NULL AND LENGTH(kana_expression) = :length
+ORDER BY RANDOM()
+LIMIT :limit;
 
 getExpressionsWithKanaReadingsLike:
 SELECT DISTINCT expression_id
