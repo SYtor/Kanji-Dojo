@@ -12,13 +12,6 @@ import kotlinx.coroutines.flow.flow
 import ua.syt0r.kanji.R
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 
-@Composable
-fun CharacterClassification.Kana.stringResource(): String {
-    return when (this) {
-        CharacterClassification.Kana.Hiragana -> stringResource(R.string.hiragana)
-        CharacterClassification.Kana.Katakana -> stringResource(R.string.katakana)
-    }
-}
 
 fun Context.asActivity(): AppCompatActivity? = when (this) {
     is AppCompatActivity -> this

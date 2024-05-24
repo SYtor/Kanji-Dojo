@@ -64,17 +64,6 @@ fun furiganaStringResource(@StringRes stringResId: Int): FuriganaString {
 
 }
 
-@Preview(showBackground = true, locale = "ja")
-@Composable
-private fun Preview() {
-    AppTheme {
-        FuriganaText(
-            furiganaString = furiganaStringResource(R.string.writing_practice_reading_on),
-            modifier = Modifier.width(200.dp)
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun ClickPreview() {
