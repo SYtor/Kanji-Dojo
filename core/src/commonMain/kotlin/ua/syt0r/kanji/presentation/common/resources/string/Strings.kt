@@ -47,6 +47,7 @@ interface Strings {
 
     val home: HomeStrings
     val practiceDashboard: PracticeDashboardStrings
+    val vocabDashboard: VocabDashboardStrings
     val createPracticeDialog: CreatePracticeDialogStrings
     val dailyGoalDialog: DailyGoalDialogStrings
 
@@ -67,6 +68,7 @@ interface Strings {
     val commonPractice: CommonPracticeStrings
     val writingPractice: WritingPracticeStrings
     val readingPractice: ReadingPracticeStrings
+    val vocabPractice: VocabPracticeStrings
 
     val kanjiInfo: KanjiInfoStrings
 
@@ -75,6 +77,24 @@ interface Strings {
 
     val reminderNotification: ReminderNotificationStrings
 
+}
+
+interface VocabDashboardStrings {
+    val reviewButton: String
+    val wordsCount: (Int) -> String
+
+    val deckTitleTime: String
+    val deckTitleWeek: String
+    val deckTitleCommonVerbs: String
+    val deckTitleColors: String
+    val deckTitleRegularFood: String
+    val deckTitleJapaneseFood: String
+    val deckTitleGrammarTerms: String
+    val deckTitleAnimals: String
+    val deckTitleBody: String
+    val deckTitleCommonPlaces: String
+    val deckTitleCities: String
+    val deckTitleTransport: String
 }
 
 interface FeedbackStrings {
@@ -468,6 +488,23 @@ interface ReadingPracticeStrings {
     val showAnswerButton: String
     val goodButton: String
     val repeatButton: String
+}
+
+interface VocabPracticeStrings {
+    val readingPriorityConfigurationTitle: String
+    val readingPriorityConfigurationMessage: String
+    val readingPriorityConfigurationDefault: String
+    val readingPriorityConfigurationKanji: String
+    val readingPriorityConfigurationKana: String
+    val readingMeaningConfigurationTitle: String
+    val readingMeaningConfigurationMessage: String
+
+    val practiceProgressCounter: (current: Int, total: Int) -> String
+        get() = { a, b -> "$a / $b" }
+
+    val nextButton: String
+
+    val summaryItemsCountTitle: String
 }
 
 interface KanjiInfoStrings {

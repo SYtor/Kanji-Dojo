@@ -32,6 +32,7 @@ object EnglishStrings : Strings {
 
     override val home: HomeStrings = EnglishHomeStrings
     override val practiceDashboard = EnglishPracticeDashboardStrings
+    override val vocabDashboard: VocabDashboardStrings = EnglishVocabDashboardStrings
     override val createPracticeDialog = EnglishCreatePracticeDialogStrings
     override val dailyGoalDialog: DailyGoalDialogStrings = EnglishDailyGoalDialogStrings
     override val stats: StatsStrings = EnglishStatsStrings
@@ -49,6 +50,7 @@ object EnglishStrings : Strings {
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
+    override val vocabPractice: VocabPracticeStrings = EnglishVocabPracticeStrings
     override val kanjiInfo: KanjiInfoStrings = EnglishKanjiInfoStrings
 
     override val urlPickerMessage: String = "Open With"
@@ -122,6 +124,23 @@ object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
     override val dailyIndicatorDisabled: String = "Disabled"
     override val dailyIndicatorNew: (Int) -> String = { "$it new" }
     override val dailyIndicatorReview: (Int) -> String = { "$it review" }
+}
+
+object EnglishVocabDashboardStrings : VocabDashboardStrings {
+    override val reviewButton: String = "Review"
+    override val wordsCount: (Int) -> String = { "Expressions count: $it" }
+    override val deckTitleTime: String = "Time"
+    override val deckTitleWeek: String = "Week Days"
+    override val deckTitleCommonVerbs: String = "Common Verbs"
+    override val deckTitleColors: String = "Colors"
+    override val deckTitleRegularFood: String = "Regular Food"
+    override val deckTitleJapaneseFood: String = "Japanese Food"
+    override val deckTitleGrammarTerms: String = "Grammar Terms"
+    override val deckTitleAnimals: String = "Animals"
+    override val deckTitleBody: String = "Body"
+    override val deckTitleCommonPlaces: String = "Common Places"
+    override val deckTitleCities: String = "Cities"
+    override val deckTitleTransport: String = "Transport"
 }
 
 object EnglishCreatePracticeDialogStrings : CreatePracticeDialogStrings {
@@ -276,6 +295,7 @@ object EnglishFeedbackStrings : FeedbackStrings {
             FeedbackScreen.ReadingPractice -> "Reading practice"
             FeedbackScreen.Search -> "Search"
             FeedbackScreen.CharacterInfo -> "Character info"
+            FeedbackScreen.VocabPractice -> "Vocab practice"
         }
         "$screenName, expression $id"
     }
@@ -509,7 +529,8 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val hintStrokeAllMode: String = "For all"
     override val hintStrokeNoneMode: String = "Never"
     override val inputModeTitle: String = "Input Mode"
-    override val inputModeMessage: String = "Choose whether to validate each stroke or the entire character"
+    override val inputModeMessage: String =
+        "Choose whether to validate each stroke or the entire character"
     override val inputModeStroke: String = "Stroke"
     override val inputModeCharacter: String = "Character"
     override val kanaRomajiTitle: String = "Show romaji in kana practice"
@@ -548,6 +569,20 @@ object EnglishReadingPracticeString : ReadingPracticeStrings {
     override val showAnswerButton: String = "Show Answer"
     override val goodButton: String = "Good"
     override val repeatButton: String = "Bad"
+}
+
+object EnglishVocabPracticeStrings : VocabPracticeStrings {
+    override val readingPriorityConfigurationTitle: String = "Reading Priority"
+    override val readingPriorityConfigurationMessage: String =
+        "Choose which reading to use if the word has multiple readings"
+    override val readingPriorityConfigurationDefault: String = "Default"
+    override val readingPriorityConfigurationKanji: String = "Kanji"
+    override val readingPriorityConfigurationKana: String = "Kana"
+    override val readingMeaningConfigurationTitle: String = "Show Meaning"
+    override val readingMeaningConfigurationMessage: String =
+        "Choose meaning visibility when answer is not selected"
+    override val nextButton: String = "Next"
+    override val summaryItemsCountTitle: String = "Reviewed Words"
 }
 
 object EnglishKanjiInfoStrings : KanjiInfoStrings {

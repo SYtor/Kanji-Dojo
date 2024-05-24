@@ -18,15 +18,15 @@ class VocabDashboardViewModel(
 
     override val state: StateFlow<ScreenState> = _state
 
-    override fun select(set: VocabPracticeSet) {
+    override fun select(deck: VocabPracticeDeck) {
         val wordsState = MutableStateFlow<VocabPracticePreviewState>(
             value = VocabPracticePreviewState.Loading
         )
 
-        _state.value = ScreenState.SelectedSet(set, wordsState)
+        _state.value = ScreenState.DeckSelected(deck, wordsState)
 
         viewModelScope.launch {
-            val words = set.expressionIds.map { appDataRepository.getWord(it) }
+            val words = deck.expressionIds.map { appDataRepository.getWord(it) }
             wordsState.value = VocabPracticePreviewState.Loaded(words)
         }
     }

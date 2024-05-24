@@ -1,9 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
-data class VocabPracticeSet(
-    val title: String,
+data class VocabPracticeDeck(
+    val titleResolver: StringResolveScope<String>,
     val expressionIds: List<Long>
 )
 
@@ -12,9 +13,9 @@ sealed interface VocabPracticePreviewState {
     data class Loaded(val words: List<JapaneseWord>) : VocabPracticePreviewState
 }
 
-val vocabSets = listOf(
-    VocabPracticeSet(
-        title = "Time",
+val vocabDecks = listOf(
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleTime },
         expressionIds = listOf(
             1315920,
             1315840,
@@ -50,14 +51,14 @@ val vocabSets = listOf(
             1548010
         )
     ),
-    VocabPracticeSet(
-        title = "Week Days",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleWeek },
         expressionIds = listOf(
             1545770, 1255890, 1194290, 1372190, 1534890, 1243320, 1445590, 1464900
         )
     ),
-    VocabPracticeSet(
-        title = "Common Verbs",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleCommonVerbs },
         expressionIds = listOf(
             1578850,
             1547720,
@@ -82,8 +83,8 @@ val vocabSets = listOf(
             1305990
         )
     ),
-    VocabPracticeSet(
-        title = "Colors",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleColors },
         expressionIds = listOf(
             2013900,
             1381380,
@@ -101,8 +102,8 @@ val vocabSets = listOf(
             1243560
         )
     ),
-    VocabPracticeSet(
-        title = "Regular Food",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleRegularFood },
         expressionIds = listOf(
             1270590,
             1103090,
@@ -130,8 +131,8 @@ val vocabSets = listOf(
             1370860
         )
     ),
-    VocabPracticeSet(
-        title = "Japanese Food",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleJapaneseFood },
         expressionIds = listOf(
             1595650,
             1440590,
@@ -156,16 +157,16 @@ val vocabSets = listOf(
             1590640
         )
     ),
-    VocabPracticeSet(
-        title = "Grammar Terms",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleGrammarTerms },
         expressionIds = listOf(
             1531570,
             1451380,
             1250430
         )
     ),
-    VocabPracticeSet(
-        title = "Animals",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleAnimals },
         expressionIds = listOf(
             1451470,
             1467640,
@@ -186,9 +187,9 @@ val vocabSets = listOf(
             1319030
         )
     ),
-    VocabPracticeSet(
-        "Body",
-        listOf(
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleBody },
+        expressionIds = listOf(
             1582310,
             1217730,
             1604890,
@@ -215,8 +216,8 @@ val vocabSets = listOf(
             1387010
         )
     ),
-    VocabPracticeSet(
-        title = "Common Places",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleCommonPlaces },
         expressionIds = listOf(
             1066710,
             1053280,
@@ -254,8 +255,8 @@ val vocabSets = listOf(
             1183450
         )
     ),
-    VocabPracticeSet(
-        title = "Cities",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleCities },
         expressionIds = listOf(
             1447690,
             1652350,
@@ -272,8 +273,8 @@ val vocabSets = listOf(
             2770680
         )
     ),
-    VocabPracticeSet(
-        title = "Transport",
+    VocabPracticeDeck(
+        titleResolver = { vocabDashboard.deckTitleTransport },
         expressionIds = listOf(
             1323080,
             1443530,

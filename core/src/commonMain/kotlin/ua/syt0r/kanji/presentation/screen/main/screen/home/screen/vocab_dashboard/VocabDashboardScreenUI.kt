@@ -51,6 +51,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
@@ -61,8 +62,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 @Composable
 fun VocabDashboardScreenUI(
     state: State<ScreenState>,
-    select: (VocabPracticeSet) -> Unit,
-    navigateToPractice: (VocabPracticeSet) -> Unit
+    select: (VocabPracticeDeck) -> Unit,
+    navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -88,9 +89,9 @@ fun VocabDashboardScreenUI(
                 Spacer(Modifier.height(20.dp))
             }
 
-            items(vocabSets) { vocabPracticeSet ->
+            items(vocabDecks) { vocabPracticeSet ->
                 PracticeGridItem(
-                    title = vocabPracticeSet.title,
+                    title = resolveString(vocabPracticeSet.titleResolver),
                     onClick = {
                         select(vocabPracticeSet)
                         showBottomSheet = true
@@ -138,7 +139,7 @@ private fun PracticeGridItem(
 @Composable
 private fun BottomSheetContent(
     state: State<ScreenState>,
-    navigateToPractice: (VocabPracticeSet) -> Unit
+    navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
     val currentState = state.value
@@ -148,7 +149,7 @@ private fun BottomSheetContent(
         return
     }
 
-    currentState as ScreenState.SelectedSet
+    currentState as ScreenState.DeckSelected
 
     var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
     selectedWord?.also {
@@ -159,7 +160,7 @@ private fun BottomSheetContent(
     }
 
     val wordsState = currentState.words.collectAsState()
-    val wordsVisible = rememberSaveable(currentState.set.title) { mutableStateOf(false) }
+    val wordsVisible = rememberSaveable(currentState.deck.titleResolver) { mutableStateOf(false) }
     val wordsHidingOverlayAlpha = animateFloatAsState(
         targetValue = if (wordsVisible.value) 0f else 1f
     )
@@ -205,9 +206,9 @@ private fun BottomSheetContent(
 
 @Composable
 private fun ScreenBottomSheetHeader(
-    screenState: ScreenState.SelectedSet,
+    screenState: ScreenState.DeckSelected,
     showWords: MutableState<Boolean>,
-    onPracticeClick: (VocabPracticeSet) -> Unit
+    onPracticeClick: (VocabPracticeDeck) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -219,7 +220,7 @@ private fun ScreenBottomSheetHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = screenState.set.title,
+                text = resolveString(screenState.deck.titleResolver),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -238,16 +239,16 @@ private fun ScreenBottomSheetHeader(
             Spacer(modifier = Modifier.weight(1f))
 
             TextButton(
-                onClick = { onPracticeClick(screenState.set) },
+                onClick = { onPracticeClick(screenState.deck) },
                 colors = ButtonDefaults.neutralTextButtonColors()
             ) {
-                Text("Review")
+                Text(text = resolveString { vocabDashboard.reviewButton })
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
             }
         }
 
         Text(
-            text = "Expressions count: ${screenState.set.expressionIds.size}",
+            text = resolveString { vocabDashboard.wordsCount(screenState.deck.expressionIds.size) },
             style = MaterialTheme.typography.bodySmall
         )
 

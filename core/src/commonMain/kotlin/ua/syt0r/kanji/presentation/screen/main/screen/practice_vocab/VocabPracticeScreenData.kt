@@ -14,14 +14,22 @@ enum class VocabPracticeType : DisplayableEnum {
 }
 
 enum class VocabPracticeReadingPriority(
+    override val titleResolver: StringResolveScope<String>,
     val repoType: VocabReadingPriority
 ) : DisplayableEnum {
 
-    Default(VocabReadingPriority.Default),
-    Kanji(VocabReadingPriority.Kanji),
-    Kana(VocabReadingPriority.Kana);
-
-    override val titleResolver: StringResolveScope<String> = { name }
+    Default(
+        titleResolver = { vocabPractice.readingPriorityConfigurationDefault },
+        repoType = VocabReadingPriority.Default
+    ),
+    Kanji(
+        titleResolver = { vocabPractice.readingPriorityConfigurationKanji },
+        repoType = VocabReadingPriority.Kanji
+    ),
+    Kana(
+        titleResolver = { vocabPractice.readingPriorityConfigurationKana },
+        repoType = VocabReadingPriority.Kana
+    );
 
 }
 

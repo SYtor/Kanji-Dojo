@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.feedback
 import kotlinx.serialization.Serializable
 
 enum class FeedbackScreen {
-    WritingPractice, ReadingPractice, Search, CharacterInfo
+    WritingPractice, ReadingPractice, Search, CharacterInfo, VocabPractice
 }
 
 @Serializable

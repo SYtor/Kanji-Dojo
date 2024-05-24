@@ -31,6 +31,7 @@ object JapaneseStrings : Strings {
 
     override val home: HomeStrings = JapaneseHomeStrings
     override val practiceDashboard = JapanesePracticeDashboardStrings
+    override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
     override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
     override val dailyGoalDialog = JapaneseDailyGoalDialogStrings
     override val stats: StatsStrings = JapaneseStatsStrings
@@ -48,6 +49,7 @@ object JapaneseStrings : Strings {
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = JapaneseWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = JapaneseReadingPracticeString
+    override val vocabPractice: VocabPracticeStrings = JapaneseVocabPracticeStrings
     override val kanjiInfo: KanjiInfoStrings = JapaneseKanjiInfoStrings
 
     override val urlPickerMessage: String = "開く"
@@ -121,6 +123,8 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
     override val dailyIndicatorNew: (Int) -> String = { "$it 学習" }
     override val dailyIndicatorReview: (Int) -> String = { "$it 復習" }
 }
+
+object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings
 
 object JapaneseCreatePracticeDialogStrings : CreatePracticeDialogStrings {
     override val title: String = "練習セットの作成"
@@ -523,6 +527,20 @@ object JapaneseReadingPracticeString : ReadingPracticeStrings {
     override val showAnswerButton: String = "正答を表示"
     override val goodButton: String = "正解"
     override val repeatButton: String = "もう一度"
+}
+
+object JapaneseVocabPracticeStrings : VocabPracticeStrings {
+    override val readingPriorityConfigurationTitle: String = "単語の読み方"
+    override val readingPriorityConfigurationMessage: String =
+        "単語に複数の読みがある場合、使用する読みを選択してください"
+    override val readingPriorityConfigurationDefault: String = "辞書の最初"
+    override val readingPriorityConfigurationKanji: String = "漢字"
+    override val readingPriorityConfigurationKana: String = "かな"
+    override val readingMeaningConfigurationTitle: String = "意味の表示"
+    override val readingMeaningConfigurationMessage: String =
+        "回答が選択されていない場合の意味の表示を選択してください"
+    override val nextButton: String = "次へ"
+    override val summaryItemsCountTitle: String = "練習した単語の数"
 }
 
 object JapaneseKanjiInfoStrings : KanjiInfoStrings {

@@ -79,6 +79,7 @@ fun VocabPracticeScreenUI(
     onConfigured: (VocabPracticeConfiguration) -> Unit,
     onAnswerSelected: (String) -> Unit,
     onNext: () -> Unit,
+    onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit
 ) {
 
@@ -114,7 +115,8 @@ fun VocabPracticeScreenUI(
                     ScreenReview(
                         screenState = it,
                         onAnswerSelected = onAnswerSelected,
-                        onNext = onNext
+                        onNext = onNext,
+                        feedbackClick = onFeedback
                     )
                 }
 
@@ -146,12 +148,12 @@ private fun ScreenTopBar(
             }
         },
         actions = {
-            val progressTextState = remember {
+            val currentToTotal = remember {
                 derivedStateOf {
                     when (val practiceState = state.value) {
                         is ScreenState.Review -> {
                             practiceState.practiceState.value
-                                .run { "$currentPositionInQueue/$totalItemsInQueue" }
+                                .run { currentPositionInQueue to totalItemsInQueue }
                         }
 
                         else -> null
@@ -159,9 +161,9 @@ private fun ScreenTopBar(
                 }
             }
 
-            progressTextState.value?.let {
+            currentToTotal.value?.let { (current, total) ->
                 Text(
-                    text = it,
+                    text = resolveString { vocabPractice.practiceProgressCounter(current, total) },
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
@@ -202,16 +204,16 @@ private fun ScreenConfiguration(
         )
 
         PracticeConfigurationEnumSelector(
-            title = "Reading Priority",
-            subtitle = "Choose which reading to use if the word has multiple readings",
+            title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
+            subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
             values = VocabPracticeReadingPriority.values(),
             selected = readingPriority,
             onSelected = { readingPriority = it }
         )
 
         PracticeConfigurationOption(
-            title = "Show Meaning",
-            subtitle = "Choose meaning visibility when answer is not selected",
+            title = resolveString { vocabPractice.readingMeaningConfigurationTitle },
+            subtitle = resolveString { vocabPractice.readingMeaningConfigurationMessage },
             checked = showMeaning,
             onChange = { showMeaning = it }
         )
@@ -225,7 +227,8 @@ private fun ScreenConfiguration(
 private fun ScreenReview(
     screenState: ScreenState.Review,
     onAnswerSelected: (String) -> Unit,
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    feedbackClick: (JapaneseWord) -> Unit
 ) {
 
     var alternativeWordsDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
@@ -296,7 +299,8 @@ private fun ScreenReview(
 
                     NextButton(
                         showNextButton = shouldShowNextButton,
-                        onClick = onNext
+                        onClick = onNext,
+                        onFeedbackClick = { feedbackClick(currentState.word) }
                     )
                 }
 
@@ -363,7 +367,8 @@ private fun FlowRowScope.ReadingAnswerButton(
 @Composable
 private fun NextButton(
     showNextButton: State<Boolean>,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFeedbackClick: () -> Unit
 ) {
 
     val offset = animateFloatAsState(if (showNextButton.value) 0f else 1f)
@@ -380,7 +385,7 @@ private fun NextButton(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         IconButton(
-            onClick = {},
+            onClick = onFeedbackClick,
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             ),
@@ -395,7 +400,10 @@ private fun NextButton(
             colors = ButtonDefaults.neutralButtonColors(),
             modifier = Modifier.weight(1f).fillMaxHeight()
         ) {
-            Text(text = "Next", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = resolveString { vocabPractice.nextButton },
+                style = MaterialTheme.typography.titleMedium
+            )
             Icon(Icons.AutoMirrored.Filled.NavigateNext, null)
         }
     }
@@ -434,7 +442,7 @@ private fun ScreenSummary(
         )
 
         PracticeSavedStateInfoLabel(
-            title = resolveString { "Reviewed Words" },
+            title = resolveString { vocabPractice.summaryItemsCountTitle },
             data = resolveString { screenState.results.size.toString() }
         )
 

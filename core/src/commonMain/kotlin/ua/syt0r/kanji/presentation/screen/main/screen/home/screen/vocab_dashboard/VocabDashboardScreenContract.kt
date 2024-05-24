@@ -6,14 +6,14 @@ interface VocabDashboardScreenContract {
 
     interface ViewModel {
         val state: StateFlow<ScreenState>
-        fun select(set: VocabPracticeSet)
+        fun select(deck: VocabPracticeDeck)
         fun reportScreenShown()
     }
 
     sealed interface ScreenState {
         object NothingSelected : ScreenState
-        data class SelectedSet(
-            val set: VocabPracticeSet,
+        data class DeckSelected(
+            val deck: VocabPracticeDeck,
             val words: StateFlow<VocabPracticePreviewState>
         ) : ScreenState
     }
