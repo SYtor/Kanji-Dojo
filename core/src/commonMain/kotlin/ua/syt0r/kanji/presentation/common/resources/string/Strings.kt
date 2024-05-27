@@ -114,6 +114,7 @@ interface HomeStrings {
     val screenTitle: String
 
     val dashboardTabLabel: String
+    val vocabDashboardTabLabel: String
     val statsTabLabel: String
     val searchTabLabel: String
     val settingsTabLabel: String

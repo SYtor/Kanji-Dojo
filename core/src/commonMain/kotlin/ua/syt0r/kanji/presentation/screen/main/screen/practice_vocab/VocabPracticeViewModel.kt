@@ -81,7 +81,7 @@ class VocabPracticeViewModel(
     }
 
     override fun next() {
-        val isCorrectAnswer = _reviewState.value.isCorrectAnswer()
+        val isCorrectAnswer = _reviewState.value.isCorrectAnswer() ?: return
         viewModelScope.launch { practiceQueue.completeCurrentReview(isCorrectAnswer) }
     }
 

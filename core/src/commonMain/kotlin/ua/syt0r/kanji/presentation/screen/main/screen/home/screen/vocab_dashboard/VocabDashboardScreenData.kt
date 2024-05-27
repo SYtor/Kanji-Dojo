@@ -21,7 +21,6 @@ val vocabDecks = listOf(
             1315840,
             2020680,
             1502840,
-            1502860,
             1490430,
             1579110,
             1584660,
@@ -161,8 +160,13 @@ val vocabDecks = listOf(
         titleResolver = { vocabDashboard.deckTitleGrammarTerms },
         expressionIds = listOf(
             1531570,
+            1250430,
             1451380,
-            1250430
+            1505090,
+            1556590,
+            1417330,
+            1264420,
+            1489700
         )
     ),
     VocabPracticeDeck(

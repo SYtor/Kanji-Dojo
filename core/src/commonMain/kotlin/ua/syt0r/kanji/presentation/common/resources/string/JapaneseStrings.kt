@@ -62,7 +62,8 @@ object JapaneseStrings : Strings {
 
 object JapaneseHomeStrings : HomeStrings {
     override val screenTitle: String = JapaneseStrings.appName
-    override val dashboardTabLabel: String = "練習"
+    override val dashboardTabLabel: String = "文字"
+    override val vocabDashboardTabLabel: String = "単語"
     override val statsTabLabel: String = "統計"
     override val searchTabLabel: String = "検索"
     override val settingsTabLabel: String = "設定"

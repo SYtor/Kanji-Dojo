@@ -63,7 +63,8 @@ object EnglishStrings : Strings {
 
 object EnglishHomeStrings : HomeStrings {
     override val screenTitle: String = "Kanji Dojo"
-    override val dashboardTabLabel: String = "Practice"
+    override val dashboardTabLabel: String = "Letters"
+    override val vocabDashboardTabLabel: String = "Vocab"
     override val statsTabLabel: String = "Stats"
     override val searchTabLabel: String = "Search"
     override val settingsTabLabel: String = "Settings"

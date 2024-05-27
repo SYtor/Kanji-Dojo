@@ -17,11 +17,11 @@ enum class HomeScreenTab(
 
     PracticeDashboard(
         iconContent = { Text(text = "字", style = MaterialTheme.typography.titleMedium) },
-        titleResolver = { "Letters" },
+        titleResolver = { home.dashboardTabLabel },
     ),
     VocabDashboard(
         iconContent = { Text(text = "語", style = MaterialTheme.typography.titleMedium) },
-        titleResolver = { "Vocab" }
+        titleResolver = { home.vocabDashboardTabLabel }
     ),
     Stats(
         iconContent = { Icon(Icons.Default.QueryStats, null) },

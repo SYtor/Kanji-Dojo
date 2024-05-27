@@ -54,7 +54,7 @@ sealed interface VocabReviewManagingState {
         val reading: FuriganaString
         val questionCharacter: String
 
-        fun isCorrectAnswer(): Boolean
+        fun isCorrectAnswer(): Boolean?
 
         class Reading(
             override val word: JapaneseWord,
@@ -71,7 +71,7 @@ sealed interface VocabReviewManagingState {
             override val displayReading = mutableStateOf<FuriganaString>(hiddenReading)
             override val selectedAnswer = mutableStateOf<SelectedReadingAnswer?>(null)
 
-            override fun isCorrectAnswer(): Boolean = selectedAnswer.value!!.isCorrect
+            override fun isCorrectAnswer(): Boolean? = selectedAnswer.value?.isCorrect
 
         }
 
