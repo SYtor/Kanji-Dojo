@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,34 +35,43 @@ fun AutopaddedScrollableColumn(
     columnContent: @Composable ColumnScope.() -> Unit
 ) {
 
-    val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val overlayCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val extraOverlayBottomSpacingData = remember {
-        ExtraOverlayBottomSpacingData(listCoordinatesState, overlayCoordinatesState)
-    }
+    val extraListSpacerState = rememberExtraListSpacerState()
 
     Box(modifier) {
         Column(
             modifier = Modifier.fillMaxSize()
-                .onGloballyPositioned { listCoordinatesState.value = it }
+                .onGloballyPositioned { extraListSpacerState.updateList(it) }
                 .verticalScroll(rememberScrollState())
         ) {
             columnContent()
-            extraOverlayBottomSpacingData.ExtraSpacer()
+            extraListSpacerState.ExtraSpacer()
         }
         Box(
             modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-                .onGloballyPositioned { overlayCoordinatesState.value = it }
+                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
         ) { bottomOverlayContent() }
     }
 
 }
 
+@Composable
+fun rememberExtraListSpacerState(): ExtraListSpacerState {
+    return remember { ExtraListSpacerState() }
+}
 
-data class ExtraOverlayBottomSpacingData(
-    val listCoordinatesState: State<LayoutCoordinates?>,
-    val overlayCoordinatesState: State<LayoutCoordinates?>
-) {
+
+class ExtraListSpacerState {
+
+    private val listCoordinatesState = mutableStateOf<LayoutCoordinates?>(null)
+    private val overlayCoordinatesState = mutableStateOf<LayoutCoordinates?>(null)
+
+    fun updateList(layoutCoordinates: LayoutCoordinates) {
+        listCoordinatesState.value = layoutCoordinates
+    }
+
+    fun updateOverlay(layoutCoordinates: LayoutCoordinates) {
+        overlayCoordinatesState.value = layoutCoordinates
+    }
 
     @Composable
     fun ExtraSpacer(minimalSpacing: Dp = 16.dp) {
@@ -89,4 +99,13 @@ data class ExtraOverlayBottomSpacingData(
         Spacer(Modifier.height(resultSpacing.value.dp))
     }
 
+
+}
+
+fun ExtraListSpacerState.ExtraSpacer(scope: LazyGridScope, minimalSpacing: Dp = 16.dp) {
+    scope.item(
+        span = { GridItemSpan(maxLineSpan) }
+    ) {
+        ExtraSpacer(minimalSpacing)
+    }
 }

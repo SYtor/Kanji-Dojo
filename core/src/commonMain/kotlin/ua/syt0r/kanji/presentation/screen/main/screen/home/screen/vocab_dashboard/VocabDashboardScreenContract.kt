@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
+import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
 
 interface VocabDashboardScreenContract {
@@ -11,11 +12,15 @@ interface VocabDashboardScreenContract {
     }
 
     sealed interface ScreenState {
-        object NothingSelected : ScreenState
-        data class DeckSelected(
-            val deck: VocabPracticeDeck,
-            val words: StateFlow<VocabPracticePreviewState>
+
+        object Loading : ScreenState
+
+        data class Loaded(
+            val userDecks: List<VocabPracticeDeck>,
+            val defaultDecks: List<VocabPracticeDeck>,
+            val deckSelectionState: State<VocabDeckSelectionState>
         ) : ScreenState
+
     }
 
 }

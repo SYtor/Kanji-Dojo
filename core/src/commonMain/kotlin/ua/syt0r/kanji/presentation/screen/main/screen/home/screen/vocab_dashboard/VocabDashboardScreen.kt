@@ -20,6 +20,11 @@ fun VocabDashboardScreen(
     VocabDashboardScreenUI(
         state = viewModel.state.collectAsState(),
         select = { viewModel.select(it) },
+        createDeck = {
+            mainNavigationState.navigate(
+                MainDestination.CreatePractice.New
+            )
+        },
         navigateToPractice = {
             mainNavigationState.navigate(
                 MainDestination.VocabPractice(expressionIds = it.expressionIds)

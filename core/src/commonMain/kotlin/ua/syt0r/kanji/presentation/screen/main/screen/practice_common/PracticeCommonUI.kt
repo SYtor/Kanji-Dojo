@@ -66,7 +66,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -78,8 +77,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
-import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
@@ -536,11 +535,7 @@ fun PracticeSavingState(
             .padding(horizontal = 20.dp)
     ) {
 
-        val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-        val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-        val extraOverlayBottomSpacingData = remember {
-            ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
-        }
+        val extraListSpacerState = rememberExtraListSpacerState()
 
         val toleratedMistakesCount = remember { mutableStateOf(defaultToleratedMistakesCount) }
 
@@ -558,7 +553,7 @@ fun PracticeSavingState(
                 .wrapContentWidth()
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
-                .onGloballyPositioned { listCoordinatesState.value = it },
+                .onGloballyPositioned { extraListSpacerState.updateList(it) },
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
@@ -628,7 +623,7 @@ fun PracticeSavingState(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                extraOverlayBottomSpacingData.ExtraSpacer()
+                extraListSpacerState.ExtraSpacer()
             }
 
         }
@@ -643,7 +638,7 @@ fun PracticeSavingState(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 20.dp)
-                .onGloballyPositioned { fabCoordinatesState.value = it }
+                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
         )
 
     }
@@ -711,18 +706,14 @@ fun PracticeSavedState(
             .padding(horizontal = 20.dp)
     ) {
 
-        val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-        val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-        val extraOverlayBottomSpacingData = remember {
-            ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
-        }
+        val extraListSpacerState = rememberExtraListSpacerState()
 
         LazyVerticalGrid(
             modifier = Modifier.fillMaxSize()
                 .wrapContentWidth()
                 .widthIn(max = 400.dp)
                 .fillMaxWidth()
-                .onGloballyPositioned { listCoordinatesState.value = it },
+                .onGloballyPositioned { extraListSpacerState.updateList(it) },
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
             columns = GridCells.FixedSize(gridItemSize)
@@ -772,7 +763,7 @@ fun PracticeSavedState(
             item(
                 span = { GridItemSpan(maxLineSpan) }
             ) {
-                extraOverlayBottomSpacingData.ExtraSpacer()
+                extraListSpacerState.ExtraSpacer()
             }
 
         }
@@ -784,7 +775,7 @@ fun PracticeSavedState(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 20.dp)
-                .onGloballyPositioned { fabCoordinatesState.value = it }
+                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
         )
 
     }

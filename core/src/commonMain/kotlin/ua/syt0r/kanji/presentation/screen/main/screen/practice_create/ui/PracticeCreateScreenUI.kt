@@ -57,15 +57,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
+import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Restore
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
@@ -157,7 +157,8 @@ fun PracticeCreateScreenUI(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    val extraListSpacerState = rememberExtraListSpacerState()
 
     Scaffold(
         topBar = {
@@ -186,7 +187,7 @@ fun PracticeCreateScreenUI(
                 exit = scaleOut()
             ) {
                 FloatingActionButton(
-                    modifier = Modifier.onGloballyPositioned { fabCoordinatesState.value = it },
+                    modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) },
                     onClick = { showTitleInputDialog = true },
                     content = { Icon(ExtraIcons.Save, null) }
                 )
@@ -223,7 +224,7 @@ fun PracticeCreateScreenUI(
                         onInfoClick = onCharacterInfoClick,
                         onDeleteClick = onCharacterDeleteClick,
                         onDeleteCancel = onCharacterRemovalCancel,
-                        fabCoordinatesState = fabCoordinatesState
+                        extraListSpacerState = extraListSpacerState
                     )
                 }
             }
@@ -296,18 +297,8 @@ private fun LoadedState(
     onInfoClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
     onDeleteCancel: (String) -> Unit,
-    fabCoordinatesState: State<LayoutCoordinates?>
+    extraListSpacerState: ExtraListSpacerState
 ) {
-
-    val listCoordinatesState = remember {
-        mutableStateOf<LayoutCoordinates?>(null)
-    }
-    val extraOverlayBottomSpacingData = remember {
-        ExtraOverlayBottomSpacingData(
-            listCoordinatesState = listCoordinatesState,
-            overlayCoordinatesState = fabCoordinatesState
-        )
-    }
 
     Column(
         modifier = Modifier
@@ -326,7 +317,7 @@ private fun LoadedState(
             columns = GridCells.Adaptive(50.dp),
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .onGloballyPositioned { listCoordinatesState.value = it }
+                .onGloballyPositioned { extraListSpacerState.updateList(it) }
         ) {
 
             items(screenState.characters.toList()) {
@@ -342,7 +333,7 @@ private fun LoadedState(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                extraOverlayBottomSpacingData.ExtraSpacer()
+                extraListSpacerState.ExtraSpacer()
             }
 
         }
@@ -351,7 +342,6 @@ private fun LoadedState(
 
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun CharacterInputField(
     isEnabled: Boolean,
@@ -508,6 +498,5 @@ private fun Character(
         }
 
     }
-
 
 }

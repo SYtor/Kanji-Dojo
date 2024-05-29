@@ -78,7 +78,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -89,8 +88,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
-import ua.syt0r.kanji.presentation.common.ExtraOverlayBottomSpacingData
+import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.customBlue
@@ -135,7 +135,7 @@ fun PracticeDashboardScreenUI(
         )
     }
 
-    val fabCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val extraListSpacerState = rememberExtraListSpacerState()
 
     Scaffold(
         floatingActionButton = {
@@ -147,7 +147,7 @@ fun PracticeDashboardScreenUI(
             ) {
                 FloatingActionButton(
                     onClick = { shouldShowCreatePracticeDialog = true },
-                    modifier = Modifier.onGloballyPositioned { fabCoordinatesState.value = it }
+                    modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -188,7 +188,7 @@ fun PracticeDashboardScreenUI(
                         LoadedState(
                             listMode = mode,
                             dailyIndicatorData = screenState.dailyIndicatorData,
-                            fabCoordinatesState = fabCoordinatesState,
+                            extraListSpacerState = extraListSpacerState,
                             startMerge = startMerge,
                             merge = merge,
                             startReorder = startReorder,
@@ -215,7 +215,7 @@ private fun LoadingState() {
 private fun LoadedState(
     listMode: State<PracticeDashboardListMode>,
     dailyIndicatorData: DailyIndicatorData,
-    fabCoordinatesState: State<LayoutCoordinates?>,
+    extraListSpacerState: ExtraListSpacerState,
     startMerge: () -> Unit,
     merge: (PracticeMergeRequestData) -> Unit,
     startReorder: () -> Unit,
@@ -225,17 +225,12 @@ private fun LoadedState(
     startQuickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    val listCoordinatesState = remember { mutableStateOf<LayoutCoordinates?>(null) }
-    val extraOverlayBottomSpacingData = remember {
-        ExtraOverlayBottomSpacingData(listCoordinatesState, fabCoordinatesState)
-    }
-
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
             .fillMaxSize()
             .wrapContentWidth()
-            .onGloballyPositioned { listCoordinatesState.value = it }
+            .onGloballyPositioned { extraListSpacerState.updateList(it) }
             .widthIn(max = 400.dp)
             .padding(horizontal = 10.dp)
     ) {
@@ -269,7 +264,7 @@ private fun LoadedState(
             }
         }
 
-        item { extraOverlayBottomSpacingData.ExtraSpacer() }
+        item { extraListSpacerState.ExtraSpacer() }
 
     }
 

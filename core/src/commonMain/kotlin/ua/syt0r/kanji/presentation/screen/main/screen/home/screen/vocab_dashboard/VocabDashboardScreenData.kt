@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
+import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
@@ -8,10 +9,22 @@ data class VocabPracticeDeck(
     val expressionIds: List<Long>
 )
 
+sealed interface VocabDeckSelectionState {
+
+    object NothingSelected : VocabDeckSelectionState
+
+    data class DeckSelected(
+        val deck: VocabPracticeDeck,
+        val words: StateFlow<VocabPracticePreviewState>
+    ) : VocabDeckSelectionState
+
+}
+
 sealed interface VocabPracticePreviewState {
     object Loading : VocabPracticePreviewState
     data class Loaded(val words: List<JapaneseWord>) : VocabPracticePreviewState
 }
+
 
 val vocabDecks = listOf(
     VocabPracticeDeck(

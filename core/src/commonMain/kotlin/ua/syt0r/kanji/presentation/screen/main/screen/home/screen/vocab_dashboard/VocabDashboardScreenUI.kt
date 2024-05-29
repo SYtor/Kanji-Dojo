@@ -1,6 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -23,11 +28,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,53 +56,55 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
+import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
+import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabDashboardScreenUI(
     state: State<ScreenState>,
     select: (VocabPracticeDeck) -> Unit,
+    createDeck: () -> Unit,
     navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
-    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val extraListSpacerState = rememberExtraListSpacerState()
 
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = createDeck,
+                modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
+            ) {
+                Icon(Icons.Default.Add, null)
+            }
+        }
     ) { paddingValues ->
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(paddingValues)
-                .padding(horizontal = 20.dp)
-                .fillMaxSize()
-                .wrapContentWidth()
-                .widthIn(max = 400.dp)
-        ) {
+        AnimatedContent(
+            targetState = state.value,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        ) { screenState ->
 
-            item(
-                span = { GridItemSpan(maxLineSpan) }
-            ) {
-                Spacer(Modifier.height(20.dp))
-            }
-
-            items(vocabDecks) { vocabPracticeSet ->
-                PracticeGridItem(
-                    title = resolveString(vocabPracticeSet.titleResolver),
-                    onClick = {
-                        select(vocabPracticeSet)
-                        showBottomSheet = true
-                    }
+            when (screenState) {
+                ScreenState.Loading -> FancyLoading(Modifier.fillMaxSize().wrapContentSize())
+                is ScreenState.Loaded -> ScreenLoadedState(
+                    screenState = screenState,
+                    extraListSpacerState = extraListSpacerState,
+                    select = select,
+                    navigateToPractice = navigateToPractice
                 )
             }
 
@@ -103,13 +112,68 @@ fun VocabDashboardScreenUI(
 
     }
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScreenLoadedState(
+    screenState: ScreenState.Loaded,
+    extraListSpacerState: ExtraListSpacerState,
+    select: (VocabPracticeDeck) -> Unit,
+    navigateToPractice: (VocabPracticeDeck) -> Unit
+) {
+
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
             tonalElevation = 0.dp
         ) {
-            BottomSheetContent(state, navigateToPractice)
+            BottomSheetContent(screenState.deckSelectionState, navigateToPractice)
         }
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(horizontal = 20.dp)
+            .fillMaxSize()
+            .wrapContentWidth()
+            .widthIn(max = 400.dp)
+            .onGloballyPositioned { extraListSpacerState.updateList(it) }
+    ) {
+
+        item(
+            span = { GridItemSpan(maxLineSpan) }
+        ) {
+            Spacer(Modifier.height(20.dp))
+        }
+
+        if (screenState.userDecks.isNotEmpty()) {
+            items(screenState.userDecks) {
+                PracticeGridItem(
+                    title = resolveString(it.titleResolver),
+                    onClick = {
+                        select(it)
+                        showBottomSheet = true
+                    }
+                )
+            }
+        }
+
+        items(vocabDecks) { vocabPracticeSet ->
+            PracticeGridItem(
+                title = resolveString(vocabPracticeSet.titleResolver),
+                onClick = {
+                    select(vocabPracticeSet)
+                    showBottomSheet = true
+                }
+            )
+        }
+
+        extraListSpacerState.ExtraSpacer(this)
+
     }
 
 }
@@ -138,18 +202,18 @@ private fun PracticeGridItem(
 
 @Composable
 private fun BottomSheetContent(
-    state: State<ScreenState>,
+    state: State<VocabDeckSelectionState>,
     navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
     val currentState = state.value
 
-    if (currentState == ScreenState.NothingSelected) {
+    if (currentState == VocabDeckSelectionState.NothingSelected) {
         CircularProgressIndicator(Modifier.fillMaxWidth().wrapContentWidth())
         return
     }
 
-    currentState as ScreenState.DeckSelected
+    currentState as VocabDeckSelectionState.DeckSelected
 
     var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
     selectedWord?.also {
@@ -206,7 +270,7 @@ private fun BottomSheetContent(
 
 @Composable
 private fun ScreenBottomSheetHeader(
-    screenState: ScreenState.DeckSelected,
+    screenState: VocabDeckSelectionState.DeckSelected,
     showWords: MutableState<Boolean>,
     onPracticeClick: (VocabPracticeDeck) -> Unit
 ) {
