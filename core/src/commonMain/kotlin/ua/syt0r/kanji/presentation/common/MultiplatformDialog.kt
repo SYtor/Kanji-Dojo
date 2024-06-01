@@ -32,7 +32,8 @@ fun MultiplatformDialog(
     title: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
     buttons: @Composable RowScope.() -> Unit,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp)
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    scrollableContent: Boolean = true
 ) {
 
     MultiplatformDialog(
@@ -42,7 +43,7 @@ fun MultiplatformDialog(
         Column(
             verticalArrangement = verticalArrangement,
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                .let { if (scrollableContent) it.verticalScroll(rememberScrollState()) else it }
                 .padding(
                     top = 20.dp,
                     start = 20.dp,

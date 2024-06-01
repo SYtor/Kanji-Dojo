@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,11 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -56,6 +61,7 @@ import kotlinx.coroutines.flow.map
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
+import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.jsonSaver
@@ -65,6 +71,7 @@ import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
@@ -322,6 +329,15 @@ private fun ColumnScope.WordsSection(
         style = MaterialTheme.typography.titleMedium
     )
 
+    var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
+    wordToAddToVocabDeck?.let {
+        AddWordToDeckDialog(
+            wordId = it.id,
+            wordPreviewReading = it.readings.first().withoutAnnotations(),
+            onDismissRequest = { wordToAddToVocabDeck = null }
+        )
+    }
+
     val showAnswer = showAnswerState.value
     words.forEachIndexed { index, word ->
 
@@ -334,17 +350,27 @@ private fun ColumnScope.WordsSection(
             }
         }
 
-        FuriganaText(
-            furiganaString = message,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 50.dp)
-                .padding(horizontal = 10.dp)
+                .padding(horizontal = 12.dp)
                 .clip(MaterialTheme.shapes.medium)
-                .clickable(enabled = showAnswer, onClick = { onWordClick(word) })
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-                .wrapContentSize(Alignment.CenterStart)
-        )
+                .clickable(enabled = showAnswer) { onWordClick(word) }
+                .padding(vertical = 4.dp, horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FuriganaText(
+                furiganaString = message,
+                textStyle = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            if (showAnswer)
+                IconButton(onClick = { wordToAddToVocabDeck = word }) {
+                    Icon(Icons.Default.AddCircleOutline, null)
+                }
+        }
 
     }
 

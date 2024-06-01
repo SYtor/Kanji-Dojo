@@ -59,3 +59,7 @@ fun FuriganaString.withEmptyFurigana(): FuriganaString {
         compounds.map { it.copy(annotation = it.annotation?.let { "" }) }
     )
 }
+
+fun FuriganaString.withoutAnnotations(): String {
+    return compounds.joinToString("") { it.text }
+}
