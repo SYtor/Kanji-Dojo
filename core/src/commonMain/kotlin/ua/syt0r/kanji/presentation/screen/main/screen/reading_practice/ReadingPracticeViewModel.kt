@@ -15,10 +15,10 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.practice.CharacterReadingReviewResult
+import ua.syt0r.kanji.core.user_data.practice.CharacterReviewOutcome
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -30,7 +30,7 @@ class ReadingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadCharactersDataUseCase: ReadingPracticeContract.LoadCharactersDataUseCase,
     private val userPreferencesRepository: PracticeUserPreferencesRepository,
-    private val practiceRepository: PracticeRepository,
+    private val practiceRepository: LetterPracticeRepository,
     private val kanaTtsManager: KanaTtsManager,
     private val analyticsManager: AnalyticsManager,
     private val timeUtils: TimeUtils

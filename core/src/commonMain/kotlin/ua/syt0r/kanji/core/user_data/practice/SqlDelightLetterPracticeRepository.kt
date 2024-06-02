@@ -1,22 +1,17 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.practice
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.user_data.model.CharacterReadingReviewResult
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewResult
-import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
-import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
-import ua.syt0r.kanji.core.user_data.model.Practice
-import ua.syt0r.kanji.core.user_data.model.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.userdata.db.Character_progress
 import ua.syt0r.kanji.core.userdata.db.Reading_review
 import ua.syt0r.kanji.core.userdata.db.Writing_review
 import kotlin.time.Duration.Companion.milliseconds
 
-class SqlDelightPracticeRepository(
+class SqlDelightLetterPracticeRepository(
     private val databaseManager: UserDataDatabaseManager
-) : PracticeRepository {
+) : LetterPracticeRepository {
 
     override val practiceChangeFlow: Flow<Unit> = databaseManager.dataChangedFlow
 

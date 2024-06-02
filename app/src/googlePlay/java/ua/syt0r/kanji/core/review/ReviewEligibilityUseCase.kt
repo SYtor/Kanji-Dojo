@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.core.review
 
-import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 
 class ReviewEligibilityUseCase(
-    private val practiceRepository: PracticeRepository
+    private val practiceRepository: LetterPracticeRepository
 ) : AppReviewContract.ReviewEligibilityUseCase {
 
     companion object {

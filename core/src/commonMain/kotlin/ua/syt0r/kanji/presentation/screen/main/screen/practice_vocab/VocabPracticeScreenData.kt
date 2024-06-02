@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.user_data.model.VocabReadingPriority
+import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 

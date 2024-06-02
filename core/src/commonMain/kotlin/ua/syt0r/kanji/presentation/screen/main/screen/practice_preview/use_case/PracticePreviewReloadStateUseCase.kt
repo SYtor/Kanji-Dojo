@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.use_case
 
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.FilterConfiguration
@@ -12,7 +12,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toSc
 
 class PracticePreviewReloadStateUseCase(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val practiceRepository: PracticeRepository,
+    private val practiceRepository: LetterPracticeRepository,
     private val fetchItemsUseCase: PracticePreviewScreenContract.FetchItemsUseCase,
     private val filterItemsUseCase: PracticePreviewScreenContract.FilterItemsUseCase,
     private val sortItemsUseCase: PracticePreviewScreenContract.SortItemsUseCase,

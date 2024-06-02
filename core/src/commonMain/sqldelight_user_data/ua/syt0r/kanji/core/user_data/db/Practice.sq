@@ -1,4 +1,4 @@
-PRAGMA user_version = 6;
+PRAGMA user_version = 7;
 
 CREATE TABLE IF NOT EXISTS practice (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -46,6 +46,19 @@ CREATE TABLE IF NOT EXISTS reading_review (
     duration INTEGER NOT NULL,
     PRIMARY KEY(character, practice_id, timestamp, mistakes),
     FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS vocab_deck (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    title TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0 -- bigger values are at the top of the list
+);
+
+CREATE TABLE IF NOT EXISTS vocab_deck_entry (
+    word_id INTEGER NOT NULL,
+    deck_id INTEGER NOT NULL,
+    PRIMARY KEY(word_id, deck_id),
+    FOREIGN KEY(deck_id) REFERENCES vocab_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
 
@@ -182,3 +195,22 @@ FROM reading_review;
 
 getTotalUniqueReviewedCharactersCount:
 SELECT COUNT(DISTINCT character) FROM character_progress;
+
+insertVocabDeck:
+INSERT INTO vocab_deck(title, position)
+SELECT :title, IFNULL(MAX(position) + 1, 0) FROM vocab_deck;
+
+deleteVocabDeck:
+DELETE FROM vocab_deck WHERE id = ?;
+
+insertVocabDeckEntry:
+INSERT OR IGNORE INTO vocab_deck_entry(word_id, deck_id) VALUES (?, ?);
+
+deleteVocabDeckEntry:
+DELETE FROM vocab_deck_entry WHERE word_id = ? AND deck_id = ?;
+
+getVocabDecks:
+SELECT * FROM vocab_deck;
+
+getVocabDeckEntries:
+SELECT * FROM vocab_deck_entry WHERE deck_id = :practiceId;

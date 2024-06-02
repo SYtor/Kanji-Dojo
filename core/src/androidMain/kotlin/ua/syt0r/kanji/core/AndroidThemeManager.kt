@@ -6,8 +6,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.model.SupportedTheme
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.SupportedTheme
 
 class AndroidThemeManager(
     userPreferencesRepository: UserPreferencesRepository

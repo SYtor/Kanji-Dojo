@@ -1,14 +1,8 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
-import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
-import ua.syt0r.kanji.core.user_data.model.PracticeType
-import ua.syt0r.kanji.core.user_data.model.SortOption
-import ua.syt0r.kanji.core.user_data.model.SupportedTheme
-import ua.syt0r.kanji.core.user_data.model.VocabReadingPriority
-import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 interface UserPreferencesRepository : SuspendedPropertyRegistry {
 
@@ -61,3 +55,10 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
     val vocabShowMeaning: SuspendedProperty<Boolean>
 
 }
+
+enum class PracticeType { Writing, Reading }
+enum class SortOption { AddOrder, Frequency, Name }
+enum class PracticePreviewLayout { Character, Groups }
+enum class SupportedTheme { System, Light, Dark }
+enum class WritingInputMethod { Stroke, Character }
+enum class VocabReadingPriority { Default, Kanji, Kana }

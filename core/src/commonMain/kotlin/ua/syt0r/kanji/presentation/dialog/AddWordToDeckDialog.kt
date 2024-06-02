@@ -38,7 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.core.app_data.AppDataRepository
-import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 
@@ -200,7 +200,7 @@ private class AddWordToDeckDialogState(
     wordId: Long,
     private val coroutineScope: CoroutineScope,
     appDataRepository: AppDataRepository,
-    val practiceRepository: PracticeRepository
+    val practiceRepository: LetterPracticeRepository
 ) {
 
     private val _state = mutableStateOf<AddingState>(AddingState.Loading)

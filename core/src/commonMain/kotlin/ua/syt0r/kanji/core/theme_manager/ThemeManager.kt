@@ -6,8 +6,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.runBlocking
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.model.SupportedTheme
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.SupportedTheme
 
 
 open class ThemeManager(

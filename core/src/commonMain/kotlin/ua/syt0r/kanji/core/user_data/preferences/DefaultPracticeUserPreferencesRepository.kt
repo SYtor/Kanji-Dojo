@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.preferences
 
 import androidx.compose.ui.text.intl.Locale
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
@@ -6,8 +6,6 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
-import ua.syt0r.kanji.core.user_data.model.VocabReadingPriority
-import ua.syt0r.kanji.core.user_data.model.WritingInputMethod
 
 class DefaultPracticeUserPreferencesRepository(
     provider: SuspendedPropertyProvider,

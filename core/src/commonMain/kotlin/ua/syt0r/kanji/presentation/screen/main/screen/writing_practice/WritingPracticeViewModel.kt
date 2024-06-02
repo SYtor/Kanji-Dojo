@@ -18,10 +18,10 @@ import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.model.CharacterReviewOutcome
-import ua.syt0r.kanji.core.user_data.model.CharacterWritingReviewResult
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.practice.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.practice.CharacterWritingReviewResult
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -37,7 +37,7 @@ import kotlin.math.max
 class WritingPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val loadDataUseCase: WritingPracticeScreenContract.LoadPracticeData,
-    private val practiceRepository: PracticeRepository,
+    private val practiceRepository: LetterPracticeRepository,
     private val userPreferencesRepository: PracticeUserPreferencesRepository,
     private val analyticsManager: AnalyticsManager,
     private val timeUtils: TimeUtils,

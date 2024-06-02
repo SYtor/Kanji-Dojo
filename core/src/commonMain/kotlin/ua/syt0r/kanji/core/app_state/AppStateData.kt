@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.app_state
 
-import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
 import kotlin.time.Duration
 
 

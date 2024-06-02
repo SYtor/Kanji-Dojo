@@ -1,13 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
 
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract.ScreenState
 
 class PracticeCreateSavePracticeUseCase(
-    private val practiceRepository: PracticeRepository
+    private val practiceRepository: LetterPracticeRepository
 ) : PracticeCreateScreenContract.SavePracticeUseCase {
 
     override suspend fun save(

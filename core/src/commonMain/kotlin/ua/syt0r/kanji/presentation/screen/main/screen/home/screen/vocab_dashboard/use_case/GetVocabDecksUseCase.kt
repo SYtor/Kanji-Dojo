@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case
 
-import ua.syt0r.kanji.core.user_data.PracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticeDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.vocabDecks
 
@@ -14,7 +14,7 @@ data class VocabDecks(
 )
 
 class DefaultGetVocabDecksUseCase(
-    private val practiceRepository: PracticeRepository
+    private val practiceRepository: LetterPracticeRepository
 ) : GetVocabDecksUseCase {
 
     override suspend fun invoke(): VocabDecks {

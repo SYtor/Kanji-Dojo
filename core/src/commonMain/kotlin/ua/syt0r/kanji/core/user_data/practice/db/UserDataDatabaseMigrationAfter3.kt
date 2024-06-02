@@ -1,10 +1,10 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.practice.db
 
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
-import ua.syt0r.kanji.core.user_data.model.PracticeType
+import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 
 object UserDataDatabaseMigrationAfter3 {
 

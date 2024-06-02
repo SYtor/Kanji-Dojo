@@ -30,12 +30,14 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.DefaultPracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.DefaultUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.SqlDelightPracticeRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.SqlDelightLetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.DefaultPracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesRepository
 
 val coreModule = module {
 
@@ -46,8 +48,14 @@ val coreModule = module {
         SqlDelightAppDataRepository(deferredDatabase)
     }
 
-    single<PracticeRepository> {
-        SqlDelightPracticeRepository(
+    single<LetterPracticeRepository> {
+        SqlDelightLetterPracticeRepository(
+            databaseManager = get()
+        )
+    }
+
+    single<VocabPracticeRepository> {
+        SqlDelightVocabPracticeRepository(
             databaseManager = get()
         )
     }

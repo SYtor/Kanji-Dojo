@@ -6,8 +6,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.app_data.AppDataRepository
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.model.PracticeType
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.PracticeItemSummary
@@ -17,7 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.data.toRe
 class PracticePreviewFetchItemsUseCase(
     private val appStateManager: AppStateManager,
     private val appDataRepository: AppDataRepository,
-    private val practiceRepository: PracticeRepository
+    private val practiceRepository: LetterPracticeRepository
 ) : PracticePreviewScreenContract.FetchItemsUseCase {
 
     override suspend fun fetch(

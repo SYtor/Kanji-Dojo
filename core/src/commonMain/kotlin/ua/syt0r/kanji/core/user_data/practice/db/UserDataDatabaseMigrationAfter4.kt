@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.practice.db
 
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver

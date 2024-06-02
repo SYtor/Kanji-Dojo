@@ -13,17 +13,17 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.PracticeRepository
-import ua.syt0r.kanji.core.user_data.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.model.CharacterStudyProgress
-import ua.syt0r.kanji.core.user_data.model.PracticeType
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DefaultAppStateManager(
     private val coroutineScope: CoroutineScope,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val practiceRepository: PracticeRepository,
+    private val practiceRepository: LetterPracticeRepository,
     private val timeUtils: TimeUtils,
     private val coroutineContext: CoroutineContext = Dispatchers.IO.limitedParallelism(1)
 ) : AppStateManager {

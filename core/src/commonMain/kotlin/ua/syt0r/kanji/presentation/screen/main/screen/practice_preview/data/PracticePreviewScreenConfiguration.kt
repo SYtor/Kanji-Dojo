@@ -7,9 +7,9 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.ui.graphics.vector.ImageVector
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
-typealias RepoPracticeType = ua.syt0r.kanji.core.user_data.model.PracticeType
-typealias RepoSortOption = ua.syt0r.kanji.core.user_data.model.SortOption
-typealias RepoLayout = ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
+typealias RepoPracticeType = ua.syt0r.kanji.core.user_data.preferences.PracticeType
+typealias RepoSortOption = ua.syt0r.kanji.core.user_data.preferences.SortOption
+typealias RepoLayout = ua.syt0r.kanji.core.user_data.preferences.PracticePreviewLayout
 
 data class PracticePreviewScreenConfiguration(
     val practiceType: PracticeType,

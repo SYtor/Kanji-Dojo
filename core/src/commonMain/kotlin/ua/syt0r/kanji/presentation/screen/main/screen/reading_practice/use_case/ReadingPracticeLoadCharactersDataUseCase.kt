@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.getWordWithFuriganaForKana
 import ua.syt0r.kanji.core.japanese.isKana
-import ua.syt0r.kanji.core.user_data.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingReviewCharacterData
 

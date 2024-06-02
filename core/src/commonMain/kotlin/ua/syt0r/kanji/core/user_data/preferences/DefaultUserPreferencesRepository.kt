@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.user_data
+package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
@@ -7,10 +7,6 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 import ua.syt0r.kanji.core.suspended_property.createLocalTimeProperty
-import ua.syt0r.kanji.core.user_data.model.PracticePreviewLayout
-import ua.syt0r.kanji.core.user_data.model.PracticeType
-import ua.syt0r.kanji.core.user_data.model.SortOption
-import ua.syt0r.kanji.core.user_data.model.SupportedTheme
 
 class DefaultUserPreferencesRepository(
     private val provider: SuspendedPropertyProvider

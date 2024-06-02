@@ -11,7 +11,7 @@ import kotlinx.serialization.json.encodeToStream
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.transferToCompat
-import ua.syt0r.kanji.core.user_data.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
