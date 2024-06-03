@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import ua.syt0r.kanji.core.backup.PlatformFileJvm
 import java.io.File
-import java.nio.file.Files
 import javax.swing.JFileChooser
 import javax.swing.JFrame
 import javax.swing.filechooser.FileFilter
@@ -46,7 +45,7 @@ private class SwingBackupFilePicker(
 
 private object SwingBackupFileFilter : FileFilter() {
     override fun accept(file: File): Boolean {
-        return file.isDirectory || Files.probeContentType(file.toPath()) == BackupMimeType
+        return file.isDirectory || file.path.endsWith(".zip")
     }
 
     override fun getDescription(): String {
