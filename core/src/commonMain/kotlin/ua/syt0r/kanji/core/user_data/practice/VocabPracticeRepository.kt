@@ -1,6 +1,10 @@
 package ua.syt0r.kanji.core.user_data.practice
 
+import kotlinx.coroutines.flow.SharedFlow
+
 interface VocabPracticeRepository {
+
+    val changesFlow: SharedFlow<Unit>
 
     suspend fun createDeck(title: String, words: List<Long>)
     suspend fun deleteDeck(id: Long)

@@ -7,6 +7,7 @@ interface VocabDashboardScreenContract {
 
     interface ViewModel {
         val state: StateFlow<ScreenState>
+        fun invalidate()
         fun select(deck: VocabPracticeDeck)
         fun reportScreenShown()
     }

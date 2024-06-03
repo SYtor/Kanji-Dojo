@@ -1,11 +1,20 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case
 
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.zip
+import ua.syt0r.kanji.core.RefreshableData
+import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticeDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.vocabDecks
 
 interface GetVocabDecksUseCase {
-    suspend operator fun invoke(): VocabDecks
+    operator fun invoke(
+        invalidationRequests: Flow<Unit>
+    ): Flow<RefreshableData<VocabDecks>>
 }
 
 data class VocabDecks(
@@ -14,12 +23,32 @@ data class VocabDecks(
 )
 
 class DefaultGetVocabDecksUseCase(
-    private val practiceRepository: LetterPracticeRepository
+    private val repository: VocabPracticeRepository
 ) : GetVocabDecksUseCase {
 
-    override suspend fun invoke(): VocabDecks {
+    override fun invoke(
+        invalidationRequests: Flow<Unit>
+    ): Flow<RefreshableData<VocabDecks>> = flow {
+
+        val dataChangesFlow = listOf(flowOf(Unit), repository.changesFlow).merge()
+
+        dataChangesFlow.zip(invalidationRequests) { _, _ -> }
+            .collect {
+                emit(RefreshableData.Loading())
+                emit(RefreshableData.Loaded(getUpdatedDecks()))
+            }
+
+    }
+
+    private suspend fun getUpdatedDecks(): VocabDecks {
+        Logger.logMethod()
         return VocabDecks(
-            userDecks = emptyList(),
+            userDecks = repository.getDecks().map {
+                VocabPracticeDeck(
+                    titleResolver = { it.title },
+                    expressionIds = repository.getDeckWords(it.id)
+                )
+            },
             defaultDecks = vocabDecks
         )
     }

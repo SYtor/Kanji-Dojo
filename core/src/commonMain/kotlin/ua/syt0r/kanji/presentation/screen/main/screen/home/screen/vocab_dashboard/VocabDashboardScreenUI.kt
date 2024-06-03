@@ -26,9 +26,11 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.ButtonDefaults
@@ -57,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
@@ -75,6 +78,7 @@ fun VocabDashboardScreenUI(
     state: State<ScreenState>,
     select: (VocabPracticeDeck) -> Unit,
     createDeck: () -> Unit,
+    onEditClick: (VocabPracticeDeck) -> Unit,
     navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
@@ -104,6 +108,7 @@ fun VocabDashboardScreenUI(
                     screenState = screenState,
                     extraListSpacerState = extraListSpacerState,
                     select = select,
+                    onEditClick = onEditClick,
                     navigateToPractice = navigateToPractice
                 )
             }
@@ -120,6 +125,7 @@ private fun ScreenLoadedState(
     screenState: ScreenState.Loaded,
     extraListSpacerState: ExtraListSpacerState,
     select: (VocabPracticeDeck) -> Unit,
+    onEditClick: (VocabPracticeDeck) -> Unit,
     navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
@@ -129,7 +135,11 @@ private fun ScreenLoadedState(
             onDismissRequest = { showBottomSheet = false },
             tonalElevation = 0.dp
         ) {
-            BottomSheetContent(screenState.deckSelectionState, navigateToPractice)
+            BottomSheetContent(
+                state = screenState.deckSelectionState,
+                onEditClick = onEditClick,
+                navigateToPractice = navigateToPractice
+            )
         }
     }
 
@@ -144,13 +154,18 @@ private fun ScreenLoadedState(
             .onGloballyPositioned { extraListSpacerState.updateList(it) }
     ) {
 
-        item(
-            span = { GridItemSpan(maxLineSpan) }
-        ) {
-            Spacer(Modifier.height(20.dp))
-        }
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.height(4.dp)) }
 
         if (screenState.userDecks.isNotEmpty()) {
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(
+                    text = "User Decks",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             items(screenState.userDecks) {
                 PracticeGridItem(
                     title = resolveString(it.titleResolver),
@@ -160,9 +175,20 @@ private fun ScreenLoadedState(
                     }
                 )
             }
+
+            item(span = { GridItemSpan(maxLineSpan) }) { Divider(Modifier.fillMaxWidth()) }
+
         }
 
-        items(vocabDecks) { vocabPracticeSet ->
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Text(
+                text = "Default Decks",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        items(screenState.defaultDecks) { vocabPracticeSet ->
             PracticeGridItem(
                 title = resolveString(vocabPracticeSet.titleResolver),
                 onClick = {
@@ -203,6 +229,7 @@ private fun PracticeGridItem(
 @Composable
 private fun BottomSheetContent(
     state: State<VocabDeckSelectionState>,
+    onEditClick: (VocabPracticeDeck) -> Unit,
     navigateToPractice: (VocabPracticeDeck) -> Unit
 ) {
 
@@ -240,6 +267,7 @@ private fun BottomSheetContent(
             ScreenBottomSheetHeader(
                 screenState = currentState,
                 showWords = wordsVisible,
+                onEditClick = onEditClick,
                 onPracticeClick = navigateToPractice
             )
         }
@@ -272,11 +300,12 @@ private fun BottomSheetContent(
 private fun ScreenBottomSheetHeader(
     screenState: VocabDeckSelectionState.DeckSelected,
     showWords: MutableState<Boolean>,
+    onEditClick: (VocabPracticeDeck) -> Unit,
     onPracticeClick: (VocabPracticeDeck) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
         Row(
@@ -285,8 +314,18 @@ private fun ScreenBottomSheetHeader(
         ) {
             Text(
                 text = resolveString(screenState.deck.titleResolver),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
             )
+
+            IconButton(
+                onClick = { onEditClick(screenState.deck) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null
+                )
+            }
 
             IconButton(
                 onClick = { showWords.value = !showWords.value }

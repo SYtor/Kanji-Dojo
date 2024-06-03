@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.dialog
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -37,9 +40,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
-import ua.syt0r.kanji.core.app_data.AppDataRepository
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 
 @Composable
@@ -58,13 +61,12 @@ fun AddWordToDeckDialog(
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().weight(1f, false)
             ) {
                 DialogContent(
                     state = it,
-                    onDismissRequest = onDismissRequest,
-                    createNewDeck = { dialogState.createNewDeck() }
-                )
+                    onDismissRequest = onDismissRequest
+                ) { dialogState.createNewDeck() }
             }
         },
         buttons = {
@@ -103,8 +105,8 @@ private fun DialogContent(
 
         is AddingState.SelectingDeck -> {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-                    .heightIn(max = 300.dp)
+                modifier = Modifier.heightIn(max = 300.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Box(
                     modifier = Modifier.fillMaxWidth()
@@ -139,7 +141,7 @@ private fun DialogContent(
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 hintContent = {
                     Text(
-                        text = "Enter deck name here...",
+                        text = "Enter deck title here...",
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 },
@@ -147,11 +149,26 @@ private fun DialogContent(
         }
 
         AddingState.Saving -> {
-            Text("Adding")
+            Text("Adding", Modifier.fillMaxWidth().wrapContentWidth())
         }
 
         AddingState.Completed -> {
-            Text("Added")
+            Row(
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text("Added")
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .background(MaterialTheme.extraColorScheme.success, CircleShape)
+                        .size(24.dp)
+                        .padding(2.dp)
+                )
+            }
             LaunchedEffect(Unit) {
                 delay(600)
                 onDismissRequest()
@@ -178,8 +195,7 @@ private sealed interface AddingState {
 
 private data class AddingDeckInfo(
     val id: Long,
-    val title: String,
-    val containsWord: Boolean
+    val title: String
 )
 
 @Composable
@@ -190,17 +206,15 @@ private fun rememberAddWordToDeckDialogState(wordId: Long): AddWordToDeckDialogS
         AddWordToDeckDialogState(
             wordId = wordId,
             coroutineScope = coroutineScope,
-            appDataRepository = koin.get(),
-            practiceRepository = koin.get()
+            repository = koin.get()
         )
     }
 }
 
 private class AddWordToDeckDialogState(
-    wordId: Long,
+    private val wordId: Long,
     private val coroutineScope: CoroutineScope,
-    appDataRepository: AppDataRepository,
-    val practiceRepository: LetterPracticeRepository
+    private val repository: VocabPracticeRepository
 ) {
 
     private val _state = mutableStateOf<AddingState>(AddingState.Loading)
@@ -209,7 +223,8 @@ private class AddWordToDeckDialogState(
     init {
         coroutineScope.launch {
             _state.value = AddingState.SelectingDeck(
-                decks = listOf(),
+                decks = repository.getDecks()
+                    .map { AddingDeckInfo(it.id, it.title) },
                 selectedDeck = mutableStateOf(null)
             )
         }
@@ -222,8 +237,25 @@ private class AddWordToDeckDialogState(
     }
 
     fun save() {
-        _state.value = AddingState.Saving
+        val currentState = _state.value
         coroutineScope.launch {
+            when (currentState) {
+                is AddingState.CreateNewDeck -> {
+                    _state.value = AddingState.Saving
+                    repository.createDeck(
+                        title = currentState.title.value,
+                        words = listOf(wordId)
+                    )
+                }
+
+                is AddingState.SelectingDeck -> {
+                    val deckId = currentState.selectedDeck.value ?: return@launch
+                    _state.value = AddingState.Saving
+                    repository.addWord(deckId, wordId)
+                }
+
+                else -> return@launch
+            }
             _state.value = AddingState.Completed
         }
     }

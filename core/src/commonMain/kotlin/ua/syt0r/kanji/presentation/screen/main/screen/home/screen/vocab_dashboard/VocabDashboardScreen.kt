@@ -14,6 +14,7 @@ fun VocabDashboardScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        viewModel.invalidate()
         viewModel.reportScreenShown()
     }
 
@@ -21,6 +22,11 @@ fun VocabDashboardScreen(
         state = viewModel.state.collectAsState(),
         select = { viewModel.select(it) },
         createDeck = {
+            mainNavigationState.navigate(
+                MainDestination.CreatePractice.New
+            )
+        },
+        onEditClick = {
             mainNavigationState.navigate(
                 MainDestination.CreatePractice.New
             )
