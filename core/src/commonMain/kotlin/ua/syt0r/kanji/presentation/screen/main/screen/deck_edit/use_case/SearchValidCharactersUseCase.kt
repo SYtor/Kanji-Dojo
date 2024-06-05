@@ -1,18 +1,34 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.practice_create.use_case
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.core.japanese.isKanji
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.data.ValidationResult
 
-class PracticeCreateValidateCharactersUseCase(
+interface SearchValidCharactersUseCase {
+    suspend operator fun invoke(input: String): SearchResult
+    suspend operator fun invoke(character: List<String>): SearchResult
+}
+
+class SearchResult(
+    val detectedCharacter: List<String>,
+    val unknownCharacters: List<String>
+)
+
+
+class DefaultSearchValidCharactersUseCase(
     private val appDataRepository: AppDataRepository
-) : PracticeCreateScreenContract.ValidateCharactersUseCase {
+) : SearchValidCharactersUseCase {
 
-    override suspend fun processInput(input: String): ValidationResult {
-        val parsedCharacters = input.toCharArray()
-            .filter { it.isKanji() || it.isKana() }
+    override suspend fun invoke(input: String): SearchResult {
+        return processInput(input = input.map { it })
+    }
+
+    override suspend fun invoke(character: List<String>): SearchResult {
+        return processInput(input = character.map { it.first() })
+    }
+
+    private suspend fun processInput(input: Iterable<Char>): SearchResult {
+        val parsedCharacters = input.filter { it.isKanji() || it.isKana() }
 
         val known = mutableListOf<String>()
         val unknown = mutableListOf<String>()
@@ -40,7 +56,7 @@ class PracticeCreateValidateCharactersUseCase(
 
         }
 
-        return ValidationResult(
+        return SearchResult(
             detectedCharacter = known,
             unknownCharacters = unknown
         )

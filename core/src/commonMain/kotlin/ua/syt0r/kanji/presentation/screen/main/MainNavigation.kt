@@ -4,15 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
-import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.PracticeCreateScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
@@ -85,29 +85,17 @@ interface MainDestination {
     }
 
     @Serializable
-    sealed interface CreatePractice : MainDestination {
+    data class DeckEdit(
+        val configuration: DeckEditScreenConfiguration
+    ) : MainDestination {
 
         @Composable
         override fun Draw(state: MainNavigationState) {
-            PracticeCreateScreen(
-                configuration = this,
+            DeckEditScreen(
+                configuration = configuration,
                 mainNavigationState = state
             )
         }
-
-        @Serializable
-        object New : CreatePractice
-
-        @Serializable
-        data class EditExisting(
-            val practiceId: Long
-        ) : CreatePractice
-
-        @Serializable
-        data class Import(
-            val title: String,
-            val classification: CharacterClassification
-        ) : CreatePractice
 
     }
 
@@ -239,9 +227,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.About::class.configuration(),
     MainDestination.Credits::class.configuration(),
     MainDestination.Backup::class.configuration(),
-    MainDestination.CreatePractice.EditExisting::class.configuration(),
-    MainDestination.CreatePractice.Import::class.configuration(),
-    MainDestination.CreatePractice.New::class.configuration(),
+    MainDestination.DeckEdit::class.configuration(),
     MainDestination.Feedback::class.configuration(),
     MainDestination.Home::class.configuration(),
     MainDestination.ImportPractice::class.configuration(),

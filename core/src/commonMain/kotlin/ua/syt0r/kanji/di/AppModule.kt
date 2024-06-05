@@ -12,7 +12,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.searchS
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.statsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.vocabDashboardScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.kanjiInfoScreenModule
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_create.practiceCreateScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.deckEditScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.practiceImportScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.practicePreviewScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.vocabPracticeScreenModule
@@ -28,7 +28,7 @@ private val screenModules = listOf(
     searchScreenModule,
     aboutScreenModule,
     practiceImportScreenModule,
-    practiceCreateScreenModule,
+    deckEditScreenModule,
     practicePreviewScreenModule,
     writingPracticeScreenModule,
     readingPracticeScreenModule,

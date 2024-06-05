@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration.LetterDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui.PracticeDashboardScreenUI
 
 @Composable
@@ -36,7 +37,7 @@ fun PracticeDashboardScreen(
             mainNavigationState.navigate(MainDestination.ImportPractice)
         },
         navigateToCreatePractice = {
-            mainNavigationState.navigate(MainDestination.CreatePractice.New)
+            mainNavigationState.navigate(MainDestination.DeckEdit(LetterDeck.CreateNew))
         },
     )
 

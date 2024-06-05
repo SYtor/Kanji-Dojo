@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui.PracticeImportScreenUI
 
 
@@ -24,9 +25,11 @@ fun PracticeImportScreen(
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onItemSelected = { classification, title ->
             mainNavigationState.navigate(
-                MainDestination.CreatePractice.Import(
-                    title = title,
-                    classification = classification
+                MainDestination.DeckEdit(
+                    DeckEditScreenConfiguration.LetterDeck.CreateDerived(
+                        title = title,
+                        classification = classification
+                    )
                 )
             )
         },

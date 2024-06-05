@@ -41,3 +41,7 @@ fun <T> Flow<T>.debounceFirst(
         }
     }
 }
+
+fun <T> T.runUnit(scope: T.() -> Unit) {
+    scope()
+}

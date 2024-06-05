@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.SharedFlow
 
 interface VocabPracticeRepository {
 
+    // TODO handle backup restore
     val changesFlow: SharedFlow<Unit>
 
     suspend fun createDeck(title: String, words: List<Long>)

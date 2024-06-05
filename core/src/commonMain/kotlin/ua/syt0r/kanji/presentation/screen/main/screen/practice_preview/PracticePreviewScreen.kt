@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration.LetterDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
 
 @Composable
@@ -32,7 +33,12 @@ fun PracticePreviewScreen(
         onUpButtonClick = { mainNavigationState.navigateBack() },
         onEditButtonClick = {
             shouldInvalidateData.value = true
-            val configuration = MainDestination.CreatePractice.EditExisting(practiceId)
+            val configuration = MainDestination.DeckEdit(
+                LetterDeck.Edit(
+                    title = "",
+                    letterDeckId = practiceId
+                )
+            )
             mainNavigationState.navigate(configuration)
         },
         selectAllClick = { viewModel.selectAll() },
