@@ -21,7 +21,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenCo
 
 
 @Composable
-fun DeleteWritingPracticeDialog(
+fun DeleteDeckDialog(
     configuration: DeckEditScreenConfiguration.EditExisting,
     onDismissRequest: () -> Unit,
     onDeleteConfirmed: () -> Unit
@@ -45,7 +45,7 @@ fun DeleteWritingPracticeDialog(
 }
 
 @Composable
-fun SaveWritingPracticeDialog(
+fun SaveDeckDialog(
     title: MutableState<String>,
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit
@@ -101,7 +101,7 @@ fun SaveWritingPracticeDialog(
 }
 
 @Composable
-fun PracticeCreateLeaveConfirmation(
+fun DeckEditLeaveConfirmationDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit
 ) {
@@ -124,8 +124,9 @@ fun PracticeCreateLeaveConfirmation(
 
 }
 
+// Test with 丌
 @Composable
-fun PracticeCreateUnknownCharactersDialog(
+fun DeckEditUnknownCharactersDialog(
     characters: List<String>,
     onDismissRequest: () -> Unit
 ) {

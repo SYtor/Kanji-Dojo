@@ -105,6 +105,10 @@ class DeckEditViewModel(
         }
     }
 
+    override fun dismissSearchResult() {
+        letterEditingState.lastSearchResult.value = null
+    }
+
     private fun addSearchLetters(
         searchResult: SearchResult,
         defaultAction: DeckEditItemAction

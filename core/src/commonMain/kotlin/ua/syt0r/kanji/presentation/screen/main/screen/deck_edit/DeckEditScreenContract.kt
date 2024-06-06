@@ -11,6 +11,7 @@ interface DeckEditScreenContract {
         val state: StateFlow<ScreenState>
         fun initialize(configuration: DeckEditScreenConfiguration)
         fun searchCharacters(input: String)
+        fun dismissSearchResult()
         fun toggleRemoval(item: DeckEditListItem)
         fun saveDeck()
         fun deleteDeck()

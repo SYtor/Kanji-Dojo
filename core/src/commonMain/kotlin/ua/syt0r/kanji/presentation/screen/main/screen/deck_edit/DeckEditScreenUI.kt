@@ -62,11 +62,11 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.DeleteWritingPracticeDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.DeckEditLeaveConfirmationDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.DeckEditUnknownCharactersDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.DeleteDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.LetterDeckEditingUI
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.PracticeCreateLeaveConfirmation
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.PracticeCreateUnknownCharactersDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.SaveWritingPracticeDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.SaveDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.VocabDeckEditingUI
 
 @Composable
@@ -75,6 +75,7 @@ fun DeckEditScreenUI(
     state: State<ScreenState>,
     navigateBack: () -> Unit,
     submitSearch: (String) -> Unit,
+    dismissSearchResult: () -> Unit,
     toggleRemoval: (DeckEditListItem) -> Unit,
     onCharacterInfoClick: (String) -> Unit,
     saveChanges: () -> Unit,
@@ -87,7 +88,7 @@ fun DeckEditScreenUI(
 
     var showLeaveConfirmationDialog by remember { mutableStateOf(false) }
     if (showLeaveConfirmationDialog) {
-        PracticeCreateLeaveConfirmation(
+        DeckEditLeaveConfirmationDialog(
             onDismissRequest = { showLeaveConfirmationDialog = false },
             onConfirmation = navigateBack
         )
@@ -95,7 +96,7 @@ fun DeckEditScreenUI(
 
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     if (showDeleteConfirmationDialog) {
-        DeleteWritingPracticeDialog(
+        DeleteDeckDialog(
             configuration = configuration as DeckEditScreenConfiguration.EditExisting,
             onDismissRequest = { showDeleteConfirmationDialog = false },
             onDeleteConfirmed = {
@@ -153,6 +154,7 @@ fun DeckEditScreenUI(
                         screenState = screenState,
                         extraListSpacerState = extraListSpacerState,
                         onInputSubmit = submitSearch,
+                        dismissSearchResult = dismissSearchResult,
                         onInfoClick = onCharacterInfoClick,
                         toggleRemoval = toggleRemoval,
                         onSaveConfirmed = saveChanges
@@ -230,6 +232,7 @@ private fun LoadedState(
     screenState: ScreenState.Loaded,
     extraListSpacerState: ExtraListSpacerState,
     onInputSubmit: (String) -> Unit,
+    dismissSearchResult: () -> Unit,
     onInfoClick: (String) -> Unit,
     toggleRemoval: (DeckEditListItem) -> Unit,
     onSaveConfirmed: () -> Unit
@@ -237,7 +240,7 @@ private fun LoadedState(
 
     var showTitleInputDialog by remember { mutableStateOf(false) }
     if (showTitleInputDialog) {
-        SaveWritingPracticeDialog(
+        SaveDeckDialog(
             title = screenState.title,
             onConfirm = onSaveConfirmed,
             onDismissRequest = { showTitleInputDialog = false }
@@ -246,7 +249,7 @@ private fun LoadedState(
 
     var unknownEnteredCharacters: List<String> by remember { mutableStateOf(emptyList()) }
     if (unknownEnteredCharacters.isNotEmpty()) {
-        PracticeCreateUnknownCharactersDialog(
+        DeckEditUnknownCharactersDialog(
             characters = unknownEnteredCharacters,
             onDismissRequest = { unknownEnteredCharacters = emptyList() }
         )
@@ -265,6 +268,15 @@ private fun LoadedState(
                     showCharacterInfo = onInfoClick,
                     toggleRemoval = toggleRemoval
                 )
+
+                screenState.lastSearchResult.value
+                    ?.takeIf { it.unknownCharacters.isNotEmpty() }
+                    ?.let {
+                        DeckEditUnknownCharactersDialog(
+                            characters = it.unknownCharacters,
+                            onDismissRequest = dismissSearchResult
+                        )
+                    }
             }
 
             is ScreenState.VocabDeckEditing -> {

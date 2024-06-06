@@ -24,6 +24,7 @@ fun DeckEditScreen(
         state = viewModel.state.collectAsState(),
         navigateBack = { mainNavigationState.navigateBack() },
         submitSearch = { viewModel.searchCharacters(it) },
+        dismissSearchResult = { viewModel.dismissSearchResult() },
         onCharacterInfoClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
         toggleRemoval = { viewModel.toggleRemoval(it) },
         saveChanges = { viewModel.saveDeck() },

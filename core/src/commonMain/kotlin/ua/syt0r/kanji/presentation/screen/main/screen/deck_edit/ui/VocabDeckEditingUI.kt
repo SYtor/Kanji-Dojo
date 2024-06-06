@@ -112,8 +112,7 @@ fun VocabDeckEditingUI(
             modifier = Modifier.fillMaxWidth()
                 .padding(top = 20.dp)
                 .weight(1f)
-                .onGloballyPositioned { extraListSpacerState.updateList(it) },
-            verticalArrangement = Arrangement.SpaceAround
+                .onGloballyPositioned { extraListSpacerState.updateList(it) }
         ) {
 
             itemsIndexed(screenState.list) { index, listItem ->

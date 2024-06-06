@@ -26,6 +26,7 @@ private fun BasePreview(
             state = rememberUpdatedState(state),
             navigateBack = {},
             submitSearch = {},
+            dismissSearchResult = {},
             onCharacterInfoClick = {},
             toggleRemoval = {},
             saveChanges = {},

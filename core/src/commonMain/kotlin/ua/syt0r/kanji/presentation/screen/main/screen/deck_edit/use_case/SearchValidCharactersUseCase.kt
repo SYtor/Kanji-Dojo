@@ -28,7 +28,7 @@ class DefaultSearchValidCharactersUseCase(
     }
 
     private suspend fun processInput(input: Iterable<Char>): SearchResult {
-        val parsedCharacters = input.filter { it.isKanji() || it.isKana() }
+        val parsedCharacters = input.filter { it.isKanji() || it.isKana() }.distinct()
 
         val known = mutableListOf<String>()
         val unknown = mutableListOf<String>()
