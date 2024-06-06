@@ -35,12 +35,12 @@ class VocabDashboardViewModel(
             .onEach { data ->
                 _state.value = when (data) {
                     is RefreshableData.Loading -> {
+                        deckSelectionState.value = VocabDeckSelectionState.NothingSelected
                         ScreenState.Loading
                     }
 
                     is RefreshableData.Loaded -> {
                         val decks = data.value
-                        deckSelectionState.value = VocabDeckSelectionState.NothingSelected
                         ScreenState.Loaded(
                             userDecks = decks.userDecks,
                             defaultDecks = decks.defaultDecks,
@@ -57,7 +57,7 @@ class VocabDashboardViewModel(
         viewModelScope.launch { invalidationRequests.send(Unit) }
     }
 
-    override fun select(deck: VocabPracticeDeck) {
+    override fun select(deck: DashboardVocabDeck) {
         val wordsState = MutableStateFlow<VocabPracticePreviewState>(
             value = VocabPracticePreviewState.Loading
         )

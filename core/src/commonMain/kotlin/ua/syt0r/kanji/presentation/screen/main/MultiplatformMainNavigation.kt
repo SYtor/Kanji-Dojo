@@ -50,7 +50,7 @@ fun rememberMultiplatformMainNavigationState(): MainNavigationState {
             override fun popUpToHome() {
                 val itemsToRemove = stack.value.drop(1)
                 stack.value = stack.value.take(1)
-                itemsToRemove.forEach { stateHolder.removeState(it) }
+                itemsToRemove.forEach { stateHolder.removeState(it.toString()) }
             }
 
             override fun navigate(destination: MainDestination) {

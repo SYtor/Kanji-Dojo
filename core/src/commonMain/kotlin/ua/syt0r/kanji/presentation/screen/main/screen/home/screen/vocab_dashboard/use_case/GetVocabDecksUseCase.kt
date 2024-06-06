@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.zip
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticeDeck
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.vocabDecks
 
 interface GetVocabDecksUseCase {
@@ -18,8 +18,8 @@ interface GetVocabDecksUseCase {
 }
 
 data class VocabDecks(
-    val userDecks: List<VocabPracticeDeck>,
-    val defaultDecks: List<VocabPracticeDeck>
+    val userDecks: List<DashboardVocabDeck>,
+    val defaultDecks: List<DashboardVocabDeck>
 )
 
 class DefaultGetVocabDecksUseCase(
@@ -44,9 +44,10 @@ class DefaultGetVocabDecksUseCase(
         Logger.logMethod()
         return VocabDecks(
             userDecks = repository.getDecks().map {
-                VocabPracticeDeck(
+                DashboardVocabDeck(
                     titleResolver = { it.title },
-                    expressionIds = repository.getDeckWords(it.id)
+                    expressionIds = repository.getDeckWords(it.id),
+                    id = it.id
                 )
             },
             defaultDecks = vocabDecks

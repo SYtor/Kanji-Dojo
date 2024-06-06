@@ -76,10 +76,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 @Composable
 fun VocabDashboardScreenUI(
     state: State<ScreenState>,
-    select: (VocabPracticeDeck) -> Unit,
+    select: (DashboardVocabDeck) -> Unit,
     createDeck: () -> Unit,
-    onEditClick: (VocabPracticeDeck) -> Unit,
-    navigateToPractice: (VocabPracticeDeck) -> Unit
+    onEditClick: (DashboardVocabDeck) -> Unit,
+    navigateToPractice: (DashboardVocabDeck) -> Unit
 ) {
 
     val extraListSpacerState = rememberExtraListSpacerState()
@@ -124,9 +124,9 @@ fun VocabDashboardScreenUI(
 private fun ScreenLoadedState(
     screenState: ScreenState.Loaded,
     extraListSpacerState: ExtraListSpacerState,
-    select: (VocabPracticeDeck) -> Unit,
-    onEditClick: (VocabPracticeDeck) -> Unit,
-    navigateToPractice: (VocabPracticeDeck) -> Unit
+    select: (DashboardVocabDeck) -> Unit,
+    onEditClick: (DashboardVocabDeck) -> Unit,
+    navigateToPractice: (DashboardVocabDeck) -> Unit
 ) {
 
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -229,8 +229,8 @@ private fun PracticeGridItem(
 @Composable
 private fun BottomSheetContent(
     state: State<VocabDeckSelectionState>,
-    onEditClick: (VocabPracticeDeck) -> Unit,
-    navigateToPractice: (VocabPracticeDeck) -> Unit
+    onEditClick: (DashboardVocabDeck) -> Unit,
+    navigateToPractice: (DashboardVocabDeck) -> Unit
 ) {
 
     val currentState = state.value
@@ -300,8 +300,8 @@ private fun BottomSheetContent(
 private fun ScreenBottomSheetHeader(
     screenState: VocabDeckSelectionState.DeckSelected,
     showWords: MutableState<Boolean>,
-    onEditClick: (VocabPracticeDeck) -> Unit,
-    onPracticeClick: (VocabPracticeDeck) -> Unit
+    onEditClick: (DashboardVocabDeck) -> Unit,
+    onPracticeClick: (DashboardVocabDeck) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),

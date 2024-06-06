@@ -26,8 +26,7 @@ interface PracticePreviewScreenContract {
         fun deselectAll()
 
         fun getPracticeConfiguration(practiceGroup: PracticeGroup): MainDestination.Practice
-
-        fun getPracticeConfiguration(): MainDestination.Practice
+        fun getMultiselectPracticeConfiguration(): MainDestination.Practice
 
         fun reportScreenShown()
 

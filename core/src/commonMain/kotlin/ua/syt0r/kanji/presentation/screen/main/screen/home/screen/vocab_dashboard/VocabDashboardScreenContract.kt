@@ -8,7 +8,7 @@ interface VocabDashboardScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
         fun invalidate()
-        fun select(deck: VocabPracticeDeck)
+        fun select(deck: DashboardVocabDeck)
         fun reportScreenShown()
     }
 
@@ -17,8 +17,8 @@ interface VocabDashboardScreenContract {
         object Loading : ScreenState
 
         data class Loaded(
-            val userDecks: List<VocabPracticeDeck>,
-            val defaultDecks: List<VocabPracticeDeck>,
+            val userDecks: List<DashboardVocabDeck>,
+            val defaultDecks: List<DashboardVocabDeck>,
             val deckSelectionState: State<VocabDeckSelectionState>
         ) : ScreenState
 

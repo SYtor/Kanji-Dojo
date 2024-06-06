@@ -449,7 +449,8 @@ private fun ToolbarActions(
                     Icon(Icons.Default.Visibility, null)
                 }
                 IconButton(
-                    onClick = editButtonClick
+                    onClick = editButtonClick,
+                    enabled = !isLoadingState.value
                 ) {
                     Icon(Icons.Default.Edit, null)
                 }

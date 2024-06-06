@@ -217,7 +217,7 @@ class PracticePreviewViewModel(
         }
     }
 
-    override fun getPracticeConfiguration(): MainDestination.Practice {
+    override fun getMultiselectPracticeConfiguration(): MainDestination.Practice {
         val currentState = state.value.let { it as ScreenState.Loaded }
 
         val characters: List<String> = when (currentState) {

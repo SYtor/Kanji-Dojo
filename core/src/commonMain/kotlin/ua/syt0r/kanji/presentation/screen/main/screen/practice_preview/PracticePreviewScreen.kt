@@ -8,6 +8,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration.LetterDeck
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.ui.PracticePreviewScreenUI
 
 @Composable
@@ -35,7 +36,7 @@ fun PracticePreviewScreen(
             shouldInvalidateData.value = true
             val configuration = MainDestination.DeckEdit(
                 LetterDeck.Edit(
-                    title = "",
+                    title = viewModel.state.value.let { it as ScreenState.Loaded }.title,
                     letterDeckId = practiceId
                 )
             )
@@ -55,7 +56,7 @@ fun PracticePreviewScreen(
         onGroupClickInMultiselectMode = { viewModel.toggleSelection(it) },
         onMultiselectPracticeStart = {
             shouldInvalidateData.value = true
-            val configuration = viewModel.getPracticeConfiguration()
+            val configuration = viewModel.getMultiselectPracticeConfiguration()
             mainNavigationState.navigate(configuration)
         }
     )

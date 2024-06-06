@@ -4,9 +4,10 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 
-data class VocabPracticeDeck(
+data class DashboardVocabDeck(
     val titleResolver: StringResolveScope<String>,
-    val expressionIds: List<Long>
+    val expressionIds: List<Long>,
+    val id: Long? = null
 )
 
 sealed interface VocabDeckSelectionState {
@@ -14,7 +15,7 @@ sealed interface VocabDeckSelectionState {
     object NothingSelected : VocabDeckSelectionState
 
     data class DeckSelected(
-        val deck: VocabPracticeDeck,
+        val deck: DashboardVocabDeck,
         val words: StateFlow<VocabPracticePreviewState>
     ) : VocabDeckSelectionState
 
@@ -27,7 +28,7 @@ sealed interface VocabPracticePreviewState {
 
 
 val vocabDecks = listOf(
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleTime },
         expressionIds = listOf(
             1315920,
@@ -60,13 +61,13 @@ val vocabDecks = listOf(
             1548010
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleWeek },
         expressionIds = listOf(
             1545770, 1255890, 1194290, 1372190, 1534890, 1243320, 1445590, 1464900, 1507720, 1333520
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCommonVerbs },
         expressionIds = listOf(
             1578850,
@@ -92,7 +93,7 @@ val vocabDecks = listOf(
             1305990
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleColors },
         expressionIds = listOf(
             2013900,
@@ -111,7 +112,7 @@ val vocabDecks = listOf(
             1243560
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleRegularFood },
         expressionIds = listOf(
             1270590,
@@ -140,7 +141,7 @@ val vocabDecks = listOf(
             1370860
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleJapaneseFood },
         expressionIds = listOf(
             1595650,
@@ -166,7 +167,7 @@ val vocabDecks = listOf(
             1590640
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleGrammarTerms },
         expressionIds = listOf(
             1531570,
@@ -176,10 +177,11 @@ val vocabDecks = listOf(
             1556590,
             1417330,
             1264420,
-            1489700
+            1489700,
+            1297960
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleAnimals },
         expressionIds = listOf(
             1451470,
@@ -201,7 +203,7 @@ val vocabDecks = listOf(
             1319030
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleBody },
         expressionIds = listOf(
             1582310,
@@ -229,7 +231,7 @@ val vocabDecks = listOf(
             1387010
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCommonPlaces },
         expressionIds = listOf(
             1066710,
@@ -268,7 +270,7 @@ val vocabDecks = listOf(
             1183450
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCities },
         expressionIds = listOf(
             1447690,
@@ -286,7 +288,7 @@ val vocabDecks = listOf(
             2770680
         )
     ),
-    VocabPracticeDeck(
+    DashboardVocabDeck(
         titleResolver = { vocabDashboard.deckTitleTransport },
         expressionIds = listOf(
             1323080,
