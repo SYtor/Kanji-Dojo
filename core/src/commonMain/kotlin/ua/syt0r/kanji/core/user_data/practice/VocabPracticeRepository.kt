@@ -10,6 +10,12 @@ interface VocabPracticeRepository {
     suspend fun createDeck(title: String, words: List<Long>)
     suspend fun deleteDeck(id: Long)
     suspend fun getDecks(): List<VocabDeck>
+    suspend fun updateDeck(
+        id: Long,
+        title: String,
+        wordsToAdd: List<Long>,
+        wordsToRemove: List<Long>
+    )
 
     suspend fun addWord(deckId: Long, wordId: Long)
     suspend fun deleteWord(deckId: Long, wordId: Long)

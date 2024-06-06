@@ -22,8 +22,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -56,6 +59,7 @@ import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui.DeleteWritingPracticeDialog
@@ -75,7 +79,7 @@ fun DeckEditScreenUI(
     onCharacterInfoClick: (String) -> Unit,
     saveChanges: () -> Unit,
     deleteDeck: () -> Unit,
-    onCompleted: () -> Unit
+    onCompleted: (ScreenState.Completed) -> Unit
 ) {
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -86,6 +90,18 @@ fun DeckEditScreenUI(
         PracticeCreateLeaveConfirmation(
             onDismissRequest = { showLeaveConfirmationDialog = false },
             onConfirmation = navigateBack
+        )
+    }
+
+    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
+    if (showDeleteConfirmationDialog) {
+        DeleteWritingPracticeDialog(
+            configuration = configuration as DeckEditScreenConfiguration.EditExisting,
+            onDismissRequest = { showDeleteConfirmationDialog = false },
+            onDeleteConfirmed = {
+                deleteDeck()
+                showDeleteConfirmationDialog = false
+            }
         )
     }
 
@@ -102,6 +118,7 @@ fun DeckEditScreenUI(
     Scaffold(
         topBar = {
             Toolbar(
+                state = state,
                 configuration = configuration,
                 navigateUp = {
                     if (shouldHandleBackClick) {
@@ -110,7 +127,7 @@ fun DeckEditScreenUI(
                         navigateBack()
                     }
                 },
-                onDeleteConfirmed = deleteDeck
+                onDeleteClick = { showDeleteConfirmationDialog = true }
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -144,11 +161,11 @@ fun DeckEditScreenUI(
 
                 ScreenState.Deleting -> Text("Del")
                 ScreenState.SavingChanges -> Text("Sav")
-                ScreenState.Completed -> {
+                is ScreenState.Completed -> {
                     Text("Don")
                     LaunchedEffect(Unit) {
                         delay(600)
-                        onCompleted()
+                        onCompleted(screenState)
                     }
                 }
 
@@ -163,19 +180,11 @@ fun DeckEditScreenUI(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
+    state: State<ScreenState>,
     configuration: DeckEditScreenConfiguration,
     navigateUp: () -> Unit,
-    onDeleteConfirmed: () -> Unit
+    onDeleteClick: () -> Unit
 ) {
-
-    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
-    if (showDeleteConfirmationDialog) {
-        DeleteWritingPracticeDialog(
-            configuration = configuration as DeckEditScreenConfiguration.EditExisting,
-            onDismissRequest = { showDeleteConfirmationDialog = false },
-            onDeleteConfirmed = onDeleteConfirmed
-        )
-    }
 
     TopAppBar(
         title = {
@@ -199,9 +208,15 @@ private fun Toolbar(
             }
         },
         actions = {
-            if (configuration is DeckEditScreenConfiguration.EditExisting) {
+            val shouldShowDeleteButton = remember {
+                derivedStateOf {
+                    configuration is DeckEditScreenConfiguration.EditExisting &&
+                            state.value is ScreenState.Loaded
+                }
+            }
+            if (shouldShowDeleteButton.value) {
                 IconButton(
-                    onClick = { showDeleteConfirmationDialog = true }
+                    onClick = onDeleteClick
                 ) {
                     Icon(Icons.Default.Delete, null)
                 }
@@ -253,7 +268,11 @@ private fun LoadedState(
             }
 
             is ScreenState.VocabDeckEditing -> {
-                VocabDeckEditingUI(screenState)
+                VocabDeckEditingUI(
+                    screenState = screenState,
+                    extraListSpacerState = extraListSpacerState,
+                    toggleRemoval = toggleRemoval
+                )
             }
         }
 
@@ -322,4 +341,27 @@ fun DeckEditingModeSelector(
         }
     }
 
+}
+
+@Composable
+fun DeckEditItemActionIndicator(
+    action: State<DeckEditItemAction>,
+    modifier: Modifier = Modifier
+) {
+    when (action.value) {
+        DeckEditItemAction.Nothing -> {}
+        DeckEditItemAction.Add -> Icon(
+            imageVector = Icons.Default.AddCircle,
+            contentDescription = null,
+            modifier = modifier.background(MaterialTheme.colorScheme.onError, CircleShape),
+            tint = MaterialTheme.extraColorScheme.success
+        )
+
+        DeckEditItemAction.Remove -> Icon(
+            imageVector = Icons.Default.Cancel,
+            contentDescription = null,
+            modifier = modifier.background(MaterialTheme.colorScheme.onError, CircleShape),
+            tint = MaterialTheme.colorScheme.error
+        )
+    }
 }

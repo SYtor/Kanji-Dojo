@@ -4,10 +4,12 @@ import org.koin.dsl.module
 import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DefaultDeleteDeckUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DefaultLoadDeckEditLetterDataUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DefaultLoadDeckEditVocabDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DefaultSaveDeckUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DefaultSearchValidCharactersUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.DeleteDeckUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.LoadDeckEditLetterDataUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.LoadDeckEditVocabDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SaveDeckUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchValidCharactersUseCase
 
@@ -16,6 +18,13 @@ val deckEditScreenModule = module {
     factory<LoadDeckEditLetterDataUseCase> {
         DefaultLoadDeckEditLetterDataUseCase(
             repository = get()
+        )
+    }
+
+    factory<LoadDeckEditVocabDataUseCase> {
+        DefaultLoadDeckEditVocabDataUseCase(
+            practiceRepository = get(),
+            appDataRepository = get()
         )
     }
 
@@ -43,6 +52,7 @@ val deckEditScreenModule = module {
         DeckEditViewModel(
             viewModelScope = it.component1(),
             loadDeckEditLetterDataUseCase = get(),
+            loadDeckEditVocabDataUseCase = get(),
             searchValidCharactersUseCase = get(),
             saveDeckUseCase = get(),
             deleteDeckUseCase = get(),

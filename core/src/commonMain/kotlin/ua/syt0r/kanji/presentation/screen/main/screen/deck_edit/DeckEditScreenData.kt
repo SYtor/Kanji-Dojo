@@ -28,9 +28,9 @@ sealed interface DeckEditScreenConfiguration {
 
         @Serializable
         data class CreateDerived(
-            override val title: String,
+            val title: String,
             val classification: CharacterClassification
-        ) : LetterDeck, EditExisting
+        ) : LetterDeck
 
         @Serializable
         data class Edit(
@@ -48,9 +48,9 @@ sealed interface DeckEditScreenConfiguration {
 
         @Serializable
         data class CreateDerived(
-            override val title: String,
+            val title: String,
             val words: List<Long>
-        ) : VocabDeck, EditExisting
+        ) : VocabDeck
 
         @Serializable
         data class Edit(
@@ -72,22 +72,22 @@ enum class DeckEditingMode(
 
 sealed interface DeckEditListItem {
     val initialAction: DeckEditItemAction
+    val action: State<DeckEditItemAction>
 }
 
 data class LetterDeckEditListItem(
     val character: String,
     override val initialAction: DeckEditItemAction,
-    val action: State<DeckEditItemAction>
+    override val action: State<DeckEditItemAction>
 ) : DeckEditListItem
 
 data class VocabDeckEditListItem(
     val word: JapaneseWord,
     override val initialAction: DeckEditItemAction,
-    val action: State<DeckEditItemAction>
+    override val action: State<DeckEditItemAction>
 ) : DeckEditListItem
 
 enum class DeckEditItemAction { Nothing, Add, Remove }
-
 
 data class MutableLetterDeckEditingState(
     override val title: MutableState<String>,
@@ -99,5 +99,6 @@ data class MutableLetterDeckEditingState(
 
 data class MutableVocabDeckEditingState(
     override val title: MutableState<String>,
-    override val confirmExit: MutableState<Boolean>
+    override val confirmExit: MutableState<Boolean>,
+    override val list: List<VocabDeckEditListItem>
 ) : ScreenState.VocabDeckEditing

@@ -19,13 +19,10 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
@@ -50,8 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemAction
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActionIndicator
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditingMode
@@ -225,24 +221,10 @@ private fun LazyGridItemScope.ListItem(
             fontSize = 32.sp
         )
 
-        when (item.action.value) {
-            DeckEditItemAction.Nothing -> {}
-            DeckEditItemAction.Add -> Icon(
-                imageVector = Icons.Default.AddCircle,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .background(MaterialTheme.colorScheme.onError, CircleShape),
-                tint = MaterialTheme.extraColorScheme.success
-            )
-
-            DeckEditItemAction.Remove -> Icon(
-                imageVector = Icons.Default.Cancel,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.BottomEnd)
-                    .background(MaterialTheme.colorScheme.onError, CircleShape),
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
+        DeckEditItemActionIndicator(
+            action = item.action,
+            modifier = Modifier.align(Alignment.BottomEnd)
+        )
 
     }
 

@@ -200,6 +200,9 @@ insertVocabDeck:
 INSERT INTO vocab_deck(title, position)
 SELECT :title, IFNULL(MAX(position) + 1, 0) FROM vocab_deck;
 
+updateVocabDeckTitle:
+UPDATE vocab_deck SET title = ? WHERE id = ?;
+
 deleteVocabDeck:
 DELETE FROM vocab_deck WHERE id = ?;
 

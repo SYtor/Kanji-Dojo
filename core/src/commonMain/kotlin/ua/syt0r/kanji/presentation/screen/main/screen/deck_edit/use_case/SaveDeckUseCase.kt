@@ -3,14 +3,17 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemAction
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.LetterDeckEditListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
 
 interface SaveDeckUseCase {
     suspend operator fun invoke(
         configuration: DeckEditScreenConfiguration,
-        state: ScreenState.Loaded
+        title: String,
+        list: List<DeckEditListItem>
     )
 }
 
@@ -21,44 +24,58 @@ class DefaultSaveDeckUseCase(
 
     override suspend fun invoke(
         configuration: DeckEditScreenConfiguration,
-        state: ScreenState.Loaded
+        title: String,
+        list: List<DeckEditListItem>
     ) {
         Logger.logMethod()
         when (configuration) {
             is DeckEditScreenConfiguration.LetterDeck.CreateNew,
             is DeckEditScreenConfiguration.LetterDeck.CreateDerived -> {
-                state as ScreenState.LetterDeckEditing
                 letterPracticeRepository.createPractice(
-                    characters = state.listState.value.mapNotNull {
-                        if (it.action.value == DeckEditItemAction.Add) it.character else null
-                    },
-                    title = state.title.value
+                    title = title,
+                    characters = list.filter<LetterDeckEditListItem>(DeckEditItemAction.Add)
+                        .map { it.character },
                 )
             }
 
             is DeckEditScreenConfiguration.LetterDeck.Edit -> {
-                state as ScreenState.LetterDeckEditing
                 letterPracticeRepository.updatePractice(
                     id = configuration.letterDeckId,
-                    title = state.title.value,
-                    charactersToAdd = state.listState.value.mapNotNull {
-                        if (it.action.value == DeckEditItemAction.Add) it.character else null
-                    },
-                    charactersToRemove = state.listState.value.mapNotNull {
-                        if (it.action.value == DeckEditItemAction.Remove) it.character else null
-                    }
+                    title = title,
+                    charactersToAdd = list.filter<LetterDeckEditListItem>(DeckEditItemAction.Add)
+                        .map { it.character },
+                    charactersToRemove = list.filter<LetterDeckEditListItem>(DeckEditItemAction.Remove)
+                        .map { it.character }
                 )
             }
 
             DeckEditScreenConfiguration.VocabDeck.CreateNew,
             is DeckEditScreenConfiguration.VocabDeck.CreateDerived -> {
-
+                vocabPracticeRepository.createDeck(
+                    title = title,
+                    words = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
+                        .map { it.word.id }
+                )
             }
 
             is DeckEditScreenConfiguration.VocabDeck.Edit -> {
-
+                vocabPracticeRepository.updateDeck(
+                    id = configuration.vocabDeckId,
+                    title = title,
+                    wordsToAdd = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
+                        .map { it.word.id },
+                    wordsToRemove = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Remove)
+                        .map { it.word.id }
+                )
             }
         }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : DeckEditListItem> List<DeckEditListItem>.filter(
+        action: DeckEditItemAction
+    ): List<T> {
+        return filter { it.action.value == action } as List<T>
     }
 
 }

@@ -37,6 +37,17 @@ class SqlDelightVocabPracticeRepository(
         getVocabDecks().executeAsList().map { VocabDeck(it.id, it.title, it.position) }
     }
 
+    override suspend fun updateDeck(
+        id: Long,
+        title: String,
+        wordsToAdd: List<Long>,
+        wordsToRemove: List<Long>
+    ) = databaseManager.runModifyingTransaction {
+        updateVocabDeckTitle(title, id)
+        wordsToAdd.forEach { insertVocabDeckEntry(it, id) }
+        wordsToRemove.forEach { deleteVocabDeckEntry(it, id) }
+    }
+
     override suspend fun addWord(
         deckId: Long,
         wordId: Long

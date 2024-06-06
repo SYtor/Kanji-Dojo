@@ -361,12 +361,12 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
     override val returnAction: String = "Return"
     override val removeAction: String = "Remove"
     override val saveTitle: String = "Save changes"
-    override val saveInputHint: String = "Practice Title"
+    override val saveInputHint: String = "Deck Title"
     override val saveButtonDefault: String = "Save"
     override val saveButtonCompleted: String = "Done"
     override val deleteTitle: String = "Delete confirmation"
     override val deleteMessage: (practiceTitle: String) -> String = {
-        "Are you sure you want to delete \"$it\" practice?"
+        "Are you sure you want to delete \"$it\" deck?"
     }
     override val deleteButtonDefault: String = "Delete"
     override val deleteButtonCompleted: String = "Done"

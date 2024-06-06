@@ -24,19 +24,27 @@ interface DeckEditScreenContract {
         sealed interface Loaded : ScreenState {
             val title: MutableState<String>
             val confirmExit: State<Boolean>
+            fun getCurrentList(): List<DeckEditListItem>
         }
 
         interface LetterDeckEditing : Loaded {
             val searching: State<Boolean>
             val listState: State<List<LetterDeckEditListItem>>
             val lastSearchResult: State<SearchResult?>
+            override fun getCurrentList(): List<LetterDeckEditListItem> {
+                return listState.value
+            }
         }
 
-        interface VocabDeckEditing : Loaded
+        interface VocabDeckEditing : Loaded {
+            val list: List<VocabDeckEditListItem>
+            override fun getCurrentList(): List<DeckEditListItem> = list
+        }
 
         object SavingChanges : ScreenState
         object Deleting : ScreenState
-        object Completed : ScreenState
+
+        data class Completed(val wasDeleted: Boolean) : ScreenState
 
     }
 

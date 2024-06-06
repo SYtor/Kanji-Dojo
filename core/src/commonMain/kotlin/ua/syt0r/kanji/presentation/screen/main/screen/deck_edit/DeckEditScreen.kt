@@ -28,7 +28,15 @@ fun DeckEditScreen(
         toggleRemoval = { viewModel.toggleRemoval(it) },
         saveChanges = { viewModel.saveDeck() },
         deleteDeck = { viewModel.deleteDeck() },
-        onCompleted = { mainNavigationState.popUpToHome() }
+        onCompleted = {
+            when {
+                configuration is DeckEditScreenConfiguration.EditExisting && !it.wasDeleted -> {
+                    mainNavigationState.navigateBack()
+                }
+
+                else -> mainNavigationState.popUpToHome()
+            }
+        }
     )
 
 }
