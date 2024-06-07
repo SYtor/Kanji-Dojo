@@ -1,10 +1,13 @@
 package ua.syt0r.kanji.core.user_data.practice
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.merge
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import ua.syt0r.kanji.core.userdata.db.Character_progress
+import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import ua.syt0r.kanji.core.userdata.db.Reading_review
 import ua.syt0r.kanji.core.userdata.db.Writing_review
 import kotlin.time.Duration.Companion.milliseconds
@@ -13,12 +16,22 @@ class SqlDelightLetterPracticeRepository(
     private val databaseManager: UserDataDatabaseManager
 ) : LetterPracticeRepository {
 
-    override val practiceChangeFlow: Flow<Unit> = databaseManager.dataChangedFlow
+    private val _changesFlow = MutableSharedFlow<Unit>()
+    override val changesFlow: Flow<Unit> = merge(_changesFlow, databaseManager.databaseChangeFlow)
+
+    private suspend fun <T> runTransaction(
+        notifyDataChange: Boolean = false,
+        block: PracticeQueries.() -> T
+    ): T {
+        val result = databaseManager.runTransaction { block() }
+        if (notifyDataChange) _changesFlow.emit(Unit)
+        return result
+    }
 
     override suspend fun createPractice(
         title: String,
         characters: List<String>
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         insertPractice(name = title)
 
         val practiceId = getLastInsertRowId().executeAsOne()
@@ -28,7 +41,7 @@ class SqlDelightLetterPracticeRepository(
     override suspend fun createPracticeAndMerge(
         title: String,
         practiceIdToMerge: List<Long>
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         insertPractice(name = title)
         val practiceId = getLastInsertRowId().executeAsOne()
 
@@ -41,13 +54,13 @@ class SqlDelightLetterPracticeRepository(
 
     override suspend fun updatePracticePositions(
         practiceIdToPositionMap: Map<Long, Int>
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         practiceIdToPositionMap.forEach { (practiceId, position) ->
             updatePracticePosition(position.toLong(), practiceId)
         }
     }
 
-    override suspend fun deletePractice(id: Long) = databaseManager.runTransaction(
+    override suspend fun deletePractice(id: Long) = runTransaction(
         notifyDataChange = true
     ) {
         deletePractice(id)
@@ -58,13 +71,13 @@ class SqlDelightLetterPracticeRepository(
         title: String,
         charactersToAdd: List<String>,
         charactersToRemove: List<String>
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         updatePracticeTitle(title, id)
         charactersToAdd.forEach { insertOrIgnorePracticeEntry(it, id) }
         charactersToRemove.forEach { deletePracticeEntry(id, it) }
     }
 
-    override suspend fun getAllPractices(): List<Practice> = databaseManager.runTransaction {
+    override suspend fun getAllPractices(): List<Practice> = runTransaction {
         getAllPractices().executeAsList().map {
             Practice(it.id, it.name, it.position.toInt())
         }
@@ -72,20 +85,20 @@ class SqlDelightLetterPracticeRepository(
 
     override suspend fun getPracticeInfo(
         id: Long
-    ): Practice = databaseManager.runTransaction {
+    ): Practice = runTransaction {
         getPractice(id).executeAsOne().run { Practice(id, name, position.toInt()) }
     }
 
     override suspend fun getKanjiForPractice(
         id: Long
-    ): List<String> = databaseManager.runTransaction {
+    ): List<String> = runTransaction {
         getPracticeEntriesForPractice(id).executeAsList().map { it.character }
     }
 
     override suspend fun saveWritingReviews(
         practiceTime: Instant,
         reviewResultList: List<CharacterWritingReviewResult>,
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         val mode = practiceTypeToDBValue.getValue(PracticeType.Writing).toLong()
         reviewResultList.forEach {
             val currentProgress = getCharacterProgress(it.character, mode).executeAsOneOrNull()
@@ -130,7 +143,7 @@ class SqlDelightLetterPracticeRepository(
     override suspend fun saveReadingReviews(
         practiceTime: Instant,
         reviewResultList: List<CharacterReadingReviewResult>
-    ) = databaseManager.runTransaction(notifyDataChange = true) {
+    ) = runTransaction(notifyDataChange = true) {
         val mode = practiceTypeToDBValue.getValue(PracticeType.Reading).toLong()
         reviewResultList.forEach {
             val currentProgress = getCharacterProgress(it.character, mode).executeAsOneOrNull()
@@ -174,7 +187,7 @@ class SqlDelightLetterPracticeRepository(
     override suspend fun getFirstReviewTime(
         character: String,
         type: PracticeType
-    ): Instant? = databaseManager.runTransaction {
+    ): Instant? = runTransaction {
         val timestamp = when (type) {
             PracticeType.Writing -> getFirstWritingReview(character).executeAsOneOrNull()?.timestamp
             PracticeType.Reading -> getFirstReadingReview(character).executeAsOneOrNull()?.timestamp
@@ -185,7 +198,7 @@ class SqlDelightLetterPracticeRepository(
     override suspend fun getLastReviewTime(
         practiceId: Long,
         type: PracticeType
-    ): Instant? = databaseManager.runTransaction {
+    ): Instant? = runTransaction {
         val timestamp = when (type) {
             PracticeType.Writing -> getLastWritingReview(practiceId).executeAsOneOrNull()?.timestamp
             PracticeType.Reading -> getLastReadingReview(practiceId).executeAsOneOrNull()?.timestamp
@@ -212,7 +225,7 @@ class SqlDelightLetterPracticeRepository(
     override suspend fun getReviews(
         start: Instant,
         end: Instant
-    ): Map<CharacterReviewResult, Instant> = databaseManager.runTransaction {
+    ): Map<CharacterReviewResult, Instant> = runTransaction {
         val writingReviews = getWritingReviews(
             start.toEpochMilliseconds(),
             end.toEpochMilliseconds()
@@ -230,13 +243,13 @@ class SqlDelightLetterPracticeRepository(
         writingReviews + readingReviews
     }
 
-    override suspend fun getTotalReviewsCount(): Long = databaseManager.runTransaction {
+    override suspend fun getTotalReviewsCount(): Long = runTransaction {
         getTotalWritingReviewsCount().executeAsOne() + getTotalReadingReviewsCount().executeAsOne()
     }
 
     override suspend fun getTotalPracticeTime(
         singleReviewDurationLimit: Long
-    ): Long = databaseManager.runTransaction {
+    ): Long = runTransaction {
         val writingsDuration = getTotalWritingReviewsDuration(
             reviewDurationLimit = singleReviewDurationLimit
         ).executeAsOne().SUM?.toLong() ?: 0L
@@ -248,7 +261,7 @@ class SqlDelightLetterPracticeRepository(
 
 
     override suspend fun getTotalUniqueReviewedCharactersCount(): Long =
-        databaseManager.runTransaction { getTotalUniqueReviewedCharactersCount().executeAsOne() }
+        runTransaction { getTotalUniqueReviewedCharactersCount().executeAsOne() }
 
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {
         CharacterReviewOutcome.Success -> 1

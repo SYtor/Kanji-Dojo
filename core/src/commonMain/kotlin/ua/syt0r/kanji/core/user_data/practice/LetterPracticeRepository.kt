@@ -10,7 +10,7 @@ import kotlin.time.DurationUnit
 
 interface LetterPracticeRepository {
 
-    val practiceChangeFlow: Flow<Unit>
+    val changesFlow: Flow<Unit>
 
     suspend fun createPractice(title: String, characters: List<String>)
     suspend fun createPracticeAndMerge(title: String, practiceIdToMerge: List<Long>)

@@ -13,11 +13,11 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDeckWordsUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDecksUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
 
 class VocabDashboardViewModel(
     private val viewModelScope: CoroutineScope,
-    getVocabDecksUseCase: GetVocabDecksUseCase,
+    subscribeOnDashboardVocabDecksUseCase: SubscribeOnDashboardVocabDecksUseCase,
     private val getVocabDeckWordsUseCase: GetVocabDeckWordsUseCase,
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel {
@@ -31,7 +31,7 @@ class VocabDashboardViewModel(
     override val state: StateFlow<ScreenState> = _state
 
     init {
-        getVocabDecksUseCase(invalidationRequests.consumeAsFlow())
+        subscribeOnDashboardVocabDecksUseCase(invalidationRequests.consumeAsFlow())
             .onEach { data ->
                 _state.value = when (data) {
                     is RefreshableData.Loading -> {

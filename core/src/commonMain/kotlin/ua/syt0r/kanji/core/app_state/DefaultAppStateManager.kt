@@ -43,7 +43,7 @@ class DefaultAppStateManager(
             .onEach { invalidate() }
             .launchIn(coroutineScope)
 
-        practiceRepository.practiceChangeFlow
+        practiceRepository.changesFlow
             .onEach { invalidate() }
             .launchIn(coroutineScope)
     }

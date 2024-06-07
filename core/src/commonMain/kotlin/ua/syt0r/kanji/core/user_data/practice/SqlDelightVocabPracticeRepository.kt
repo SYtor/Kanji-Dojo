@@ -1,7 +1,8 @@
 package ua.syt0r.kanji.core.user_data.practice
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.merge
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 
@@ -10,7 +11,7 @@ class SqlDelightVocabPracticeRepository(
 ) : VocabPracticeRepository {
 
     private val _changesFlow = MutableSharedFlow<Unit>()
-    override val changesFlow: SharedFlow<Unit> = _changesFlow
+    override val changesFlow: Flow<Unit> = merge(_changesFlow, databaseManager.databaseChangeFlow)
 
     private suspend fun <T> UserDataDatabaseManager.runModifyingTransaction(
         block: PracticeQueries.() -> T

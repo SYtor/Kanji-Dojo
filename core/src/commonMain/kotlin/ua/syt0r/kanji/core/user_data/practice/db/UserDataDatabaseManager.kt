@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
@@ -21,12 +22,9 @@ import java.io.InputStream
 
 interface UserDataDatabaseManager {
 
-    val dataChangedFlow: SharedFlow<Unit>
+    val databaseChangeFlow: SharedFlow<Unit>
 
-    suspend fun <T> runTransaction(
-        notifyDataChange: Boolean = false,
-        block: PracticeQueries.() -> T
-    ): T
+    suspend fun <T> runTransaction(block: PracticeQueries.() -> T): T
 
     suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
@@ -54,9 +52,8 @@ abstract class BaseUserDataDatabaseManager(
         value = createDeferredDatabaseConnection()
     )
 
-    private val onDataUpdatedFlow = MutableSharedFlow<Unit>()
-
-    override val dataChangedFlow: SharedFlow<Unit> = onDataUpdatedFlow
+    private val _databaseChangeFlow = MutableSharedFlow<Unit>()
+    override val databaseChangeFlow: SharedFlow<Unit> = _databaseChangeFlow
 
     protected fun getMigrationCallbacks(): Array<AfterVersion> = arrayOf(
         AfterVersion(3) { UserDataDatabaseMigrationAfter3.handleMigrations(it) },
@@ -68,19 +65,12 @@ abstract class BaseUserDataDatabaseManager(
     protected abstract fun getDatabaseFile(): File
 
     override suspend fun <T> runTransaction(
-        notifyDataChange: Boolean,
         block: PracticeQueries.() -> T
     ): T {
-        val result = coroutineScope
-            .async {
-                val queries = waitDatabaseConnection().database.practiceQueries
-                queries.transactionWithResult { queries.block() }
-            }
-            .await()
-
-        if (notifyDataChange) onDataUpdatedFlow.emit(Unit)
-
-        return result
+        return withContext(coroutineScope.coroutineContext) {
+            val queries = waitDatabaseConnection().database.practiceQueries
+            queries.transactionWithResult { queries.block() }
+        }
     }
 
     override suspend fun doWithSuspendedConnection(
@@ -99,7 +89,7 @@ abstract class BaseUserDataDatabaseManager(
             databaseFile.delete()
             inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
         }
-        onDataUpdatedFlow.emit(Unit)
+        _databaseChangeFlow.emit(Unit)
     }
 
     private suspend fun closeCurrentConnection() = coroutineScope.launch {
