@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -147,7 +149,9 @@ fun DeckEditScreenUI(
         ) { screenState ->
 
             when (screenState) {
-                ScreenState.Loading -> FancyLoading(Modifier.fillMaxSize().wrapContentSize())
+                ScreenState.Loading,
+                ScreenState.Deleting,
+                ScreenState.SavingChanges -> FancyLoading(Modifier.fillMaxSize().wrapContentSize())
 
                 is ScreenState.Loaded -> {
                     LoadedState(
@@ -161,10 +165,23 @@ fun DeckEditScreenUI(
                     )
                 }
 
-                ScreenState.Deleting -> Text("Del")
-                ScreenState.SavingChanges -> Text("Sav")
                 is ScreenState.Completed -> {
-                    Text("Don")
+                    Row(
+                        modifier = Modifier.fillMaxWidth().wrapContentWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text("Done")
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.surface,
+                            modifier = Modifier
+                                .background(MaterialTheme.extraColorScheme.success, CircleShape)
+                                .size(24.dp)
+                                .padding(2.dp)
+                        )
+                    }
                     LaunchedEffect(Unit) {
                         delay(600)
                         onCompleted(screenState)
@@ -196,7 +213,8 @@ private fun Toolbar(
                         is DeckEditScreenConfiguration.LetterDeck.Edit,
                         is DeckEditScreenConfiguration.VocabDeck.Edit -> practiceCreate.ediTitle
 
-                        else -> practiceCreate.newTitle
+                        is DeckEditScreenConfiguration.LetterDeck -> "Create Letter Deck"
+                        is DeckEditScreenConfiguration.VocabDeck -> "Create Vocab Deck"
                     }
                 }
             )

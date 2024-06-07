@@ -1,7 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -72,25 +74,28 @@ fun LetterDeckEditingUI(
             .padding(horizontal = 20.dp)
     ) {
 
-        DeckEditingModeSelector(deckEditingMode)
+        DeckEditingModeSelector(
+            selectedMode = deckEditingMode,
+            availableOptions = listOf(DeckEditingMode.Search, DeckEditingMode.Removal)
+        )
 
-        when (deckEditingMode.value) {
-            DeckEditingMode.Search -> {
-                CharacterInputField(
-                    isEnabled = !screenState.searching.value,
-                    onInputSubmit = submitSearch
-                )
-            }
+        AnimatedContent(
+            targetState = deckEditingMode.value,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            when (it) {
+                DeckEditingMode.Search -> {
+                    CharacterInputField(
+                        isEnabled = !screenState.searching.value,
+                        onInputSubmit = submitSearch
+                    )
+                }
 
-            DeckEditingMode.Removal -> {
-
-            }
-
-            DeckEditingMode.ResetSrs -> {
-
+                DeckEditingMode.Removal,
+                DeckEditingMode.ResetSrs -> Box(Modifier) // To avoid expand animation
             }
         }
-
 
         Spacer(modifier = Modifier.height(24.dp))
 
