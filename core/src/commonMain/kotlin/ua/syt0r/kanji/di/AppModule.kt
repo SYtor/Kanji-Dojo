@@ -14,7 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.kanjiInfoScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.deckEditScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.practiceImportScreenModule
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.practicePreviewScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.letterDeckDetailsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.vocabPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.readingPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.writingPracticeScreenModule
@@ -29,7 +29,7 @@ private val screenModules = listOf(
     aboutScreenModule,
     practiceImportScreenModule,
     deckEditScreenModule,
-    practicePreviewScreenModule,
+    letterDeckDetailsScreenModule,
     writingPracticeScreenModule,
     readingPracticeScreenModule,
     vocabPracticeScreenModule,

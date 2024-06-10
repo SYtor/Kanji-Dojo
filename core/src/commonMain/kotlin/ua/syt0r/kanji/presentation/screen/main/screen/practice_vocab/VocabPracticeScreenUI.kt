@@ -11,9 +11,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -66,6 +64,8 @@ import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
@@ -222,7 +222,6 @@ private fun ScreenConfiguration(
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScreenReview(
     screenState: ScreenState.Review,
@@ -248,8 +247,6 @@ private fun ScreenReview(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxSize()
-                        .wrapContentWidth()
-                        .widthIn(max = 400.dp)
                         .padding(horizontal = 20.dp)
                         .verticalScroll(rememberScrollState())
                 ) {
@@ -265,7 +262,8 @@ private fun ScreenReview(
                     if (selectedAnswer != null || screenState.showMeaning)
                         TextButton(
                             onClick = { alternativeWordsDialogWord = currentState.word },
-                            colors = ButtonDefaults.neutralTextButtonColors()
+                            colors = ButtonDefaults.neutralTextButtonColors(),
+                            modifier = Modifier.widthIn(max = 400.dp)
                         ) {
                             Text(currentState.word.meanings.first())
                             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
@@ -273,26 +271,40 @@ private fun ScreenReview(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    val maxItemsInEachRow = 4
+                    val maxItemsInEachRow = when (LocalOrientation.current) {
+                        Orientation.Portrait -> 2
+                        Orientation.Landscape -> 4
+                    }
+                    val answerRows = currentState.answers.chunked(maxItemsInEachRow)
 
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-                        maxItemsInEachRow = maxItemsInEachRow
+                    Column(
+                        modifier = Modifier.width(IntrinsicSize.Min)
                     ) {
+                        answerRows.forEach { rowAnswers ->
 
-                        currentState.answers.forEach { answer ->
-                            ReadingAnswerButton(
-                                answer = answer,
-                                selectedAnswer = selectedAnswer,
-                                enabled = selectedAnswer == null,
-                                onClick = { onAnswerSelected(answer) }
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                rowAnswers.forEach { answer ->
+                                    ReadingAnswerButton(
+                                        answer = answer,
+                                        selectedAnswer = selectedAnswer,
+                                        enabled = selectedAnswer == null,
+                                        onClick = { onAnswerSelected(answer) },
+                                        modifier = Modifier.weight(1f).padding(horizontal = 2.dp)
+                                    )
+
+                                }
+
+                                val lastLineItems = rowAnswers.size % maxItemsInEachRow
+                                val missingSpots = maxItemsInEachRow - lastLineItems
+                                if (lastLineItems != 0)
+                                    Spacer(Modifier.weight(missingSpots.toFloat()))
+
+                            }
+
                         }
-
-                        val lastLineItems = currentState.answers.size % 4
-                        if (lastLineItems != 0)
-                            Spacer(Modifier.weight(maxItemsInEachRow.toFloat() - lastLineItems))
-
                     }
 
                     val shouldShowNextButton = shouldShowNextButton(screenState.practiceState)
@@ -324,13 +336,13 @@ private fun shouldShowNextButton(state: State<VocabPracticeReviewState>): State<
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FlowRowScope.ReadingAnswerButton(
+private fun ReadingAnswerButton(
     answer: String,
     selectedAnswer: SelectedReadingAnswer?,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     val (textColor, containerColor) = MaterialTheme.run {
@@ -358,7 +370,7 @@ private fun FlowRowScope.ReadingAnswerButton(
             disabledContainerColor = containerColor
         ),
         enabled = enabled,
-        modifier = Modifier.weight(1f)
+        modifier = modifier
     ) {
         Text(text = answer, style = MaterialTheme.typography.titleMedium)
     }

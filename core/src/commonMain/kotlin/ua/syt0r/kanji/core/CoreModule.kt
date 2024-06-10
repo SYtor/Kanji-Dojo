@@ -2,8 +2,6 @@ package ua.syt0r.kanji.core
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -11,8 +9,6 @@ import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
-import ua.syt0r.kanji.core.app_state.AppStateManager
-import ua.syt0r.kanji.core.app_state.DefaultAppStateManager
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.backup.DefaultBackupManager
 import ua.syt0r.kanji.core.feedback.DefaultFeedbackManager
@@ -23,6 +19,10 @@ import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
+import ua.syt0r.kanji.core.srs.DefaultLetterSrsManager
+import ua.syt0r.kanji.core.srs.DefaultNotifySrsPreferencesChangedUseCase
+import ua.syt0r.kanji.core.srs.LetterSrsManager
+import ua.syt0r.kanji.core.srs.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertiesBackupManager
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
@@ -30,14 +30,14 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightLetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.DefaultPracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 
 val coreModule = module {
 
@@ -99,13 +99,16 @@ val coreModule = module {
         ThemeManager(userPreferencesRepository = get())
     }
 
-    single<AppStateManager> {
-        DefaultAppStateManager(
-            coroutineScope = CoroutineScope(Dispatchers.IO),
+    single<LetterSrsManager> {
+        DefaultLetterSrsManager(
             userPreferencesRepository = get(),
             practiceRepository = get(),
             timeUtils = get()
         )
+    }
+
+    factory<NotifySrsPreferencesChangedUseCase> {
+        DefaultNotifySrsPreferencesChangedUseCase(manager = get())
     }
 
     single<CharacterClassifier> { DefaultCharacterClassifier() }

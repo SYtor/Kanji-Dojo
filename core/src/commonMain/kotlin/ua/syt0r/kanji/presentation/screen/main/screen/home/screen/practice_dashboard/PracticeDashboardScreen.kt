@@ -14,6 +14,7 @@ fun PracticeDashboardScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        viewModel.notifyScreenShown()
         viewModel.reportScreenShown()
     }
 
@@ -25,7 +26,7 @@ fun PracticeDashboardScreen(
         reorder = { viewModel.reorder(it) },
         enableDefaultMode = { viewModel.enableDefaultMode() },
         navigateToPracticeDetails = {
-            mainNavigationState.navigate(MainDestination.PracticePreview(it.practiceId))
+            mainNavigationState.navigate(MainDestination.LetterDeckDetails(it.practiceId))
         },
         startQuickPractice = {
             mainNavigationState.navigate(it)

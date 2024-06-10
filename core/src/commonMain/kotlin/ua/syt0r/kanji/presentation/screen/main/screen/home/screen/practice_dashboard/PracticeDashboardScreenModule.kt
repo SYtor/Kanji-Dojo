@@ -11,7 +11,7 @@ val practiceDashboardScreenModule = module {
 
     factory<PracticeDashboardScreenContract.LoadDataUseCase> {
         PracticeDashboardLoadDataUseCase(
-            appStateManager = get()
+            srsManager = get()
         )
     }
 
@@ -37,7 +37,7 @@ val practiceDashboardScreenModule = module {
             applySortUseCase = get(),
             mergePracticeSetsUseCase = get(),
             updateSortUseCase = get(),
-            appStateManager = get(),
+            notifySrsPreferencesChangedUseCase = get(),
             userPreferencesRepository = get(),
             analyticsManager = get()
         )

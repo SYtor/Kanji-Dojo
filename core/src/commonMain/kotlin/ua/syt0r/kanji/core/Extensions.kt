@@ -1,7 +1,12 @@
 package ua.syt0r.kanji.core
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.logger.Logger
@@ -26,7 +31,7 @@ fun InputStream.transferToCompat(out: OutputStream): Long {
 }
 
 fun <T> Flow<T>.debounceFirst(
-    windowDuration: Duration = 500.milliseconds
+    windowDuration: Duration = 500.milliseconds,
 ): Flow<T> {
     return flow {
         var lastEmitTime = Instant.DISTANT_PAST
@@ -44,4 +49,17 @@ fun <T> Flow<T>.debounceFirst(
 
 fun <T> T.runUnit(scope: T.() -> Unit) {
     scope()
+}
+
+fun CoroutineScope.launchUnit(block: suspend CoroutineScope.() -> Unit) {
+    launch { block() }
+}
+
+fun <T> mergeSharedFlows(
+    coroutineScope: CoroutineScope,
+    vararg flows: Flow<T>,
+): SharedFlow<T> {
+    val sharedFlow = MutableSharedFlow<T>()
+    coroutineScope.launch { merge(*flows).collect { sharedFlow.emit(it) } }
+    return sharedFlow
 }

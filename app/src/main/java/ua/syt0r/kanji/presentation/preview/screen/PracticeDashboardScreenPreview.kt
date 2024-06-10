@@ -5,7 +5,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.flow.MutableStateFlow
-import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData

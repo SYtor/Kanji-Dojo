@@ -3,7 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dash
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.core.RefreshableData
+import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 
 interface PracticeDashboardScreenContract {
 
@@ -11,6 +12,7 @@ interface PracticeDashboardScreenContract {
 
         val state: State<ScreenState>
 
+        fun notifyScreenShown()
         fun updateDailyGoal(configuration: DailyGoalConfiguration)
 
         fun enablePracticeMergeMode()
@@ -37,7 +39,10 @@ interface PracticeDashboardScreenContract {
     }
 
     interface LoadDataUseCase {
-        fun load(): Flow<PracticeDashboardScreenData>
+        fun load(
+            screenVisibilityEvents: Flow<Unit>,
+            preferencesChangeEvents: Flow<Unit>
+        ): Flow<RefreshableData<PracticeDashboardScreenData>>
     }
 
     interface MergePracticeSetsUseCase {

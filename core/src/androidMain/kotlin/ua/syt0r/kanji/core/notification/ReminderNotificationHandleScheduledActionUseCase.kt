@@ -1,19 +1,16 @@
 package ua.syt0r.kanji.core.notification
 
 import android.app.ActivityManager
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.app_state.AppStateManager
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import kotlin.math.max
 import kotlin.math.min
 
 class ReminderNotificationHandleScheduledActionUseCase(
     private val activityManager: ActivityManager,
-    private val appStateManager: AppStateManager,
+    private val letterSrsManager: LetterSrsManager,
     private val notificationManager: ReminderNotificationContract.Manager,
     private val repository: UserPreferencesRepository,
     private val scheduler: ReminderNotificationContract.Scheduler,
@@ -35,34 +32,29 @@ class ReminderNotificationHandleScheduledActionUseCase(
             return
         }
 
-        val appState = appStateManager.appStateFlow
-            .filter { !it.isLoading }
-            .take(1)
-            .first()
-            .lastData!!
+        val srsData = letterSrsManager.getUpdatedData()
 
-        val maxLearn = appState.decks.flatMap { it.writingDetails.new }.distinct().size +
-                appState.decks.flatMap { it.readingDetails.new }.distinct().size
+        val maxLearn = srsData.decks.flatMap { it.writingDetails.new }.distinct().size +
+                srsData.decks.flatMap { it.readingDetails.new }.distinct().size
 
-        val maxReview = appState.decks.flatMap { it.writingDetails.review }.distinct().size +
-                appState.decks.flatMap { it.readingDetails.review }.distinct().size
+        val maxReview = srsData.decks.flatMap { it.writingDetails.review }.distinct().size +
+                srsData.decks.flatMap { it.readingDetails.review }.distinct().size
 
-        val learnLeft = appState.run {
+        val learnLeft = srsData.run {
             max(
                 a = 0,
                 b = min(dailyGoalConfiguration.learnLimit, maxLearn) - dailyProgress.studied
             )
         }
 
-        val reviewLeft = appState.run {
+        val reviewLeft = srsData.run {
             max(
                 a = 0,
                 b = min(dailyGoalConfiguration.reviewLimit, maxReview) - dailyProgress.reviewed
             )
         }
 
-        Logger.d("$maxLearn/$learnLeft $maxReview/$reviewLeft \n$appState[$appState]")
-
+        Logger.d("Preparing to show notification: learn[$maxLearn/$learnLeft] review[$maxReview/$reviewLeft]")
         if (learnLeft > 0 || reviewLeft > 0) {
             notificationManager.showNotification(learnLeft, reviewLeft)
             analyticsManager.sendEvent("showing_notification")

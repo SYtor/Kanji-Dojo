@@ -4,31 +4,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import ua.syt0r.kanji.core.app_state.AppStateManager
-import ua.syt0r.kanji.core.app_state.CharacterProgressStatus
+import ua.syt0r.kanji.core.srs.CharacterProgressStatus
+import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewData
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewHistory
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
+import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingScreenConfiguration
 
 class LoadWritingPracticeDataUseCase(
-    private val appStateManager: AppStateManager,
-    private val loadCharacterDataUseCase: WritingPracticeScreenContract.LoadCharacterDataUseCase
+    private val letterSrsManager: LetterSrsManager,
+    private val loadCharacterDataUseCase: WritingPracticeScreenContract.LoadCharacterDataUseCase,
 ) : WritingPracticeScreenContract.LoadPracticeData {
 
     override suspend fun load(
         configuration: WritingScreenConfiguration,
-        scope: CoroutineScope
+        scope: CoroutineScope,
     ): List<WritingCharacterReviewData> {
-
-        val progresses = appStateManager.appStateFlow
-            .filter { !it.isLoading }
-            .first()
-            .lastData!!
-            .characterProgresses
+        val progresses = letterSrsManager.getUpdatedData().characterProgresses
 
         return configuration.characters
             .map { character ->

@@ -37,6 +37,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -87,7 +89,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
@@ -511,7 +513,7 @@ private fun ListModeButtons(
                         )
                         OptionButton(
                             title = strings.sortButton,
-                            icon = Icons.Default.Sort,
+                            icon = Icons.AutoMirrored.Filled.Sort,
                             onClick = startReorder,
                             alignment = Alignment.End
                         )
@@ -758,7 +760,7 @@ private fun ListItem(
                     .padding(horizontal = 20.dp)
                     .wrapContentSize()
             ) {
-                Icon(Icons.Default.KeyboardArrowRight, null)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
             }
 
         }
@@ -978,7 +980,7 @@ private fun ColumnScope.IndicatorTextRow(
             onClick = { onClick(characters) },
             modifier = Modifier.weight(1f).wrapContentWidth(Alignment.End).size(20.dp)
         ) {
-            Icon(Icons.Default.KeyboardArrowRight, null)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
         }
 
     }

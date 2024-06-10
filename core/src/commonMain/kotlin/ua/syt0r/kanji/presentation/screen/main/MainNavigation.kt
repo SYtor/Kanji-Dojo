@@ -14,7 +14,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_preview.PracticePreviewScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
@@ -100,13 +100,13 @@ interface MainDestination {
     }
 
     @Serializable
-    data class PracticePreview(
+    data class LetterDeckDetails(
         val id: Long
     ) : MainDestination {
         @Composable
         override fun Draw(state: MainNavigationState) {
-            PracticePreviewScreen(
-                practiceId = id,
+            LetterDeckDetailsScreen(
+                deckId = id,
                 mainNavigationState = state
             )
         }
@@ -235,5 +235,5 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Practice.Reading::class.configuration(),
     MainDestination.Practice.Writing::class.configuration(),
     MainDestination.VocabPractice::class.configuration(),
-    MainDestination.PracticePreview::class.configuration(),
+    MainDestination.LetterDeckDetails::class.configuration(),
 )

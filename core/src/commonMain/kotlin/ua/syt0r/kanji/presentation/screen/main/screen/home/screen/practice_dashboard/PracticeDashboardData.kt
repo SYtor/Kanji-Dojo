@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
 
 import androidx.compose.runtime.MutableState
-import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import kotlin.time.Duration
 
 data class PracticeDashboardItem(

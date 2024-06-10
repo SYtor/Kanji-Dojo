@@ -82,7 +82,7 @@ fun StatsScreenUI(
 
 @Composable
 private fun LoadedState(screenState: ScreenState.Loaded) {
-
+    val statsData = screenState.stats
     val strings = resolveString { stats }
 
     LazyVerticalStaggeredGrid(
@@ -101,14 +101,14 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
         item {
             InfoCard(
-                title = strings.formattedDuration(screenState.todayTimeSpent),
+                title = strings.formattedDuration(statsData.todayTimeSpent),
                 subtitle = strings.timeSpentTitle
             )
         }
 
         item {
             InfoCard(
-                title = screenState.todayReviews.toString(),
+                title = statsData.todayReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
         }
@@ -124,7 +124,7 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = strings.monthLabel(screenState.today),
+                    text = strings.monthLabel(statsData.today),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
@@ -133,8 +133,8 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
         item(span = StaggeredGridItemSpan.FullLine) {
             MonthCalendar(
-                today = screenState.today,
-                reviewDates = screenState.yearlyPractices
+                today = statsData.today,
+                reviewDates = statsData.yearlyPractices
             )
         }
 
@@ -144,19 +144,19 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
         item(span = StaggeredGridItemSpan.FullLine) {
             YearCalendarUninterrupted(
-                year = screenState.today.year,
-                reviewDates = screenState.yearlyPractices
+                year = statsData.today.year,
+                reviewDates = statsData.yearlyPractices
             )
         }
 
-        val yearTotalDays = LocalDate(screenState.today.year + 1, 1, 1)
+        val yearTotalDays = LocalDate(statsData.today.year + 1, 1, 1)
             .minus(1, DateTimeUnit.DAY)
             .dayOfYear
 
         item(span = StaggeredGridItemSpan.FullLine) {
             Text(
                 text = strings.yearDaysPracticedLabel(
-                    screenState.yearlyPractices.size,
+                    statsData.yearlyPractices.size,
                     yearTotalDays
                 ),
                 modifier = Modifier.padding(vertical = 10.dp)
@@ -169,20 +169,20 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
         item {
             InfoCard(
-                title = strings.formattedDuration(screenState.totalTimeSpent),
+                title = strings.formattedDuration(statsData.totalTimeSpent),
                 subtitle = strings.timeSpentTitle
             )
         }
         item {
             InfoCard(
-                title = screenState.totalReviews.toString(),
+                title = statsData.totalReviews.toString(),
                 subtitle = strings.reviewsCountTitle
             )
         }
 
         item {
             InfoCard(
-                title = screenState.totalCharactersStudied.toString(),
+                title = statsData.totalCharactersStudied.toString(),
                 subtitle = strings.charactersStudiedTitle
             )
         }

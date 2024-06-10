@@ -9,7 +9,7 @@ val writingPracticeScreenModule = module {
 
     factory<WritingPracticeScreenContract.LoadPracticeData> {
         LoadWritingPracticeDataUseCase(
-            appStateManager = get(),
+            letterSrsManager = get(),
             loadCharacterDataUseCase = get()
         )
     }

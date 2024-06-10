@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
@@ -44,7 +45,9 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -53,6 +56,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +65,9 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
@@ -129,10 +136,12 @@ private fun ScreenLoadedState(
     navigateToPractice: (DashboardVocabDeck) -> Unit
 ) {
 
+    val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     if (showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
             tonalElevation = 0.dp
         ) {
             BottomSheetContent(
@@ -141,6 +150,13 @@ private fun ScreenLoadedState(
                 navigateToPractice = navigateToPractice
             )
         }
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { screenState.deckSelectionState.value }
+            .filter { it == VocabDeckSelectionState.NothingSelected }
+            .onEach { sheetState.hide() }
+            .collect()
     }
 
     LazyVerticalGrid(
@@ -156,16 +172,16 @@ private fun ScreenLoadedState(
 
         item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.height(4.dp)) }
 
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Text(
+                text = "User Decks",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
         if (screenState.userDecks.isNotEmpty()) {
-
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "User Decks",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
             items(screenState.userDecks) {
                 PracticeGridItem(
                     title = resolveString(it.titleResolver),
@@ -175,10 +191,15 @@ private fun ScreenLoadedState(
                     }
                 )
             }
-
-            item(span = { GridItemSpan(maxLineSpan) }) { Divider(Modifier.fillMaxWidth()) }
-
+        } else {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(
+                    "No decks saved. Use default decks to review vocabulary or create your own decks"
+                )
+            }
         }
+
+        item(span = { GridItemSpan(maxLineSpan) }) { Divider(Modifier.fillMaxWidth()) }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
@@ -265,7 +286,7 @@ private fun BottomSheetContent(
 
         item {
             ScreenBottomSheetHeader(
-                screenState = currentState,
+                selectionState = currentState,
                 showWords = wordsVisible,
                 onEditClick = onEditClick,
                 onPracticeClick = navigateToPractice
@@ -298,7 +319,7 @@ private fun BottomSheetContent(
 
 @Composable
 private fun ScreenBottomSheetHeader(
-    screenState: VocabDeckSelectionState.DeckSelected,
+    selectionState: VocabDeckSelectionState.DeckSelected,
     showWords: MutableState<Boolean>,
     onEditClick: (DashboardVocabDeck) -> Unit,
     onPracticeClick: (DashboardVocabDeck) -> Unit
@@ -313,16 +334,19 @@ private fun ScreenBottomSheetHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = resolveString(screenState.deck.titleResolver),
+                text = resolveString(selectionState.deck.titleResolver),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
 
             IconButton(
-                onClick = { onEditClick(screenState.deck) }
+                onClick = { onEditClick(selectionState.deck) }
             ) {
                 Icon(
-                    imageVector = Icons.Default.Edit,
+                    imageVector = when (selectionState.deck.id) {
+                        null -> Icons.AutoMirrored.Filled.PlaylistAdd
+                        else -> Icons.Default.Edit
+                    },
                     contentDescription = null
                 )
             }
@@ -342,7 +366,7 @@ private fun ScreenBottomSheetHeader(
             Spacer(modifier = Modifier.weight(1f))
 
             TextButton(
-                onClick = { onPracticeClick(screenState.deck) },
+                onClick = { onPracticeClick(selectionState.deck) },
                 colors = ButtonDefaults.neutralTextButtonColors()
             ) {
                 Text(text = resolveString { vocabDashboard.reviewButton })
@@ -351,7 +375,7 @@ private fun ScreenBottomSheetHeader(
         }
 
         Text(
-            text = resolveString { vocabDashboard.wordsCount(screenState.deck.expressionIds.size) },
+            text = resolveString { vocabDashboard.wordsCount(selectionState.deck.expressionIds.size) },
             style = MaterialTheme.typography.bodySmall
         )
 

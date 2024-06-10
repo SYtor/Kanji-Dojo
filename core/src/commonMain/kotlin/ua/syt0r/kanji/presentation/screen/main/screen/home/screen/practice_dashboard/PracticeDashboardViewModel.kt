@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.app_state.AppStateManager
-import ua.syt0r.kanji.core.app_state.DailyGoalConfiguration
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import kotlin.time.Duration.Companion.seconds
@@ -25,30 +26,42 @@ class PracticeDashboardViewModel(
     loadDataUseCase: PracticeDashboardScreenContract.LoadDataUseCase,
     private val applySortUseCase: PracticeDashboardScreenContract.ApplySortUseCase,
     private val updateSortUseCase: PracticeDashboardScreenContract.UpdateSortUseCase,
-    private val appStateManager: AppStateManager,
     private val userPreferencesRepository: UserPreferencesRepository,
+    private val notifySrsPreferencesChangedUseCase: NotifySrsPreferencesChangedUseCase,
     private val mergePracticeSetsUseCase: PracticeDashboardScreenContract.MergePracticeSetsUseCase,
     private val analyticsManager: AnalyticsManager
 ) : PracticeDashboardScreenContract.ViewModel {
 
-    override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
-
     private var sortByTimeEnabled: Boolean = false
     private lateinit var listMode: MutableStateFlow<PracticeDashboardListMode>
 
+    private val screenShowEvents = Channel<Unit>()
+    private val preferencesChangeEvents = Channel<Unit>()
     private val sortRequestsChannel = Channel<PracticeReorderRequestData>()
 
+    override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
+
     init {
-        loadDataUseCase.load()
+        loadDataUseCase
+            .load(
+                screenVisibilityEvents = screenShowEvents.consumeAsFlow(),
+                preferencesChangeEvents = preferencesChangeEvents.consumeAsFlow()
+            )
             .onEach {
-                Logger.d("applying new state")
-                sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
-                val sortedItems = applySortUseCase.sort(sortByTimeEnabled, it.items)
-                listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
-                state.value = ScreenState.Loaded(
-                    mode = listMode,
-                    dailyIndicatorData = it.dailyIndicatorData
-                )
+                state.value = when (it) {
+                    is RefreshableData.Loaded -> {
+                        val screenData = it.value
+                        sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
+                        val sortedItems = applySortUseCase.sort(sortByTimeEnabled, screenData.items)
+                        listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
+                        ScreenState.Loaded(
+                            mode = listMode,
+                            dailyIndicatorData = screenData.dailyIndicatorData
+                        )
+                    }
+
+                    is RefreshableData.Loading -> ScreenState.Loading
+                }
             }
             .launchIn(viewModelScope)
 
@@ -59,12 +72,17 @@ class PracticeDashboardViewModel(
             .launchIn(viewModelScope)
     }
 
+    override fun notifyScreenShown() {
+        viewModelScope.launch { screenShowEvents.send(Unit) }
+    }
+
     override fun updateDailyGoal(configuration: DailyGoalConfiguration) {
         viewModelScope.launch {
             userPreferencesRepository.dailyLimitEnabled.set(configuration.enabled)
             userPreferencesRepository.dailyLearnLimit.set(configuration.learnLimit)
             userPreferencesRepository.dailyReviewLimit.set(configuration.reviewLimit)
-            appStateManager.invalidate()
+            preferencesChangeEvents.send(Unit)
+            notifySrsPreferencesChangedUseCase()
             analyticsManager.sendEvent("daily_goal_update") {
                 put("enabled", configuration.enabled)
                 put("learn_limit", configuration.learnLimit)

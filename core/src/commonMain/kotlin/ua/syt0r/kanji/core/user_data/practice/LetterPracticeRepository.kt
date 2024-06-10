@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.user_data.practice
 
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import kotlin.math.roundToLong
@@ -10,7 +10,7 @@ import kotlin.time.DurationUnit
 
 interface LetterPracticeRepository {
 
-    val changesFlow: Flow<Unit>
+    val changesFlow: SharedFlow<Unit>
 
     suspend fun createPractice(title: String, characters: List<String>)
     suspend fun createPracticeAndMerge(title: String, practiceIdToMerge: List<Long>)
@@ -20,7 +20,7 @@ interface LetterPracticeRepository {
         id: Long,
         title: String,
         charactersToAdd: List<String>,
-        charactersToRemove: List<String>
+        charactersToRemove: List<String>,
     )
 
     suspend fun getAllPractices(): List<Practice>
@@ -30,12 +30,12 @@ interface LetterPracticeRepository {
 
     suspend fun saveWritingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterWritingReviewResult>
+        reviewResultList: List<CharacterWritingReviewResult>,
     )
 
     suspend fun saveReadingReviews(
         practiceTime: Instant,
-        reviewResultList: List<CharacterReadingReviewResult>
+        reviewResultList: List<CharacterReadingReviewResult>,
     )
 
     suspend fun getFirstReviewTime(character: String, type: PracticeType): Instant?
@@ -60,7 +60,7 @@ data class CharacterStudyProgress(
     val practiceType: PracticeType,
     val lastReviewTime: Instant,
     val repeats: Int,
-    val lapses: Int
+    val lapses: Int,
 ) {
 
     fun getExpectedReviewTime(srsInterval: Float): Instant {
@@ -86,7 +86,7 @@ data class CharacterWritingReviewResult(
     override val mistakes: Int,
     override val reviewDuration: Duration,
     override val outcome: CharacterReviewOutcome,
-    val isStudy: Boolean
+    val isStudy: Boolean,
 ) : CharacterReviewResult
 
 data class CharacterReadingReviewResult(
