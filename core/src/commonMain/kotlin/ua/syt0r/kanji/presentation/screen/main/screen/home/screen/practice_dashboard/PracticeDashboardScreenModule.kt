@@ -11,7 +11,8 @@ val practiceDashboardScreenModule = module {
 
     factory<PracticeDashboardScreenContract.LoadDataUseCase> {
         PracticeDashboardLoadDataUseCase(
-            srsManager = get()
+            srsManager = get(),
+            timeUtils = get()
         )
     }
 

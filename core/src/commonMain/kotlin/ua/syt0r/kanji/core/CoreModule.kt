@@ -19,10 +19,7 @@ import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
-import ua.syt0r.kanji.core.srs.DefaultLetterSrsManager
-import ua.syt0r.kanji.core.srs.DefaultNotifySrsPreferencesChangedUseCase
-import ua.syt0r.kanji.core.srs.LetterSrsManager
-import ua.syt0r.kanji.core.srs.NotifySrsPreferencesChangedUseCase
+import ua.syt0r.kanji.core.srs.applySrsDefinitions
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertiesBackupManager
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
@@ -40,6 +37,8 @@ import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesReposito
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 
 val coreModule = module {
+
+    applySrsDefinitions()
 
     single<AnalyticsManager> { PrintAnalyticsManager() }
 
@@ -97,18 +96,6 @@ val coreModule = module {
 
     single<ThemeManager> {
         ThemeManager(userPreferencesRepository = get())
-    }
-
-    single<LetterSrsManager> {
-        DefaultLetterSrsManager(
-            userPreferencesRepository = get(),
-            practiceRepository = get(),
-            timeUtils = get()
-        )
-    }
-
-    factory<NotifySrsPreferencesChangedUseCase> {
-        DefaultNotifySrsPreferencesChangedUseCase(manager = get())
     }
 
     single<CharacterClassifier> { DefaultCharacterClassifier() }

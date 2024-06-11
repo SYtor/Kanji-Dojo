@@ -10,14 +10,13 @@ import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeItemSummary
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.toReviewState
 
 interface SubscribeOnLetterDeckDetailsDataUseCase {
     operator fun invoke(
-        practiceId: Long,
+        deckId: Long,
         screenShownEvents: Flow<Unit>,
     ): Flow<RefreshableData<LetterDeckDetailsData>>
 }
@@ -35,39 +34,25 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
 ) : SubscribeOnLetterDeckDetailsDataUseCase {
 
     override operator fun invoke(
-        practiceId: Long,
+        deckId: Long,
         screenShownEvents: Flow<Unit>,
     ): Flow<RefreshableData<LetterDeckDetailsData>> {
         return refreshableDataFlow(
             dataChangeFlow = letterSrsManager.dataChangeFlow,
             invalidationRequestsFlow = screenShownEvents,
-            provider = { getUpdatedData(practiceId) }
+            provider = { getUpdatedData(deckId) }
         )
     }
 
-    private suspend fun getUpdatedData(
-        practiceId: Long,
-    ): LetterDeckDetailsData {
+    private suspend fun getUpdatedData(deckId: Long): LetterDeckDetailsData {
         Logger.logMethod()
-        val appState = letterSrsManager.getUpdatedData()
 
-        val deckInfo = appState.decks.find { it.id == practiceId }!!
+        val deckInfo = letterSrsManager.getUpdatedDeckInfo(deckId)
         val timeZone = TimeZone.currentSystemDefault()
 
         val items = deckInfo.characters.mapIndexed { index, character ->
-            val characterProgress = appState.characterProgresses[character]
-
-            val lastWritingReviewDate = characterProgress?.writingProgress?.lastReviewTime
-            val expectedWritingReviewTime = characterProgress?.writingProgress
-                ?.getExpectedReviewTime(1.1f)
-                ?.toLocalDateTime(timeZone)
-
-
-            val lastReadingReviewDate = characterProgress?.readingProgress?.lastReviewTime
-            val expectedReadingReviewTime = characterProgress?.readingProgress
-                ?.getExpectedReviewTime(1.1f)
-                ?.toLocalDateTime(timeZone)
-
+            val writingData = deckInfo.writingDetails.all.first { it.character == character }
+            val readingData = deckInfo.readingDetails.all.first { it.character == character }
 
             LetterDeckDetailsItemData(
                 character = character,
@@ -77,23 +62,23 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
                     firstReviewDate = practiceRepository
                         .getFirstReviewTime(character, PracticeType.Writing)
                         ?.toLocalDateTime(timeZone),
-                    lastReviewDate = lastWritingReviewDate?.toLocalDateTime(timeZone),
-                    expectedReviewDate = expectedWritingReviewTime,
-                    lapses = characterProgress?.writingProgress?.lapses ?: 0,
-                    repeats = characterProgress?.writingProgress?.repeats ?: 0,
-                    state = characterProgress?.writingStatus?.toReviewState()
-                        ?: CharacterReviewState.New
+                    lastReviewDate = writingData.studyProgress?.lastReviewTime
+                        ?.toLocalDateTime(timeZone),
+                    expectedReviewDate = writingData.expectedReviewDate,
+                    lapses = writingData.studyProgress?.lapses ?: 0,
+                    repeats = writingData.studyProgress?.repeats ?: 0,
+                    state = writingData.status.toReviewState()
                 ),
                 readingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
                         .getFirstReviewTime(character, PracticeType.Reading)
                         ?.toLocalDateTime(timeZone),
-                    lastReviewDate = lastReadingReviewDate?.toLocalDateTime(timeZone),
-                    expectedReviewDate = expectedReadingReviewTime,
-                    lapses = characterProgress?.readingProgress?.lapses ?: 0,
-                    repeats = characterProgress?.readingProgress?.repeats ?: 0,
-                    state = characterProgress?.readingStatus?.toReviewState()
-                        ?: CharacterReviewState.New
+                    lastReviewDate = readingData.studyProgress?.lastReviewTime
+                        ?.toLocalDateTime(timeZone),
+                    expectedReviewDate = readingData.expectedReviewDate,
+                    lapses = readingData.studyProgress?.lapses ?: 0,
+                    repeats = readingData.studyProgress?.repeats ?: 0,
+                    state = readingData.status.toReviewState()
                 )
             )
         }

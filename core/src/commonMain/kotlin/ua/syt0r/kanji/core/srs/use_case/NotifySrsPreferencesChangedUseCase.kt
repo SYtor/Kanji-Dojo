@@ -1,4 +1,6 @@
-package ua.syt0r.kanji.core.srs
+package ua.syt0r.kanji.core.srs.use_case
+
+import ua.syt0r.kanji.core.srs.LetterSrsManager
 
 interface NotifySrsPreferencesChangedUseCase {
     suspend operator fun invoke()

@@ -17,6 +17,7 @@ val statsScreenModule = module {
 
     factory<SubscribeOnStatsDataUseCase> {
         DefaultSubscribeOnStatsDataUseCase(
+            letterSrsManager = get(),
             letterPracticeRepository = get(),
             timeUtils = get()
         )

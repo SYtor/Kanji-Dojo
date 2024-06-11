@@ -8,22 +8,22 @@ import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.core.srs.DeckStudyProgress
 import ua.syt0r.kanji.core.srs.LetterSrsManager
+import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeStudyProgress
-import kotlin.math.max
-import kotlin.math.min
 
 class PracticeDashboardLoadDataUseCase(
-    private val srsManager: LetterSrsManager
+    private val srsManager: LetterSrsManager,
+    private val timeUtils: TimeUtils,
 ) : PracticeDashboardScreenContract.LoadDataUseCase {
 
     override fun load(
         screenVisibilityEvents: Flow<Unit>,
-        preferencesChangeEvents: Flow<Unit>
+        preferencesChangeEvents: Flow<Unit>,
     ): Flow<RefreshableData<PracticeDashboardScreenData>> {
         return refreshableDataFlow(
             dataChangeFlow = srsManager.dataChangeFlow,
@@ -34,53 +34,35 @@ class PracticeDashboardLoadDataUseCase(
 
     private suspend fun getUpdatedScreenData(): PracticeDashboardScreenData {
         Logger.logMethod()
-        val appState = srsManager.getUpdatedData()
-
-        val configuration = appState.dailyGoalConfiguration
-        val progress = appState.dailyProgress
-
-        val totalNew = appState.decks.flatMap { it.writingDetails.new }.distinct().size +
-                appState.decks.flatMap { it.readingDetails.new }.distinct().size
-
-        val totalReview = appState.decks.flatMap { it.writingDetails.review }.distinct()
-            .size + appState.decks.flatMap { it.readingDetails.review }.distinct().size
-
-        val leftToStudy = max(
-            a = 0,
-            b = min(configuration.learnLimit - progress.studied, totalNew)
-        )
-
-        val leftToReview = max(
-            a = 0,
-            b = min(configuration.reviewLimit - progress.reviewed, totalReview)
-        )
+        val srsDecksData = srsManager.getUpdatedDecksData()
+        val time = timeUtils.now()
 
         return PracticeDashboardScreenData(
-            items = appState.decks
+            items = srsDecksData.decks
                 .map { deckInfo ->
                     PracticeDashboardItem(
                         practiceId = deckInfo.id,
                         title = deckInfo.title,
                         position = deckInfo.position,
-                        timeSinceLastPractice = deckInfo.timeSinceLastReview,
+                        timeSinceLastPractice = deckInfo.lastReviewTime?.let { time - it },
                         writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
-                            configuration = appState.dailyGoalConfiguration,
-                            leftToStudy = leftToStudy,
-                            leftToReview = leftToReview
+                            configuration = srsDecksData.dailyGoalConfiguration,
+                            leftToStudy = srsDecksData.dailyProgress.leftToStudy,
+                            leftToReview = srsDecksData.dailyProgress.leftToReview
                         ),
                         readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
-                            configuration = appState.dailyGoalConfiguration,
-                            leftToStudy = leftToStudy,
-                            leftToReview = leftToReview
+                            configuration = srsDecksData.dailyGoalConfiguration,
+                            leftToStudy = srsDecksData.dailyProgress.leftToStudy,
+                            leftToReview = srsDecksData.dailyProgress.leftToReview
                         )
                     )
                 },
             dailyIndicatorData = DailyIndicatorData(
-                configuration = appState.dailyGoalConfiguration,
+                configuration = srsDecksData.dailyGoalConfiguration,
                 progress = getDailyProgress(
-                    configuration = appState.dailyGoalConfiguration,
-                    leftToStudy = leftToStudy,
-                    leftToReview = leftToReview
+                    configuration = srsDecksData.dailyGoalConfiguration,
+                    leftToStudy = srsDecksData.dailyProgress.leftToStudy,
+                    leftToReview = srsDecksData.dailyProgress.leftToReview
                 )
             )
         )
@@ -89,10 +71,10 @@ class PracticeDashboardLoadDataUseCase(
     private fun DeckStudyProgress.toPracticeStudyProgress(
         configuration: DailyGoalConfiguration,
         leftToStudy: Int,
-        leftToReview: Int
+        leftToReview: Int,
     ): PracticeStudyProgress {
         return PracticeStudyProgress(
-            all = all,
+            all = all.map { it.character },
             known = done,
             review = review,
             new = new,
@@ -104,7 +86,7 @@ class PracticeDashboardLoadDataUseCase(
     private fun getDailyProgress(
         configuration: DailyGoalConfiguration,
         leftToStudy: Int,
-        leftToReview: Int
+        leftToReview: Int,
     ): DailyProgress {
         return when {
             !configuration.enabled -> DailyProgress.Disabled

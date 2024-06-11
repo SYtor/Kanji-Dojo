@@ -112,6 +112,9 @@ upsertCharacterProgress:
 INSERT OR REPLACE INTO character_progress(character, mode, last_review_time, repeats, lapses)
 VALUES (?,?,?,?,?);
 
+getCharacterProgresse:
+SELECT * FROM character_progress WHERE character = ? AND mode = ?;
+
 getCharacterProgresses:
 SELECT *
 FROM character_progress;

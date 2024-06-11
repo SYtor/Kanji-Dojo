@@ -7,7 +7,7 @@ interface StatsScreenContract {
 
     interface ViewModel {
         val state: StateFlow<ScreenState>
-        fun invalidate()
+        fun notifyScreenShown()
         fun reportScreenShown()
     }
 

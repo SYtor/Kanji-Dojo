@@ -214,7 +214,7 @@ object JapaneseAboutStrings : AboutStrings {
     override val version: (versionName: String) -> String = { "バージョン: $it" }
     override val githubTitle: String = "プロジェクトのGitHubページ"
     override val versionChangesTitle: String = "変更履歴"
-    override val versionChangesDescription: String ="アプリの変更履歴"
+    override val versionChangesDescription: String = "アプリの変更履歴"
     override val versionChangesButton: String = "閉じる"
     override val githubDescription: String = "ソースコード、バグ報告、議論"
     override val creditsTitle: String = "クレジット"
@@ -366,8 +366,8 @@ object JapanesePracticePreviewStrings : PracticePreviewStrings {
         }
     }
     override val groupDetailsButton: String = "練習を開始"
-    override val expectedReviewDate: (LocalDateTime?) -> String = {
-        "予定の復習日: ${it?.date ?: "-"}"
+    override val expectedReviewDate: (LocalDate?) -> String = {
+        "予定の復習日: ${it ?: "-"}"
     }
     override val lastReviewDate: (LocalDateTime?) -> String = {
         "最後の復習日: ${it?.date ?: "-"}"

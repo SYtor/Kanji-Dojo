@@ -1,10 +1,10 @@
 package ua.syt0r.kanji.core.srs
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
-import kotlin.time.Duration
 
-data class LetterSrsData(
-    val characterProgresses: Map<String, CombinedCharacterProgress>,
+data class LetterSrsDecksData(
     val decks: List<LetterSrsDeckInfo>,
     val dailyGoalConfiguration: DailyGoalConfiguration,
     val dailyProgress: DailyProgress
@@ -12,11 +12,11 @@ data class LetterSrsData(
 
 enum class CharacterProgressStatus { New, Done, Review }
 
-data class CombinedCharacterProgress(
-    val writingStatus: CharacterProgressStatus,
-    val writingProgress: CharacterStudyProgress?,
-    val readingStatus: CharacterProgressStatus,
-    val readingProgress: CharacterStudyProgress?
+data class CharacterSrsData(
+    val character: String,
+    val status: CharacterProgressStatus,
+    val expectedReviewDate: LocalDate?,
+    val studyProgress: CharacterStudyProgress?
 )
 
 data class LetterSrsDeckInfo(
@@ -24,7 +24,7 @@ data class LetterSrsDeckInfo(
     val title: String,
     val position: Int,
     val characters: List<String>,
-    val timeSinceLastReview: Duration?,
+    val lastReviewTime: Instant?,
     val writingDetails: DeckStudyProgress,
     val readingDetails: DeckStudyProgress
 )
@@ -37,11 +37,13 @@ data class DailyGoalConfiguration(
 
 data class DailyProgress(
     val studied: Int,
-    val reviewed: Int
+    val reviewed: Int,
+    val leftToStudy: Int,
+    val leftToReview: Int
 )
 
 data class DeckStudyProgress(
-    val all: List<String>,
+    val all: List<CharacterSrsData>,
     val done: List<String>,
     val review: List<String>,
     val new: List<String>

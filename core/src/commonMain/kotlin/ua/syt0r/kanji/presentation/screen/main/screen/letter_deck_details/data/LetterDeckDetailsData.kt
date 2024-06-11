@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.core.srs.CharacterProgressStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract
@@ -74,7 +75,7 @@ data class LetterDeckDetailsItemData(
 data class PracticeItemSummary(
     val firstReviewDate: LocalDateTime?,
     val lastReviewDate: LocalDateTime?,
-    val expectedReviewDate: LocalDateTime?,
+    val expectedReviewDate: LocalDate?,
     val lapses: Int,
     val repeats: Int,
     val state: CharacterReviewState,

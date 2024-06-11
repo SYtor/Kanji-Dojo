@@ -10,6 +10,7 @@ fun StatsScreen(
 ) {
 
     LaunchedEffect(Unit) {
+        viewModel.notifyScreenShown()
         viewModel.reportScreenShown()
     }
 

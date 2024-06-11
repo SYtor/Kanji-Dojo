@@ -348,7 +348,7 @@ interface PracticePreviewStrings {
         }
     val groupDetailsButton: String
 
-    val expectedReviewDate: (LocalDateTime?) -> String
+    val expectedReviewDate: (LocalDate?) -> String
     val lastReviewDate: (LocalDateTime?) -> String
     val repetitions: (Int) -> String
     val lapses: (Int) -> String

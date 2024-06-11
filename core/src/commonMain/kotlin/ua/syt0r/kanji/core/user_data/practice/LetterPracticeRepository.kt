@@ -40,6 +40,7 @@ interface LetterPracticeRepository {
 
     suspend fun getFirstReviewTime(character: String, type: PracticeType): Instant?
     suspend fun getLastReviewTime(practiceId: Long, type: PracticeType): Instant?
+    suspend fun getStudyProgress(character: String, type: PracticeType): CharacterStudyProgress?
     suspend fun getStudyProgresses(): List<CharacterStudyProgress>
 
     suspend fun getReviews(start: Instant, end: Instant): Map<CharacterReviewResult, Instant>

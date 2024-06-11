@@ -17,7 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.use_case
 class StatsViewModel(
     private val viewModelScope: CoroutineScope,
     subscribeOnStatsDataUseCase: SubscribeOnStatsDataUseCase,
-    private val analyticsManager: AnalyticsManager
+    private val analyticsManager: AnalyticsManager,
 ) : StatsScreenContract.ViewModel {
 
     private val screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -37,7 +37,7 @@ class StatsViewModel(
             .launchIn(viewModelScope)
     }
 
-    override fun invalidate() {
+    override fun notifyScreenShown() {
         viewModelScope.launch { invalidationRequests.send(Unit) }
     }
 

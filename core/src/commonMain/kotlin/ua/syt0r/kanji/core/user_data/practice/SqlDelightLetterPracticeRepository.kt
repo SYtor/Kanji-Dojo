@@ -213,21 +213,21 @@ class SqlDelightLetterPracticeRepository(
         timestamp?.let { Instant.fromEpochMilliseconds(it) }
     }
 
-    override suspend fun getStudyProgresses(): List<CharacterStudyProgress> = databaseManager
-        .runTransaction {
-            getCharacterProgresses()
-                .executeAsList()
-                .map { dbItem ->
-                    CharacterStudyProgress(
-                        character = dbItem.character,
-                        practiceType = practiceTypeToDBValue.entries
-                            .first { dbItem.mode == it.value }.key,
-                        lastReviewTime = Instant.fromEpochMilliseconds(dbItem.last_review_time!!),
-                        repeats = dbItem.repeats.toInt(),
-                        lapses = dbItem.lapses.toInt()
-                    )
-                }
-        }
+    override suspend fun getStudyProgress(
+        character: String,
+        type: PracticeType,
+    ): CharacterStudyProgress? = runTransaction {
+        getCharacterProgress(
+            character = character,
+            mode = practiceTypeToDBValue.getValue(type)
+        ).executeAsOneOrNull()?.converted()
+    }
+
+    override suspend fun getStudyProgresses(): List<CharacterStudyProgress> = runTransaction {
+        getCharacterProgresses()
+            .executeAsList()
+            .map { it.converted() }
+    }
 
     override suspend fun getReviews(
         start: Instant,
@@ -273,6 +273,17 @@ class SqlDelightLetterPracticeRepository(
     private fun CharacterReviewOutcome.toLong(): Long = when (this) {
         CharacterReviewOutcome.Success -> 1
         CharacterReviewOutcome.Fail -> 0
+    }
+
+    private fun Character_progress.converted(): CharacterStudyProgress {
+        return CharacterStudyProgress(
+            character = character,
+            practiceType = practiceTypeToDBValue.entries
+                .first { mode == it.value }.key,
+            lastReviewTime = Instant.fromEpochMilliseconds(last_review_time!!),
+            repeats = repeats.toInt(),
+            lapses = lapses.toInt()
+        )
     }
 
     private fun Writing_review.converted(): CharacterWritingReviewResult {

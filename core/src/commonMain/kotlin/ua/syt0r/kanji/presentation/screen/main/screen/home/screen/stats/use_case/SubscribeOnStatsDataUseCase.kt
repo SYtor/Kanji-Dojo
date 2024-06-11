@@ -8,6 +8,7 @@ import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
+import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
@@ -31,6 +32,7 @@ data class StatsData(
 )
 
 class DefaultSubscribeOnStatsDataUseCase(
+    private val letterSrsManager: LetterSrsManager,
     private val letterPracticeRepository: LetterPracticeRepository,
     private val timeUtils: TimeUtils
 ) : SubscribeOnStatsDataUseCase {
@@ -39,7 +41,7 @@ class DefaultSubscribeOnStatsDataUseCase(
         invalidationRequests: Flow<Unit>
     ): Flow<RefreshableData<StatsData>> {
         return refreshableDataFlow(
-            dataChangeFlow = letterPracticeRepository.changesFlow,
+            dataChangeFlow = letterSrsManager.dataChangeFlow,
             invalidationRequestsFlow = invalidationRequests,
             provider = { getStats() }
         )

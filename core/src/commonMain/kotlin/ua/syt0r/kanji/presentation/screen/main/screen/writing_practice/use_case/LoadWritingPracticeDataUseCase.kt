@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import ua.syt0r.kanji.core.srs.CharacterProgressStatus
 import ua.syt0r.kanji.core.srs.LetterSrsManager
+import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewHistory
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
@@ -21,14 +22,12 @@ class LoadWritingPracticeDataUseCase(
         configuration: WritingScreenConfiguration,
         scope: CoroutineScope,
     ): List<WritingCharacterReviewData> {
-        val progresses = letterSrsManager.getUpdatedData().characterProgresses
-
         return configuration.characters
             .map { character ->
-                val writingStatus = progresses[character]?.writingStatus
                 val shouldStudy: Boolean = when (configuration.hintMode) {
                     WritingPracticeHintMode.OnlyNew -> {
-                        writingStatus == null || writingStatus == CharacterProgressStatus.New
+                        letterSrsManager.getStatus(character, PracticeType.Writing).status ==
+                                CharacterProgressStatus.New
                     }
 
                     WritingPracticeHintMode.All -> true

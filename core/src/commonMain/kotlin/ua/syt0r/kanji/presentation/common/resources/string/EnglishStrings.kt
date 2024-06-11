@@ -400,8 +400,8 @@ object EnglishPracticePreviewStrings : PracticePreviewStrings {
     }
     override val groupDetailsButton: String = "Start"
 
-    override val expectedReviewDate: (LocalDateTime?) -> String =
-        { "Expected Review: ${it?.date ?: "-"}" }
+    override val expectedReviewDate: (LocalDate?) -> String =
+        { "Expected Review: ${it ?: "-"}" }
     override val lastReviewDate: (LocalDateTime?) -> String = {
         "Last Review: ${it?.date ?: "-"}"
     }

@@ -14,7 +14,7 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
-import ua.syt0r.kanji.core.srs.NotifySrsPreferencesChangedUseCase
+import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
 import kotlin.time.Duration.Companion.seconds
