@@ -168,6 +168,7 @@ fun LetterDeckDetailsScreenUI(
                 is ScreenState.Loaded -> {
                     ScreenLoadedState(
                         screenState = screenState,
+                        extraListSpacerState = extraListSpacerState,
                         onConfigurationUpdate = updateConfiguration,
                         onCharacterClick = navigateToCharacterDetails,
                         selectGroup = {
@@ -227,17 +228,15 @@ fun LetterDeckDetailsScreenUI(
 @Composable
 private fun ScreenLoadedState(
     screenState: ScreenState.Loaded,
+    extraListSpacerState: ExtraListSpacerState,
     onConfigurationUpdate: (LetterDeckDetailsConfiguration) -> Unit,
     onCharacterClick: (String) -> Unit,
     selectGroup: (DeckDetailsListItem.Group) -> Unit,
     toggleItemSelection: (DeckDetailsListItem) -> Unit,
 ) {
 
-    val extraListSpacerState = rememberExtraListSpacerState()
-
     Box(
         modifier = Modifier.fillMaxSize()
-            .onGloballyPositioned { extraListSpacerState.updateList(it) },
     ) {
 
         AnimatedContent(
