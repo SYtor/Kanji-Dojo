@@ -27,8 +27,8 @@ kotlin {
                 api(compose.runtime)
                 api(compose.materialIconsExtended)
                 api("io.insert-koin:koin-core:$koinVersion")
-                api("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
-                api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
+                api("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+                api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
                 implementation("dev.esnault.wanakana:wanakana-core:1.1.1")
 
@@ -43,7 +43,7 @@ kotlin {
             dependencies {
                 implementation("app.cash.sqldelight:android-driver:2.0.0")
 
-                val lifecycleVersion = "2.7.0"
+                val lifecycleVersion = "2.8.1"
                 api("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
                 api("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
 
@@ -52,14 +52,14 @@ kotlin {
                 api("io.insert-koin:koin-android:$koinVersion")
                 api("io.insert-koin:koin-androidx-compose:$koinVersion")
 
-                implementation("androidx.navigation:navigation-compose:2.7.6")
-                api("androidx.activity:activity-compose:1.8.2")
-                api("androidx.datastore:datastore-preferences:1.0.0")
+                implementation("androidx.navigation:navigation-compose:2.7.7")
+                api("androidx.activity:activity-compose:1.9.0")
+                api("androidx.datastore:datastore-preferences:1.1.1")
                 api(compose.uiTooling)
 
-                api("androidx.core:core-ktx:1.12.0")
-                api("androidx.appcompat:appcompat:1.6.1")
-                implementation("androidx.media3:media3-exoplayer:1.2.1")
+                api("androidx.core:core-ktx:1.13.1")
+                api("androidx.appcompat:appcompat:1.7.0")
+                implementation("androidx.media3:media3-exoplayer:1.3.1")
             }
         }
         val jvmMain by getting {

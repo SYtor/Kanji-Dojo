@@ -92,7 +92,7 @@ dependencies {
     implementation(project(":core"))
 
     // Google Play
-    "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:32.2.3"))
+    "googlePlayImplementation"(platform("com.google.firebase:firebase-bom:33.1.0"))
     "googlePlayImplementation"("com.google.firebase:firebase-analytics-ktx")
     "googlePlayImplementation"("com.google.firebase:firebase-crashlytics-ktx")
     "googlePlayImplementation"("com.google.android.play:review-ktx:2.0.1")
