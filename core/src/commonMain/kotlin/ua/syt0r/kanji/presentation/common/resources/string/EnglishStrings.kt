@@ -31,9 +31,8 @@ object EnglishStrings : Strings {
     override val reviewStateNew: String = "New"
 
     override val home: HomeStrings = EnglishHomeStrings
-    override val practiceDashboard = EnglishPracticeDashboardStrings
+    override val lettersDashboard = EnglishLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = EnglishVocabDashboardStrings
-    override val createPracticeDialog = EnglishCreatePracticeDialogStrings
     override val dailyGoalDialog: DailyGoalDialogStrings = EnglishDailyGoalDialogStrings
     override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
@@ -44,9 +43,9 @@ object EnglishStrings : Strings {
     override val backup: BackupStrings = EnglishBackupStrings
     override val feedback: FeedbackStrings = EnglishFeedbackStrings
 
-    override val practiceImport: PracticeImportStrings = EnglishPracticeImportStrings
-    override val practiceCreate: PracticeCreateStrings = EnglishPracticeCreateStrings
-    override val practicePreview: PracticePreviewStrings = EnglishPracticePreviewStrings
+    override val letterDeckPicker: LetterDeckPickerStrings = EnglishLetterDeckPickerStrings
+    override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
+    override val letterDeckDetails: LetterDeckDetailsStrings = EnglishLetterDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
@@ -63,18 +62,18 @@ object EnglishStrings : Strings {
 
 object EnglishHomeStrings : HomeStrings {
     override val screenTitle: String = "Kanji Dojo"
-    override val dashboardTabLabel: String = "Letters"
+    override val lettersDashboardTabLabel: String = "Letters"
     override val vocabDashboardTabLabel: String = "Vocab"
     override val statsTabLabel: String = "Stats"
     override val searchTabLabel: String = "Search"
     override val settingsTabLabel: String = "Settings"
 }
 
-object EnglishPracticeDashboardStrings : PracticeDashboardStrings {
+object EnglishLettersDashboardStrings : LettersDashboardStrings {
 
     override val emptyScreenMessage = { color: Color ->
         buildAnnotatedString {
-            append("Click ")
+            append("To start ")
             withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append("+") }
             append(" and save practice to start.\nPractices are used to track your progress")
         }
@@ -142,12 +141,6 @@ object EnglishVocabDashboardStrings : VocabDashboardStrings {
     override val deckTitleCommonPlaces: String = "Common Places"
     override val deckTitleCities: String = "Cities"
     override val deckTitleTransport: String = "Transport"
-}
-
-object EnglishCreatePracticeDialogStrings : CreatePracticeDialogStrings {
-    override val title: String = "Create practice"
-    override val selectMessage: String = "Select (Kana, JLPT, etc.)"
-    override val createMessage: String = "Create custom"
 }
 
 object EnglishDailyGoalDialogStrings : DailyGoalDialogStrings {
@@ -280,7 +273,7 @@ object EnglishFeedbackStrings : FeedbackStrings {
     override val errorMessage: (String?) -> String = { "Error: $it" }
 }
 
-object EnglishPracticeImportStrings : PracticeImportStrings {
+object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
 
     override val title: String = "Select"
 
@@ -353,7 +346,7 @@ object EnglishPracticeImportStrings : PracticeImportStrings {
 
 }
 
-object EnglishPracticeCreateStrings : PracticeCreateStrings {
+object EnglishDeckEditStrings : DeckEditStrings {
     override val newTitle: String = "Create"
     override val ediTitle: String = "Edit"
     override val searchHint: String = "Enter kana or kanji"
@@ -383,7 +376,7 @@ object EnglishPracticeCreateStrings : PracticeCreateStrings {
     override val leaveConfirmationAccept: String = "Leave"
 }
 
-object EnglishPracticePreviewStrings : PracticePreviewStrings {
+object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val emptyListMessage: String = "Nothing here"
     override val detailsGroupTitle: (index: Int) -> String = { "Group $it" }
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {

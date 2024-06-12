@@ -20,7 +20,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
@@ -84,9 +84,9 @@ actual fun HomeNavigationContent(
     ) {
 
         composable(
-            route = HomeScreenTab.PracticeDashboard.route,
+            route = HomeScreenTab.LettersDashboard.route,
             content = {
-                PracticeDashboardScreen(
+                LettersDashboardScreen(
                     mainNavigationState = mainNavigationState,
                     viewModel = getMultiplatformViewModel()
                 )

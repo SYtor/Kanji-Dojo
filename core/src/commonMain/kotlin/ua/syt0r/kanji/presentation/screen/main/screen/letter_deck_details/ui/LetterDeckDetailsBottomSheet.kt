@@ -134,7 +134,7 @@ private fun PracticeGroupDetails(
         ) {
 
             Text(
-                text = resolveString { practicePreview.detailsGroupTitle(group.index) },
+                text = resolveString { letterDeckDetails.detailsGroupTitle(group.index) },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 1.dp) // TODO text alignment api
             )
@@ -193,14 +193,14 @@ private fun PracticeGroupDetails(
 
         Text(
             text = resolveString {
-                practicePreview.firstTimeReviewMessage(group.summary.firstReviewDate)
+                letterDeckDetails.firstTimeReviewMessage(group.summary.firstReviewDate)
             },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
         Text(
             text = resolveString {
-                practicePreview.lastTimeReviewMessage(group.summary.lastReviewDate)
+                letterDeckDetails.lastTimeReviewMessage(group.summary.lastReviewDate)
             },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
@@ -248,7 +248,7 @@ private fun PracticeGroupDetails(
                 modifier = Modifier.weight(1f).padding(vertical = 6.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(text = resolveString { practicePreview.groupDetailsButton })
+                Text(text = resolveString { letterDeckDetails.groupDetailsButton })
             }
 
         }

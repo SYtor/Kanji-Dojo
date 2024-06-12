@@ -188,7 +188,7 @@ private fun CharacterInputField(
                 exit = fadeOut()
             ) {
                 Text(
-                    text = resolveString { practiceCreate.searchHint },
+                    text = resolveString { deckEdit.searchHint },
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )

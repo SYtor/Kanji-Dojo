@@ -10,7 +10,7 @@ import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
@@ -46,8 +46,8 @@ actual fun HomeNavigationContent(
 
     stateHolder.SaveableStateProvider(tab.name) {
         when (tab) {
-            HomeScreenTab.PracticeDashboard -> {
-                PracticeDashboardScreen(
+            HomeScreenTab.LettersDashboard -> {
+                LettersDashboardScreen(
                     mainNavigationState = mainNavigationState,
                     viewModel = getMultiplatformViewModel()
                 )

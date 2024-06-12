@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,11 +30,11 @@ import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyIndicatorData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyProgress
 
 @Composable
-fun PracticeDashboardDailyLimitIndicator(
+fun LettersDashboardDailyLimitIndicator(
     state: State<DailyIndicatorData?>,
     updateConfiguration: (DailyGoalConfiguration) -> Unit
 ) {
@@ -54,7 +54,7 @@ fun PracticeDashboardDailyLimitIndicator(
         }
 
         val data = cachedData.value
-        val strings = resolveString { practiceDashboard }
+        val strings = resolveString { lettersDashboard }
         val message = when {
             data == null -> null
             data.progress is DailyProgress.Disabled -> buildAnnotatedString {

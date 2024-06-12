@@ -1,9 +1,9 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.practice_import
+package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker
 
 import androidx.compose.runtime.State
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.data.LetterDeckPickerCategory
 
-interface PracticeImportScreenContract {
+interface LetterDeckPickerScreenContract {
 
     interface ViewModel {
         val state: State<ScreenState>
@@ -15,7 +15,7 @@ interface PracticeImportScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
-            val categories: List<ImportPracticeCategory>
+            val categories: List<LetterDeckPickerCategory>
         ) : ScreenState()
 
     }

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -89,7 +88,7 @@ fun PracticePreviewScreenFilterOptionDialog(
     )
 
     PracticePreviewScreenBaseDialog(
-        title = resolveString { practicePreview.filterDialog.title },
+        title = resolveString { letterDeckDetails.filterDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = {
             onApplyConfiguration(
@@ -147,7 +146,7 @@ fun PracticePreviewScreenSortDialog(
     var isDescending by rememberSaveable { mutableStateOf(isDesc) }
 
     PracticePreviewScreenBaseDialog(
-        title = resolveString { practicePreview.sortDialog.title },
+        title = resolveString { letterDeckDetails.sortDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyClick(selectedSortOption, isDescending) }
     ) {
@@ -220,7 +219,7 @@ fun DeckDetailsLayoutDialog(
     var selectedKanaGroups by remember { mutableStateOf(kanaGroups) }
 
     PracticePreviewScreenBaseDialog(
-        title = resolveString { practicePreview.layoutDialog.title },
+        title = resolveString { letterDeckDetails.layoutDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selectedLayout, selectedKanaGroups) }
     ) {
@@ -258,9 +257,9 @@ fun DeckDetailsLayoutDialog(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Column(Modifier.weight(1f)) {
-                Text(text = resolveString { practicePreview.layoutDialog.kanaGroupsTitle })
+                Text(text = resolveString { letterDeckDetails.layoutDialog.kanaGroupsTitle })
                 Text(
-                    text = resolveString { practicePreview.layoutDialog.kanaGroupsSubtitle },
+                    text = resolveString { letterDeckDetails.layoutDialog.kanaGroupsSubtitle },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -286,10 +285,10 @@ private fun PracticePreviewScreenBaseDialog(
         content = content,
         buttons = {
             TextButton(onClick = onDismissRequest) {
-                Text(text = resolveString { practicePreview.dialogCommon.buttonCancel })
+                Text(text = resolveString { letterDeckDetails.dialogCommon.buttonCancel })
             }
             TextButton(onClick = onApplyClick) {
-                Text(text = resolveString { practicePreview.dialogCommon.buttonApply })
+                Text(text = resolveString { letterDeckDetails.dialogCommon.buttonApply })
             }
         }
     )

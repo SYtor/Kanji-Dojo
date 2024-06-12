@@ -27,7 +27,7 @@ fun DeleteDeckDialog(
     onDeleteConfirmed: () -> Unit
 ) {
 
-    val strings = resolveString { practiceCreate }
+    val strings = resolveString { deckEdit }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
@@ -51,7 +51,7 @@ fun SaveDeckDialog(
     onDismissRequest: () -> Unit
 ) {
 
-    val strings = resolveString { practiceCreate }
+    val strings = resolveString { deckEdit }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
@@ -106,7 +106,7 @@ fun DeckEditLeaveConfirmationDialog(
     onConfirmation: () -> Unit
 ) {
 
-    val strings = resolveString { practiceCreate }
+    val strings = resolveString { deckEdit }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
@@ -134,16 +134,16 @@ fun DeckEditUnknownCharactersDialog(
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {
-            Text(text = resolveString { practiceCreate.unknownTitle })
+            Text(text = resolveString { deckEdit.unknownTitle })
         },
         content = {
-            Text(text = resolveString { practiceCreate.unknownMessage(characters.toList()) })
+            Text(text = resolveString { deckEdit.unknownMessage(characters.toList()) })
         },
         buttons = {
             TextButton(
                 onClick = onDismissRequest
             ) {
-                Text(text = resolveString { practiceCreate.unknownButton })
+                Text(text = resolveString { deckEdit.unknownButton })
             }
         }
     )

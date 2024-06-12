@@ -211,7 +211,7 @@ private fun Toolbar(
                 text = resolveString {
                     when (configuration) {
                         is DeckEditScreenConfiguration.LetterDeck.Edit,
-                        is DeckEditScreenConfiguration.VocabDeck.Edit -> practiceCreate.ediTitle
+                        is DeckEditScreenConfiguration.VocabDeck.Edit -> deckEdit.ediTitle
 
                         is DeckEditScreenConfiguration.LetterDeck -> "Create Letter Deck"
                         is DeckEditScreenConfiguration.VocabDeck -> "Create Vocab Deck"

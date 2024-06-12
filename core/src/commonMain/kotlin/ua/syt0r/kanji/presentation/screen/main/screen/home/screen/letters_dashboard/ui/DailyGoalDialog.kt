@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

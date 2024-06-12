@@ -87,7 +87,7 @@ fun LetterDeckDetailsItemsUI(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
 
-                    val strings = resolveString { practicePreview }
+                    val strings = resolveString { letterDeckDetails }
 
                     Text(
                         text = strings.expectedReviewDate(summary.expectedReviewDate),

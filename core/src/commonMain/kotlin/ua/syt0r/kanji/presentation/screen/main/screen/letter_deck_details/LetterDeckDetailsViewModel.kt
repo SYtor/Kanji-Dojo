@@ -8,13 +8,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.launchUnit
+import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
+import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
@@ -36,7 +37,7 @@ class LetterDeckDetailsViewModel(
     private val updateConfigurationUseCase: UpdateLetterDeckDetailsConfigurationUseCase,
     private val getVisibleDataUseCase: GetLetterDeckDetailsVisibleDataUseCase,
     private val analyticsManager: AnalyticsManager,
-) : LetterDeckDetailsContract.ViewModel {
+) : LetterDeckDetailsContract.ViewModel, LifecycleAwareViewModel {
 
     private var practiceId: Long = -1L
     private val screenShownEvents = Channel<Unit>()
@@ -46,6 +47,9 @@ class LetterDeckDetailsViewModel(
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val state: StateFlow<ScreenState> = _state
 
+    override val lifecycleState: MutableStateFlow<LifecycleState> =
+        MutableStateFlow(LifecycleState.Hidden)
+
     override fun notifyScreenShown(practiceId: Long) = viewModelScope.launchUnit {
         if (this@LetterDeckDetailsViewModel.practiceId != -1L) {
             screenShownEvents.send(Unit)
@@ -53,7 +57,7 @@ class LetterDeckDetailsViewModel(
         }
 
         this@LetterDeckDetailsViewModel.practiceId = practiceId
-        subscribeOnDataUseCase(practiceId, screenShownEvents.consumeAsFlow())
+        subscribeOnDataUseCase(practiceId, lifecycleState)
             .onEach { it.applyToState() }
             .launchIn(viewModelScope)
 

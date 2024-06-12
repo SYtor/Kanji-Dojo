@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardListMode
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeStudyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui.PracticeDashboardScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyIndicatorData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardListMode
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.PracticeStudyProgress
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
@@ -41,18 +41,17 @@ private fun randomStudyProgress(): PracticeStudyProgress {
 private fun EmptyPreview(
     state: ScreenState = ScreenState.Loaded(
         mode = MutableStateFlow(
-            PracticeDashboardListMode.Default(emptyList())
+            LettersDashboardListMode.Default(emptyList())
         ),
         dailyIndicatorData = dailyIndicatorData
     ),
     useDarkTheme: Boolean = false,
 ) {
     AppTheme(useDarkTheme) {
-        PracticeDashboardScreenUI(
+        LettersDashboardScreenUI(
             state = rememberUpdatedState(newValue = state),
-            navigateToImportPractice = {},
-            navigateToCreatePractice = {},
-            navigateToPracticeDetails = {},
+            navigateToDeckPicker = {},
+            navigateToDeckDetails = {},
             startQuickPractice = {},
             updateDailyGoalConfiguration = {},
             startMerge = { },
@@ -70,15 +69,15 @@ fun PracticeDashboardUIPreview() {
     EmptyPreview(
         state = ScreenState.Loaded(
             mode = (1..5).map {
-                PracticeDashboardItem(
-                    practiceId = Random.nextLong(),
+                LettersDashboardItem(
+                    deckId = Random.nextLong(),
                     title = "Grade $it",
                     position = 1,
-                    timeSinceLastPractice = 1.days,
+                    timeSinceLastReview = 1.days,
                     writingProgress = randomStudyProgress(),
                     readingProgress = randomStudyProgress()
                 )
-            }.let { MutableStateFlow(PracticeDashboardListMode.Default(it)) },
+            }.let { MutableStateFlow(LettersDashboardListMode.Default(it)) },
             dailyIndicatorData = dailyIndicatorData
         )
     )
@@ -90,15 +89,15 @@ private fun TabletPreview() {
     EmptyPreview(
         state = ScreenState.Loaded(
             mode = (0..10).map {
-                PracticeDashboardItem(
-                    practiceId = Random.nextLong(),
+                LettersDashboardItem(
+                    deckId = Random.nextLong(),
                     title = "Grade $it",
                     position = 1,
-                    timeSinceLastPractice = if (it % 2 == 0) null else it.days,
+                    timeSinceLastReview = if (it % 2 == 0) null else it.days,
                     writingProgress = randomStudyProgress(),
                     readingProgress = randomStudyProgress()
                 )
-            }.let { MutableStateFlow(PracticeDashboardListMode.Default(it)) },
+            }.let { MutableStateFlow(LettersDashboardListMode.Default(it)) },
             dailyIndicatorData = dailyIndicatorData
         ),
         useDarkTheme = true

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.use_case
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.RefreshableData
@@ -10,6 +11,7 @@ import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeItemSummary
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.toReviewState
@@ -17,7 +19,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.t
 interface SubscribeOnLetterDeckDetailsDataUseCase {
     operator fun invoke(
         deckId: Long,
-        screenShownEvents: Flow<Unit>,
+        lifecycleState: StateFlow<LifecycleState>
     ): Flow<RefreshableData<LetterDeckDetailsData>>
 }
 
@@ -35,12 +37,12 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
 
     override operator fun invoke(
         deckId: Long,
-        screenShownEvents: Flow<Unit>,
+        lifecycleState: StateFlow<LifecycleState>,
     ): Flow<RefreshableData<LetterDeckDetailsData>> {
         return refreshableDataFlow(
             dataChangeFlow = letterSrsManager.dataChangeFlow,
-            invalidationRequestsFlow = screenShownEvents,
-            provider = { getUpdatedData(deckId) }
+            lifecycleState = lifecycleState,
+            valueProvider = { getUpdatedData(deckId) }
         )
     }
 

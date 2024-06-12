@@ -1,7 +1,7 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.use_case
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.use_case
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
@@ -9,42 +9,42 @@ import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.core.srs.DeckStudyProgress
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeStudyProgress
+import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyIndicatorData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.PracticeStudyProgress
 
-class PracticeDashboardLoadDataUseCase(
+class LettersDashboardLoadDataUseCase(
     private val srsManager: LetterSrsManager,
     private val timeUtils: TimeUtils,
-) : PracticeDashboardScreenContract.LoadDataUseCase {
+) : LettersDashboardScreenContract.LoadDataUseCase {
 
     override fun load(
-        screenVisibilityEvents: Flow<Unit>,
-        preferencesChangeEvents: Flow<Unit>,
-    ): Flow<RefreshableData<PracticeDashboardScreenData>> {
+        lifecycleState: StateFlow<LifecycleState>
+    ): Flow<RefreshableData<LettersDashboardScreenData>> {
         return refreshableDataFlow(
             dataChangeFlow = srsManager.dataChangeFlow,
-            invalidationRequestsFlow = merge(screenVisibilityEvents, preferencesChangeEvents),
-            provider = { getUpdatedScreenData() }
+            lifecycleState = lifecycleState,
+            valueProvider = { getUpdatedScreenData() }
         )
     }
 
-    private suspend fun getUpdatedScreenData(): PracticeDashboardScreenData {
+    private suspend fun getUpdatedScreenData(): LettersDashboardScreenData {
         Logger.logMethod()
         val srsDecksData = srsManager.getUpdatedDecksData()
         val time = timeUtils.now()
 
-        return PracticeDashboardScreenData(
+        return LettersDashboardScreenData(
             items = srsDecksData.decks
                 .map { deckInfo ->
-                    PracticeDashboardItem(
-                        practiceId = deckInfo.id,
+                    LettersDashboardItem(
+                        deckId = deckInfo.id,
                         title = deckInfo.title,
                         position = deckInfo.position,
-                        timeSinceLastPractice = deckInfo.lastReviewTime?.let { time - it },
+                        timeSinceLastReview = deckInfo.lastReviewTime?.let { time - it },
                         writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
                             configuration = srsDecksData.dailyGoalConfiguration,
                             leftToStudy = srsDecksData.dailyProgress.leftToStudy,

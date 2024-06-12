@@ -197,7 +197,7 @@ fun LetterDeckDetailsScreenUI(
             }
 
             val noGroupsSelectedMessage = resolveString {
-                practicePreview.multiselectNoSelected
+                letterDeckDetails.multiselectNoSelected
             }
 
             FAB(
@@ -384,7 +384,7 @@ fun LetterDeckDetailsConfigurationRow(
                 enabled = false,
                 onClick = {},
                 modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-                label = { Text(resolveString { practicePreview.kanaGroupsModeActivatedLabel }) },
+                label = { Text(resolveString { letterDeckDetails.kanaGroupsModeActivatedLabel }) },
             )
         } else {
             FilterChip(
@@ -396,8 +396,8 @@ fun LetterDeckDetailsConfigurationRow(
                         text = resolveString {
                             configuration.filterConfiguration.run {
                                 when {
-                                    showNew && showDue && showDone -> practicePreview.filterAllLabel
-                                    !(showNew || showDue || showDone) -> practicePreview.filterNoneLabel
+                                    showNew && showDue && showDone -> letterDeckDetails.filterAllLabel
+                                    !(showNew || showDue || showDone) -> letterDeckDetails.filterNoneLabel
                                     else -> {
                                         val appliedFilters = mutableListOf<String>()
                                         if (showNew) appliedFilters.add(reviewStateNew)

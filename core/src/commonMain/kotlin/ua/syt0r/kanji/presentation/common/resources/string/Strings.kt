@@ -46,9 +46,8 @@ interface Strings {
     val reviewStateNew: String
 
     val home: HomeStrings
-    val practiceDashboard: PracticeDashboardStrings
+    val lettersDashboard: LettersDashboardStrings
     val vocabDashboard: VocabDashboardStrings
-    val createPracticeDialog: CreatePracticeDialogStrings
     val dailyGoalDialog: DailyGoalDialogStrings
 
     val stats: StatsStrings
@@ -61,9 +60,9 @@ interface Strings {
     val backup: BackupStrings
     val feedback: FeedbackStrings
 
-    val practiceImport: PracticeImportStrings
-    val practiceCreate: PracticeCreateStrings
-    val practicePreview: PracticePreviewStrings
+    val letterDeckPicker: LetterDeckPickerStrings
+    val letterDeckDetails: LetterDeckDetailsStrings
+    val deckEdit: DeckEditStrings
 
     val commonPractice: CommonPracticeStrings
     val writingPractice: WritingPracticeStrings
@@ -113,14 +112,14 @@ interface FeedbackStrings {
 interface HomeStrings {
     val screenTitle: String
 
-    val dashboardTabLabel: String
+    val lettersDashboardTabLabel: String
     val vocabDashboardTabLabel: String
     val statsTabLabel: String
     val searchTabLabel: String
     val settingsTabLabel: String
 }
 
-interface PracticeDashboardStrings {
+interface LettersDashboardStrings {
 
     val emptyScreenMessage: (Color) -> AnnotatedString
 
@@ -163,12 +162,6 @@ interface PracticeDashboardStrings {
     val dailyIndicatorNew: (Int) -> String
     val dailyIndicatorReview: (Int) -> String
 
-}
-
-interface CreatePracticeDialogStrings {
-    val title: String
-    val selectMessage: String
-    val createMessage: String
 }
 
 interface DailyGoalDialogStrings {
@@ -265,7 +258,7 @@ interface BackupStrings {
     val completeMessage: String
 }
 
-interface PracticeImportStrings {
+interface LetterDeckPickerStrings {
 
     val title: String
 
@@ -302,7 +295,7 @@ interface PracticeImportStrings {
 
 }
 
-interface PracticeCreateStrings {
+interface DeckEditStrings {
     val newTitle: String
     val ediTitle: String
 
@@ -332,7 +325,7 @@ interface PracticeCreateStrings {
     val leaveConfirmationAccept: String
 }
 
-interface PracticePreviewStrings {
+interface LetterDeckDetailsStrings {
 
     val emptyListMessage: String
     fun listGroupTitle(index: Int, characters: String): String = "$index. $characters"

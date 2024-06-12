@@ -1,9 +1,14 @@
 package ua.syt0r.kanji.core
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.transform
-import kotlinx.coroutines.flow.zip
+import ua.syt0r.kanji.presentation.LifecycleState
 
 sealed interface RefreshableData<T> {
     class Loading<T> : RefreshableData<T>
@@ -11,15 +16,20 @@ sealed interface RefreshableData<T> {
 }
 
 fun <T> refreshableDataFlow(
-    dataChangeFlow: Flow<Unit>,
-    invalidationRequestsFlow: Flow<Unit>,
-    provider: suspend () -> T
-): Flow<RefreshableData<T>> {
-    return dataChangeFlow
-        .onStart { emit(Unit) }
-        .zip(invalidationRequestsFlow) { _, _ -> }
-        .transform {
-            emit(RefreshableData.Loading())
-            emit(RefreshableData.Loaded(provider()))
+    dataChangeFlow: SharedFlow<Unit>,
+    lifecycleState: StateFlow<LifecycleState>,
+    valueProvider: suspend () -> T
+): Flow<RefreshableData<T>> = channelFlow {
+
+    val waitForScreenVisibility = suspend {
+        lifecycleState.filter { it == LifecycleState.Visible }.first()
+    }
+
+    dataChangeFlow.onStart { emit(Unit) }
+        .collectLatest {
+            send(RefreshableData.Loading())
+            waitForScreenVisibility()
+            send(RefreshableData.Loaded(valueProvider()))
         }
+
 }

@@ -15,9 +15,9 @@ enum class HomeScreenTab(
     val titleResolver: StringResolveScope<String>
 ) {
 
-    PracticeDashboard(
+    LettersDashboard(
         iconContent = { Text(text = "字", style = MaterialTheme.typography.titleMedium) },
-        titleResolver = { home.dashboardTabLabel },
+        titleResolver = { home.lettersDashboardTabLabel },
     ),
     VocabDashboard(
         iconContent = { Text(text = "語", style = MaterialTheme.typography.titleMedium) },
@@ -37,7 +37,7 @@ enum class HomeScreenTab(
     );
 
     companion object {
-        val Default = PracticeDashboard
+        val Default = LettersDashboard
         val VisibleTabs: List<HomeScreenTab> = HomeScreenTab.values().toList()
     }
 

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.use_case
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -12,13 +13,14 @@ import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.CharacterReviewResult
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.presentation.LifecycleState
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 interface SubscribeOnStatsDataUseCase {
-    operator fun invoke(invalidationRequests: Flow<Unit>): Flow<RefreshableData<StatsData>>
+    operator fun invoke(lifecycleState: StateFlow<LifecycleState>): Flow<RefreshableData<StatsData>>
 }
 
 data class StatsData(
@@ -38,12 +40,12 @@ class DefaultSubscribeOnStatsDataUseCase(
 ) : SubscribeOnStatsDataUseCase {
 
     override fun invoke(
-        invalidationRequests: Flow<Unit>
+        lifecycleState: StateFlow<LifecycleState>
     ): Flow<RefreshableData<StatsData>> {
         return refreshableDataFlow(
             dataChangeFlow = letterSrsManager.dataChangeFlow,
-            invalidationRequestsFlow = invalidationRequests,
-            provider = { getStats() }
+            lifecycleState = lifecycleState,
+            valueProvider = { getStats() }
         )
     }
 

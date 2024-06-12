@@ -1,30 +1,34 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.practice_import.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,28 +43,30 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.PracticeImportScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_import.data.ImportPracticeCategory
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.LetterDeckPickerScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.data.LetterDeckPickerCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PracticeImportScreenUI(
+fun LetterDeckPickerScreenUI(
     state: State<ScreenState>,
-    onUpButtonClick: () -> Unit = {},
-    onItemSelected: (classification: CharacterClassification, title: String) -> Unit = { _, _ -> },
-    onLinkClick: (String) -> Unit = {}
+    onUpButtonClick: () -> Unit,
+    createEmpty: () -> Unit,
+    onItemSelected: (classification: CharacterClassification, title: String) -> Unit,
+    onLinkClick: (String) -> Unit
 ) {
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = resolveString { practiceImport.title }) },
+                title = { Text(text = resolveString { letterDeckPicker.title }) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(
@@ -85,6 +91,7 @@ fun PracticeImportScreenUI(
                 ScreenState.Loading -> LoadingState()
                 is ScreenState.Loaded -> LoadedState(
                     screenState = screenState,
+                    createEmpty = createEmpty,
                     onItemClick = onItemSelected,
                     onLinkClick = onLinkClick
                 )
@@ -107,37 +114,54 @@ private fun LoadingState() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoadedState(
     screenState: ScreenState.Loaded,
+    createEmpty: () -> Unit,
     onItemClick: (classification: CharacterClassification, title: String) -> Unit = { _, _ -> },
     onLinkClick: (String) -> Unit
 ) {
 
     var expandedStates by rememberSaveable(stateSaver = jsonSaver()) {
-        mutableStateOf(mapOf<ImportPracticeCategory, Boolean>())
+        mutableStateOf(mapOf<LetterDeckPickerCategory, Boolean>())
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 400.dp)
     ) {
+
+        item {
+            ClickableRow(onClick = createEmpty) {
+                Text(
+                    text = "Create Custom",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = createEmpty) {
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                }
+            }
+        }
+
+        item { HorizontalDivider(Modifier.padding(horizontal = 20.dp)) }
 
         screenState.categories.forEachIndexed { index, category ->
 
             val isExpanded = expandedStates[category] == true
 
-            item {
+            item(
+                key = category.toListKey() + "header"
+            ) {
 
                 val onHeaderClick = {
                     expandedStates = expandedStates.plus(category to !isExpanded)
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onHeaderClick)
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                ClickableRow(
+                    onClick = onHeaderClick,
+                    modifier = Modifier.animateItemPlacement()
                 ) {
                     Text(
                         text = resolveString(category.titleResolver),
@@ -145,10 +169,7 @@ private fun LoadedState(
                         style = MaterialTheme.typography.titleLarge
                     )
 
-                    IconButton(
-                        onClick = onHeaderClick,
-                        modifier = Modifier.padding(start = 16.dp)
-                    ) {
+                    IconButton(onClick = onHeaderClick) {
                         val icon = if (isExpanded) {
                             Icons.Default.KeyboardArrowUp
                         } else {
@@ -163,12 +184,14 @@ private fun LoadedState(
 
             if (isExpanded) {
 
-                item {
+                item(
+                    key = category.toListKey() + "description"
+                ) {
                     val description = resolveString(category.descriptionResolver)
                     ClickableText(
                         text = description,
                         onClick = { position -> description.detectUrlClick(position, onLinkClick) },
-                        modifier = Modifier
+                        modifier = Modifier.animateItemPlacement()
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp),
                         style = MaterialTheme.typography.bodySmall.copy(
@@ -177,24 +200,44 @@ private fun LoadedState(
                     )
                 }
 
-                items(category.items) {
+                items(
+                    items = category.items,
+                    key = { it.classification.toString() }
+                ) {
                     val title = it.title()
-                    ClickableCharacterRow(
-                        char = it.previewCharacter,
-                        text = title,
-                        onClick = { onItemClick(it.classification, title) }
-                    )
+                    ClickableRow(
+                        onClick = { onItemClick(it.classification, title) },
+                        modifier = Modifier.animateItemPlacement()
+                    ) {
+
+                        Card(
+                            modifier = Modifier.padding(vertical = 8.dp).size(46.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = it.previewCharacter.toString(), fontSize = 30.sp)
+                            }
+                        }
+
+                        Text(
+                            text = title,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                    }
                 }
 
             }
 
             val isLast = index == screenState.categories.size - 1
             if (!isLast) {
-                item {
-                    Divider(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp)
+                item(
+                    key = category.toListKey() + "divider"
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier.animateItemPlacement().padding(horizontal = 20.dp)
                     )
                 }
             }
@@ -204,39 +247,28 @@ private fun LoadedState(
     }
 }
 
+private fun LetterDeckPickerCategory.toListKey(): String {
+    return this::class.simpleName!!
+}
+
 @Composable
-private fun ClickableCharacterRow(
-    char: Char,
-    text: String,
-    onClick: () -> Unit = {}
+private fun ClickableRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
 ) {
 
     Row(
-        modifier = Modifier
+        modifier = modifier
+            .padding(vertical = 4.dp)
             .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(start = 20.dp, end = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
-        Card(
-            modifier = Modifier.size(46.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = char.toString(), fontSize = 30.sp)
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            text = text,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+        content()
     }
 
 }

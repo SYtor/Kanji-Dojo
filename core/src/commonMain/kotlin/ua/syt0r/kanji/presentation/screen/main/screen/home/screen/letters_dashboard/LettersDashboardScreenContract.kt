@@ -1,25 +1,25 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.presentation.LifecycleState
 
-interface PracticeDashboardScreenContract {
+interface LettersDashboardScreenContract {
 
     interface ViewModel {
 
         val state: State<ScreenState>
 
-        fun notifyScreenShown()
         fun updateDailyGoal(configuration: DailyGoalConfiguration)
 
         fun enablePracticeMergeMode()
-        fun merge(data: PracticeMergeRequestData)
+        fun merge(data: LetterDecksMergeRequestData)
 
         fun enablePracticeReorderMode()
-        fun reorder(data: PracticeReorderRequestData)
+        fun reorder(data: LetterDecksReorderRequestData)
 
         fun enableDefaultMode()
 
@@ -32,7 +32,7 @@ interface PracticeDashboardScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
-            val mode: StateFlow<PracticeDashboardListMode>,
+            val mode: StateFlow<LettersDashboardListMode>,
             val dailyIndicatorData: DailyIndicatorData
         ) : ScreenState()
 
@@ -40,24 +40,23 @@ interface PracticeDashboardScreenContract {
 
     interface LoadDataUseCase {
         fun load(
-            screenVisibilityEvents: Flow<Unit>,
-            preferencesChangeEvents: Flow<Unit>
-        ): Flow<RefreshableData<PracticeDashboardScreenData>>
+            lifecycleState: StateFlow<LifecycleState>
+        ): Flow<RefreshableData<LettersDashboardScreenData>>
     }
 
-    interface MergePracticeSetsUseCase {
-        suspend fun merge(data: PracticeMergeRequestData)
+    interface MergeDecksUseCase {
+        suspend fun merge(data: LetterDecksMergeRequestData)
     }
 
     interface ApplySortUseCase {
         fun sort(
             sortByTime: Boolean,
-            items: List<PracticeDashboardItem>
-        ): List<PracticeDashboardItem>
+            items: List<LettersDashboardItem>
+        ): List<LettersDashboardItem>
     }
 
     interface UpdateSortUseCase {
-        suspend fun update(data: PracticeReorderRequestData)
+        suspend fun update(data: LetterDecksReorderRequestData)
     }
 
 }

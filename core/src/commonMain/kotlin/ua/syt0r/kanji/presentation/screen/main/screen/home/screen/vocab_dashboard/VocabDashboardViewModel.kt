@@ -5,12 +5,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
+import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDeckWordsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
@@ -20,7 +21,7 @@ class VocabDashboardViewModel(
     subscribeOnDashboardVocabDecksUseCase: SubscribeOnDashboardVocabDecksUseCase,
     private val getVocabDeckWordsUseCase: GetVocabDeckWordsUseCase,
     private val analyticsManager: AnalyticsManager
-) : VocabDashboardScreenContract.ViewModel {
+) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
     private val invalidationRequests = Channel<Unit>()
     private val deckSelectionState = mutableStateOf<VocabDeckSelectionState>(
@@ -30,8 +31,11 @@ class VocabDashboardViewModel(
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val state: StateFlow<ScreenState> = _state
 
+    override val lifecycleState: MutableStateFlow<LifecycleState> =
+        MutableStateFlow(LifecycleState.Hidden)
+
     init {
-        subscribeOnDashboardVocabDecksUseCase(invalidationRequests.consumeAsFlow())
+        subscribeOnDashboardVocabDecksUseCase(lifecycleState)
             .onEach { data ->
                 _state.value = when (data) {
                     is RefreshableData.Loading -> {

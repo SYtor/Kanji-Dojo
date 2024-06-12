@@ -1,32 +1,29 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration.LetterDeck
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui.PracticeDashboardScreenUI
 
 @Composable
-fun PracticeDashboardScreen(
+fun LettersDashboardScreen(
     mainNavigationState: MainNavigationState,
-    viewModel: PracticeDashboardScreenContract.ViewModel
+    viewModel: LettersDashboardScreenContract.ViewModel
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.notifyScreenShown()
         viewModel.reportScreenShown()
     }
 
-    PracticeDashboardScreenUI(
+    LettersDashboardScreenUI(
         state = viewModel.state,
         startMerge = { viewModel.enablePracticeMergeMode() },
         merge = { viewModel.merge(it) },
         startReorder = { viewModel.enablePracticeReorderMode() },
         reorder = { viewModel.reorder(it) },
         enableDefaultMode = { viewModel.enableDefaultMode() },
-        navigateToPracticeDetails = {
-            mainNavigationState.navigate(MainDestination.LetterDeckDetails(it.practiceId))
+        navigateToDeckDetails = {
+            mainNavigationState.navigate(MainDestination.LetterDeckDetails(it.deckId))
         },
         startQuickPractice = {
             mainNavigationState.navigate(it)
@@ -34,12 +31,9 @@ fun PracticeDashboardScreen(
         updateDailyGoalConfiguration = {
             viewModel.updateDailyGoal(it)
         },
-        navigateToImportPractice = {
-            mainNavigationState.navigate(MainDestination.ImportPractice)
-        },
-        navigateToCreatePractice = {
-            mainNavigationState.navigate(MainDestination.DeckEdit(LetterDeck.CreateNew))
-        },
+        navigateToDeckPicker = {
+            mainNavigationState.navigate(MainDestination.LetterDeckPicker)
+        }
     )
 
 }

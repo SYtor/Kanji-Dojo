@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
@@ -16,44 +16,43 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
+import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
 import kotlin.time.Duration.Companion.seconds
 
 
 @OptIn(FlowPreview::class)
-class PracticeDashboardViewModel(
+class LettersDashboardViewModel(
     private val viewModelScope: CoroutineScope,
-    loadDataUseCase: PracticeDashboardScreenContract.LoadDataUseCase,
-    private val applySortUseCase: PracticeDashboardScreenContract.ApplySortUseCase,
-    private val updateSortUseCase: PracticeDashboardScreenContract.UpdateSortUseCase,
+    loadDataUseCase: LettersDashboardScreenContract.LoadDataUseCase,
+    private val applySortUseCase: LettersDashboardScreenContract.ApplySortUseCase,
+    private val updateSortUseCase: LettersDashboardScreenContract.UpdateSortUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val notifySrsPreferencesChangedUseCase: NotifySrsPreferencesChangedUseCase,
-    private val mergePracticeSetsUseCase: PracticeDashboardScreenContract.MergePracticeSetsUseCase,
+    private val mergeDecksUseCase: LettersDashboardScreenContract.MergeDecksUseCase,
     private val analyticsManager: AnalyticsManager
-) : PracticeDashboardScreenContract.ViewModel {
+) : LettersDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
+
+    override val lifecycleState: MutableStateFlow<LifecycleState> =
+        MutableStateFlow(LifecycleState.Hidden)
 
     private var sortByTimeEnabled: Boolean = false
-    private lateinit var listMode: MutableStateFlow<PracticeDashboardListMode>
+    private lateinit var listMode: MutableStateFlow<LettersDashboardListMode>
 
-    private val screenShowEvents = Channel<Unit>()
-    private val preferencesChangeEvents = Channel<Unit>()
-    private val sortRequestsChannel = Channel<PracticeReorderRequestData>()
+    private val sortRequestsChannel = Channel<LetterDecksReorderRequestData>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
     init {
-        loadDataUseCase
-            .load(
-                screenVisibilityEvents = screenShowEvents.consumeAsFlow(),
-                preferencesChangeEvents = preferencesChangeEvents.consumeAsFlow()
-            )
+        loadDataUseCase.load(lifecycleState)
             .onEach {
                 state.value = when (it) {
                     is RefreshableData.Loaded -> {
                         val screenData = it.value
                         sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
                         val sortedItems = applySortUseCase.sort(sortByTimeEnabled, screenData.items)
-                        listMode = MutableStateFlow(PracticeDashboardListMode.Default(sortedItems))
+                        listMode = MutableStateFlow(LettersDashboardListMode.Default(sortedItems))
                         ScreenState.Loaded(
                             mode = listMode,
                             dailyIndicatorData = screenData.dailyIndicatorData
@@ -72,16 +71,11 @@ class PracticeDashboardViewModel(
             .launchIn(viewModelScope)
     }
 
-    override fun notifyScreenShown() {
-        viewModelScope.launch { screenShowEvents.send(Unit) }
-    }
-
     override fun updateDailyGoal(configuration: DailyGoalConfiguration) {
         viewModelScope.launch {
             userPreferencesRepository.dailyLimitEnabled.set(configuration.enabled)
             userPreferencesRepository.dailyLearnLimit.set(configuration.learnLimit)
             userPreferencesRepository.dailyReviewLimit.set(configuration.reviewLimit)
-            preferencesChangeEvents.send(Unit)
             notifySrsPreferencesChangedUseCase()
             analyticsManager.sendEvent("daily_goal_update") {
                 put("enabled", configuration.enabled)
@@ -92,29 +86,29 @@ class PracticeDashboardViewModel(
     }
 
     override fun enablePracticeMergeMode() {
-        listMode.value = PracticeDashboardListMode.MergeMode(
+        listMode.value = LettersDashboardListMode.MergeMode(
             items = listMode.value.items,
             selected = mutableStateOf(emptySet()),
             title = mutableStateOf("")
         )
     }
 
-    override fun merge(data: PracticeMergeRequestData) {
+    override fun merge(data: LetterDecksMergeRequestData) {
         Logger.d("data[$data]")
         state.value = ScreenState.Loading
-        viewModelScope.launch { mergePracticeSetsUseCase.merge(data) }
+        viewModelScope.launch { mergeDecksUseCase.merge(data) }
     }
 
     override fun enablePracticeReorderMode() {
         val items = listMode.value.items
-        listMode.value = PracticeDashboardListMode.SortMode(
+        listMode.value = LettersDashboardListMode.SortMode(
             items = items,
             reorderedList = mutableStateOf(items),
             sortByReviewTime = mutableStateOf(sortByTimeEnabled)
         )
     }
 
-    override fun reorder(data: PracticeReorderRequestData) {
+    override fun reorder(data: LetterDecksReorderRequestData) {
         Logger.d("data[$data]")
         state.value = ScreenState.Loading
         sortByTimeEnabled = data.sortByTime
@@ -122,7 +116,7 @@ class PracticeDashboardViewModel(
     }
 
     override fun enableDefaultMode() {
-        listMode.value = PracticeDashboardListMode.Default(
+        listMode.value = LettersDashboardListMode.Default(
             items = listMode.value.items
         )
     }

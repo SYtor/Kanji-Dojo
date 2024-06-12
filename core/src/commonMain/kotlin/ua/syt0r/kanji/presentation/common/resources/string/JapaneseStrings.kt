@@ -30,9 +30,8 @@ object JapaneseStrings : Strings {
     override val reviewStateNew: String = "未習"
 
     override val home: HomeStrings = JapaneseHomeStrings
-    override val practiceDashboard = JapanesePracticeDashboardStrings
+    override val lettersDashboard = JapaneseLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
-    override val createPracticeDialog = JapaneseCreatePracticeDialogStrings
     override val dailyGoalDialog = JapaneseDailyGoalDialogStrings
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
@@ -43,9 +42,9 @@ object JapaneseStrings : Strings {
     override val backup: BackupStrings = JapaneseBackupStrings
     override val feedback: FeedbackStrings = JapaneseFeedbackStrings
 
-    override val practiceImport: PracticeImportStrings = JapanesePracticeImportStrings
-    override val practiceCreate: PracticeCreateStrings = JapanesePracticeCreateStrings
-    override val practicePreview: PracticePreviewStrings = JapanesePracticePreviewStrings
+    override val letterDeckPicker: LetterDeckPickerStrings = JapaneseLetterDeckPickerStrings
+    override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
+    override val letterDeckDetails: LetterDeckDetailsStrings = JapaneseLetterDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = JapaneseWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = JapaneseReadingPracticeString
@@ -62,14 +61,14 @@ object JapaneseStrings : Strings {
 
 object JapaneseHomeStrings : HomeStrings {
     override val screenTitle: String = JapaneseStrings.appName
-    override val dashboardTabLabel: String = "文字"
+    override val lettersDashboardTabLabel: String = "文字"
     override val vocabDashboardTabLabel: String = "単語"
     override val statsTabLabel: String = "統計"
     override val searchTabLabel: String = "検索"
     override val settingsTabLabel: String = "設定"
 }
 
-object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
+object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val emptyScreenMessage = { color: Color ->
         buildAnnotatedString {
             append("アプリを使うには練習セットが必要です。\n")
@@ -126,12 +125,6 @@ object JapanesePracticeDashboardStrings : PracticeDashboardStrings {
 }
 
 object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings
-
-object JapaneseCreatePracticeDialogStrings : CreatePracticeDialogStrings {
-    override val title: String = "練習セットの作成"
-    override val selectMessage: String = "選ぶ（仮名、教育漢字など）"
-    override val createMessage: String = "空のセットから作る"
-}
 
 object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
     override val title: String = "毎日の目標"
@@ -245,7 +238,7 @@ object JapaneseFeedbackStrings : FeedbackStrings by EnglishFeedbackStrings {
     override val errorMessage: (String?) -> String = { "エラー: $it" }
 }
 
-object JapanesePracticeImportStrings : PracticeImportStrings {
+object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
 
     override val title: String = "選択"
 
@@ -307,7 +300,7 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
     override val gradeItemNames: String = "人名用漢字(一)"
     override val gradeItemNamesVariants: String = "人名用漢字(二)（常用漢字の異体字）"
 
-    override val wanikaniTitle: String = EnglishPracticeImportStrings.wanikaniTitle
+    override val wanikaniTitle: String = EnglishLetterDeckPickerStrings.wanikaniTitle
     override val wanikaniDescription = { urlColor: Color ->
         buildAnnotatedString {
             append("Tofuguが運営するWaniKaniに準拠したレベル別の漢字の一覧です。")
@@ -320,7 +313,7 @@ object JapanesePracticeImportStrings : PracticeImportStrings {
 
 }
 
-object JapanesePracticeCreateStrings : PracticeCreateStrings {
+object JapaneseDeckEditStrings : DeckEditStrings {
     override val newTitle: String = "作成"
     override val ediTitle: String = "編集"
     override val searchHint: String = "文字を入力"
@@ -350,7 +343,7 @@ object JapanesePracticeCreateStrings : PracticeCreateStrings {
 
 }
 
-object JapanesePracticePreviewStrings : PracticePreviewStrings {
+object JapaneseLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val emptyListMessage: String = "何もありません"
     override val detailsGroupTitle: (index: Int) -> String = { "グループ $it" }
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {

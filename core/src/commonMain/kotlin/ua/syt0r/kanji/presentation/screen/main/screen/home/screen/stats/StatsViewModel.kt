@@ -1,44 +1,40 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
+import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.use_case.SubscribeOnStatsDataUseCase
 
 class StatsViewModel(
-    private val viewModelScope: CoroutineScope,
+    viewModelScope: CoroutineScope,
     subscribeOnStatsDataUseCase: SubscribeOnStatsDataUseCase,
     private val analyticsManager: AnalyticsManager,
-) : StatsScreenContract.ViewModel {
+) : StatsScreenContract.ViewModel, LifecycleAwareViewModel {
 
-    private val screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    override val lifecycleState: MutableStateFlow<LifecycleState> =
+        MutableStateFlow(LifecycleState.Hidden)
 
-    private val invalidationRequests = Channel<Unit>()
-    override val state: StateFlow<ScreenState> = screenState
+    private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    override val state: StateFlow<ScreenState> = _state
 
     init {
-        subscribeOnStatsDataUseCase(invalidationRequests.consumeAsFlow())
+        subscribeOnStatsDataUseCase(lifecycleState)
             .map {
                 when (it) {
                     is RefreshableData.Loading -> ScreenState.Loading
                     is RefreshableData.Loaded -> ScreenState.Loaded(it.value)
                 }
             }
-            .onEach { screenState.value = it }
+            .onEach { _state.value = it }
             .launchIn(viewModelScope)
-    }
-
-    override fun notifyScreenShown() {
-        viewModelScope.launch { invalidationRequests.send(Unit) }
     }
 
     override fun reportScreenShown() {

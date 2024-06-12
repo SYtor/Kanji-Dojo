@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -36,6 +36,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -44,11 +46,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.Mediation
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -81,6 +81,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -101,41 +103,22 @@ import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardListMode
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeMergeRequestData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard.PracticeReorderRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui.LettersDashboardDailyLimitIndicator
 
 @Composable
-fun PracticeDashboardScreenUI(
+fun LettersDashboardScreenUI(
     state: State<ScreenState>,
     startMerge: () -> Unit,
-    merge: (PracticeMergeRequestData) -> Unit,
+    merge: (LetterDecksMergeRequestData) -> Unit,
     startReorder: () -> Unit,
-    reorder: (PracticeReorderRequestData) -> Unit,
+    reorder: (LetterDecksReorderRequestData) -> Unit,
     enableDefaultMode: () -> Unit,
-    navigateToPracticeDetails: (PracticeDashboardItem) -> Unit,
+    navigateToDeckDetails: (LettersDashboardItem) -> Unit,
     startQuickPractice: (MainDestination.Practice) -> Unit,
     updateDailyGoalConfiguration: (DailyGoalConfiguration) -> Unit,
-    navigateToImportPractice: () -> Unit,
-    navigateToCreatePractice: () -> Unit,
+    navigateToDeckPicker: () -> Unit
 ) {
-
-    var shouldShowCreatePracticeDialog by remember { mutableStateOf(false) }
-    if (shouldShowCreatePracticeDialog) {
-        CreatePracticeOptionDialog(
-            onDismiss = { shouldShowCreatePracticeDialog = false },
-            onOptionSelected = {
-                shouldShowCreatePracticeDialog = false
-                when (it) {
-                    DialogOption.SELECT -> navigateToImportPractice()
-                    DialogOption.CREATE -> navigateToCreatePractice()
-                }
-            }
-        )
-    }
 
     val extraListSpacerState = rememberExtraListSpacerState()
 
@@ -148,7 +131,7 @@ fun PracticeDashboardScreenUI(
                 exit = scaleOut()
             ) {
                 FloatingActionButton(
-                    onClick = { shouldShowCreatePracticeDialog = true },
+                    onClick = navigateToDeckPicker,
                     modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
                 ) {
                     Icon(
@@ -159,7 +142,7 @@ fun PracticeDashboardScreenUI(
             }
         },
         bottomBar = {
-            PracticeDashboardDailyLimitIndicator(
+            LettersDashboardDailyLimitIndicator(
                 state = remember {
                     derivedStateOf {
                         state.value.let { it as? ScreenState.Loaded }?.dailyIndicatorData
@@ -185,7 +168,7 @@ fun PracticeDashboardScreenUI(
                     val mode = screenState.mode.collectAsState()
                     val isEmpty by remember { derivedStateOf { mode.value.items.isEmpty() } }
                     if (isEmpty) {
-                        PracticeSetEmptyState()
+                        EmptyState()
                     } else {
                         LoadedState(
                             listMode = mode,
@@ -196,7 +179,7 @@ fun PracticeDashboardScreenUI(
                             startReorder = startReorder,
                             reorder = reorder,
                             enableDefaultMode = enableDefaultMode,
-                            onPracticeClick = navigateToPracticeDetails,
+                            onDetailsClick = navigateToDeckDetails,
                             startQuickPractice = startQuickPractice
                         )
                     }
@@ -215,15 +198,15 @@ private fun LoadingState() {
 
 @Composable
 private fun LoadedState(
-    listMode: State<PracticeDashboardListMode>,
+    listMode: State<LettersDashboardListMode>,
     dailyIndicatorData: DailyIndicatorData,
     extraListSpacerState: ExtraListSpacerState,
     startMerge: () -> Unit,
-    merge: (PracticeMergeRequestData) -> Unit,
+    merge: (LetterDecksMergeRequestData) -> Unit,
     startReorder: () -> Unit,
-    reorder: (PracticeReorderRequestData) -> Unit,
+    reorder: (LetterDecksReorderRequestData) -> Unit,
     enableDefaultMode: () -> Unit,
-    onPracticeClick: (PracticeDashboardItem) -> Unit,
+    onDetailsClick: (LettersDashboardItem) -> Unit,
     startQuickPractice: (MainDestination.Practice) -> Unit
 ) {
 
@@ -253,15 +236,15 @@ private fun LoadedState(
         }
 
         when (currentMode) {
-            is PracticeDashboardListMode.Default -> {
-                addContent(currentMode, dailyIndicatorData, onPracticeClick, startQuickPractice)
+            is LettersDashboardListMode.Default -> {
+                addContent(currentMode, dailyIndicatorData, onDetailsClick, startQuickPractice)
             }
 
-            is PracticeDashboardListMode.MergeMode -> {
+            is LettersDashboardListMode.MergeMode -> {
                 addContent(currentMode)
             }
 
-            is PracticeDashboardListMode.SortMode -> {
+            is LettersDashboardListMode.SortMode -> {
                 addContent(currentMode)
             }
         }
@@ -273,21 +256,21 @@ private fun LoadedState(
 }
 
 private fun LazyListScope.addContent(
-    listMode: PracticeDashboardListMode.Default,
+    listMode: LettersDashboardListMode.Default,
     dailyIndicatorData: DailyIndicatorData,
-    onPracticeClick: (PracticeDashboardItem) -> Unit,
+    onDetailsClick: (LettersDashboardItem) -> Unit,
     startQuickPractice: (MainDestination.Practice) -> Unit
 ) {
 
     items(
         items = listMode.items,
-        key = { listMode::class.simpleName to it.practiceId }
+        key = { listMode::class.simpleName to it.deckId }
     ) {
 
         ListItem(
-            practice = it,
+            item = it,
             dailyGoalEnabled = dailyIndicatorData.configuration.enabled,
-            onItemClick = { onPracticeClick(it) },
+            onItemClick = { onDetailsClick(it) },
             quickPractice = startQuickPractice
         )
 
@@ -296,7 +279,7 @@ private fun LazyListScope.addContent(
 }
 
 private fun LazyListScope.addContent(
-    listMode: PracticeDashboardListMode.MergeMode
+    listMode: LettersDashboardListMode.MergeMode
 ) {
 
     item {
@@ -304,7 +287,7 @@ private fun LazyListScope.addContent(
             modifier = Modifier,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            val strings = resolveString { practiceDashboard }
+            val strings = resolveString { lettersDashboard }
             Text(
                 text = strings.mergeTitle,
                 style = MaterialTheme.typography.titleMedium,
@@ -351,13 +334,13 @@ private fun LazyListScope.addContent(
 
     items(
         items = listMode.items,
-        key = { listMode::class.simpleName to it.practiceId }
+        key = { listMode::class.simpleName to it.deckId }
     ) {
-        val isSelected = listMode.selected.value.contains(it.practiceId)
+        val isSelected = listMode.selected.value.contains(it.deckId)
         val onClick = {
             listMode.selected.value = listMode.selected.value.run {
-                if (isSelected) minus(it.practiceId)
-                else plus(it.practiceId)
+                if (isSelected) minus(it.deckId)
+                else plus(it.deckId)
             }
         }
         Row(
@@ -384,12 +367,12 @@ private fun LazyListScope.addContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.addContent(
-    listMode: PracticeDashboardListMode.SortMode
+    listMode: LettersDashboardListMode.SortMode
 ) {
 
     item {
         Text(
-            text = resolveString { practiceDashboard.sortTitle },
+            text = resolveString { lettersDashboard.sortTitle },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.fillMaxWidth().wrapContentSize()
@@ -408,7 +391,7 @@ private fun LazyListScope.addContent(
                 .padding(horizontal = 10.dp)
         ) {
             Text(
-                text = resolveString { practiceDashboard.sortByTimeTitle },
+                text = resolveString { lettersDashboard.sortByTimeTitle },
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f)
             )
@@ -423,7 +406,7 @@ private fun LazyListScope.addContent(
 
     itemsIndexed(
         items = listMode.reorderedList.value,
-        key = { _, item -> listMode::class.simpleName to item.practiceId }
+        key = { _, item -> listMode::class.simpleName to item.deckId }
     ) { index, item ->
         Row(
             modifier = Modifier
@@ -485,11 +468,11 @@ fun <T> List<T>.withSwappedItems(index1: Int, index2: Int): List<T> {
 
 @Composable
 private fun ListModeButtons(
-    listMode: State<PracticeDashboardListMode>,
+    listMode: State<LettersDashboardListMode>,
     startMerge: () -> Unit,
-    merge: (PracticeMergeRequestData) -> Unit,
+    merge: (LetterDecksMergeRequestData) -> Unit,
     startReorder: () -> Unit,
-    reorder: (PracticeReorderRequestData) -> Unit,
+    reorder: (LetterDecksReorderRequestData) -> Unit,
     enableDefaultMode: () -> Unit
 ) {
     Row(
@@ -501,10 +484,10 @@ private fun ListModeButtons(
             targetState = listMode.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) {
-            val strings = resolveString { practiceDashboard }
+            val strings = resolveString { lettersDashboard }
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 when (it) {
-                    is PracticeDashboardListMode.Default -> {
+                    is LettersDashboardListMode.Default -> {
                         OptionButton(
                             title = strings.mergeButton,
                             icon = Icons.Default.Mediation,
@@ -519,7 +502,7 @@ private fun ListModeButtons(
                         )
                     }
 
-                    is PracticeDashboardListMode.MergeMode -> {
+                    is LettersDashboardListMode.MergeMode -> {
                         val showConfirmationDialog = remember { mutableStateOf(false) }
                         if (showConfirmationDialog.value) {
                             MergeConfirmationDialog(
@@ -549,7 +532,7 @@ private fun ListModeButtons(
                         )
                     }
 
-                    is PracticeDashboardListMode.SortMode -> {
+                    is LettersDashboardListMode.SortMode -> {
                         OptionButton(
                             title = strings.sortCancelButton,
                             icon = Icons.Default.Clear,
@@ -561,7 +544,7 @@ private fun ListModeButtons(
                             icon = Icons.Default.Check,
                             onClick = {
                                 reorder(
-                                    PracticeReorderRequestData(
+                                    LetterDecksReorderRequestData(
                                         reorderedList = it.reorderedList.value,
                                         sortByTime = it.sortByReviewTime.value
                                     )
@@ -625,9 +608,9 @@ private fun RowScope.OptionButton(
 
 @Composable
 private fun MergeConfirmationDialog(
-    listMode: PracticeDashboardListMode.MergeMode,
+    listMode: LettersDashboardListMode.MergeMode,
     onDismissRequest: () -> Unit,
-    onConfirmed: (PracticeMergeRequestData) -> Unit
+    onConfirmed: (LetterDecksMergeRequestData) -> Unit
 ) {
     MultiplatformDialog(onDismissRequest) {
         Column(
@@ -637,12 +620,12 @@ private fun MergeConfirmationDialog(
         ) {
 
             val title = listMode.title.value
-            val practiceIdList = listMode.selected.value.toList()
-            val mergedPracticeTitles = listMode.items
-                .filter { practiceIdList.contains(it.practiceId) }
+            val decksIdList = listMode.selected.value.toList()
+            val mergedDeckTitles = listMode.items
+                .filter { decksIdList.contains(it.deckId) }
                 .map { it.title }
 
-            val strings = resolveString { practiceDashboard }
+            val strings = resolveString { lettersDashboard }
 
             Text(
                 text = strings.mergeDialogTitle,
@@ -650,7 +633,7 @@ private fun MergeConfirmationDialog(
             )
 
             Text(
-                text = strings.mergeDialogMessage(title, mergedPracticeTitles),
+                text = strings.mergeDialogMessage(title, mergedDeckTitles),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -665,9 +648,9 @@ private fun MergeConfirmationDialog(
                 TextButton(
                     onClick = {
                         onConfirmed(
-                            PracticeMergeRequestData(
+                            LetterDecksMergeRequestData(
                                 title = listMode.title.value,
-                                practiceIdList = listMode.selected.value.toList()
+                                deckIds = listMode.selected.value.toList()
                             )
                         )
                     }
@@ -682,27 +665,53 @@ private fun MergeConfirmationDialog(
 }
 
 @Composable
-private fun PracticeSetEmptyState() {
-    val iconColor = MaterialTheme.colorScheme.secondary
+private fun EmptyState() {
     Text(
-        text = resolveString { practiceDashboard.emptyScreenMessage(iconColor) },
+        text = buildAnnotatedString {
+            append("Create deck by clicking on ")
+            appendInlineContent("icon")
+            append(" button. Decks are used to track your progress")
+        },
+        inlineContent = mapOf(
+            "icon" to InlineTextContent(
+                placeholder = Placeholder(
+                    width = 24.textDp,
+                    height = 24.textDp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                ),
+                children = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.fillMaxSize()
+                            .background(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.shapes.small
+                            )
+                            .padding(4.dp)
+                    )
+                }
+            )
+        ),
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 48.dp)
-            .wrapContentSize(),
+            .wrapContentSize()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp),
         textAlign = TextAlign.Center
     )
 }
 
 @Composable
 private fun ListItem(
-    practice: PracticeDashboardItem,
+    item: LettersDashboardItem,
     dailyGoalEnabled: Boolean,
     onItemClick: () -> Unit,
     quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    var expanded by rememberSaveable(practice.practiceId) { mutableStateOf(false) }
+    var expanded by rememberSaveable(item.deckId) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.clip(MaterialTheme.shapes.large)
@@ -725,13 +734,13 @@ private fun ListItem(
             ) {
 
                 Text(
-                    text = practice.title,
+                    text = item.title,
                     style = MaterialTheme.typography.titleMedium
                 )
 
                 Text(
                     text = resolveString {
-                        practiceDashboard.itemTimeMessage(practice.timeSinceLastPractice)
+                        lettersDashboard.itemTimeMessage(item.timeSinceLastReview)
                     },
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -740,15 +749,15 @@ private fun ListItem(
 
             if (dailyGoalEnabled) {
                 Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                    PracticeSneakPeekIndicator(
+                    DeckSneakPeekIndicator(
                         icon = Icons.Default.Draw,
-                        study = practice.writingProgress.quickLearn.size,
-                        review = practice.writingProgress.quickReview.size
+                        study = item.writingProgress.quickLearn.size,
+                        review = item.writingProgress.quickReview.size
                     )
-                    PracticeSneakPeekIndicator(
+                    DeckSneakPeekIndicator(
                         icon = Icons.Default.LocalLibrary,
-                        study = practice.readingProgress.quickLearn.size,
-                        review = practice.readingProgress.quickReview.size
+                        study = item.readingProgress.quickLearn.size,
+                        review = item.readingProgress.quickReview.size
                     )
                 }
             }
@@ -770,7 +779,7 @@ private fun ListItem(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            ListItemDetails(practice, quickPractice)
+            ListItemDetails(item, quickPractice)
         }
 
     }
@@ -778,7 +787,7 @@ private fun ListItem(
 }
 
 @Composable
-private fun PracticeSneakPeekIndicator(icon: ImageVector, study: Int, review: Int) {
+private fun DeckSneakPeekIndicator(icon: ImageVector, study: Int, review: Int) {
     if (study == 0 && review == 0) return
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Icon(
@@ -804,13 +813,13 @@ private fun PracticeSneakPeekIndicator(icon: ImageVector, study: Int, review: In
 
 @Composable
 private fun ListItemDetails(
-    data: PracticeDashboardItem,
+    data: LettersDashboardItem,
     quickPractice: (MainDestination.Practice) -> Unit
 ) {
 
-    val strings = resolveString { practiceDashboard }
+    val strings = resolveString { lettersDashboard }
 
-    val isReadingMode = rememberSaveable(data.practiceId) { mutableStateOf(false) }
+    val isReadingMode = rememberSaveable(data.deckId) { mutableStateOf(false) }
     val studyProgress by remember {
         derivedStateOf { if (isReadingMode.value) data.readingProgress else data.writingProgress }
     }
@@ -818,8 +827,8 @@ private fun ListItemDetails(
     val onQuickPracticeButtonClick: (characters: List<String>) -> Unit = lambda@{
         if (it.isEmpty()) return@lambda
         val destination = when (isReadingMode.value) {
-            true -> MainDestination.Practice.Reading(data.practiceId, it)
-            false -> MainDestination.Practice.Writing(data.practiceId, it)
+            true -> MainDestination.Practice.Reading(data.deckId, it)
+            false -> MainDestination.Practice.Writing(data.deckId, it)
         }
         quickPractice(destination)
     }
@@ -1083,7 +1092,7 @@ private fun ColumnScope.PracticeTypeSwitch(
 
         Text(
             text = resolveString {
-                if (isReadingMode.value) practiceDashboard.itemReadingTitle else practiceDashboard.itemWritingTitle
+                if (isReadingMode.value) lettersDashboard.itemReadingTitle else lettersDashboard.itemWritingTitle
             },
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.ExtraLight

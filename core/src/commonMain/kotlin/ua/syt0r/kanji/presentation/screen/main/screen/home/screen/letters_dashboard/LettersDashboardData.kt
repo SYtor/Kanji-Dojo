@@ -1,14 +1,14 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.practice_dashboard
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
 import androidx.compose.runtime.MutableState
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import kotlin.time.Duration
 
-data class PracticeDashboardItem(
-    val practiceId: Long,
+data class LettersDashboardItem(
+    val deckId: Long,
     val title: String,
     val position: Int,
-    val timeSinceLastPractice: Duration?,
+    val timeSinceLastReview: Duration?,
     val writingProgress: PracticeStudyProgress,
     val readingProgress: PracticeStudyProgress
 )
@@ -42,39 +42,39 @@ sealed interface DailyProgress {
     object Disabled : DailyProgress
 }
 
-data class PracticeDashboardScreenData(
-    val items: List<PracticeDashboardItem>,
+data class LettersDashboardScreenData(
+    val items: List<LettersDashboardItem>,
     val dailyIndicatorData: DailyIndicatorData
 )
 
-sealed interface PracticeDashboardListMode {
+sealed interface LettersDashboardListMode {
 
-    val items: List<PracticeDashboardItem>
+    val items: List<LettersDashboardItem>
 
     data class Default(
-        override val items: List<PracticeDashboardItem>
-    ) : PracticeDashboardListMode
+        override val items: List<LettersDashboardItem>
+    ) : LettersDashboardListMode
 
     data class MergeMode(
-        override val items: List<PracticeDashboardItem>,
+        override val items: List<LettersDashboardItem>,
         val selected: MutableState<Set<Long>>,
         val title: MutableState<String>
-    ) : PracticeDashboardListMode
+    ) : LettersDashboardListMode
 
     data class SortMode(
-        override val items: List<PracticeDashboardItem>,
-        val reorderedList: MutableState<List<PracticeDashboardItem>>,
+        override val items: List<LettersDashboardItem>,
+        val reorderedList: MutableState<List<LettersDashboardItem>>,
         val sortByReviewTime: MutableState<Boolean>
-    ) : PracticeDashboardListMode
+    ) : LettersDashboardListMode
 
 }
 
-data class PracticeMergeRequestData(
+data class LetterDecksMergeRequestData(
     val title: String,
-    val practiceIdList: List<Long>
+    val deckIds: List<Long>
 )
 
-data class PracticeReorderRequestData(
-    val reorderedList: List<PracticeDashboardItem>,
+data class LetterDecksReorderRequestData(
+    val reorderedList: List<LettersDashboardItem>,
     val sortByTime: Boolean
 )

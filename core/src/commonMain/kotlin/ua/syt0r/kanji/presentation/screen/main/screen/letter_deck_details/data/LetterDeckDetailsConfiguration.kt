@@ -27,12 +27,12 @@ enum class PracticeType(
     val imageVector: ImageVector,
 ) {
     Writing(
-        titleResolver = { practicePreview.practiceType.practiceTypeWriting },
+        titleResolver = { letterDeckDetails.practiceType.practiceTypeWriting },
         correspondingRepoType = RepoPracticeType.Writing,
         imageVector = Icons.Default.Draw
     ),
     Reading(
-        titleResolver = { practicePreview.practiceType.practiceTypeReading },
+        titleResolver = { letterDeckDetails.practiceType.practiceTypeReading },
         correspondingRepoType = RepoPracticeType.Reading,
         imageVector = Icons.Default.LocalLibrary
     )
@@ -53,18 +53,18 @@ enum class SortOption(
     val correspondingRepoType: RepoSortOption,
 ) {
     ADD_ORDER(
-        titleResolver = { practicePreview.sortDialog.sortOptionAddOrder },
-        hintResolver = { practicePreview.sortDialog.sortOptionAddOrderHint },
+        titleResolver = { letterDeckDetails.sortDialog.sortOptionAddOrder },
+        hintResolver = { letterDeckDetails.sortDialog.sortOptionAddOrderHint },
         correspondingRepoType = RepoSortOption.AddOrder
     ),
     FREQUENCY(
-        titleResolver = { practicePreview.sortDialog.sortOptionFrequency },
-        hintResolver = { practicePreview.sortDialog.sortOptionFrequencyHint },
+        titleResolver = { letterDeckDetails.sortDialog.sortOptionFrequency },
+        hintResolver = { letterDeckDetails.sortDialog.sortOptionFrequencyHint },
         correspondingRepoType = RepoSortOption.Frequency
     ),
     NAME(
-        titleResolver = { practicePreview.sortDialog.sortOptionName },
-        hintResolver = { practicePreview.sortDialog.sortOptionNameHint },
+        titleResolver = { letterDeckDetails.sortDialog.sortOptionName },
+        hintResolver = { letterDeckDetails.sortDialog.sortOptionNameHint },
         correspondingRepoType = RepoSortOption.Name
     );
 
@@ -79,11 +79,11 @@ enum class DeckDetailsLayout(
     val correspondingRepoType: RepoLayout,
 ) {
     SingleCharacter(
-        titleResolver = { practicePreview.layoutDialog.singleCharacterOptionLabel },
+        titleResolver = { letterDeckDetails.layoutDialog.singleCharacterOptionLabel },
         correspondingRepoType = RepoLayout.Character
     ),
     Groups(
-        titleResolver = { practicePreview.layoutDialog.groupsOptionLabel },
+        titleResolver = { letterDeckDetails.layoutDialog.groupsOptionLabel },
         correspondingRepoType = RepoLayout.Groups
     )
 }

@@ -114,7 +114,7 @@ private fun ToolbarTitle(state: State<LetterDeckDetailsContract.ScreenState>) {
         }
 
         is ToolbarTitleData.Selection -> {
-            Text(text = resolveString { practicePreview.multiselectTitle(data.count) })
+            Text(text = resolveString { letterDeckDetails.multiselectTitle(data.count) })
         }
     }
 }
