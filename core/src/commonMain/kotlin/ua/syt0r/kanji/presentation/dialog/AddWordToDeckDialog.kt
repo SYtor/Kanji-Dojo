@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 
@@ -53,11 +54,12 @@ fun AddWordToDeckDialog(
 ) {
 
     val dialogState = rememberAddWordToDeckDialogState(wordId)
+    val strings = resolveString { addWordToDeckDialog }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         scrollableContent = false,
-        title = { Text("Add $wordPreviewReading to vocab deck") },
+        title = { Text(strings.title(wordPreviewReading)) },
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
@@ -65,13 +67,14 @@ fun AddWordToDeckDialog(
             ) {
                 DialogContent(
                     state = it,
-                    onDismissRequest = onDismissRequest
-                ) { dialogState.createNewDeck() }
+                    onDismissRequest = onDismissRequest,
+                    createNewDeck = { dialogState.createNewDeck() }
+                )
             }
         },
         buttons = {
             TextButton(onDismissRequest) {
-                Text("Cancel")
+                Text(strings.buttonCancel)
             }
             val isAddButtonEnabled = remember {
                 derivedStateOf {
@@ -85,7 +88,7 @@ fun AddWordToDeckDialog(
                 onClick = { dialogState.save() },
                 enabled = isAddButtonEnabled.value
             ) {
-                Text("Add")
+                Text(strings.buttonAdd)
             }
         }
     )
@@ -115,7 +118,7 @@ private fun DialogContent(
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(" + Create New Deck")
+                    Text(text = resolveString { addWordToDeckDialog.createDeckButton })
                 }
                 state.decks.forEach { deck ->
                     Row(
@@ -141,7 +144,7 @@ private fun DialogContent(
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 hintContent = {
                     Text(
-                        text = "Enter deck title here...",
+                        text = resolveString { addWordToDeckDialog.createDeckTitleHint },
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 },
@@ -149,7 +152,10 @@ private fun DialogContent(
         }
 
         AddingState.Saving -> {
-            Text("Adding", Modifier.fillMaxWidth().wrapContentWidth())
+            Text(
+                text = resolveString { addWordToDeckDialog.savingStateMessage },
+                modifier = Modifier.fillMaxWidth().wrapContentWidth()
+            )
         }
 
         AddingState.Completed -> {
@@ -158,7 +164,9 @@ private fun DialogContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Added")
+                Text(
+                    text = resolveString { addWordToDeckDialog.completedStateMessage }
+                )
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,

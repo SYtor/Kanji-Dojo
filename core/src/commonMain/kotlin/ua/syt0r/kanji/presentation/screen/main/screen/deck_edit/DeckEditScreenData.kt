@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
 
@@ -63,11 +64,21 @@ sealed interface DeckEditScreenConfiguration {
 }
 
 enum class DeckEditingMode(
-    val icon: ImageVector
+    val icon: ImageVector,
+    val titleResolver: StringResolveScope<String>
 ) {
-    Search(Icons.Default.Search),
-    Removal(Icons.Default.Close),
-    ResetSrs(Icons.Default.Memory)
+    Search(
+        icon = Icons.Default.Search,
+        titleResolver = { deckEdit.editingModeSearchTitle }
+    ),
+    Removal(
+        icon = Icons.Default.Close,
+        titleResolver = { deckEdit.editingModeRemovalTitle }
+    ),
+    ResetSrs(
+        icon = Icons.Default.Memory,
+        titleResolver = { TODO() }
+    )
 }
 
 sealed interface DeckEditListItem {

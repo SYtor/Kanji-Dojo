@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.Icon
@@ -36,12 +35,12 @@ import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
@@ -50,6 +49,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenCo
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditingMode
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditingModeSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
+
+private const val InlineIconId = "icon"
 
 @Composable
 fun VocabDeckEditingUI(
@@ -87,13 +88,9 @@ fun VocabDeckEditingUI(
             when (it) {
                 DeckEditingMode.Search -> {
                     Text(
-                        text = buildAnnotatedString {
-                            append("To add new words use ")
-                            appendInlineContent("icon")
-                            append(" icon on search screen, during writing reviews and other places in the app")
-                        },
+                        text = resolveString { deckEdit.vocabSearchMessage(InlineIconId) },
                         inlineContent = mapOf(
-                            "icon" to InlineTextContent(
+                            InlineIconId to InlineTextContent(
                                 Placeholder(
                                     24.textDp,
                                     24.textDp,

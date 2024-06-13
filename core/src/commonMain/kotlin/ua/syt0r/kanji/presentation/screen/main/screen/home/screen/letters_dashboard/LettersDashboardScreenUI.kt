@@ -37,7 +37,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Sort
@@ -664,16 +663,14 @@ private fun MergeConfirmationDialog(
     }
 }
 
+private const val InlineIconId = "icon"
+
 @Composable
 private fun EmptyState() {
     Text(
-        text = buildAnnotatedString {
-            append("Create deck by clicking on ")
-            appendInlineContent("icon")
-            append(" button. Decks are used to track your progress")
-        },
+        text = resolveString { lettersDashboard.emptyScreenMessage(InlineIconId) },
         inlineContent = mapOf(
-            "icon" to InlineTextContent(
+            InlineIconId to InlineTextContent(
                 placeholder = Placeholder(
                     width = 24.textDp,
                     height = 24.textDp,

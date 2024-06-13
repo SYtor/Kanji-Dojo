@@ -53,6 +53,7 @@ interface Strings {
     val stats: StatsStrings
     val search: SearchStrings
     val alternativeDialog: AlternativeDialogStrings
+    val addWordToDeckDialog: AddWordToDeckDialogStrings
 
     val settings: SettingsStrings
     val reminderDialog: ReminderDialogStrings
@@ -78,7 +79,21 @@ interface Strings {
 
 }
 
+interface AddWordToDeckDialogStrings {
+    val title: (reading: String) -> String
+    val createDeckButton: String
+    val createDeckTitleHint: String
+    val savingStateMessage: String
+    val completedStateMessage: String
+    val buttonCancel: String
+    val buttonAdd: String
+}
+
 interface VocabDashboardStrings {
+    val userDecksTitle: String
+    val userDecksEmptyMessage: String
+    val defaultDecksTitle: String
+
     val reviewButton: String
     val wordsCount: (Int) -> String
 
@@ -121,7 +136,7 @@ interface HomeStrings {
 
 interface LettersDashboardStrings {
 
-    val emptyScreenMessage: (Color) -> AnnotatedString
+    val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString
 
     val mergeButton: String
     val mergeCancelButton: String
@@ -296,14 +311,17 @@ interface LetterDeckPickerStrings {
 }
 
 interface DeckEditStrings {
-    val newTitle: String
+    val createTitle: String
     val ediTitle: String
 
     val searchHint: String
 
-    val infoAction: String
-    val returnAction: String
-    val removeAction: String
+    val editingModeSearchTitle: String
+    val editingModeRemovalTitle: String
+
+    val vocabSearchMessage: (inlineIconId: String) -> AnnotatedString
+
+    val completeMessage: String
 
     val saveTitle: String
     val saveInputHint: String
@@ -311,7 +329,7 @@ interface DeckEditStrings {
     val saveButtonCompleted: String
 
     val deleteTitle: String
-    val deleteMessage: (practiceTitle: String) -> String
+    val deleteMessage: (deckTitle: String) -> String
     val deleteButtonDefault: String
     val deleteButtonCompleted: String
 
@@ -354,7 +372,7 @@ interface LetterDeckDetailsStrings {
     val filterNoneLabel: String
     val kanaGroupsModeActivatedLabel: String
 
-    val dialogCommon: PracticePreviewDialogCommonStrings
+    val dialogCommon: LetterDeckDetailDialogCommonStrings
     val practiceType: PracticeTypeStrings
     val filterDialog: FilterDialogStrings
     val sortDialog: SortDialogStrings
@@ -390,7 +408,7 @@ interface PracticePreviewLayoutDialogStrings {
     val kanaGroupsSubtitle: String
 }
 
-interface PracticePreviewDialogCommonStrings {
+interface LetterDeckDetailDialogCommonStrings {
     val buttonCancel: String
     val buttonApply: String
 }

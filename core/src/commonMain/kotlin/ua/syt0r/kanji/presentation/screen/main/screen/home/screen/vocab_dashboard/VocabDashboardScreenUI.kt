@@ -175,7 +175,7 @@ private fun ScreenLoadedState(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
-                text = "User Decks",
+                text = resolveString { vocabDashboard.userDecksTitle },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -193,9 +193,7 @@ private fun ScreenLoadedState(
             }
         } else {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    "No decks saved. Use default decks to review vocabulary or create your own decks"
-                )
+                Text(resolveString { vocabDashboard.userDecksEmptyMessage })
             }
         }
 
@@ -203,7 +201,7 @@ private fun ScreenLoadedState(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
             Text(
-                text = "Default Decks",
+                text = resolveString { vocabDashboard.defaultDecksTitle },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )

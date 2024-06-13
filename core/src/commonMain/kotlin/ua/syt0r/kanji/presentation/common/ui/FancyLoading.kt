@@ -51,7 +51,8 @@ fun FancyLoading(
                     start = text.length - periodsToRemove,
                     end = text.length
                 )
-            }
+            },
+            maxLines = 1
         )
 
         LinearProgressIndicator(

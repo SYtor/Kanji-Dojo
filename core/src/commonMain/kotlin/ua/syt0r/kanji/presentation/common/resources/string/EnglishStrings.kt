@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.common.resources.string
 
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -37,6 +38,8 @@ object EnglishStrings : Strings {
     override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
+    override val addWordToDeckDialog: AddWordToDeckDialogStrings = EnglishAddWordToDeckDialogStrings
+
     override val settings: SettingsStrings = EnglishSettingsStrings
     override val reminderDialog: ReminderDialogStrings = EnglishReminderDialogStrings
     override val about: AboutStrings = EnglishAboutStrings
@@ -71,25 +74,25 @@ object EnglishHomeStrings : HomeStrings {
 
 object EnglishLettersDashboardStrings : LettersDashboardStrings {
 
-    override val emptyScreenMessage = { color: Color ->
+    override val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString = { inlineIconId ->
         buildAnnotatedString {
-            append("To start ")
-            withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append("+") }
-            append(" and save practice to start.\nPractices are used to track your progress")
+            append("Create deck by clicking on ")
+            appendInlineContent(inlineIconId)
+            append(" button. Decks are used to track your progress")
         }
     }
 
     override val mergeButton: String = "Merge"
     override val mergeCancelButton: String = "Cancel"
     override val mergeAcceptButton: String = "Merge"
-    override val mergeTitle: String = "Merge multiple sets into one"
+    override val mergeTitle: String = "Merge multiple decks into one"
     override val mergeTitleHint: String = "Enter title here"
     override val mergeSelectedCount: (Int) -> String = { "$it selected" }
     override val mergeClearSelectionButton: String = "Clear"
 
     override val mergeDialogTitle: String = "Merge Confirmation"
     override val mergeDialogMessage: (String, List<String>) -> String = { newTitle, mergedTitles ->
-        "Following ${mergedTitles.size} sets will be merged into the new \"$newTitle\" set: ${mergedTitles.joinToString()}"
+        "Following ${mergedTitles.size} decks will be merged into the new \"$newTitle\" deck: ${mergedTitles.joinToString()}"
     }
     override val mergeDialogCancelButton: String = "Cancel"
     override val mergeDialogAcceptButton: String = "Merge"
@@ -97,7 +100,7 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
     override val sortButton: String = "Sort"
     override val sortCancelButton: String = "Cancel"
     override val sortAcceptButton: String = "Apply"
-    override val sortTitle: String = "Change sets order"
+    override val sortTitle: String = "Change decks order"
     override val sortByTimeTitle: String = "Sort by last review time"
 
     override val itemTimeMessage: (Duration?) -> String = {
@@ -127,8 +130,12 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
 }
 
 object EnglishVocabDashboardStrings : VocabDashboardStrings {
+    override val userDecksTitle: String = "User Decks"
+    override val userDecksEmptyMessage: String =
+        "No decks saved. Use default decks to review vocabulary or create your own decks"
+    override val defaultDecksTitle: String = "Default Decks"
     override val reviewButton: String = "Review"
-    override val wordsCount: (Int) -> String = { "Expressions count: $it" }
+    override val wordsCount: (Int) -> String = { "Words count: $it" }
     override val deckTitleTime: String = "Time"
     override val deckTitleWeek: String = "Week Days"
     override val deckTitleCommonVerbs: String = "Common Verbs"
@@ -200,6 +207,16 @@ object EnglishAlternativeDialogStrings : AlternativeDialogStrings {
     override val meaningsTitle: String = "Meanings"
     override val reportButton: String = "Report"
     override val closeButton: String = "Close"
+}
+
+object EnglishAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
+    override val title: (reading: String) -> String = { "Add $it to vocab deck" }
+    override val createDeckButton: String = " + Create New Deck"
+    override val createDeckTitleHint: String = "Enter deck title here..."
+    override val savingStateMessage: String = "Adding"
+    override val completedStateMessage: String = "Added"
+    override val buttonCancel: String = "Cancel"
+    override val buttonAdd: String = "Add"
 }
 
 object EnglishSettingsStrings : SettingsStrings {
@@ -275,7 +292,7 @@ object EnglishFeedbackStrings : FeedbackStrings {
 
 object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
 
-    override val title: String = "Select"
+    override val title: String = "Select Deck"
 
     override val kanaTitle: String = "Kana"
 
@@ -347,18 +364,25 @@ object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
 }
 
 object EnglishDeckEditStrings : DeckEditStrings {
-    override val newTitle: String = "Create"
-    override val ediTitle: String = "Edit"
+    override val createTitle: String = "Create Deck"
+    override val ediTitle: String = "Edit Deck"
     override val searchHint: String = "Enter kana or kanji"
-    override val infoAction: String = "Info"
-    override val returnAction: String = "Return"
-    override val removeAction: String = "Remove"
+    override val editingModeSearchTitle: String = "Search"
+    override val editingModeRemovalTitle: String = "Removal"
+    override val vocabSearchMessage: (inlineIconId: String) -> AnnotatedString = {
+        buildAnnotatedString {
+            append("To add new words use ")
+            appendInlineContent(it)
+            append(" icon on search screen, during writing reviews and other places in the app")
+        }
+    }
+    override val completeMessage: String = "Done"
     override val saveTitle: String = "Save changes"
     override val saveInputHint: String = "Deck Title"
     override val saveButtonDefault: String = "Save"
     override val saveButtonCompleted: String = "Done"
     override val deleteTitle: String = "Delete confirmation"
-    override val deleteMessage: (practiceTitle: String) -> String = {
+    override val deleteMessage: (deckTitle: String) -> String = {
         "Are you sure you want to delete \"$it\" deck?"
     }
     override val deleteButtonDefault: String = "Delete"
@@ -401,8 +425,8 @@ object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val repetitions: (Int) -> String = { "Repetitions: $it" }
     override val lapses: (Int) -> String = { "Lapses: $it" }
 
-    override val dialogCommon: PracticePreviewDialogCommonStrings =
-        EnglishPracticePreviewDialogCommonStrings
+    override val dialogCommon: LetterDeckDetailDialogCommonStrings =
+        EnglishLetterDeckDetailDialogCommonStrings
     override val practiceType: PracticeTypeStrings = EnglishPracticeTypeStrings
     override val filterDialog: FilterDialogStrings = EnglishFilterDialogStrings
     override val sortDialog: SortDialogStrings = EnglishSortDialogStrings
@@ -418,7 +442,7 @@ object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val kanaGroupsModeActivatedLabel: String = "Kana Groups Mode"
 }
 
-object EnglishPracticePreviewDialogCommonStrings : PracticePreviewDialogCommonStrings {
+object EnglishLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {
     override val buttonCancel: String = "Cancel"
     override val buttonApply: String = "Apply"
 }

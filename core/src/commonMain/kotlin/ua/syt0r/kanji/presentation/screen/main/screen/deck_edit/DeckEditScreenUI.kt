@@ -171,7 +171,7 @@ fun DeckEditScreenUI(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Done")
+                        Text(resolveString { deckEdit.completeMessage })
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
@@ -213,8 +213,8 @@ private fun Toolbar(
                         is DeckEditScreenConfiguration.LetterDeck.Edit,
                         is DeckEditScreenConfiguration.VocabDeck.Edit -> deckEdit.ediTitle
 
-                        is DeckEditScreenConfiguration.LetterDeck -> "Create Letter Deck"
-                        is DeckEditScreenConfiguration.VocabDeck -> "Create Vocab Deck"
+                        is DeckEditScreenConfiguration.LetterDeck,
+                        is DeckEditScreenConfiguration.VocabDeck -> deckEdit.createTitle
                     }
                 }
             )
@@ -366,7 +366,7 @@ fun DeckEditingModeSelector(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(it.icon, null)
-                Text(text = it.name)
+                Text(text = resolveString(it.titleResolver))
             }
         }
     }

@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.common.resources.string
 
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -36,6 +37,9 @@ object JapaneseStrings : Strings {
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
+    override val addWordToDeckDialog: AddWordToDeckDialogStrings =
+        JapaneseAddWordToDeckDialogStrings
+
     override val settings: SettingsStrings = JapaneseSettingsStrings
     override val reminderDialog: ReminderDialogStrings = JapaneseReminderDialogStrings
     override val about: AboutStrings = JapaneseAboutStrings
@@ -69,25 +73,25 @@ object JapaneseHomeStrings : HomeStrings {
 }
 
 object JapaneseLettersDashboardStrings : LettersDashboardStrings {
-    override val emptyScreenMessage = { color: Color ->
+    override val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
-            append("アプリを使うには練習セットが必要です。\n")
-            withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append("+") }
-            append("ボタンを押して、練習セットを作成してください。")
+            append("アプリを使うにはデッキが必要です。")
+            appendInlineContent(it)
+            append("　ボタンを押して、デッキを作成してください。")
         }
     }
 
     override val mergeButton: String = "統合"
     override val mergeCancelButton: String = "キャンセル"
     override val mergeAcceptButton: String = "統合"
-    override val mergeTitle: String = "複数のセットを1つに統合"
+    override val mergeTitle: String = "複数のデッキを1つに統合"
     override val mergeTitleHint: String = "タイトルを入力"
     override val mergeSelectedCount: (Int) -> String = { "$it 個選択中" }
     override val mergeClearSelectionButton: String = "クリア"
 
     override val mergeDialogTitle: String = "統合の確認"
     override val mergeDialogMessage: (String, List<String>) -> String = { newTitle, mergedTitles ->
-        "以下の${mergedTitles.size}個のセットが新しいセット「$newTitle」に統合されます: ${mergedTitles.joinToString()}"
+        "以下の${mergedTitles.size}個のデッキが新しいデッキ「$newTitle」に統合されます: ${mergedTitles.joinToString()}"
     }
     override val mergeDialogCancelButton: String = "キャンセル"
     override val mergeDialogAcceptButton: String = "統合"
@@ -95,7 +99,7 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val sortButton: String = "並べ替え"
     override val sortCancelButton: String = "キャンセル"
     override val sortAcceptButton: String = "適用"
-    override val sortTitle: String = "セットの順序を変更"
+    override val sortTitle: String = "デッキの順序を変更"
     override val sortByTimeTitle: String = "最終練習時間で並べ替える"
 
     override val itemTimeMessage: (Duration?) -> String = {
@@ -124,7 +128,14 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val dailyIndicatorReview: (Int) -> String = { "$it 復習" }
 }
 
-object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings
+object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings {
+    override val userDecksTitle: String = "保存したデッキ"
+    override val userDecksEmptyMessage: String =
+        "デッキが保存されていません。既定デッキを使用して単語を復習するか、自分でデッキを作成してください。"
+    override val defaultDecksTitle: String = "既定デッキ"
+    override val reviewButton: String = "練習へ"
+    override val wordsCount: (Int) -> String = { "単語の数：$it" }
+}
 
 object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
     override val title: String = "毎日の目標"
@@ -176,6 +187,16 @@ object JapaneseAlternativeDialogStrings : AlternativeDialogStrings {
     override val meaningsTitle: String = "意味"
     override val reportButton: String = "報告"
     override val closeButton: String = "閉じる"
+}
+
+object JapaneseAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
+    override val title: (reading: String) -> String = { "「$it」を単語デッキに追加" }
+    override val createDeckButton: String = " + 新しいデッキを作る"
+    override val createDeckTitleHint: String = "ここにデッキのタイトルを入力..."
+    override val savingStateMessage: String = "追加中"
+    override val completedStateMessage: String = "追加完了"
+    override val buttonCancel: String = "キャンセル"
+    override val buttonAdd: String = "追加"
 }
 
 object JapaneseSettingsStrings : SettingsStrings {
@@ -314,19 +335,26 @@ object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
 }
 
 object JapaneseDeckEditStrings : DeckEditStrings {
-    override val newTitle: String = "作成"
-    override val ediTitle: String = "編集"
+    override val createTitle: String = "デッキの作成"
+    override val ediTitle: String = "デッキの編集"
     override val searchHint: String = "文字を入力"
-    override val infoAction: String = "情報"
-    override val returnAction: String = "戻る"
-    override val removeAction: String = "消去"
+    override val editingModeSearchTitle: String = "検索"
+    override val editingModeRemovalTitle: String = "削除"
+    override val vocabSearchMessage: (inlineIconId: String) -> AnnotatedString = {
+        buildAnnotatedString {
+            append("新しい単語を追加するには、検索画面や、書く練習中、アプリ内の他の場所で ")
+            appendInlineContent(it)
+            append(" アイコンを使用してください")
+        }
+    }
+    override val completeMessage: String = "完了"
     override val saveTitle: String = "変更の保存"
     override val saveInputHint: String = "名前"
     override val saveButtonDefault: String = "保存"
     override val saveButtonCompleted: String = "完了"
     override val deleteTitle: String = "削除の確認"
     override val deleteMessage: (practiceTitle: String) -> String = {
-        "練習セット「$it」を削除してもよろしいですか？"
+        "デッキ「$it」を削除してもよろしいですか？"
     }
     override val deleteButtonDefault: String = "削除"
     override val deleteButtonCompleted: String = "完了"
@@ -368,8 +396,8 @@ object JapaneseLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val repetitions: (Int) -> String = { "連続正解回数: $it" }
     override val lapses: (Int) -> String = { "忘却回数: $it" }
 
-    override val dialogCommon: PracticePreviewDialogCommonStrings =
-        JapanesePracticePreviewDialogCommonStrings
+    override val dialogCommon: LetterDeckDetailDialogCommonStrings =
+        JapaneseLetterDeckDetailDialogCommonStrings
     override val practiceType: PracticeTypeStrings = JapanesePracticeTypeStrings
     override val filterDialog: FilterDialogStrings = JapaneseFilterDialogStrings
     override val sortDialog: SortDialogStrings = JapaneseSortDialogStrings
@@ -385,7 +413,7 @@ object JapaneseLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val kanaGroupsModeActivatedLabel: String = "仮名グループモード"
 }
 
-object JapanesePracticePreviewDialogCommonStrings : PracticePreviewDialogCommonStrings {
+object JapaneseLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {
     override val buttonCancel: String = "キャンセル"
     override val buttonApply: String = "適用"
 }
