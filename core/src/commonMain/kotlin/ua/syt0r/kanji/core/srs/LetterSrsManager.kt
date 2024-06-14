@@ -3,8 +3,11 @@ package ua.syt0r.kanji.core.srs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -30,6 +33,7 @@ interface LetterSrsManager {
 class DefaultLetterSrsManager(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val practiceRepository: LetterPracticeRepository,
+    private val studyProgressCache: CharacterStudyProgressCache,
     private val getDeckSrsProgressUseCase: GetLetterDeckSrsProgressUseCase,
     private val getLetterSrsStatusUseCase: GetLetterSrsStatusUseCase,
     private val timeUtils: TimeUtils,
@@ -38,11 +42,20 @@ class DefaultLetterSrsManager(
 
     private val preferencesChange = Channel<Unit>()
 
-    override val dataChangeFlow: SharedFlow<Unit> = mergeSharedFlows(
-        coroutineScope,
-        practiceRepository.changesFlow,
-        preferencesChange.consumeAsFlow()
-    )
+    private val _dataChangeFlow = MutableSharedFlow<Unit>()
+    override val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
+
+    init {
+        val dataChangeFlowWithCacheClearing = mergeSharedFlows(
+            coroutineScope,
+            practiceRepository.changesFlow.onEach { studyProgressCache.clear() },
+            preferencesChange.consumeAsFlow()
+        )
+
+        dataChangeFlowWithCacheClearing
+            .onEach { _dataChangeFlow.emit(it) }
+            .launchIn(coroutineScope)
+    }
 
     override suspend fun notifyPreferencesChange() {
         preferencesChange.send(Unit)
@@ -90,10 +103,11 @@ class DefaultLetterSrsManager(
         decksInfo: List<LetterSrsDeckInfo>,
     ): DailyProgress {
 
-        val characterProgresses = practiceRepository.getStudyProgresses()
+        val characterProgresses = studyProgressCache.get().asSequence().flatMap { it.value }
 
         val charactersUpdatedToday = characterProgresses
             .filter { getSrsDate(it.lastReviewTime) == date }
+            .toList()
 
         val studiedToday = charactersUpdatedToday.filter {
             practiceRepository.getFirstReviewTime(it.character, it.practiceType)

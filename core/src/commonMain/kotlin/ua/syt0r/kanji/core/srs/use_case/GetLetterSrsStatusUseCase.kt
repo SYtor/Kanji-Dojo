@@ -5,7 +5,8 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.srs.CharacterProgressStatus
 import ua.syt0r.kanji.core.srs.CharacterSrsData
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.srs.CharacterStudyProgressCache
+import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 
 interface GetLetterSrsStatusUseCase {
@@ -19,7 +20,7 @@ interface GetLetterSrsStatusUseCase {
 }
 
 class DefaultGetLetterSrsStatusUseCase(
-    private val repository: LetterPracticeRepository,
+    private val characterStudyProgressCache: CharacterStudyProgressCache
 ) : GetLetterSrsStatusUseCase {
 
     override suspend fun invoke(
@@ -27,7 +28,8 @@ class DefaultGetLetterSrsStatusUseCase(
         practiceType: PracticeType,
         date: LocalDate,
     ): CharacterSrsData {
-        val studyProgress = repository.getStudyProgress(letter, practiceType)
+        val studyProgress: CharacterStudyProgress? = characterStudyProgressCache.get(letter)
+            .find { it.practiceType == practiceType }
         val expectedReviewDate = studyProgress?.getExpectedReviewTime(DEFAULT_SRS_INTERVAL)
             ?.toLocalDateTime(TimeZone.currentSystemDefault())
             ?.date
