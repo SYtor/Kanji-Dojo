@@ -1,9 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,6 +80,7 @@ fun State<WritingReviewState>.asWordsBottomSheetState(): State<BottomSheetStateD
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WritingPracticeWordsBottomSheet(
     state: State<BottomSheetStateData>,
@@ -93,25 +92,18 @@ fun WritingPracticeWordsBottomSheet(
         modifier = Modifier
             .fillMaxWidth()
             .height(sheetContentHeight.value)
+            .windowInsetsPadding(BottomSheetDefaults.windowInsets)
     ) {
 
-        Box(
-            modifier = Modifier
-                .padding(top = 10.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.outline)
-                .size(width = 60.dp, height = 4.dp)
-                .align(Alignment.CenterHorizontally)
+        BottomSheetDefaults.DragHandle(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
         Text(
             text = resolveString { writingPractice.wordsBottomSheetTitle },
-            modifier = Modifier
-                .padding(top = 8.dp, bottom = 16.dp)
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
             style = MaterialTheme.typography.titleLarge
         )
-
 
         val currentState = state.value
 

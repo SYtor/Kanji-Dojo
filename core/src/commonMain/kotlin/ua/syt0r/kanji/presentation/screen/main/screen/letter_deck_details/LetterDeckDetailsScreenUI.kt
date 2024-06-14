@@ -21,21 +21,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -75,7 +75,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.Let
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.PracticePreviewScreenFilterOptionDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.PracticePreviewScreenSortDialog
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LetterDeckDetailsScreenUI(
     state: State<ScreenState>,
@@ -110,117 +110,148 @@ fun LetterDeckDetailsScreenUI(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val practiceSharer = rememberPracticeSharer(snackbarHostState)
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            skipHiddenState = false
-        )
-    )
+    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-    if (scaffoldState.bottomSheetState.isVisible) {
-        MultiplatformBackHandler { coroutineScope.launch { scaffoldState.bottomSheetState.hide() } }
+    if (bottomSheetState.isVisible) {
+        MultiplatformBackHandler { coroutineScope.launch { bottomSheetState.hide() } }
     }
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetTonalElevation = 0.dp,
-        sheetPeekHeight = 0.dp,
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+        sheetShape = MaterialTheme.shapes.large,
         sheetContent = {
             LetterDeckDetailsBottomSheet(
                 state = state,
                 onCharacterClick = navigateToCharacterDetails,
                 onStudyClick = startGroupReview,
-                onDismissRequest = { scaffoldState.bottomSheetState.hide() }
+                onDismissRequest = { bottomSheetState.hide() }
             )
-        },
-        topBar = {
-            LetterDeckDetailsToolbar(
-                state = state,
-                upButtonClick = navigateUp,
-                dismissMultiSelectButtonClick = leaveSelectionMode,
-                onVisibilityButtonClick = { shouldShowVisibilityDialog = true },
-                editButtonClick = navigateToDeckEdit,
-                selectAllClick = selectAllClick,
-                deselectAllClick = deselectAllClick,
-                shareButtonClick = { practiceSharer.share(it) }
-            )
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-
-        val extraListSpacerState = rememberExtraListSpacerState()
-
-        val transition = updateTransition(targetState = state.value, label = "State Transition")
-        transition.AnimatedContent(
-            contentKey = { it::class },
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .onGloballyPositioned { extraListSpacerState.updateList(it) }
-        ) { screenState ->
-
-            when (screenState) {
-                ScreenState.Loading -> {
-                    FancyLoading(Modifier.fillMaxSize().wrapContentSize())
-                }
-
-                is ScreenState.Loaded -> {
-                    ScreenLoadedState(
-                        screenState = screenState,
-                        extraListSpacerState = extraListSpacerState,
-                        onConfigurationUpdate = updateConfiguration,
-                        onCharacterClick = navigateToCharacterDetails,
-                        selectGroup = {
-                            showGroupDetails(it)
-                            coroutineScope.launch { scaffoldState.bottomSheetState.expand() }
-                        },
-                        toggleItemSelection = toggleSelection
-                    )
-
-                    if (screenState.visibleDataState.value.isSelectionModeEnabled.value) {
-                        MultiplatformBackHandler(onBack = leaveSelectionMode)
-                    }
-                }
-            }
-
         }
+    ) {
 
-        transition.AnimatedContent(
-            transitionSpec = { scaleIn() togetherWith scaleOut() },
-            modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.BottomEnd),
-            contentAlignment = Alignment.BottomEnd
-        ) { screenState ->
-            if (screenState !is ScreenState.Loaded) {
-                Box(Modifier)
-                return@AnimatedContent
-            }
+        Scaffold(
+            topBar = {
+                LetterDeckDetailsToolbar(
+                    state = state,
+                    upButtonClick = navigateUp,
+                    dismissMultiSelectButtonClick = leaveSelectionMode,
+                    onVisibilityButtonClick = { shouldShowVisibilityDialog = true },
+                    editButtonClick = navigateToDeckEdit,
+                    selectAllClick = selectAllClick,
+                    deselectAllClick = deselectAllClick,
+                    shareButtonClick = { practiceSharer.share(it) }
+                )
+            },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { paddingValues ->
 
             val noGroupsSelectedMessage = resolveString {
                 letterDeckDetails.multiselectNoSelected
             }
 
-            FAB(
-                screenState = screenState,
-                extraListSpacerState = extraListSpacerState,
-                startPractice = {
-                    val anyItemSelected = screenState.visibleDataState.value
-                        .items.any { it.selected.value }
-                    if (anyItemSelected) {
-                        startMultiselectReview()
-                    } else {
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = noGroupsSelectedMessage,
-                                withDismissAction = true
-                            )
-                        }
+            ScreenContent(
+                state = state,
+                updateConfiguration = updateConfiguration,
+                navigateToCharacterDetails = navigateToCharacterDetails,
+                selectGroup = {
+                    coroutineScope.launch {
+                        showGroupDetails(it)
+                        bottomSheetState.show()
                     }
                 },
-                startSelectionMode = startSelectionMode
+                toggleSelection = toggleSelection,
+                startSelectionMode = startSelectionMode,
+                leaveSelectionMode = leaveSelectionMode,
+                startMultiselectReview = startMultiselectReview,
+                showNoSelectionMessage = {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = noGroupsSelectedMessage,
+                            withDismissAction = true
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
             )
+
         }
 
+    }
+
+}
+
+@Composable
+private fun ScreenContent(
+    state: State<ScreenState>,
+    updateConfiguration: (LetterDeckDetailsConfiguration) -> Unit,
+    navigateToCharacterDetails: (String) -> Unit,
+    selectGroup: (DeckDetailsListItem.Group) -> Unit,
+    toggleSelection: (DeckDetailsListItem) -> Unit,
+    startSelectionMode: () -> Unit,
+    leaveSelectionMode: () -> Unit,
+    startMultiselectReview: () -> Unit,
+    showNoSelectionMessage: () -> Unit,
+    modifier: Modifier,
+) {
+
+    val extraListSpacerState = rememberExtraListSpacerState()
+
+    val transition = updateTransition(targetState = state.value, label = "State Transition")
+    transition.AnimatedContent(
+        contentKey = { it::class },
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        modifier = modifier.onGloballyPositioned { extraListSpacerState.updateList(it) }
+    ) { screenState ->
+
+        when (screenState) {
+            ScreenState.Loading -> {
+                FancyLoading(Modifier.fillMaxSize().wrapContentSize())
+            }
+
+            is ScreenState.Loaded -> {
+                ScreenLoadedState(
+                    screenState = screenState,
+                    extraListSpacerState = extraListSpacerState,
+                    onConfigurationUpdate = updateConfiguration,
+                    onCharacterClick = navigateToCharacterDetails,
+                    selectGroup = selectGroup,
+                    toggleItemSelection = toggleSelection
+                )
+
+                if (screenState.visibleDataState.value.isSelectionModeEnabled.value) {
+                    MultiplatformBackHandler(onBack = leaveSelectionMode)
+                }
+            }
+        }
+
+    }
+
+    transition.AnimatedContent(
+        transitionSpec = { scaleIn() togetherWith scaleOut() },
+        modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.BottomEnd),
+        contentAlignment = Alignment.BottomEnd
+    ) { screenState ->
+        if (screenState !is ScreenState.Loaded) {
+            Box(Modifier)
+            return@AnimatedContent
+        }
+
+
+        FAB(
+            screenState = screenState,
+            extraListSpacerState = extraListSpacerState,
+            startPractice = {
+                val anyItemSelected = screenState.visibleDataState.value
+                    .items.any { it.selected.value }
+                if (anyItemSelected) {
+                    startMultiselectReview()
+                } else {
+                    showNoSelectionMessage()
+                }
+            },
+            startSelectionMode = startSelectionMode
+        )
     }
 
 }

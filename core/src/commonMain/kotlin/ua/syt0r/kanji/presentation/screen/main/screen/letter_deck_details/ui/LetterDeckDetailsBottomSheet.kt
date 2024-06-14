@@ -17,13 +17,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,52 +48,67 @@ import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsCharacterBox
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.CharacterReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.toColor
 
-private sealed interface BottomSheetState {
-    object Loading : BottomSheetState
+private sealed interface SheetContentState {
+
+    object Loading : SheetContentState
+
     data class Loaded(
         val practiceType: PracticeType,
         val group: DeckDetailsListItem.Group,
-    ) : BottomSheetState
+    ) : SheetContentState
+
 }
 
 @Composable
-fun LetterDeckDetailsBottomSheet(
-    state: State<LetterDeckDetailsContract.ScreenState>,
-    onCharacterClick: (String) -> Unit,
-    onStudyClick: (DeckDetailsListItem.Group) -> Unit,
-    onDismissRequest: suspend () -> Unit,
-) {
-
-    val bottomSheetState: BottomSheetState by remember {
+private fun State<ScreenState>.toSheetContentState(): State<SheetContentState> {
+    return remember {
         derivedStateOf {
-            val currentState = state.value
-                .let { it as? LetterDeckDetailsContract.ScreenState.Loaded }
-                ?: return@derivedStateOf BottomSheetState.Loading
+            val currentState = value
+                .let { it as? ScreenState.Loaded }
+                ?: return@derivedStateOf SheetContentState.Loading
 
-            BottomSheetState.Loaded(
+            SheetContentState.Loaded(
                 currentState.visibleDataState.value.configuration.practiceType,
                 group = currentState.visibleDataState.value
                     .let { it as? DeckDetailsVisibleData.Groups }
                     ?.selectedItem
                     ?.value
-                    ?: return@derivedStateOf BottomSheetState.Loading
+                    ?: return@derivedStateOf SheetContentState.Loading
             )
 
         }
     }
+}
 
-    Box(
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LetterDeckDetailsBottomSheet(
+    state: State<ScreenState>,
+    onCharacterClick: (String) -> Unit,
+    onStudyClick: (DeckDetailsListItem.Group) -> Unit,
+    onDismissRequest: suspend () -> Unit,
+) {
+
+    val sheetContentState = state.toSheetContentState()
+
+    Column(
         modifier = Modifier.animateContentSize(tween(100, easing = LinearEasing))
+            .windowInsetsPadding(BottomSheetDefaults.windowInsets)
     ) {
-        when (val currentState = bottomSheetState) {
-            BottomSheetState.Loading -> {
+
+        BottomSheetDefaults.DragHandle(
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        when (val currentState = sheetContentState.value) {
+            SheetContentState.Loading -> {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,7 +118,7 @@ fun LetterDeckDetailsBottomSheet(
                 LaunchedEffect(Unit) { onDismissRequest() }
             }
 
-            is BottomSheetState.Loaded -> {
+            is SheetContentState.Loaded -> {
                 PracticeGroupDetails(
                     practiceType = currentState.practiceType,
                     group = currentState.group,
