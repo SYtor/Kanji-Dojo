@@ -2,42 +2,25 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeReadingPriority
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabReviewManagingState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
 
 interface GetVocabReadingReviewStateUseCase {
     suspend operator fun invoke(
-        wordId: Long,
-        priority: VocabPracticeReadingPriority
-    ): VocabReviewManagingState.Review.Reading
+        descriptor: VocabQueueItemDescriptor.ReadingPicker
+    ): MutableVocabReviewState.Reading
 }
 
 class DefaultGetVocabReadingReviewStateUseCase(
-    private val appDataRepository: AppDataRepository
+    private val appDataRepository: AppDataRepository,
+    private val getPrioritizedWordReadingUseCase: GetPrioritizedWordReadingUseCase
 ) : GetVocabReadingReviewStateUseCase {
 
     override suspend fun invoke(
-        wordId: Long,
-        priority: VocabPracticeReadingPriority
-    ): VocabReviewManagingState.Review.Reading {
-        val word = appDataRepository.getWord(wordId)
-
-        val reading = when (priority) {
-            VocabPracticeReadingPriority.Default -> word.readings.first()
-            VocabPracticeReadingPriority.Kanji -> {
-                val readingWithKanji = word.readings.find {
-                    it.compounds.any { it.annotation != null }
-                }
-                readingWithKanji ?: word.readings.first()
-            }
-
-            VocabPracticeReadingPriority.Kana -> {
-                val kanaReading = word.readings.find {
-                    it.compounds.all { it.annotation == null }
-                }
-                kanaReading ?: word.readings.first()
-            }
-        }
+        descriptor: VocabQueueItemDescriptor.ReadingPicker
+    ): MutableVocabReviewState.Reading {
+        val word = appDataRepository.getWord(descriptor.wordId)
+        val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)
 
         val containsKanji = reading.compounds.any { it.annotation != null }
 
@@ -60,13 +43,14 @@ class DefaultGetVocabReadingReviewStateUseCase(
             .take(ANSWERS_COUNT)
             .shuffled()
 
-        return VocabReviewManagingState.Review.Reading(
+        return MutableVocabReviewState.Reading(
             word = word,
             questionCharacter = questionCharacter,
             revealedReading = reading,
             hiddenReading = reading.withEncodedText(correctAnswer),
             answers = answers,
-            correctAnswer = correctAnswer
+            correctAnswer = correctAnswer,
+            showMeaning = descriptor.showMeaning
         )
     }
 

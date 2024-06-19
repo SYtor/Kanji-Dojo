@@ -12,68 +12,83 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewQueueState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toScreenType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 
 class VocabPracticeViewModel(
     private val viewModelScope: CoroutineScope,
     private val userPreferencesRepository: PracticeUserPreferencesRepository,
+    private val getQueueDataUseCase: GetVocabPracticeQueueDataUseCase,
     private val practiceQueue: VocabPracticeQueue,
     private val analyticsManager: AnalyticsManager
 ) : VocabPracticeScreenContract.ViewModel {
 
     private lateinit var expressions: List<Long>
-    private lateinit var configuration: VocabPracticeConfiguration
 
-    private lateinit var _reviewState: MutableState<VocabReviewManagingState.Review>
+    private lateinit var _reviewState: MutableState<VocabReviewQueueState.Review>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
 
     override val state: StateFlow<ScreenState>
         get() = _state
 
-    override fun initialize(expressions: List<Long>) {
+    override fun initialize(words: List<Long>) {
         if (::expressions.isInitialized) return
-        this.expressions = expressions
+        this.expressions = words
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
-                practiceType = VocabPracticeType.ReadingPicker,
-                shuffle = true,
-                readingPriority = userPreferencesRepository.vocabReadingPriority.get()
-                    .toScreenType(),
-                showMeaning = userPreferencesRepository.vocabShowMeaning.get()
+                practiceType = mutableStateOf(VocabPracticeType.ReadingPicker),
+                shuffle = mutableStateOf(true),
+                flashcard = VocabPracticeConfiguration.Flashcard(
+                    readingPriority = mutableStateOf(VocabPracticeReadingPriority.Default),
+                    translationInFront = mutableStateOf(false)
+                ),
+                readingPicker = VocabPracticeConfiguration.ReadingPicker(
+                    readingPriority = mutableStateOf(
+                        userPreferencesRepository.vocabReadingPriority.get().toScreenType()
+                    ),
+                    showMeaning = mutableStateOf(
+                        userPreferencesRepository.vocabShowMeaning.get()
+                    )
+                )
             )
         }
     }
 
-    override fun configure(configuration: VocabPracticeConfiguration) {
+    override fun configure() {
+        val configurationState = _state.value as? ScreenState.Configuration ?: return
         _state.value = ScreenState.Loading
-        this.configuration = configuration
 
         viewModelScope.launch {
             userPreferencesRepository.apply {
-                vocabReadingPriority.set(configuration.readingPriority.repoType)
-                vocabShowMeaning.set(configuration.showMeaning)
+                val pickerState = configurationState.readingPicker
+                vocabReadingPriority.set(pickerState.readingPriority.value.repoType)
+                vocabShowMeaning.set(pickerState.showMeaning.value)
             }
 
-            val expressionDescriptors = expressions
-                .map {
-                    VocabQueueItemDescriptor(
-                        id = it,
-                        practiceType = configuration.practiceType,
-                        priority = configuration.readingPriority
-                    )
-                }
-                .run { if (configuration.shuffle) shuffled() else this }
-
-            practiceQueue.initialize(expressions = expressionDescriptors)
+            val data = getQueueDataUseCase(expressions, configurationState)
+            practiceQueue.initialize(expressions = data)
 
             practiceQueue.state
-                .onEach { it.applyToState() }
+                .onEach { applyToScreenState(it) }
                 .launchIn(viewModelScope)
         }
     }
 
-    override fun submitAnswer(answer: String) {
-        val currentState = _reviewState.value as VocabReviewManagingState.Review.Reading
+    override fun revealFlashcard() {
+        val currentState = _reviewState.value.state as MutableVocabReviewState.Flashcard
+        currentState.showAnswer.value = true
+    }
+
+    override fun submitReadingPickerAnswer(answer: String) {
+        val currentState = _reviewState.value.state as MutableVocabReviewState.Reading
         currentState.apply {
             displayReading.value = currentState.revealedReading
             selectedAnswer.value = SelectedReadingAnswer(answer, currentState.correctAnswer)
@@ -81,52 +96,47 @@ class VocabPracticeViewModel(
     }
 
     override fun next() {
-        val isCorrectAnswer = _reviewState.value.isCorrectAnswer() ?: return
-        viewModelScope.launch { practiceQueue.completeCurrentReview(isCorrectAnswer) }
+        viewModelScope.launch { practiceQueue.completeCurrentReview() }
     }
 
     override fun reportScreenShown() {
         analyticsManager.setScreen("expression_practice")
     }
 
-    private fun VocabReviewManagingState.applyToState() {
-        when (this) {
-            VocabReviewManagingState.Loading -> {
+    private fun applyToScreenState(queueState: VocabReviewQueueState) {
+        when (queueState) {
+            VocabReviewQueueState.Loading -> {
                 _state.value = ScreenState.Loading
             }
 
-            is VocabReviewManagingState.Review -> {
+            is VocabReviewQueueState.Review -> {
                 if (::_reviewState.isInitialized.not()) {
-                    _reviewState = mutableStateOf(this)
+                    _reviewState = mutableStateOf(queueState)
                 } else {
-                    _reviewState.value = this
+                    _reviewState.value = queueState
                 }
 
                 if (_state.value !is ScreenState.Review) {
                     _state.value = ScreenState.Review(
-                        showMeaning = configuration.showMeaning,
-                        practiceState = derivedStateOf {
-                            _reviewState.value.toPracticeReviewState()
-                        }
+                        state = derivedStateOf { _reviewState.value.toPracticeReviewState() }
                     )
                 }
             }
 
-            is VocabReviewManagingState.Summary -> {
+            is VocabReviewQueueState.Summary -> {
                 _state.value = ScreenState.Summary(
-                    practiceDuration = duration,
-                    results = items
+                    practiceDuration = queueState.duration,
+                    results = queueState.items
                 )
             }
         }
     }
 
-    private fun VocabReviewManagingState.Review.toPracticeReviewState(): VocabPracticeReviewState {
-        val progress = practiceQueue.getProgress()
+    private fun VocabReviewQueueState.Review.toPracticeReviewState(): VocabPracticeReviewState {
         return VocabPracticeReviewState(
             currentPositionInQueue = progress.current,
             totalItemsInQueue = progress.total,
-            reviewState = asVocabReviewState
+            reviewState = state.asImmutable
         )
     }
 

@@ -11,20 +11,21 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 
 @Composable
 fun VocabPracticeScreen(
-    expressionsIds: List<Long>,
+    wordIds: List<Long>,
     mainNavigationState: MainNavigationState,
     viewModel: VocabPracticeScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.initialize(expressionsIds)
+        viewModel.initialize(wordIds)
         viewModel.reportScreenShown()
     }
 
     VocabPracticeScreenUI(
         state = viewModel.state.collectAsState(),
-        onConfigured = { viewModel.configure(it) },
-        onAnswerSelected = { viewModel.submitAnswer(it) },
+        onConfigured = { viewModel.configure() },
+        onFlashcardAnswerRevealClick = { viewModel.revealFlashcard() },
+        onReadingPickerAnswerSelected = { viewModel.submitReadingPickerAnswer(it) },
         onNext = { viewModel.next() },
         onFeedback = {
             mainNavigationState.navigate(

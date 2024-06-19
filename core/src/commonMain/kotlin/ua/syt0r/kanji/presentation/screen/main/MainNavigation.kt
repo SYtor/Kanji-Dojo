@@ -151,13 +151,13 @@ interface MainDestination {
 
     @Serializable
     data class VocabPractice(
-        val expressionIds: List<Long>
+        val wordIds: List<Long>
     ) : MainDestination {
 
         @Composable
         override fun Draw(state: MainNavigationState) {
             VocabPracticeScreen(
-                expressionsIds = expressionIds,
+                wordIds = wordIds,
                 mainNavigationState = state
             )
         }

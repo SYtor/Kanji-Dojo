@@ -1,7 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import kotlin.time.Duration
 
 interface VocabPracticeScreenContract {
@@ -9,10 +14,11 @@ interface VocabPracticeScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
 
-        fun initialize(expressions: List<Long>)
-        fun configure(configuration: VocabPracticeConfiguration)
+        fun initialize(words: List<Long>)
+        fun configure()
 
-        fun submitAnswer(answer: String)
+        fun revealFlashcard()
+        fun submitReadingPickerAnswer(answer: String)
         fun next()
 
         fun reportScreenShown()
@@ -23,15 +29,14 @@ interface VocabPracticeScreenContract {
         object Loading : ScreenState
 
         data class Configuration(
-            val practiceType: VocabPracticeType,
-            val shuffle: Boolean,
-            val readingPriority: VocabPracticeReadingPriority,
-            val showMeaning: Boolean
+            val practiceType: MutableState<VocabPracticeType>,
+            val shuffle: MutableState<Boolean>,
+            val flashcard: VocabPracticeConfiguration.Flashcard,
+            val readingPicker: VocabPracticeConfiguration.ReadingPicker
         ) : ScreenState
 
         data class Review(
-            val showMeaning: Boolean,
-            val practiceState: State<VocabPracticeReviewState>
+            val state: State<VocabPracticeReviewState>
         ) : ScreenState
 
         data class Summary(
