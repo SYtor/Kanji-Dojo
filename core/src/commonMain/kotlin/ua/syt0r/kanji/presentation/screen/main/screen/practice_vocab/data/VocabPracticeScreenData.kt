@@ -4,15 +4,31 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 
-enum class VocabPracticeType : DisplayableEnum {
-    ReadingPicker,
-    Flashcard;
+enum class VocabPracticeType(
+    val preferencesType: PreferencesVocabPracticeType,
+    override val titleResolver: StringResolveScope<String>
+) : DisplayableEnum {
 
-    override val titleResolver: StringResolveScope<String> = { name }
+    ReadingPicker(
+        preferencesType = PreferencesVocabPracticeType.ReadingPicker,
+        titleResolver = { "Reading Picker" }
+    ),
+    Flashcard(
+        preferencesType = PreferencesVocabPracticeType.Flashcard,
+        titleResolver = { "Flashcard" }
+    );
+
+    companion object {
+        fun from(practiceType: PreferencesVocabPracticeType): VocabPracticeType {
+            return values().first { it.preferencesType == practiceType }
+        }
+    }
+
 }
 
 enum class VocabPracticeReadingPriority(
@@ -42,12 +58,10 @@ fun VocabReadingPriority.toScreenType(): VocabPracticeReadingPriority {
 sealed interface VocabPracticeConfiguration {
 
     data class Flashcard(
-        val readingPriority: MutableState<VocabPracticeReadingPriority>,
         val translationInFront: MutableState<Boolean>
     ) : VocabPracticeConfiguration
 
     data class ReadingPicker(
-        val readingPriority: MutableState<VocabPracticeReadingPriority>,
         val showMeaning: MutableState<Boolean>
     ) : VocabPracticeConfiguration
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
@@ -31,6 +32,7 @@ interface VocabPracticeScreenContract {
         data class Configuration(
             val practiceType: MutableState<VocabPracticeType>,
             val shuffle: MutableState<Boolean>,
+            val readingPriority: MutableState<VocabPracticeReadingPriority>,
             val flashcard: VocabPracticeConfiguration.Flashcard,
             val readingPicker: VocabPracticeConfiguration.ReadingPicker
         ) : ScreenState

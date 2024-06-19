@@ -183,19 +183,18 @@ private fun ScreenConfiguration(
             onChange = { screenState.shuffle.value = it }
         )
 
+        var readingPriority by screenState.readingPriority
+        PracticeConfigurationEnumSelector(
+            title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
+            subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
+            values = VocabPracticeReadingPriority.values(),
+            selected = readingPriority,
+            onSelected = { readingPriority = it }
+        )
+
         when (screenState.practiceType.value) {
             VocabPracticeType.Flashcard -> {
-                var readingPriority by screenState.flashcard.readingPriority
                 var translationInFront by screenState.flashcard.translationInFront
-
-                PracticeConfigurationEnumSelector(
-                    title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
-                    subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
-                    values = VocabPracticeReadingPriority.values(),
-                    selected = readingPriority,
-                    onSelected = { readingPriority = it }
-                )
-
                 PracticeConfigurationOption(
                     title = resolveString { "Translation In Front" },
                     subtitle = resolveString { "Test" },
@@ -205,17 +204,7 @@ private fun ScreenConfiguration(
             }
 
             VocabPracticeType.ReadingPicker -> {
-                var readingPriority by screenState.readingPicker.readingPriority
                 var showMeaning by screenState.readingPicker.showMeaning
-
-                PracticeConfigurationEnumSelector(
-                    title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
-                    subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
-                    values = VocabPracticeReadingPriority.values(),
-                    selected = readingPriority,
-                    onSelected = { readingPriority = it }
-                )
-
                 PracticeConfigurationOption(
                     title = resolveString { vocabPractice.readingMeaningConfigurationTitle },
                     subtitle = resolveString { vocabPractice.readingMeaningConfigurationMessage },

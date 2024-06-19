@@ -23,7 +23,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
                     VocabPracticeType.Flashcard -> {
                         VocabQueueItemDescriptor.Flashcard(
                             wordId = it,
-                            priority = state.flashcard.readingPriority.value,
+                            priority = state.readingPriority.value,
                             translationInFont = state.flashcard.translationInFront.value
                         )
                     }
@@ -31,7 +31,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
                     VocabPracticeType.ReadingPicker -> {
                         VocabQueueItemDescriptor.ReadingPicker(
                             wordId = it,
-                            priority = state.readingPicker.readingPriority.value,
+                            priority = state.readingPriority.value,
                             showMeaning = state.readingPicker.showMeaning.value
                         )
                     }

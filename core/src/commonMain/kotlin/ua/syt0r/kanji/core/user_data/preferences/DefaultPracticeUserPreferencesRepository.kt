@@ -82,6 +82,13 @@ class DefaultPracticeUserPreferencesRepository(
         )
     }
 
+    override val vocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType> = registerProperty {
+        createEnumProperty(
+            key = "vocab_practice_type",
+            initialValueProvider = { PreferencesVocabPracticeType.ReadingPicker }
+        )
+    }
+
     override val vocabReadingPriority: SuspendedProperty<VocabReadingPriority> = registerProperty {
         createEnumProperty(
             key = "vocab_reading_priority",
@@ -89,7 +96,14 @@ class DefaultPracticeUserPreferencesRepository(
         )
     }
 
-    override val vocabShowMeaning: SuspendedProperty<Boolean> = registerProperty {
+    override val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = "vocab_flashcard_meaning_in_front",
+            initialValueProvider = { true }
+        )
+    }
+
+    override val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "vocab_show_meaning",
             initialValueProvider = { true }

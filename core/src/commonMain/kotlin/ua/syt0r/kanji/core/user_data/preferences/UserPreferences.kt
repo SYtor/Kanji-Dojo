@@ -51,8 +51,10 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
     val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
     val readingToleratedMistakes: SuspendedProperty<Int>
 
+    val vocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
     val vocabReadingPriority: SuspendedProperty<VocabReadingPriority>
-    val vocabShowMeaning: SuspendedProperty<Boolean>
+    val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>
+    val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean>
 
 }
 
@@ -61,4 +63,5 @@ enum class SortOption { AddOrder, Frequency, Name }
 enum class PracticePreviewLayout { Character, Groups }
 enum class SupportedTheme { System, Light, Dark }
 enum class WritingInputMethod { Stroke, Character }
+enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker }
 enum class VocabReadingPriority { Default, Kanji, Kana }

@@ -15,7 +15,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewQueueState
@@ -44,18 +43,21 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
-                practiceType = mutableStateOf(VocabPracticeType.ReadingPicker),
+                practiceType = mutableStateOf(
+                    VocabPracticeType.from(userPreferencesRepository.vocabPracticeType.get())
+                ),
                 shuffle = mutableStateOf(true),
+                readingPriority = mutableStateOf(
+                    userPreferencesRepository.vocabReadingPriority.get().toScreenType()
+                ),
                 flashcard = VocabPracticeConfiguration.Flashcard(
-                    readingPriority = mutableStateOf(VocabPracticeReadingPriority.Default),
-                    translationInFront = mutableStateOf(false)
+                    translationInFront = mutableStateOf(
+                        userPreferencesRepository.vocabFlashcardMeaningInFront.get()
+                    )
                 ),
                 readingPicker = VocabPracticeConfiguration.ReadingPicker(
-                    readingPriority = mutableStateOf(
-                        userPreferencesRepository.vocabReadingPriority.get().toScreenType()
-                    ),
                     showMeaning = mutableStateOf(
-                        userPreferencesRepository.vocabShowMeaning.get()
+                        userPreferencesRepository.vocabReadingPickerShowMeaning.get()
                     )
                 )
             )
@@ -68,9 +70,10 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             userPreferencesRepository.apply {
-                val pickerState = configurationState.readingPicker
-                vocabReadingPriority.set(pickerState.readingPriority.value.repoType)
-                vocabShowMeaning.set(pickerState.showMeaning.value)
+                vocabPracticeType.set(configurationState.practiceType.value.preferencesType)
+                vocabReadingPriority.set(configurationState.readingPriority.value.repoType)
+                vocabReadingPickerShowMeaning.set(configurationState.readingPicker.showMeaning.value)
+                vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
             }
 
             val data = getQueueDataUseCase(expressions, configurationState)
