@@ -63,9 +63,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSa
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokesInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.SingleStrokeInputData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeInputMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -82,9 +80,6 @@ fun WritingPracticeScreenUI(
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
     speakKana: (KanaReading) -> Unit,
-    onSingleStrokeSubmit: (SingleStrokeInputData) -> Unit,
-    onMultipleStokeSubmit: (MultipleStrokesInputData) -> Unit,
-    onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     onPracticeSaveClick: (PracticeSavingResult) -> Unit,
     onPracticeCompleteButtonClick: () -> Unit
@@ -161,9 +156,6 @@ fun WritingPracticeScreenUI(
                     ReviewState(
                         configuration = screenState.layoutConfiguration,
                         reviewState = screenState.reviewState.collectAsState(),
-                        onSingleStrokeSubmit = onSingleStrokeSubmit,
-                        onMultipleStokeSubmit = onMultipleStokeSubmit,
-                        onHintClick = onHintClick,
                         onNextClick = onNextClick,
                         toggleRadicalsHighlight = toggleRadicalsHighlight,
                         toggleAutoPlay = toggleAutoPlay,
@@ -344,9 +336,6 @@ private fun LoadingState() {
 private fun ReviewState(
     configuration: WritingScreenLayoutConfiguration,
     reviewState: State<WritingReviewState>,
-    onSingleStrokeSubmit: (SingleStrokeInputData) -> Unit,
-    onMultipleStokeSubmit: (MultipleStrokesInputData) -> Unit,
-    onHintClick: () -> Unit,
     onNextClick: (ReviewUserAction) -> Unit,
     toggleRadicalsHighlight: () -> Unit,
     toggleAutoPlay: () -> Unit,
@@ -404,9 +393,6 @@ private fun ReviewState(
 
             WritingPracticeInputSection(
                 state = reviewState,
-                onSingleStrokeSubmit = onSingleStrokeSubmit,
-                onMultipleStokeSubmit = onMultipleStokeSubmit,
-                onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -452,9 +438,6 @@ private fun ReviewState(
         val inputSection: @Composable RowScope.() -> Unit = {
             WritingPracticeInputSection(
                 state = reviewState,
-                onSingleStrokeSubmit = onSingleStrokeSubmit,
-                onMultipleStokeSubmit = onMultipleStokeSubmit,
-                onHintClick = onHintClick,
                 onNextClick = onNextClick,
                 modifier = Modifier
                     .fillMaxHeight()

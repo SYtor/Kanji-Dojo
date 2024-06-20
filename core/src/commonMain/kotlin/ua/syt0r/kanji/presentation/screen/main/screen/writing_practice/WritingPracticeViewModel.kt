@@ -3,14 +3,11 @@ package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
@@ -18,11 +15,16 @@ import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.practice.CharacterReviewOutcome
 import ua.syt0r.kanji.core.user_data.practice.CharacterWritingReviewResult
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.MultipleStrokeInputContentState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ReviewAction
@@ -44,23 +46,6 @@ class WritingPracticeViewModel(
     private val kanaTtsManager: KanaTtsManager
 ) : WritingPracticeScreenContract.ViewModel {
 
-
-    private sealed interface MutableReviewData {
-
-        data class SingleStroke(
-            val drawnStrokesCount: MutableState<Int>,
-            val currentStrokeMistakes: MutableState<Int>,
-            val currentCharacterMistakes: MutableState<Int>,
-            val inputProcessingResults: MutableSharedFlow<StrokeProcessingResult>,
-        ) : MutableReviewData
-
-        data class MultipleStroke(
-            val state: MutableState<MultipleStrokeInputState>
-        ) : MutableReviewData
-
-    }
-
-
     private var practiceId: Long? = null
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
@@ -69,7 +54,7 @@ class WritingPracticeViewModel(
 
     private lateinit var reviewManager: WritingCharacterReviewManager
     private lateinit var reviewDataState: MutableStateFlow<WritingReviewState>
-    private lateinit var currentMutableReviewData: MutableReviewData
+    private lateinit var characterWriterState: CharacterWriterState
 
     private val mistakesMap = mutableMapOf<String, Int>()
 
@@ -135,70 +120,6 @@ class WritingPracticeViewModel(
         }
     }
 
-    override fun submitStroke(inputData: SingleStrokeInputData) {
-        viewModelScope.launch {
-            val isDrawnCorrectly = withContext(Dispatchers.IO) {
-                kanjiStrokeEvaluator.areStrokesSimilar(inputData.kanjiPath, inputData.userPath)
-            }
-            val mutableState = currentMutableReviewData as MutableReviewData.SingleStroke
-            val result = if (isDrawnCorrectly) {
-                mutableState.drawnStrokesCount.value += 1
-                StrokeProcessingResult.Correct(
-                    userPath = inputData.userPath,
-                    kanjiPath = inputData.kanjiPath
-                )
-            } else {
-                val currentStrokeMistakes = mutableState.run {
-                    currentStrokeMistakes.value += 1
-                    currentCharacterMistakes.value += 1
-                    currentStrokeMistakes.value
-                }
-                val path = when {
-                    currentStrokeMistakes > 2 -> inputData.kanjiPath
-                    else -> inputData.userPath
-                }
-                StrokeProcessingResult.Mistake(path)
-            }
-            mutableState.inputProcessingResults.emit(result)
-        }
-    }
-
-    override fun submitStrokes(inputData: MultipleStrokesInputData) {
-        val mutableState = currentMutableReviewData as MutableReviewData.MultipleStroke
-        mutableState.state.value = MultipleStrokeInputState.Processing
-        viewModelScope.launch {
-            val processedState = withContext(Dispatchers.IO) {
-                val strokesCount = max(inputData.characterStrokes.size, inputData.inputStrokes.size)
-                val results = (0 until strokesCount).map { index ->
-                    val input = inputData.inputStrokes.getOrNull(index)
-                    val stroke = inputData.characterStrokes.getOrNull(index)
-
-                    if (input == null || stroke == null) {
-                        StrokeProcessingResult.Mistake(
-                            hintStroke = input ?: stroke!!
-                        )
-                    } else {
-                        val similar = kanjiStrokeEvaluator.areStrokesSimilar(stroke, input)
-                        if (similar) {
-                            StrokeProcessingResult.Correct(input, stroke)
-                        } else {
-                            StrokeProcessingResult.Mistake(
-                                hintStroke = stroke
-                            )
-                        }
-                    }
-                }
-
-                MultipleStrokeInputState.Processed(
-                    results = results.take(inputData.characterStrokes.size),
-                    mistakes = results.count { it is StrokeProcessingResult.Mistake }
-                )
-            }
-
-            mutableState.state.value = processedState
-        }
-    }
-
     override fun savePractice(result: PracticeSavingResult) {
         state.value = ScreenState.Loading
         viewModelScope.launch {
@@ -238,25 +159,16 @@ class WritingPracticeViewModel(
         }
     }
 
-    override fun onHintClick() {
-        val mutableState = currentMutableReviewData as MutableReviewData.SingleStroke
-        mutableState.run {
-            currentStrokeMistakes.value += 1
-            currentCharacterMistakes.value += 1
-        }
-    }
-
     override fun loadNextCharacter(userAction: ReviewUserAction) {
-        val currentState = reviewDataState.value
-        val character = currentState.characterDetails.character
+        val character = characterWriterState.character
 
-        val mistakes = when (currentState) {
-            is WritingReviewState.MultipleStrokeInput -> currentState
-                .let { it.inputState.value as? MultipleStrokeInputState.Processed }
+        val mistakes = when (val inputState = characterWriterState.inputState) {
+            is CharacterInputState.MultipleStroke -> inputState
+                .let { it.contentState.value as? MultipleStrokeInputContentState.Processed }
                 ?.mistakes
 
-            is WritingReviewState.SingleStrokeInput -> currentState
-                .takeIf { it.drawnStrokesCount.value == it.characterDetails.strokes.size }
+            is CharacterInputState.SingleStroke -> inputState
+                .takeIf { it.drawnStrokesCount.value == characterWriterState.strokes.size }
                 ?.currentCharacterMistakes
                 ?.value
         } ?: return // Avoid handling quick multiple clicks on submit button during animation
@@ -303,45 +215,29 @@ class WritingPracticeViewModel(
 
         val isStudyMode = history.last() == WritingCharacterReviewHistory.Study
 
-        val (mutableState, reviewData) = when {
+        val writerConfiguration = when {
             screenConfiguration.inputMode == WritingPracticeInputMode.Character && !isStudyMode -> {
-                val mutableState = MutableReviewData.MultipleStroke(
-                    state = mutableStateOf(MultipleStrokeInputState.Writing)
-                )
-
-                val reviewData = WritingReviewState.MultipleStrokeInput(
-                    practiceProgress = reviewManager.getProgress(),
-                    characterDetails = finalDetails,
-                    inputStrokes = mutableStateOf(emptyList()),
-                    inputState = mutableState.state
-                )
-
-                mutableState to reviewData
+                CharacterWriterConfiguration.CharacterInput
             }
 
             else -> {
-                val mutableState = MutableReviewData.SingleStroke(
-                    drawnStrokesCount = mutableStateOf(0),
-                    currentStrokeMistakes = mutableStateOf(0),
-                    currentCharacterMistakes = mutableStateOf(0),
-                    inputProcessingResults = MutableSharedFlow()
-                )
-
-                val reviewData = WritingReviewState.SingleStrokeInput(
-                    practiceProgress = reviewManager.getProgress(),
-                    characterDetails = finalDetails,
-                    isStudyMode = isStudyMode,
-                    drawnStrokesCount = mutableState.drawnStrokesCount,
-                    currentStrokeMistakes = mutableState.currentStrokeMistakes,
-                    currentCharacterMistakes = mutableState.currentCharacterMistakes,
-                    inputProcessingResults = mutableState.inputProcessingResults
-                )
-
-                mutableState to reviewData
+                CharacterWriterConfiguration.StrokeInput(isStudyMode)
             }
         }
 
-        currentMutableReviewData = mutableState
+        characterWriterState = DefaultCharacterWriterState(
+            coroutineScope = viewModelScope,
+            strokeEvaluator = kanjiStrokeEvaluator,
+            character = finalDetails.character,
+            strokes = finalDetails.strokes,
+            configuration = writerConfiguration
+        )
+
+        val reviewData = WritingReviewState(
+            practiceProgress = reviewManager.getProgress(),
+            characterDetails = finalDetails,
+            writerState = characterWriterState
+        )
 
         if (!::reviewDataState.isInitialized) {
             reviewDataState = MutableStateFlow(reviewData)

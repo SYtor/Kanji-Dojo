@@ -1,15 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.writing_practice
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Path
-import kotlinx.coroutines.flow.SharedFlow
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.user_data.preferences.WritingInputMethod
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 
@@ -68,53 +67,11 @@ enum class ReviewUserAction {
     Repeat
 }
 
-data class MultipleStrokesInputData(
-    val characterStrokes: List<Path>,
-    val inputStrokes: List<Path>
+data class WritingReviewState(
+    val practiceProgress: PracticeProgress,
+    val characterDetails: WritingReviewCharacterDetails,
+    val writerState: CharacterWriterState
 )
-
-data class SingleStrokeInputData(
-    val userPath: Path,
-    val kanjiPath: Path
-)
-
-sealed interface StrokeProcessingResult {
-
-    data class Correct(
-        val userPath: Path,
-        val kanjiPath: Path
-    ) : StrokeProcessingResult
-
-    data class Mistake(
-        val hintStroke: Path
-    ) : StrokeProcessingResult
-
-}
-
-
-sealed interface WritingReviewState {
-
-    val practiceProgress: PracticeProgress
-    val characterDetails: WritingReviewCharacterDetails
-
-    data class SingleStrokeInput(
-        override val practiceProgress: PracticeProgress,
-        override val characterDetails: WritingReviewCharacterDetails,
-        val isStudyMode: Boolean,
-        val drawnStrokesCount: State<Int>,
-        val currentStrokeMistakes: State<Int>,
-        val currentCharacterMistakes: State<Int>,
-        val inputProcessingResults: SharedFlow<StrokeProcessingResult>
-    ) : WritingReviewState
-
-    data class MultipleStrokeInput(
-        override val practiceProgress: PracticeProgress,
-        override val characterDetails: WritingReviewCharacterDetails,
-        val inputStrokes: MutableState<List<Path>>,
-        val inputState: State<MultipleStrokeInputState>
-    ) : WritingReviewState
-
-}
 
 sealed class WritingReviewCharacterDetails {
 
@@ -144,15 +101,6 @@ sealed class WritingReviewCharacterDetails {
         val variants: String?
     ) : WritingReviewCharacterDetails()
 
-}
-
-sealed interface MultipleStrokeInputState {
-    object Writing : MultipleStrokeInputState
-    object Processing : MultipleStrokeInputState
-    data class Processed(
-        val results: List<StrokeProcessingResult>,
-        val mistakes: Int
-    ) : MultipleStrokeInputState
 }
 
 data class WritingReviewCharacterSummaryDetails(

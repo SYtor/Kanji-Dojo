@@ -38,7 +38,8 @@ import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.MultipleStrokeInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterInputState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.MultipleStrokeInputContentState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingReviewState
 
@@ -53,13 +54,14 @@ fun State<WritingReviewState>.asWordsBottomSheetState(): State<BottomSheetStateD
     return remember {
         derivedStateOf {
             val currentState = value
-            val shouldRevealCharacter = when (currentState) {
-                is WritingReviewState.MultipleStrokeInput -> {
-                    currentState.inputState.value is MultipleStrokeInputState.Processed
+            val shouldRevealCharacter = when (
+                val inputState = currentState.writerState.inputState) {
+                is CharacterInputState.MultipleStroke -> {
+                    inputState.contentState.value is MultipleStrokeInputContentState.Processed
                 }
 
-                is WritingReviewState.SingleStrokeInput -> {
-                    currentState.isStudyMode || currentState.drawnStrokesCount
+                is CharacterInputState.SingleStroke -> {
+                    inputState.isStudyMode || inputState.drawnStrokesCount
                         .value == currentState.characterDetails.strokes.size
                 }
             }

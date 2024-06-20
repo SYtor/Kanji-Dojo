@@ -1,15 +1,18 @@
 package ua.syt0r.kanji.presentation.preview.screen
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.getHiraganaReading
+import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract.ScreenState
@@ -33,9 +36,6 @@ private fun WritingPracticeScreenPreview(
             navigateBack = {},
             navigateToWordFeedback = {},
             onConfigured = {},
-            onSingleStrokeSubmit = {},
-            onMultipleStokeSubmit = {},
-            onHintClick = {},
             onPracticeSaveClick = {},
             onPracticeCompleteButtonClick = {},
             onNextClick = {},
@@ -151,7 +151,7 @@ object WritingPracticeScreenUIPreviewUtils {
                 leftHandedMode = false
             ),
             reviewState = MutableStateFlow(
-                WritingReviewState.SingleStrokeInput(
+                WritingReviewState(
                     practiceProgress = progress,
                     characterDetails = when {
                         isKana -> WritingReviewCharacterDetails.KanaReviewDetails(
@@ -175,11 +175,13 @@ object WritingPracticeScreenUIPreviewUtils {
                             variants = null
                         )
                     },
-                    isStudyMode = isStudyMode,
-                    drawnStrokesCount = rememberUpdatedState(drawnStrokesCount),
-                    currentStrokeMistakes = rememberUpdatedState(0),
-                    currentCharacterMistakes = rememberUpdatedState(0),
-                    inputProcessingResults = MutableSharedFlow()
+                    writerState = DefaultCharacterWriterState(
+                        coroutineScope = rememberCoroutineScope(),
+                        strokeEvaluator = DefaultKanjiStrokeEvaluator(),
+                        character = "",
+                        strokes = PreviewKanji.strokes,
+                        configuration = CharacterWriterConfiguration.StrokeInput(true)
+                    )
                 )
             )
         )

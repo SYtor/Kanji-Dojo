@@ -35,13 +35,9 @@ interface WritingPracticeScreenContract {
         fun init(configuration: MainDestination.Practice.Writing)
         fun onPracticeConfigured(configuration: WritingScreenConfiguration)
 
-        fun submitStroke(inputData: SingleStrokeInputData)
-        fun submitStrokes(inputData: MultipleStrokesInputData)
-
         fun loadNextCharacter(userAction: ReviewUserAction)
         fun savePractice(result: PracticeSavingResult)
 
-        fun onHintClick()
         fun toggleRadicalsHighlight()
         fun toggleAutoPlay()
         fun speakKana(reading: KanaReading)
