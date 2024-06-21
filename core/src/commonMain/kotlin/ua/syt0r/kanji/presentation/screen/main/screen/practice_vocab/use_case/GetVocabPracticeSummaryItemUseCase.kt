@@ -1,6 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterPracticeResult
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 
 interface GetVocabPracticeSummaryItemUseCase {
@@ -23,10 +26,19 @@ class DefaultGetVocabPracticeSummaryItemUseCase : GetVocabPracticeSummaryItemUse
                 isCorrect = state.isCorrectAnswer()!!
             )
 
-            // TODO
-            is MutableVocabReviewState.Writing -> VocabSummaryItem.Flashcard(
+            is MutableVocabReviewState.Writing -> VocabSummaryItem.Writing(
                 word = state.word,
-                reading = state.summaryReading
+                reading = state.summaryReading,
+                results = state.charactersData
+                    .filterIsInstance<VocabCharacterWritingData.WithStrokes>()
+                    .map { writingData ->
+                        VocabCharacterPracticeResult(
+                            character = writingData.character,
+                            isCorrect = writingData.writerState.writingStatus
+                                .let { it.value as CharacterWritingStatus.Completed }
+                                .isCorrect
+                        )
+                    }
             )
         }
     }

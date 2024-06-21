@@ -530,6 +530,11 @@ object JapaneseReadingPracticeString : ReadingPracticeStrings {
 }
 
 object JapaneseVocabPracticeStrings : VocabPracticeStrings {
+    override val practiceTypeConfigurationTitle: String = "練習タイプ"
+    override val practiceTypeConfigurationMessage: String = "さまざまなモードから選ぶ"
+    override val practiceTypeReadingPicker: String = "読み取りピッカー"
+    override val practiceTypeFlashcard: String = "フラッシュカード"
+    override val practiceTypeWriting: String = "書く"
     override val readingPriorityConfigurationTitle: String = "単語の読み方"
     override val readingPriorityConfigurationMessage: String =
         "単語に複数の読みがある場合、使用する読みを選択してください"
@@ -539,6 +544,10 @@ object JapaneseVocabPracticeStrings : VocabPracticeStrings {
     override val readingMeaningConfigurationTitle: String = "意味の表示"
     override val readingMeaningConfigurationMessage: String =
         "回答が選択されていない場合の意味の表示を選択してください"
+    override val translationInFrontConfigurationTitle: String = "表に翻訳を置く"
+    override val translationInFrontConfigurationMessage: String =
+        "フラッシュカードが隠れているときに単語の代わりに翻訳を表示する"
+    override val detailsButton: String = "詳細"
     override val nextButton: String = "次へ"
     override val summaryItemsCountTitle: String = "練習した単語の数"
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -90,7 +91,9 @@ fun VocabPracticeFlashcardUI(
                 modifier = Modifier.align(Alignment.End).graphicsLayer { alpha = detailsAlpha },
                 colors = ButtonDefaults.neutralTextButtonColors()
             ) {
-                Text("Details")
+                Text(
+                    text = resolveString { vocabPractice.detailsButton }
+                )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ReadMore,
                     contentDescription = null,

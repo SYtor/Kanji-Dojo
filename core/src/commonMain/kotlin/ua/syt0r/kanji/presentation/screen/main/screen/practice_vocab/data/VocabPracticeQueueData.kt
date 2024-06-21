@@ -4,7 +4,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import kotlin.time.Duration
 
 
@@ -92,11 +91,12 @@ sealed interface MutableVocabReviewState {
     class Writing(
         override val word: JapaneseWord,
         override val summaryReading: FuriganaString,
-        override val charactersData: List<CharacterWriterState>,
+        override val charactersData: List<VocabCharacterWritingData>,
     ) : MutableVocabReviewState, VocabReviewState.Writing {
         override val asImmutable: VocabReviewState.Writing = this
-        override val selected: MutableState<CharacterWriterState> = mutableStateOf(
-            value = charactersData.first()
+        override val selected: MutableState<VocabCharacterWritingData> = mutableStateOf(
+            value = charactersData.firstOrNull { it is VocabCharacterWritingData.WithStrokes }
+                ?: charactersData.first()
         )
     }
 

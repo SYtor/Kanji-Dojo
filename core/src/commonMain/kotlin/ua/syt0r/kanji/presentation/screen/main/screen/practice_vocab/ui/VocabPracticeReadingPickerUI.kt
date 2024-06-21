@@ -95,12 +95,10 @@ fun VocabPracticeReadingPickerUI(
                             onClick = { onAnswerSelected(answer) },
                             modifier = Modifier.weight(1f).padding(horizontal = 2.dp)
                         )
-
                     }
 
-                    val lastLineItems = rowAnswers.size % maxItemsInEachRow
-                    val missingSpots = maxItemsInEachRow - lastLineItems
-                    if (lastLineItems != 0)
+                    val missingSpots = maxItemsInEachRow - rowAnswers.size
+                    if (missingSpots != 0)
                         Spacer(Modifier.weight(missingSpots.toFloat()))
 
                 }

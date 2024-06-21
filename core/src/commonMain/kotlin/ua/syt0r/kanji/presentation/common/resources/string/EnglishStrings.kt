@@ -565,6 +565,11 @@ object EnglishReadingPracticeString : ReadingPracticeStrings {
 }
 
 object EnglishVocabPracticeStrings : VocabPracticeStrings {
+    override val practiceTypeConfigurationTitle: String = "Practice Type"
+    override val practiceTypeConfigurationMessage: String = "Choose from various modes"
+    override val practiceTypeReadingPicker: String = "Reading Picker"
+    override val practiceTypeFlashcard: String = "Flashcard"
+    override val practiceTypeWriting: String = "Writing"
     override val readingPriorityConfigurationTitle: String = "Reading Priority"
     override val readingPriorityConfigurationMessage: String =
         "Choose which reading to use if the word has multiple readings"
@@ -574,6 +579,10 @@ object EnglishVocabPracticeStrings : VocabPracticeStrings {
     override val readingMeaningConfigurationTitle: String = "Show Meaning"
     override val readingMeaningConfigurationMessage: String =
         "Choose meaning visibility when answer is not selected"
+    override val translationInFrontConfigurationTitle: String = "Translation In Front"
+    override val translationInFrontConfigurationMessage: String =
+        "Show translation instead of word when flashcard is hidden"
+    override val detailsButton: String = "Details"
     override val nextButton: String = "Next"
     override val summaryItemsCountTitle: String = "Reviewed Words"
 }

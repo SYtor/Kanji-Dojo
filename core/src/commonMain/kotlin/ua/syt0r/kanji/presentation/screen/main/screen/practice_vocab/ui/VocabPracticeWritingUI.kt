@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -49,22 +50,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterDecorations
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeNextButton
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Composable
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
@@ -73,34 +77,13 @@ fun VocabPracticeWritingUI(
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
+    AutoSwitchSelectedItemLaunchedEffect(reviewState)
+
     val showNextButton = remember(reviewState) {
         derivedStateOf {
-            reviewState.charactersData
-                .all { it.writingStatus.value is CharacterWritingStatus.Completed }
+            reviewState.charactersData.filterIsInstance<VocabCharacterWritingData.WithStrokes>()
+                .all { it.writerState.writingStatus.value is CharacterWritingStatus.Completed }
         }
-    }
-
-    LaunchedEffect(reviewState) {
-        val completedStateIndex = mutableSetOf<Int>()
-        snapshotFlow {
-            val selected = reviewState.selected.value
-            val index = reviewState.charactersData.indexOf(selected)
-            selected to index
-        }
-            .filter { (state, index) -> !completedStateIndex.contains(index) }
-            .flatMapLatest { (state, index) ->
-                snapshotFlow { Triple(state, index, state.writingStatus.value) }
-            }
-            .filter { (state, index, status) -> status is CharacterWritingStatus.Completed }
-            .onEach { (state, index, status) ->
-                completedStateIndex.add(index)
-                delay(800)
-                val nextState = reviewState.charactersData
-                    .find { it.writingStatus.value !is CharacterWritingStatus.Completed }
-                    ?: return@onEach
-                reviewState.selected.value = nextState
-            }
-            .collect()
     }
 
     Box(
@@ -190,32 +173,18 @@ private fun Progress(
             style = MaterialTheme.typography.displaySmall
         )
 
-        val scrollState = rememberLazyListState()
-        LaunchedEffect(reviewState) {
-            snapshotFlow { reviewState.selected.value }
-                .collectLatest {
-                    val index = reviewState.charactersData.indexOf(it)
-
-                    val offset = scrollState.layoutInfo.visibleItemsInfo.first().size * 3
-                    val firstVisibleItemIndex = scrollState.firstVisibleItemIndex
-                    if (index < firstVisibleItemIndex + 3)
-                        scrollState.animateScrollToItem(index, -offset)
-
-                    val lastVisibleItemIndex = scrollState.layoutInfo.visibleItemsInfo.last().index
-                    if (index > lastVisibleItemIndex - 3)
-                        scrollState.animateScrollToItem(index, offset)
-                }
-        }
+        val lazyListState = rememberLazyListState()
+        AutoscrollCharacterIndicatorRowLaunchedEffect(reviewState, lazyListState)
 
         LazyRow(
             modifier = Modifier,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            state = scrollState
+            state = lazyListState
         ) {
 
             items(reviewState.charactersData) {
                 CharacterStateIndicator(
-                    writerState = it,
+                    characterData = it,
                     selectedState = reviewState.selected
                 )
             }
@@ -230,7 +199,9 @@ private fun Progress(
             modifier = Modifier.graphicsLayer { alpha = detailsAlpha },
             colors = ButtonDefaults.neutralTextButtonColors()
         ) {
-            Text("Details")
+            Text(
+                text = resolveString { vocabPractice.detailsButton }
+            )
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ReadMore,
                 contentDescription = null,
@@ -244,7 +215,7 @@ private fun Progress(
 
 @Composable
 private fun Input(
-    state: State<CharacterWriterState>,
+    state: State<VocabCharacterWritingData>,
     modifier: Modifier
 ) {
     CharacterWriterDecorations(
@@ -255,44 +226,77 @@ private fun Input(
             targetState = state.value
         ) {
 
-            CharacterWriter(
-                state = it,
-                modifier = Modifier.fillMaxSize()
-            )
+            when (it) {
+                is VocabCharacterWritingData.NoStrokes -> {}
+                is VocabCharacterWritingData.WithStrokes -> CharacterWriter(
+                    state = it.writerState,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
         }
     }
 }
 
+private enum class CharacterWritingDisplayState { NoWritingData, Writing, Correct, Failed }
+
 @Composable
 private fun CharacterStateIndicator(
-    writerState: CharacterWriterState,
-    selectedState: MutableState<CharacterWriterState>
+    characterData: VocabCharacterWritingData,
+    selectedState: MutableState<VocabCharacterWritingData>
 ) {
 
-    val status = writerState.writingStatus.value
+    val state = when (characterData) {
+        is VocabCharacterWritingData.NoStrokes -> {
+            CharacterWritingDisplayState.NoWritingData
+        }
 
-    val borderColor = when {
-        status !is CharacterWritingStatus.Completed -> MaterialTheme.colorScheme.surfaceVariant
-        status.mistakes > 2 -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.extraColorScheme.success
+        is VocabCharacterWritingData.WithStrokes -> {
+            when (val status = characterData.writerState.writingStatus.value) {
+                CharacterWritingStatus.InProcess -> {
+                    CharacterWritingDisplayState.Writing
+                }
+
+                is CharacterWritingStatus.Completed -> {
+                    if (status.isCorrect) CharacterWritingDisplayState.Correct
+                    else CharacterWritingDisplayState.Failed
+                }
+
+            }
+        }
+    }
+
+    val borderColor = when (state) {
+        CharacterWritingDisplayState.NoWritingData,
+        CharacterWritingDisplayState.Writing -> MaterialTheme.colorScheme.surfaceVariant
+
+        CharacterWritingDisplayState.Failed -> MaterialTheme.colorScheme.error
+        CharacterWritingDisplayState.Correct -> MaterialTheme.extraColorScheme.success
+    }
+
+    val textColor = when (state) {
+        CharacterWritingDisplayState.NoWritingData -> MaterialTheme.colorScheme
+            .onSurface.copy(alpha = 0.6f)
+
+        CharacterWritingDisplayState.Writing -> MaterialTheme.colorScheme.surfaceVariant
+        CharacterWritingDisplayState.Correct,
+        CharacterWritingDisplayState.Failed -> MaterialTheme.colorScheme.onSurface
     }
 
     Column(
         modifier = Modifier.width(IntrinsicSize.Max),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
 
         Text(
-            text = writerState.character,
-            color = when (status) {
-                CharacterWritingStatus.InProcess -> MaterialTheme.colorScheme.surfaceVariant
-                is CharacterWritingStatus.Completed -> MaterialTheme.colorScheme.onSurface
-            },
+            text = characterData.character,
+            color = textColor,
             modifier = Modifier
                 .size(40.dp)
                 .clip(MaterialTheme.shapes.small)
-                .clickable { selectedState.value = writerState }
+                .clickable(
+                    enabled = state != CharacterWritingDisplayState.NoWritingData
+                ) { selectedState.value = characterData }
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .border(2.dp, borderColor, MaterialTheme.shapes.small)
                 .wrapContentSize()
@@ -301,15 +305,70 @@ private fun CharacterStateIndicator(
         Box(
             Modifier.fillMaxWidth()
                 .height(2.dp)
-                .padding(horizontal = 2.dp)
+                .padding(horizontal = 4.dp)
                 .clip(CircleShape)
                 .background(
-                    when (writerState == selectedState.value) {
+                    when (characterData == selectedState.value) {
                         true -> MaterialTheme.colorScheme.onSurface
                         false -> MaterialTheme.colorScheme.surface
                     }
                 )
         )
 
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Composable
+private fun AutoSwitchSelectedItemLaunchedEffect(reviewState: VocabReviewState.Writing) {
+    LaunchedEffect(reviewState) {
+        val completedItemIndexes = mutableSetOf<Int>()
+        val selectedStateToIndexFlow = snapshotFlow {
+            val selected = reviewState.selected.value
+            val index = reviewState.charactersData.indexOf(selected)
+            selected to index
+        }
+
+        selectedStateToIndexFlow.filter { (state, index) -> !completedItemIndexes.contains(index) }
+            // Filters selected data with completed statuses only
+            .flatMapLatest { (state: VocabCharacterWritingData, index: Int) ->
+                if (state !is VocabCharacterWritingData.WithStrokes)
+                    return@flatMapLatest flow<Int> { }
+
+                val writingStatusFlow = snapshotFlow { state.writerState.writingStatus.value }
+                writingStatusFlow.filterIsInstance<CharacterWritingStatus.Completed>().map { index }
+            }
+            .onEach { index ->
+                completedItemIndexes.add(index)
+                delay(800)
+                val nextState = reviewState.charactersData
+                    .filterIsInstance<VocabCharacterWritingData.WithStrokes>()
+                    .find { it.writerState.writingStatus.value !is CharacterWritingStatus.Completed }
+                    ?: return@onEach
+                reviewState.selected.value = nextState
+            }
+            .collect()
+    }
+}
+
+@Composable
+fun AutoscrollCharacterIndicatorRowLaunchedEffect(
+    reviewState: VocabReviewState.Writing,
+    lazyListState: LazyListState
+) {
+    LaunchedEffect(reviewState) {
+        snapshotFlow { reviewState.selected.value }
+            .collectLatest {
+                val index = reviewState.charactersData.indexOf(it)
+
+                val offset = lazyListState.layoutInfo.visibleItemsInfo.first().size * 3
+                val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
+                if (index < firstVisibleItemIndex + 3)
+                    lazyListState.animateScrollToItem(index, -offset)
+
+                val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.last().index
+                if (index > lastVisibleItemIndex - 3)
+                    lazyListState.animateScrollToItem(index, offset)
+            }
     }
 }

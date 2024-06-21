@@ -486,6 +486,11 @@ interface ReadingPracticeStrings {
 }
 
 interface VocabPracticeStrings {
+    val practiceTypeConfigurationTitle: String
+    val practiceTypeConfigurationMessage: String
+    val practiceTypeReadingPicker: String
+    val practiceTypeFlashcard: String
+    val practiceTypeWriting: String
     val readingPriorityConfigurationTitle: String
     val readingPriorityConfigurationMessage: String
     val readingPriorityConfigurationDefault: String
@@ -493,10 +498,13 @@ interface VocabPracticeStrings {
     val readingPriorityConfigurationKana: String
     val readingMeaningConfigurationTitle: String
     val readingMeaningConfigurationMessage: String
+    val translationInFrontConfigurationTitle: String
+    val translationInFrontConfigurationMessage: String
 
     val practiceProgressCounter: (current: Int, total: Int) -> String
         get() = { a, b -> "$a / $b" }
 
+    val detailsButton: String
     val nextButton: String
 
     val summaryItemsCountTitle: String

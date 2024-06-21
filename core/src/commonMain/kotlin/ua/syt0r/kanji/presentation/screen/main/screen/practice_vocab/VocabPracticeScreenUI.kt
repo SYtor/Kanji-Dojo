@@ -8,19 +8,24 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
@@ -179,8 +184,8 @@ private fun ScreenConfiguration(
     PracticeConfigurationContainer(onClick = onConfigured) {
 
         PracticeConfigurationEnumSelector(
-            title = "Practice Type",
-            subtitle = "B",
+            title = resolveString { vocabPractice.practiceTypeConfigurationTitle },
+            subtitle = resolveString { vocabPractice.practiceTypeConfigurationMessage },
             values = VocabPracticeType.values(),
             selected = screenState.practiceType.value,
             onSelected = { screenState.practiceType.value = it }
@@ -206,8 +211,8 @@ private fun ScreenConfiguration(
             VocabPracticeType.Flashcard -> {
                 var translationInFront by screenState.flashcard.translationInFront
                 PracticeConfigurationOption(
-                    title = resolveString { "Translation In Front" },
-                    subtitle = resolveString { "Test" },
+                    title = resolveString { vocabPractice.translationInFrontConfigurationTitle },
+                    subtitle = resolveString { vocabPractice.translationInFrontConfigurationMessage },
                     checked = translationInFront,
                     onChange = { translationInFront = it }
                 )
@@ -334,40 +339,82 @@ private fun SummaryItem(
     index: Int,
     item: VocabSummaryItem
 ) {
+    when (item) {
+        is VocabSummaryItem.Flashcard -> {
+            FuriganaText(
+                furiganaString = buildFuriganaString {
+                    append("${index + 1}. ")
+                    append(item.reading)
+                },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            )
+        }
 
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(IntrinsicSize.Min),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FuriganaText(
-            furiganaString = buildFuriganaString {
-                append("${index + 1}. ")
-                append(item.reading)
-            },
-            modifier = Modifier.weight(1f)
-        )
+        is VocabSummaryItem.ReadingPicker -> {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-        when (item) {
-            is VocabSummaryItem.Flashcard -> {}
-            is VocabSummaryItem.ReadingPicker -> {
-                Text(
-                    text = item.character,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.clip(MaterialTheme.shapes.small)
-                        .clickable { }
-                        .border(
-                            width = 1.dp,
-                            color = if (item.isCorrect) MaterialTheme.extraColorScheme.success else MaterialTheme.colorScheme.error,
-                            shape = MaterialTheme.shapes.small
-                        )
-                        .padding(vertical = 8.dp, horizontal = 12.dp)
+                FuriganaText(
+                    furiganaString = buildFuriganaString {
+                        append("${index + 1}. ")
+                        append(item.reading)
+                    },
+                    modifier = Modifier.weight(1f)
                 )
+
+                SummaryCharacterResult(
+                    character = item.character,
+                    isCorrect = item.isCorrect
+                )
+
+            }
+        }
+
+        is VocabSummaryItem.Writing -> {
+            Column(
+                modifier = Modifier.padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                FuriganaText(
+                    furiganaString = buildFuriganaString {
+                        append("${index + 1}. ")
+                        append(item.reading)
+                    }
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Spacer(Modifier.width(20.dp))
+                    item.results.forEach { SummaryCharacterResult(it.character, it.isCorrect) }
+                }
             }
         }
     }
 
+}
+
+@Composable
+private fun SummaryCharacterResult(character: String, isCorrect: Boolean) {
+    Text(
+        text = character,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.clip(MaterialTheme.shapes.small)
+            .clickable { }
+            .border(
+                width = 2.dp,
+                color = when {
+                    isCorrect -> MaterialTheme.extraColorScheme.success
+                    else -> MaterialTheme.colorScheme.error
+                },
+                shape = MaterialTheme.shapes.small
+            )
+            .padding(vertical = 8.dp, horizontal = 12.dp)
+    )
 }
 
 

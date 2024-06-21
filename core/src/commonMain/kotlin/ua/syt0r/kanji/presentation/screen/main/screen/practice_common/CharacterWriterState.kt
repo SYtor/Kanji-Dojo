@@ -110,7 +110,7 @@ private data class MutableMultiStrokeInputState(
 
 sealed interface CharacterWritingStatus {
     object InProcess : CharacterWritingStatus
-    data class Completed(val mistakes: Int) : CharacterWritingStatus
+    data class Completed(val isCorrect: Boolean, val mistakes: Int) : CharacterWritingStatus
 }
 
 class DefaultCharacterWriterState(
@@ -246,6 +246,7 @@ class DefaultCharacterWriterState(
             is MultipleStrokeInputContentState.Processing -> CharacterWritingStatus.InProcess
 
             is MultipleStrokeInputContentState.Processed -> CharacterWritingStatus.Completed(
+                isCorrect = isResultCorrect(currentState.mistakes),
                 mistakes = currentState.mistakes
             )
         }
@@ -254,9 +255,21 @@ class DefaultCharacterWriterState(
     private fun CharacterInputState.SingleStroke.toWritingStatus(): CharacterWritingStatus {
         return when (drawnStrokesCount.value == strokes.size) {
             false -> CharacterWritingStatus.InProcess
-            true -> CharacterWritingStatus.Completed(
-                mistakes = totalMistakes.value
-            )
+            true -> {
+                val mistakes = totalMistakes.value
+                CharacterWritingStatus.Completed(
+                    isCorrect = isResultCorrect(mistakes),
+                    mistakes = mistakes
+                )
+            }
+        }
+    }
+
+    private fun isResultCorrect(characterMistakes: Int): Boolean {
+        return when (strokes.size) {
+            1 -> characterMistakes == 0
+            2, 3 -> characterMistakes < 2
+            else -> characterMistakes <= 2
         }
     }
 

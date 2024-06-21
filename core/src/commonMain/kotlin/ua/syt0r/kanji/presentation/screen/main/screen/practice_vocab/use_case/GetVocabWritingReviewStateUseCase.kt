@@ -8,6 +8,7 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
 
 interface GetVocabWritingReviewStateUseCase {
@@ -30,15 +31,29 @@ class DefaultGetVocabWritingReviewStateUseCase(
         val writerStates = reading.compounds.toTypedArray()
             .map { stringCompound -> stringCompound.text.map { it.toString() } }
             .flatten()
-            .map {
-                val strokes = appDataRepository.getStrokes(it)
-                DefaultCharacterWriterState(
-                    coroutineScope = CoroutineScope(context = Dispatchers.IO),
-                    strokeEvaluator = DefaultKanjiStrokeEvaluator(),
-                    character = it,
-                    strokes = parseKanjiStrokes(strokes),
-                    configuration = CharacterWriterConfiguration.CharacterInput
-                )
+            .map { character ->
+                val strokes = appDataRepository.getStrokes(character)
+
+                when {
+                    strokes.isEmpty() -> {
+                        VocabCharacterWritingData.NoStrokes(character)
+                    }
+
+                    else -> {
+                        VocabCharacterWritingData.WithStrokes(
+                            character = character,
+                            writerState = DefaultCharacterWriterState(
+                                coroutineScope = CoroutineScope(context = Dispatchers.IO),
+                                strokeEvaluator = DefaultKanjiStrokeEvaluator(),
+                                character = character,
+                                strokes = parseKanjiStrokes(strokes),
+                                configuration = CharacterWriterConfiguration.CharacterInput
+                            )
+                        )
+
+                    }
+                }
+
             }
 
         return MutableVocabReviewState.Writing(

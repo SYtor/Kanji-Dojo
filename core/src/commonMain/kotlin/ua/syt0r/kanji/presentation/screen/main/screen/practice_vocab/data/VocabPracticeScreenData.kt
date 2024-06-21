@@ -17,15 +17,15 @@ enum class VocabPracticeType(
 
     ReadingPicker(
         preferencesType = PreferencesVocabPracticeType.ReadingPicker,
-        titleResolver = { "Reading Picker" }
+        titleResolver = { vocabPractice.practiceTypeReadingPicker }
     ),
     Flashcard(
         preferencesType = PreferencesVocabPracticeType.Flashcard,
-        titleResolver = { "Flashcard" }
+        titleResolver = { vocabPractice.practiceTypeFlashcard }
     ),
     Writing(
         preferencesType = PreferencesVocabPracticeType.Writing,
-        titleResolver = { "Writing" }
+        titleResolver = { vocabPractice.practiceTypeWriting }
     );
 
     companion object {
@@ -94,9 +94,24 @@ sealed interface VocabReviewState {
     }
 
     interface Writing : VocabReviewState {
-        val charactersData: List<CharacterWriterState>
-        val selected: MutableState<CharacterWriterState>
+        val charactersData: List<VocabCharacterWritingData>
+        val selected: MutableState<VocabCharacterWritingData>
     }
+
+}
+
+sealed interface VocabCharacterWritingData {
+
+    val character: String
+
+    data class NoStrokes(
+        override val character: String
+    ) : VocabCharacterWritingData
+
+    data class WithStrokes(
+        override val character: String,
+        val writerState: CharacterWriterState
+    ) : VocabCharacterWritingData
 
 }
 
@@ -130,4 +145,15 @@ sealed interface VocabSummaryItem {
         val isCorrect: Boolean
     ) : VocabSummaryItem
 
+    data class Writing(
+        override val word: JapaneseWord,
+        override val reading: FuriganaString,
+        val results: List<VocabCharacterPracticeResult>
+    ) : VocabSummaryItem
+
 }
+
+data class VocabCharacterPracticeResult(
+    val character: String,
+    val isCorrect: Boolean
+)
