@@ -18,6 +18,7 @@ fun HomeScreenPreview(
             availableTabs = HomeScreenTab.values().toList(),
             selectedTabState = HomeScreenTab.values().first().run { rememberUpdatedState(this) },
             onTabSelected = {},
+            onSponsorButtonClick = {},
             screenTabContent = { content() }
         )
     }

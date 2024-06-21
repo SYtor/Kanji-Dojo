@@ -17,7 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -32,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -39,12 +44,15 @@ import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
+private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenUI(
     availableTabs: List<HomeScreenTab>,
     selectedTabState: State<HomeScreenTab>,
     onTabSelected: (HomeScreenTab) -> Unit,
+    onSponsorButtonClick: () -> Unit,
     screenTabContent: @Composable () -> Unit
 ) {
 
@@ -78,6 +86,10 @@ fun HomeScreenUI(
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                IconButton(onClick = onSponsorButtonClick) {
+                    Icon(SponsorIcon, null)
+                }
+
             }
 
             Surface { screenTabContent.invoke() }
@@ -89,7 +101,11 @@ fun HomeScreenUI(
             topBar = {
                 TopAppBar(
                     title = { Text(text = resolveString { home.screenTitle }) },
-                    actions = { }
+                    actions = {
+                        IconButton(onClick = onSponsorButtonClick) {
+                            Icon(SponsorIcon, null)
+                        }
+                    }
                 )
             },
             bottomBar = {

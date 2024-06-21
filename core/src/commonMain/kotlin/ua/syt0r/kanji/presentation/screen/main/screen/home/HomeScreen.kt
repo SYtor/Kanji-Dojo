@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.movableContentOf
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
@@ -22,7 +23,8 @@ fun HomeScreen(
     HomeScreenUI(
         availableTabs = HomeScreenTab.VisibleTabs,
         selectedTabState = homeNavigationState.selectedTab,
-        onTabSelected = { homeNavigationState.navigate(it) }
+        onTabSelected = { homeNavigationState.navigate(it) },
+        onSponsorButtonClick = { mainNavigationState.value.navigate(MainDestination.Sponsor) }
     ) {
 
         tabContent()

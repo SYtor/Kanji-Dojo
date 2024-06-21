@@ -16,10 +16,12 @@ import ua.syt0r.kanji.presentation.screen.main.GooglePlayReadingPracticeScreenCo
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayWritingPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
+import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsViewModel
+import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContent
 
 val flavorModule = module {
 
@@ -55,5 +57,7 @@ val flavorModule = module {
             reminderScheduler = get()
         )
     }
+
+    single<SponsorScreenContract.Content> { GooglePlaySponsorScreenContent }
 
 }

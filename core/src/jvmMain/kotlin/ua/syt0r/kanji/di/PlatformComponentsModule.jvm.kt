@@ -19,6 +19,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibraries
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.JvmGetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.JvmSettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.JvmSponsorScreenContent
+import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import java.util.prefs.Preferences
 
 
@@ -51,6 +53,7 @@ actual val platformComponentsModule: Module = module {
     }
 
     single<SettingsScreenContract.Content> { JvmSettingsScreenContent }
+    single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
 
     factory<GetCreditLibrariesUseCase> { JvmGetCreditLibrariesUseCase }
 

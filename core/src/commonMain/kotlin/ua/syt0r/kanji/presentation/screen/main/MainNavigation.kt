@@ -1,9 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
+import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
@@ -17,6 +19,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.Letter
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.LetterDeckPickerScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
 import kotlin.reflect.KClass
 
@@ -204,6 +207,17 @@ interface MainDestination {
 
     }
 
+    @Serializable
+    object Sponsor : MainDestination {
+
+        @Composable
+        override fun Draw(state: MainNavigationState) {
+            val content = remember { getKoin().get<SponsorScreenContract.Content>() }
+            content(state)
+        }
+
+    }
+
 }
 
 sealed interface MainDestinationConfiguration<T : MainDestination> {
@@ -254,6 +268,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Backup.configuration(),
     MainDestination.About.configuration(),
     MainDestination.Credits.configuration(),
+    MainDestination.Sponsor.configuration(),
     MainDestination.LetterDeckPicker.configuration(),
     MainDestination.LetterDeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),
