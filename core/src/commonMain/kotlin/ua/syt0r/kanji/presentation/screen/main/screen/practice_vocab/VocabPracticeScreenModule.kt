@@ -7,11 +7,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.De
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeQueueDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeSummaryItemUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabReadingReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabWritingReviewStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetPrioritizedWordReadingUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabFlashcardReviewStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabReadingReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabWritingReviewStateUseCase
 
 val vocabPracticeScreenModule = module {
 
@@ -35,15 +37,26 @@ val vocabPracticeScreenModule = module {
             getPrioritizedWordReadingUseCase = get()
         )
     }
+
+    factory<GetVocabWritingReviewStateUseCase> {
+        DefaultGetVocabWritingReviewStateUseCase(
+            appDataRepository = get(),
+            getPrioritizedWordReadingUseCase = get()
+        )
+    }
+
+
     factory<VocabPracticeQueue> {
         DefaultVocabPracticeQueue(
             coroutineScope = it.component1(),
             timeUtils = get(),
             getFlashcardReviewStateUseCase = get(),
             getReadingReviewStateUseCase = get(),
+            getWritingReviewStateUseCase = get(),
             getSummaryItemUseCase = get()
         )
     }
+
     multiplatformViewModel<VocabPracticeScreenContract.ViewModel> {
         VocabPracticeViewModel(
             viewModelScope = it.component1(),

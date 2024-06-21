@@ -22,6 +22,12 @@ class DefaultGetVocabPracticeSummaryItemUseCase : GetVocabPracticeSummaryItemUse
                 character = state.questionCharacter,
                 isCorrect = state.isCorrectAnswer()!!
             )
+
+            // TODO
+            is MutableVocabReviewState.Writing -> VocabSummaryItem.Flashcard(
+                word = state.word,
+                reading = state.summaryReading
+            )
         }
     }
 

@@ -1,14 +1,19 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,11 +23,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
@@ -58,6 +67,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabR
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
 
 @Composable
 fun VocabPracticeScreenUI(
@@ -212,6 +222,10 @@ private fun ScreenConfiguration(
                     onChange = { showMeaning = it }
                 )
             }
+
+            VocabPracticeType.Writing -> {
+
+            }
         }
 
     }
@@ -255,6 +269,15 @@ private fun ScreenReview(
                     onWordClick = { alternativeWordsDialogWord = it },
                     onAnswerSelected = onAnswerSelected,
                     onNextClick = onNextClick,
+                    onFeedbackClick = onFeedbackClick
+                )
+            }
+
+            is VocabReviewState.Writing -> {
+                VocabPracticeWritingUI(
+                    reviewState = currentState,
+                    onNextClick = onNextClick,
+                    onWordClick = { alternativeWordsDialogWord = it },
                     onFeedbackClick = onFeedbackClick
                 )
             }
@@ -346,3 +369,53 @@ private fun SummaryItem(
     }
 
 }
+
+
+@Composable
+fun VocabPracticeNextButton(
+    showNextButton: State<Boolean>,
+    onClick: () -> Unit,
+    onFeedbackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val offset = animateFloatAsState(if (showNextButton.value) 0f else 1f)
+
+    Row(
+        modifier = modifier.graphicsLayer { translationY = size.height * offset.value }
+            .fillMaxWidth()
+            .wrapContentWidth()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
+            .height(IntrinsicSize.Min)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+            .padding(vertical = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        IconButton(
+            onClick = onFeedbackClick,
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ),
+            modifier = Modifier.fillMaxHeight()
+                .aspectRatio(1f)
+        ) {
+            Icon(Icons.Default.Flag, null)
+        }
+
+        Button(
+            onClick = onClick,
+            colors = ButtonDefaults.neutralButtonColors(),
+            modifier = Modifier.weight(1f).fillMaxHeight()
+        ) {
+            Text(
+                text = resolveString { vocabPractice.nextButton },
+                style = MaterialTheme.typography.titleMedium
+            )
+            Icon(Icons.AutoMirrored.Filled.NavigateNext, null)
+        }
+    }
+
+}
+
+

@@ -76,7 +76,7 @@ private fun State<WritingReviewState>.toAnswerButtonsState(): State<AnswerButton
                 if (visible) {
                     if (writerInputState.isStudyMode) AnswerButtonsState.StudyButtonShown
                     else AnswerButtonsState.Shown(
-                        showNextButton = writerInputState.currentCharacterMistakes.value < CharacterMistakesToRepeat
+                        showNextButton = writerInputState.totalMistakes.value < CharacterMistakesToRepeat
                     )
                 } else {
                     AnswerButtonsState.Hidden

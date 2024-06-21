@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 
 enum class VocabPracticeType(
@@ -21,6 +22,10 @@ enum class VocabPracticeType(
     Flashcard(
         preferencesType = PreferencesVocabPracticeType.Flashcard,
         titleResolver = { "Flashcard" }
+    ),
+    Writing(
+        preferencesType = PreferencesVocabPracticeType.Writing,
+        titleResolver = { "Writing" }
     );
 
     companion object {
@@ -69,8 +74,9 @@ sealed interface VocabPracticeConfiguration {
 
 sealed interface VocabReviewState {
 
+    val word: JapaneseWord
+
     interface Flashcard : VocabReviewState {
-        val word: JapaneseWord
         val reading: FuriganaString
         val noFuriganaReading: FuriganaString
         val meaning: String
@@ -79,13 +85,17 @@ sealed interface VocabReviewState {
     }
 
     interface Reading : VocabReviewState {
-        val word: JapaneseWord
         val questionCharacter: String
         val showMeaning: Boolean
         val displayReading: State<FuriganaString>
         val answers: List<String>
         val correctAnswer: String
         val selectedAnswer: State<SelectedReadingAnswer?>
+    }
+
+    interface Writing : VocabReviewState {
+        val charactersData: List<CharacterWriterState>
+        val selected: MutableState<CharacterWriterState>
     }
 
 }

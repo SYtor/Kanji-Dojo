@@ -73,9 +73,8 @@ fun VocabPracticeFlashcardUI(
             FuriganaText(
                 furiganaString = furigana,
                 textStyle = MaterialTheme.typography.displayLarge,
-                annotationTextStyle = MaterialTheme.typography.bodyLarge,
-
-                )
+                annotationTextStyle = MaterialTheme.typography.bodyLarge
+            )
         }
 
         Column(

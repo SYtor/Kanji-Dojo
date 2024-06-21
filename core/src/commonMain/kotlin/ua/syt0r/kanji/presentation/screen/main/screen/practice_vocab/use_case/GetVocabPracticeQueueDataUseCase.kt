@@ -35,6 +35,13 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
                             showMeaning = state.readingPicker.showMeaning.value
                         )
                     }
+
+                    VocabPracticeType.Writing -> {
+                        VocabQueueItemDescriptor.Writing(
+                            wordId = it,
+                            priority = state.readingPriority.value
+                        )
+                    }
                 }
             }
             .let { if (state.shuffle.value) it.shuffled() else it }

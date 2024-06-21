@@ -169,7 +169,7 @@ class WritingPracticeViewModel(
 
             is CharacterInputState.SingleStroke -> inputState
                 .takeIf { it.drawnStrokesCount.value == characterWriterState.strokes.size }
-                ?.currentCharacterMistakes
+                ?.totalMistakes
                 ?.value
         } ?: return // Avoid handling quick multiple clicks on submit button during animation
 

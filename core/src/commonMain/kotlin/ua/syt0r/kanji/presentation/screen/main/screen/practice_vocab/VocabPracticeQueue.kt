@@ -22,6 +22,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabS
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabFlashcardReviewStateUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabReadingReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabWritingReviewStateUseCase
 
 
 interface VocabPracticeQueue {
@@ -41,6 +42,7 @@ class DefaultVocabPracticeQueue(
     private val timeUtils: TimeUtils,
     private val getFlashcardReviewStateUseCase: GetVocabFlashcardReviewStateUseCase,
     private val getReadingReviewStateUseCase: GetVocabReadingReviewStateUseCase,
+    private val getWritingReviewStateUseCase: GetVocabWritingReviewStateUseCase,
     private val getSummaryItemUseCase: GetVocabPracticeSummaryItemUseCase
 ) : VocabPracticeQueue {
 
@@ -122,6 +124,10 @@ class DefaultVocabPracticeQueue(
 
                     is VocabQueueItemDescriptor.ReadingPicker -> {
                         getReadingReviewStateUseCase(this@toQueueItem)
+                    }
+
+                    is VocabQueueItemDescriptor.Writing -> {
+                        getWritingReviewStateUseCase(this@toQueueItem)
                     }
                 }
             }

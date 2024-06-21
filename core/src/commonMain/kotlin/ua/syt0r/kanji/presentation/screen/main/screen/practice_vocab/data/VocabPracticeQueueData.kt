@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import kotlin.time.Duration
 
 
@@ -24,6 +25,11 @@ sealed interface VocabQueueItemDescriptor {
         val wordId: Long,
         val priority: VocabPracticeReadingPriority,
         val showMeaning: Boolean
+    ) : VocabQueueItemDescriptor
+
+    data class Writing(
+        val wordId: Long,
+        val priority: VocabPracticeReadingPriority
     ) : VocabQueueItemDescriptor
 
 }
@@ -51,8 +57,6 @@ sealed interface MutableVocabReviewState {
     val word: JapaneseWord
     val summaryReading: FuriganaString
 
-    fun isCorrectAnswer(): Boolean?
-
     class Flashcard(
         override val word: JapaneseWord,
         override val reading: FuriganaString,
@@ -63,7 +67,6 @@ sealed interface MutableVocabReviewState {
     ) : MutableVocabReviewState, VocabReviewState.Flashcard {
         override val summaryReading: FuriganaString = reading
         override val asImmutable: VocabReviewState.Flashcard = this
-        override fun isCorrectAnswer(): Boolean = true
     }
 
     class Reading(
@@ -82,8 +85,19 @@ sealed interface MutableVocabReviewState {
         override val displayReading = mutableStateOf<FuriganaString>(hiddenReading)
         override val selectedAnswer = mutableStateOf<SelectedReadingAnswer?>(null)
 
-        override fun isCorrectAnswer(): Boolean? = selectedAnswer.value?.isCorrect
+        fun isCorrectAnswer(): Boolean? = selectedAnswer.value?.isCorrect
 
+    }
+
+    class Writing(
+        override val word: JapaneseWord,
+        override val summaryReading: FuriganaString,
+        override val charactersData: List<CharacterWriterState>,
+    ) : MutableVocabReviewState, VocabReviewState.Writing {
+        override val asImmutable: VocabReviewState.Writing = this
+        override val selected: MutableState<CharacterWriterState> = mutableStateOf(
+            value = charactersData.first()
+        )
     }
 
 }

@@ -63,5 +63,5 @@ enum class SortOption { AddOrder, Frequency, Name }
 enum class PracticePreviewLayout { Character, Groups }
 enum class SupportedTheme { System, Light, Dark }
 enum class WritingInputMethod { Stroke, Character }
-enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker }
+enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
 enum class VocabReadingPriority { Default, Kanji, Kana }
