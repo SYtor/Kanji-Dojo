@@ -97,6 +97,9 @@ dependencies {
     "googlePlayImplementation"("com.google.firebase:firebase-crashlytics-ktx")
     "googlePlayImplementation"("com.google.android.play:review-ktx:2.0.1")
 
+    val billingVersion = "7.0.0"
+    "googlePlayImplementation"("com.android.billingclient:billing-ktx:$billingVersion")
+
     // Test
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.3")

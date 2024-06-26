@@ -58,25 +58,7 @@ fun SponsorScreenUI(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            Text(
-                text = resolveString { appName },
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
-            )
-
-            Box(
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                    .padding(20.dp)
-            ) {
-                Text(
-                    text = "The development of Kanji Dojo started in 2021 by a single person and it stays free for all users who want to learn Japanese" +
-                            "\n\nIf you find the app useful please consider supporting this project financially, every contribution counts" +
-                            "\n\nFinancial support will allow me to focus more on development, bring extra features, add more voiced content and translations",
-                    textAlign = TextAlign.Justify
-                )
-            }
+            SponsorScreenDefaultContent()
 
             content()
 
@@ -84,4 +66,25 @@ fun SponsorScreenUI(
 
     }
 
+}
+
+@Composable
+fun ColumnScope.SponsorScreenDefaultContent() {
+    Text(
+        text = resolveString { appName },
+        style = MaterialTheme.typography.headlineLarge,
+        fontWeight = FontWeight.Bold
+    )
+
+    Box(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+            .padding(20.dp)
+    ) {
+        Text(
+            text = resolveString { sponsor.message },
+            textAlign = TextAlign.Justify
+        )
+    }
 }

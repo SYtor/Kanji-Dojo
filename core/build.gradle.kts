@@ -32,7 +32,7 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.21")
                 implementation("dev.esnault.wanakana:wanakana-core:1.1.1")
 
-                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                api("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
 
                 api("com.mikepenz:aboutlibraries-core:11.2.0")

@@ -45,6 +45,7 @@ object JapaneseStrings : Strings {
     override val about: AboutStrings = JapaneseAboutStrings
     override val backup: BackupStrings = JapaneseBackupStrings
     override val feedback: FeedbackStrings = JapaneseFeedbackStrings
+    override val sponsor: SponsorStrings = JapaneseSponsorStrings
 
     override val letterDeckPicker: LetterDeckPickerStrings = JapaneseLetterDeckPickerStrings
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
@@ -259,6 +260,8 @@ object JapaneseFeedbackStrings : FeedbackStrings by EnglishFeedbackStrings {
     override val successMessage: String = "フィードバックを送信しました"
     override val errorMessage: (String?) -> String = { "エラー: $it" }
 }
+
+object JapaneseSponsorStrings : SponsorStrings by EnglishSponsorStrings
 
 object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
 

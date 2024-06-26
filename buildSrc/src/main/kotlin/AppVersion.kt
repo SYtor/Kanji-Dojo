@@ -1,6 +1,6 @@
 object AppVersion {
 
-    const val versionCode = 2060
+    const val versionCode = 2061
 
     const val versionName = "2.0.6"
 

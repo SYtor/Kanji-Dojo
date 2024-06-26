@@ -60,6 +60,7 @@ interface Strings {
     val about: AboutStrings
     val backup: BackupStrings
     val feedback: FeedbackStrings
+    val sponsor: SponsorStrings
 
     val letterDeckPicker: LetterDeckPickerStrings
     val letterDeckDetails: LetterDeckDetailsStrings
@@ -77,6 +78,10 @@ interface Strings {
 
     val reminderNotification: ReminderNotificationStrings
 
+}
+
+interface SponsorStrings {
+    val message: String
 }
 
 interface AddWordToDeckDialogStrings {

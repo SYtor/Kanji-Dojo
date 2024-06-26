@@ -5,6 +5,7 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import org.koin.android.ext.koin.androidApplication
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.FirebaseAnalyticsManager
@@ -21,7 +22,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsViewModel
+import ua.syt0r.kanji.presentation.screen.sponsor.DefaultGooglePlayPurchaseManager
+import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlayPurchaseManager
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContent
+import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContract
+import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorViewModel
+import ua.syt0r.kanji.presentation.screen.sponsor.use_case.DefaultGooglePlaySendSponsorResultsUseCase
+import ua.syt0r.kanji.presentation.screen.sponsor.use_case.GooglePlaySendSponsorResultsUseCase
 
 val flavorModule = module {
 
@@ -59,5 +66,27 @@ val flavorModule = module {
     }
 
     single<SponsorScreenContract.Content> { GooglePlaySponsorScreenContent }
+
+    factory<GooglePlayPurchaseManager> {
+        DefaultGooglePlayPurchaseManager(
+            context = androidContext(),
+            coroutineScope = it.component1()
+        )
+    }
+
+    factory<GooglePlaySendSponsorResultsUseCase> {
+        DefaultGooglePlaySendSponsorResultsUseCase(
+            httpClient = get()
+        )
+    }
+
+    multiplatformViewModel<GooglePlaySponsorScreenContract.ViewModel> {
+        GooglePlaySponsorViewModel(
+            viewModelScope = it.component1(),
+            purchaseManager = get { it },
+            sendSponsorResultsUseCase = get(),
+            analyticsManager = get()
+        )
+    }
 
 }

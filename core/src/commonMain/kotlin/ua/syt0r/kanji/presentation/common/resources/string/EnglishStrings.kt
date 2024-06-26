@@ -45,6 +45,7 @@ object EnglishStrings : Strings {
     override val about: AboutStrings = EnglishAboutStrings
     override val backup: BackupStrings = EnglishBackupStrings
     override val feedback: FeedbackStrings = EnglishFeedbackStrings
+    override val sponsor: SponsorStrings = EnglishSponsorStrings
 
     override val letterDeckPicker: LetterDeckPickerStrings = EnglishLetterDeckPickerStrings
     override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
@@ -289,6 +290,17 @@ object EnglishFeedbackStrings : FeedbackStrings {
     override val button: String = "Send"
     override val successMessage: String = "Feedback sent"
     override val errorMessage: (String?) -> String = { "Error: $it" }
+}
+
+object EnglishSponsorStrings : SponsorStrings {
+    override val message: String = """
+        Development of Kanji Dojo started in 2021 by a single person and it remains free for all users who want to learn Japanese
+        
+        If you find the app useful please consider supporting this project financially, every contribution counts
+        
+        Financial support will allow me to focus more on development, bring extra features, add more voiced content and translations
+    """.trimIndent()
+
 }
 
 object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
