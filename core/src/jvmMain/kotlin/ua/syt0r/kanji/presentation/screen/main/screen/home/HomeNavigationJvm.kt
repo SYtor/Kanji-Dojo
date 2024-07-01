@@ -1,10 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
@@ -30,10 +33,14 @@ actual fun HomeNavigationContent(
     homeNavigationState as MultiplatformHomeNavigationState
 
     val stateHolder = rememberSaveableStateHolder()
-    val tab = homeNavigationState.selectedTab.value
 
-    stateHolder.SaveableStateProvider(tab.name) {
-        tab.content(mainNavigationState)
+    Crossfade(
+        targetState = homeNavigationState.selectedTab.value,
+        modifier = Modifier.fillMaxSize()
+    ) { tab ->
+        stateHolder.SaveableStateProvider(tab.name) {
+            tab.content(mainNavigationState)
+        }
     }
 
 }

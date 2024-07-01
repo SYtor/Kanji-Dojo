@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -20,10 +21,12 @@ fun MultiplatformMainNavigation(
 ) {
     state as MultiplatformMainNavigationState
 
-    val destination = state.currentDestination.value
-
-    state.stateHolder.SaveableStateProvider(destination.toString()) {
-        destination.Draw(state)
+    Crossfade(
+        targetState = state.currentDestination.value
+    ) { destination ->
+        state.stateHolder.SaveableStateProvider(destination.toString()) {
+            destination.Draw(state)
+        }
     }
 
 }
