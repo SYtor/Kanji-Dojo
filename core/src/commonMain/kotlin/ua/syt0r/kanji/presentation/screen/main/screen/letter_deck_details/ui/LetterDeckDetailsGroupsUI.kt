@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -23,10 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
@@ -53,11 +55,6 @@ fun LetterDeckDetailsGroupsUI(
         Column(
             modifier = Modifier.padding(horizontal = 20.dp)
         ) {
-            LetterDeckDetailsConfigurationRow(
-                configuration = visibleData.configuration,
-                kanaGroupsMode = visibleData.kanaGroupsMode,
-                onConfigurationUpdate = onConfigurationUpdate
-            )
             Text(
                 text = resolveString { letterDeckDetails.emptyListMessage },
                 modifier = Modifier
@@ -69,18 +66,13 @@ fun LetterDeckDetailsGroupsUI(
         return
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(160.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .wrapContentSize(Alignment.TopCenter)
-    ) {
+    Column {
 
-        item(
-            span = { GridItemSpan(maxLineSpan) }
+        val collapsibleConfigurationContainerState = rememberCollapsibleContainerState()
+
+        CollapsibleContainer(
+            state = collapsibleConfigurationContainerState,
+            modifier = Modifier.fillMaxWidth()
         ) {
             LetterDeckDetailsConfigurationRow(
                 configuration = visibleData.configuration,
@@ -89,34 +81,46 @@ fun LetterDeckDetailsGroupsUI(
             )
         }
 
-        items(
-            items = visibleData.items,
-            key = { it.index }
-        ) { group ->
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(160.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .wrapContentSize(Alignment.TopCenter)
+                .nestedScroll(collapsibleConfigurationContainerState.nestedScrollConnection)
+        ) {
 
-            PracticeGroup(
-                group = group,
-                state = when {
-                    !visibleData.isSelectionModeEnabled.value -> GroupItemState.Default
-                    group.selected.value -> GroupItemState.Selected
-                    else -> GroupItemState.Unselected
-                },
-                onClick = {
-                    if (visibleData.isSelectionModeEnabled.value) {
-                        toggleGroupSelection(group)
-                    } else {
-                        selectGroup(group)
-                    }
-                },
-                modifier = Modifier
-            )
+            items(
+                items = visibleData.items,
+                key = { it.index }
+            ) { group ->
+
+                PracticeGroup(
+                    group = group,
+                    state = when {
+                        !visibleData.isSelectionModeEnabled.value -> GroupItemState.Default
+                        group.selected.value -> GroupItemState.Selected
+                        else -> GroupItemState.Unselected
+                    },
+                    onClick = {
+                        if (visibleData.isSelectionModeEnabled.value) {
+                            toggleGroupSelection(group)
+                        } else {
+                            selectGroup(group)
+                        }
+                    },
+                    modifier = Modifier
+                )
+
+            }
+
+            extraListSpacerState.ExtraSpacer(this)
 
         }
 
-        extraListSpacerState.ExtraSpacer(this)
-
     }
-
 }
 
 

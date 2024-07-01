@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -63,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -72,8 +71,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
+import ua.syt0r.kanji.presentation.common.CollapsibleContainer
+import ua.syt0r.kanji.presentation.common.CollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.isNearListEnd
 import ua.syt0r.kanji.presentation.common.jsonSaver
+import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
@@ -142,20 +144,23 @@ fun SearchScreenUI(
             modifier = Modifier.fillMaxSize()
         ) {
 
-            // TODO move to topbar with scroll behaviour when stable
-            InputSection(
-                inputState = inputState,
-                onOpenRadicalSearch = {
-                    coroutineScope.launch {
-                        sheetState.show()
-                        onRadicalsSectionExpanded()
-                    }
-                },
-                modifier = Modifier
-                    .widthIn(max = 400.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .trackItemPosition { bottomSheetHeight.value = it.heightFromScreenBottom }
-            )
+            val searchContainerState = rememberCollapsibleContainerState()
+
+            CollapsibleContainer(searchContainerState) {
+                InputSection(
+                    inputState = inputState,
+                    onOpenRadicalSearch = {
+                        coroutineScope.launch {
+                            sheetState.show()
+                            onRadicalsSectionExpanded()
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .trackItemPosition { bottomSheetHeight.value = it.heightFromScreenBottom }
+                )
+            }
 
             Box(
                 modifier = Modifier
@@ -190,6 +195,7 @@ fun SearchScreenUI(
 
             ListContent(
                 screenState = state.value,
+                searchContainerState = searchContainerState,
                 onCharacterClick = onCharacterClick,
                 onWordClick = { selectedWord = it },
                 onScrolledToEnd = onScrolledToEnd
@@ -266,10 +272,11 @@ private fun InputSection(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ListContent(
     screenState: ScreenState,
+    searchContainerState: CollapsibleContainerState,
     onCharacterClick: (String) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onScrolledToEnd: () -> Unit
@@ -311,6 +318,7 @@ private fun ListContent(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize()
+                .nestedScroll(searchContainerState.nestedScrollConnection)
         ) {
 
             item {
@@ -402,7 +410,10 @@ private fun ListContent(
         ) {
             val coroutineScope = rememberCoroutineScope()
             FloatingActionButton(
-                onClick = { coroutineScope.launch { listState.scrollToItem(0) } }
+                onClick = {
+                    coroutineScope.launch { listState.scrollToItem(0) }
+                    coroutineScope.launch { searchContainerState.expand() }
+                }
             ) {
                 Icon(Icons.Default.KeyboardArrowUp, null)
             }

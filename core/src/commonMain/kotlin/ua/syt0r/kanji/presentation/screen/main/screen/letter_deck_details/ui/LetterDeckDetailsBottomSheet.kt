@@ -5,7 +5,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -106,7 +104,6 @@ fun LetterDeckDetailsBottomSheet(
 
     Column(
         modifier = Modifier.animateContentSize(tween(100, easing = LinearEasing))
-            .windowInsetsPadding(BottomSheetDefaults.windowInsets)
     ) {
 
         BottomSheetDefaults.DragHandle(
@@ -232,7 +229,6 @@ private fun PracticeGroupDetails(
         Spacer(modifier = Modifier.height(20.dp))
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().height(65.dp),
         ) {
 
@@ -248,18 +244,18 @@ private fun PracticeGroupDetails(
                 LetterDeckDetailsCharacterBox(
                     character = it.character,
                     reviewState = reviewState,
-                    onClick = { onCharacterClick(it.character) }
+                    onClick = { onCharacterClick(it.character) },
+                    modifier = Modifier.padding(end = 12.dp)
                 )
 
             }
 
-            item { Spacer(Modifier.width(20.dp)) }
+            item { Spacer(Modifier.width(8.dp)) }
 
         }
 
         Row(
-            modifier = Modifier
-                .padding(20.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 

@@ -394,7 +394,9 @@ fun LetterDeckDetailsConfigurationRow(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
     ) {
         FilterChip(
             selected = true,
@@ -469,12 +471,12 @@ fun LetterDeckDetailsCharacterBox(
     character: String,
     reviewState: CharacterReviewState,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Text(
         text = character,
         fontSize = 32.textDp,
-        modifier = Modifier
-            .size(60.dp)
+        modifier = modifier.size(60.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
