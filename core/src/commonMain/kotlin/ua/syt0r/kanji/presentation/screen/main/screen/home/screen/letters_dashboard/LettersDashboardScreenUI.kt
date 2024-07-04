@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashb
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +57,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -79,6 +80,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -101,9 +103,12 @@ import ua.syt0r.kanji.presentation.common.theme.customOrange
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui.LettersDashboardDailyLimitIndicator
+import kotlin.math.max
 
 @Composable
 fun LettersDashboardScreenUI(
@@ -121,42 +126,11 @@ fun LettersDashboardScreenUI(
 
     val extraListSpacerState = rememberExtraListSpacerState()
 
-    Scaffold(
-        floatingActionButton = {
-            val shouldShowButton by remember { derivedStateOf { state.value is ScreenState.Loaded } }
-            AnimatedVisibility(
-                visible = shouldShowButton,
-                enter = scaleIn(),
-                exit = scaleOut()
-            ) {
-                FloatingActionButton(
-                    onClick = navigateToDeckPicker,
-                    modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            LettersDashboardDailyLimitIndicator(
-                state = remember {
-                    derivedStateOf {
-                        state.value.let { it as? ScreenState.Loaded }?.dailyIndicatorData
-                    }
-                },
-                updateConfiguration = updateDailyGoalConfiguration
-            )
-
-        }
-    ) { paddingValues ->
+    Box {
 
         AnimatedContent(
             targetState = state.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.padding(paddingValues)
         ) { screenState ->
             when (screenState) {
                 ScreenState.Loading -> {
@@ -186,6 +160,14 @@ fun LettersDashboardScreenUI(
             }
         }
 
+        ScreenBottomBar(
+            state = state,
+            navigateToDeckPicker = navigateToDeckPicker,
+            updateConfiguration = updateDailyGoalConfiguration,
+            modifier = Modifier.align(Alignment.BottomCenter)
+                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) },
+        )
+
     }
 
 }
@@ -209,6 +191,8 @@ private fun LoadedState(
     startQuickPractice: (MainDestination.Practice) -> Unit
 ) {
 
+    val orientation = LocalOrientation.current
+
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier
@@ -218,6 +202,10 @@ private fun LoadedState(
             .widthIn(max = 400.dp)
             .padding(horizontal = 10.dp)
     ) {
+
+        if (orientation == Orientation.Landscape) {
+            item { Spacer(Modifier.height(20.dp)) }
+        }
 
         val currentMode = listMode.value
 
@@ -476,7 +464,6 @@ private fun ListModeButtons(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .padding(top = 4.dp)
             .clip(MaterialTheme.shapes.large)
     ) {
         AnimatedContent(
@@ -611,56 +598,45 @@ private fun MergeConfirmationDialog(
     onDismissRequest: () -> Unit,
     onConfirmed: (LetterDecksMergeRequestData) -> Unit
 ) {
-    MultiplatformDialog(onDismissRequest) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-                .padding(top = 20.dp, bottom = 10.dp, start = 20.dp, end = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
+    val strings = resolveString { lettersDashboard }
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = strings.mergeDialogTitle,
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        content = {
             val title = listMode.title.value
             val decksIdList = listMode.selected.value.toList()
             val mergedDeckTitles = listMode.items
                 .filter { decksIdList.contains(it.deckId) }
                 .map { it.title }
-
-            val strings = resolveString { lettersDashboard }
-
-            Text(
-                text = strings.mergeDialogTitle,
-                style = MaterialTheme.typography.titleLarge
-            )
-
             Text(
                 text = strings.mergeDialogMessage(title, mergedDeckTitles),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Row(
-                modifier = Modifier.align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                TextButton(onClick = onDismissRequest) {
-                    Text(strings.mergeDialogCancelButton)
-                }
-                TextButton(
-                    onClick = {
-                        onConfirmed(
-                            LetterDecksMergeRequestData(
-                                title = listMode.title.value,
-                                deckIds = listMode.selected.value.toList()
-                            )
-                        )
-                    }
-                ) {
-                    Text(strings.mergeDialogAcceptButton)
-                }
+        },
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(strings.mergeDialogCancelButton)
             }
-
+            TextButton(
+                onClick = {
+                    onConfirmed(
+                        LetterDecksMergeRequestData(
+                            title = listMode.title.value,
+                            deckIds = listMode.selected.value.toList()
+                        )
+                    )
+                }
+            ) {
+                Text(strings.mergeDialogAcceptButton)
+            }
         }
-
-    }
+    )
 }
 
 private const val InlineIconId = "icon"
@@ -1118,4 +1094,86 @@ private fun RowScope.QuickPracticeButton(
         Text(text)
     }
 
+}
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+private fun ScreenBottomBar(
+    state: State<ScreenState>,
+    navigateToDeckPicker: () -> Unit,
+    updateConfiguration: (DailyGoalConfiguration) -> Unit,
+    modifier: Modifier
+) {
+
+    AnimatedContent(
+        targetState = state.value,
+        transitionSpec = { fadeIn() togetherWith fadeOut() },
+        modifier = modifier.fillMaxWidth()
+    ) {
+
+        when (it) {
+            is ScreenState.Loaded -> {
+                Layout(
+                    modifier = Modifier.fillMaxWidth(),
+                    content = {
+                        LettersDashboardDailyLimitIndicator(
+                            data = it.dailyIndicatorData,
+                            updateConfiguration = updateConfiguration
+                        )
+                        FloatingActionButton(
+                            onClick = navigateToDeckPicker,
+                            modifier = Modifier.animateEnterExit(
+                                enter = scaleIn(),
+                                exit = scaleOut()
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                ) { measurables, constraints ->
+                    val fabSpacing = 20.dp.roundToPx()
+                    val indicatorPlaceable = measurables.first()
+                        .measure(constraints.copy(minWidth = 0))
+                    val fabPlaceable = measurables[1].measure(constraints.copy(minWidth = 0))
+
+                    val width = constraints.maxWidth
+                    val fitInLine =
+                        (width / 2 + indicatorPlaceable.width / 2 + fabPlaceable.width + fabSpacing) > width
+
+                    val height = when (fitInLine) {
+                        true -> indicatorPlaceable.height + fabPlaceable.height
+                        false -> max(indicatorPlaceable.height, fabPlaceable.height) + fabSpacing
+                    }
+
+                    layout(
+                        width = width,
+                        height = height
+                    ) {
+
+                        fabPlaceable.place(
+                            x = constraints.maxWidth - fabPlaceable.width - fabSpacing,
+                            y = when (fitInLine) {
+                                true -> 0
+                                false -> height - fabPlaceable.height - fabSpacing
+                            }
+                        )
+
+                        indicatorPlaceable.place(
+                            x = width / 2 - indicatorPlaceable.width / 2,
+                            y = height - indicatorPlaceable.height
+                        )
+
+                    }
+                }
+
+            }
+
+            ScreenState.Loading -> Box(Modifier.fillMaxWidth())
+        }
+
+    }
 }

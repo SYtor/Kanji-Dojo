@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -48,7 +47,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -97,43 +95,25 @@ fun PracticeLeaveConfirmationDialog(
     val strings = resolveString { commonPractice }
 
     MultiplatformDialog(
-        onDismissRequest = onDismissRequest
-    ) {
-
-        Surface(
-            modifier = Modifier.clip(RoundedCornerShape(20.dp))
-        ) {
-            Column(
-                modifier = Modifier
-                    .width(300.dp)
-                    .padding(20.dp)
-            ) {
-
-                Text(
-                    text = resolveString { strings.leaveDialogTitle },
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(bottom = 14.dp)
-                )
-
-                Text(
-                    text = resolveString { strings.leaveDialogMessage },
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                TextButton(
-                    onClick = onConfirmClick,
-                    modifier = Modifier
-                        .padding(top = 2.dp)
-                        .align(Alignment.End)
-                ) {
-                    Text(text = resolveString { strings.leaveDialogButton })
-                }
-
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = resolveString { strings.leaveDialogTitle },
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        content = {
+            Text(
+                text = resolveString { strings.leaveDialogMessage },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        buttons = {
+            TextButton(onClick = onConfirmClick) {
+                Text(text = resolveString { strings.leaveDialogButton })
             }
         }
-
-    }
-
+    )
 }
 
 sealed interface PracticeToolbarState {
