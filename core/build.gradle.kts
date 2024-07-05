@@ -39,6 +39,11 @@ kotlin {
                 implementation("com.mikepenz:aboutlibraries-compose-m3:11.2.0")
             }
         }
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+            }
+        }
         val androidMain by getting {
             dependencies {
                 implementation("app.cash.sqldelight:android-driver:2.0.0")
@@ -171,6 +176,10 @@ buildkonfig {
             )
         }
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 aboutLibraries {
