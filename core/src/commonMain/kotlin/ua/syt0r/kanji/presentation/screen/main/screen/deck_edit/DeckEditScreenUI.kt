@@ -52,6 +52,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -60,6 +61,7 @@ import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Save
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
@@ -331,17 +333,21 @@ private fun LoadedState(
 
 }
 
+interface DeckEditingMode {
+    val icon: ImageVector
+    val titleResolver: StringResolveScope<String>
+}
+
 @Composable
-fun DeckEditingModeSelector(
-    selectedMode: MutableState<DeckEditingMode>,
-    availableOptions: List<DeckEditingMode> = DeckEditingMode.values().toList()
+fun <T : DeckEditingMode> DeckEditingModeSelector(
+    selectedMode: MutableState<T>,
+    availableOptions: List<T>
 ) {
 
     Row(
         modifier = Modifier.fillMaxWidth()
-            .wrapContentWidth()
+            .wrapContentWidth(align = Alignment.Start)
             .height(IntrinsicSize.Min)
-            .wrapContentWidth()
             .width(IntrinsicSize.Min)
             .clip(MaterialTheme.shapes.large)
             .padding(2.dp),

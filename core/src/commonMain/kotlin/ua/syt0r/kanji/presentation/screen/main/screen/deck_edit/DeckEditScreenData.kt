@@ -63,24 +63,6 @@ sealed interface DeckEditScreenConfiguration {
 
 }
 
-enum class DeckEditingMode(
-    val icon: ImageVector,
-    val titleResolver: StringResolveScope<String>
-) {
-    Search(
-        icon = Icons.Default.Search,
-        titleResolver = { deckEdit.editingModeSearchTitle }
-    ),
-    Removal(
-        icon = Icons.Default.Close,
-        titleResolver = { deckEdit.editingModeRemovalTitle }
-    ),
-    ResetSrs(
-        icon = Icons.Default.Memory,
-        titleResolver = { TODO() }
-    )
-}
-
 sealed interface DeckEditListItem {
     val initialAction: DeckEditItemAction
     val action: State<DeckEditItemAction>

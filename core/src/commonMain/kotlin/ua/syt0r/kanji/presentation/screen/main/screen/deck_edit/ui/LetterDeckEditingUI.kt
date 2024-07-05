@@ -8,13 +8,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,12 +43,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
+import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemActionIndicator
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditListItem
@@ -66,7 +72,7 @@ fun LetterDeckEditingUI(
     toggleRemoval: (DeckEditListItem) -> Unit,
 ) {
 
-    val deckEditingMode = rememberSaveable { mutableStateOf(DeckEditingMode.Search) }
+    val deckEditingMode = rememberSaveable { mutableStateOf(LetterDeckEditingMode.Search) }
 
     Column(
         modifier = Modifier
@@ -74,36 +80,50 @@ fun LetterDeckEditingUI(
             .padding(horizontal = 20.dp)
     ) {
 
-        DeckEditingModeSelector(
-            selectedMode = deckEditingMode,
-            availableOptions = listOf(DeckEditingMode.Search, DeckEditingMode.Removal)
-        )
+        val collapsibleContainerState = rememberCollapsibleContainerState()
 
-        AnimatedContent(
-            targetState = deckEditingMode.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            when (it) {
-                DeckEditingMode.Search -> {
-                    CharacterInputField(
-                        isEnabled = !screenState.searching.value,
-                        onInputSubmit = submitSearch
+        CollapsibleContainer(collapsibleContainerState) {
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+
+                DeckEditingModeSelector(
+                    selectedMode = deckEditingMode,
+                    availableOptions = listOf(
+                        LetterDeckEditingMode.Search,
+                        LetterDeckEditingMode.Removal
                     )
+                )
+
+                AnimatedContent(
+                    targetState = deckEditingMode.value,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    when (it) {
+                        LetterDeckEditingMode.Search -> {
+                            CharacterInputField(
+                                isEnabled = !screenState.searching.value,
+                                onInputSubmit = submitSearch
+                            )
+                        }
+
+                        LetterDeckEditingMode.Removal,
+                        LetterDeckEditingMode.ResetSrs -> Box(Modifier) // To avoid expand animation
+                    }
                 }
 
-                DeckEditingMode.Removal,
-                DeckEditingMode.ResetSrs -> Box(Modifier) // To avoid expand animation
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        }
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(50.dp),
             modifier = Modifier.fillMaxWidth()
-                .padding(horizontal = 20.dp)
                 .onGloballyPositioned { extraListSpacerState.updateList(it) }
+                .nestedScroll(collapsibleContainerState.nestedScrollConnection)
         ) {
 
             items(screenState.listState.value) {
@@ -111,9 +131,9 @@ fun LetterDeckEditingUI(
                     item = it,
                     onClick = {
                         when (deckEditingMode.value) {
-                            DeckEditingMode.Search -> showCharacterInfo(it.character)
-                            DeckEditingMode.Removal -> toggleRemoval(it)
-                            DeckEditingMode.ResetSrs -> TODO()
+                            LetterDeckEditingMode.Search -> showCharacterInfo(it.character)
+                            LetterDeckEditingMode.Removal -> toggleRemoval(it)
+                            LetterDeckEditingMode.ResetSrs -> TODO()
                         }
                     }
                 )
@@ -127,6 +147,24 @@ fun LetterDeckEditingUI(
 
     }
 
+}
+
+private enum class LetterDeckEditingMode(
+    override val icon: ImageVector,
+    override val titleResolver: StringResolveScope<String>
+) : DeckEditingMode {
+    Search(
+        icon = Icons.Default.Search,
+        titleResolver = { deckEdit.editingModeSearchTitle }
+    ),
+    Removal(
+        icon = Icons.Default.Close,
+        titleResolver = { deckEdit.editingModeRemovalTitle }
+    ),
+    ResetSrs(
+        icon = Icons.Default.Memory,
+        titleResolver = { TODO() }
+    )
 }
 
 @Composable
@@ -148,7 +186,6 @@ private fun CharacterInputField(
     val color = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         modifier = Modifier
-            .padding(top = 20.dp)
             .fillMaxWidth()
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -217,6 +254,7 @@ private fun LazyGridItemScope.ListItem(
     Box(
         modifier = Modifier.animateItemPlacement()
             .clip(MaterialTheme.shapes.medium)
+            .aspectRatio(1f)
             .clickable(onClick = onClick)
     ) {
 
