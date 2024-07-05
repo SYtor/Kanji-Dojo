@@ -46,6 +46,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,6 +65,7 @@ import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
@@ -85,9 +87,21 @@ fun VocabPracticeScreenUI(
     navigateBack: () -> Unit
 ) {
 
+    var showLeaveConfirmation by rememberSaveable { mutableStateOf(false) }
+    if (showLeaveConfirmation) {
+        PracticeLeaveConfirmationDialog(
+            onDismissRequest = { showLeaveConfirmation = false },
+            onConfirmClick = navigateBack
+        )
+    }
+
     val tryNavigateBack = {
-        // TODO leave confirmation
-        navigateBack()
+        val isSafeToLeave = state.value.let {
+            it is ScreenState.Configuration || it is ScreenState.Summary
+        }
+
+        if (isSafeToLeave) navigateBack()
+        else showLeaveConfirmation = true
     }
 
     Scaffold(
