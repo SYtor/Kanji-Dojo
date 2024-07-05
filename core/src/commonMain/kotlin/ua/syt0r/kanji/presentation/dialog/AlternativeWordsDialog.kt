@@ -2,8 +2,7 @@ package ua.syt0r.kanji.presentation.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,16 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AlternativeWordsDialog(
     word: JapaneseWord,
@@ -64,7 +62,7 @@ fun AlternativeWordsDialog(
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
 
@@ -73,26 +71,37 @@ fun AlternativeWordsDialog(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = 16.dp,
-                        alignment = Alignment.CenterHorizontally
-                    )
-                ) {
-                    word.readings.forEach { reading ->
+                word.readings.forEachIndexed { index, reading ->
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+
+                        Text("${index + 1}. ", Modifier.alignByBaseline())
+
+                        /*
+                         * Align by baseline has issues when aligning text that starts with inline
+                         * content, adding non empty string in the beginning to fix this behaviour
+                         */
+                        val fixedFurigana = buildFuriganaString {
+                            append(" ")
+                            append(reading)
+                        }
+
                         if (onFuriganaClick != null) {
                             ClickableFuriganaText(
-                                furiganaString = reading,
+                                furiganaString = fixedFurigana,
                                 onClick = onFuriganaClick,
-                                modifier = Modifier.align(Alignment.Bottom)
+                                modifier = Modifier.alignByBaseline()
                             )
                         } else {
                             FuriganaText(
-                                furiganaString = reading,
-                                modifier = Modifier.align(Alignment.Bottom)
+                                furiganaString = fixedFurigana,
+                                modifier = Modifier.alignByBaseline()
                             )
                         }
                     }
+
                 }
 
                 Text(
@@ -100,18 +109,13 @@ fun AlternativeWordsDialog(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = 16.dp,
-                        alignment = Alignment.CenterHorizontally
-                    ),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    word.meanings.forEach { text ->
+                word.meanings.forEachIndexed { index, text ->
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("${index + 1}.  ", Modifier.alignByBaseline())
                         Text(
-                            text = text.capitalize(Locale.current),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Bottom)
+                            text = text.capitalize(Locale.current)
                         )
                     }
                 }
