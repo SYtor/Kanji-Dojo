@@ -325,7 +325,8 @@ interface DeckEditStrings {
     val editingModeSearchTitle: String
     val editingModeRemovalTitle: String
 
-    val vocabSearchMessage: (inlineIconId: String) -> AnnotatedString
+    val editingModeDetailsTitle: String
+    val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString
 
     val completeMessage: String
 

@@ -383,9 +383,10 @@ object EnglishDeckEditStrings : DeckEditStrings {
     override val searchHint: String = "Enter kana or kanji"
     override val editingModeSearchTitle: String = "Search"
     override val editingModeRemovalTitle: String = "Removal"
-    override val vocabSearchMessage: (inlineIconId: String) -> AnnotatedString = {
+    override val editingModeDetailsTitle: String = "Details"
+    override val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
-            append("To add new words use ")
+            append("Save deck by clicking on the button below. To add more words use ")
             appendInlineContent(it)
             append(" icon on search screen, during writing reviews and other places in the app")
         }
@@ -418,13 +419,13 @@ object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val emptyListMessage: String = "Nothing here"
     override val detailsGroupTitle: (index: Int) -> String = { "Group $it" }
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
-        "First time studied: " + when (it) {
+        "First review time: " + when (it) {
             null -> "Never"
             else -> groupDetailsDateTimeFormatter(it)
         }
     }
     override val lastTimeReviewMessage: (LocalDateTime?) -> String = {
-        "Last time studied: " + when (it) {
+        "Last review time: " + when (it) {
             null -> "Never"
             else -> groupDetailsDateTimeFormatter(it)
         }
