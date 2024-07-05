@@ -307,6 +307,7 @@ object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
 
     override val title: String = "Select Deck"
 
+    override val customDeckButton: String = "Create Custom"
     override val kanaTitle: String = "Kana"
 
     override val kanaDescription = { urlColor: Color ->

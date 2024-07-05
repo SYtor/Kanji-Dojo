@@ -267,6 +267,7 @@ object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
 
     override val title: String = "選択"
 
+    override val customDeckButton: String = "空のデッキを作る"
     override val kanaTitle: String = "かな"
 
     override val kanaDescription = { urlColor: Color ->

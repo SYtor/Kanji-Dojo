@@ -282,6 +282,7 @@ interface LetterDeckPickerStrings {
 
     val title: String
 
+    val customDeckButton: String
     val kanaTitle: String
     val kanaDescription: (urlColor: Color) -> AnnotatedString
     val hiragana: String

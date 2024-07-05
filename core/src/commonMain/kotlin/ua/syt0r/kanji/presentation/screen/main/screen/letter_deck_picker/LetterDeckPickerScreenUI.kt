@@ -128,13 +128,16 @@ private fun LoadedState(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().wrapContentWidth().widthIn(max = 400.dp)
+        modifier = Modifier.fillMaxSize()
+            .wrapContentWidth()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 10.dp)
     ) {
 
         item {
             ClickableRow(onClick = createEmpty) {
                 Text(
-                    text = "Create Custom",
+                    text = resolveString { letterDeckPicker.customDeckButton },
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -145,7 +148,7 @@ private fun LoadedState(
             }
         }
 
-        item { HorizontalDivider(Modifier.padding(horizontal = 20.dp)) }
+        item { HorizontalDivider(Modifier.padding(horizontal = 8.dp)) }
 
         screenState.categories.forEachIndexed { index, category ->
 
@@ -193,7 +196,7 @@ private fun LoadedState(
                         onClick = { position -> description.detectUrlClick(position, onLinkClick) },
                         modifier = Modifier.animateItemPlacement()
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp),
+                            .padding(horizontal = 10.dp),
                         style = MaterialTheme.typography.bodySmall.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -237,7 +240,7 @@ private fun LoadedState(
                     key = category.toListKey() + "divider"
                 ) {
                     HorizontalDivider(
-                        modifier = Modifier.animateItemPlacement().padding(horizontal = 20.dp)
+                        modifier = Modifier.animateItemPlacement().padding(horizontal = 8.dp)
                     )
                 }
             }
@@ -260,11 +263,11 @@ private fun ClickableRow(
 
     Row(
         modifier = modifier
-            .padding(vertical = 4.dp)
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .padding(start = 20.dp, end = 6.dp),
+            .padding(start = 10.dp, end = 6.dp)
+            .padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
