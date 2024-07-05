@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +23,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
@@ -44,7 +45,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -71,8 +72,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
@@ -93,22 +96,14 @@ fun VocabDashboardScreenUI(
 
     val extraListSpacerState = rememberExtraListSpacerState()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = createDeck,
-                modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-            ) {
-                Icon(Icons.Default.Add, null)
-            }
-        }
-    ) { paddingValues ->
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
         AnimatedContent(
             targetState = state.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) { screenState ->
 
             when (screenState) {
@@ -122,6 +117,15 @@ fun VocabDashboardScreenUI(
                 )
             }
 
+        }
+
+        FloatingActionButton(
+            onClick = createDeck,
+            modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(20.dp)
+                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
+        ) {
+            Icon(Icons.Default.Add, null)
         }
 
     }
@@ -161,10 +165,10 @@ private fun ScreenLoadedState(
             .collect()
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalItemSpacing = 8.dp,
         modifier = Modifier.padding(horizontal = 20.dp)
             .fillMaxSize()
             .wrapContentWidth()
@@ -172,10 +176,10 @@ private fun ScreenLoadedState(
             .onGloballyPositioned { extraListSpacerState.updateList(it) }
     ) {
 
-        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.height(4.dp)) }
+        item(span = StaggeredGridItemSpan.FullLine) { Spacer(Modifier.height(4.dp)) }
 
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
+        item(span = StaggeredGridItemSpan.FullLine) {
             Text(
                 text = resolveString { vocabDashboard.userDecksTitle },
                 style = MaterialTheme.typography.headlineSmall,
@@ -194,14 +198,14 @@ private fun ScreenLoadedState(
                 )
             }
         } else {
-            item(span = { GridItemSpan(maxLineSpan) }) {
+            item(span = StaggeredGridItemSpan.FullLine) {
                 Text(resolveString { vocabDashboard.userDecksEmptyMessage })
             }
         }
 
-        item(span = { GridItemSpan(maxLineSpan) }) { Divider(Modifier.fillMaxWidth()) }
+        item(span = StaggeredGridItemSpan.FullLine) { Divider(Modifier.fillMaxWidth()) }
 
-        item(span = { GridItemSpan(maxLineSpan) }) {
+        item(span = StaggeredGridItemSpan.FullLine) {
             Text(
                 text = resolveString { vocabDashboard.defaultDecksTitle },
                 style = MaterialTheme.typography.headlineSmall,
@@ -277,14 +281,13 @@ private fun BottomSheetContent(
         targetValue = if (wordsVisible.value) 0f else 1f
     )
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .heightIn(min = 400.dp),
+    Column(
+        modifier = Modifier.padding(horizontal = 20.dp)
+            .heightIn(min = 400.dp)
     ) {
 
-        item {
+        val collapsibleContainerState = rememberCollapsibleContainerState()
+        CollapsibleContainer(collapsibleContainerState) {
             ScreenBottomSheetHeader(
                 selectionState = currentState,
                 showWords = wordsVisible,
@@ -293,25 +296,33 @@ private fun BottomSheetContent(
             )
         }
 
-        when (val vocabPracticePreviewState = wordsState.value) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+                .nestedScroll(collapsibleContainerState.nestedScrollConnection),
+        ) {
 
-            is VocabPracticePreviewState.Loaded -> {
-                itemsIndexed(vocabPracticePreviewState.words) { index, word ->
-                    VocabItem(
-                        listIndex = index,
-                        word = word,
-                        overlayAlpha = wordsHidingOverlayAlpha,
-                        onClick = { selectedWord = word })
+            when (val vocabPracticePreviewState = wordsState.value) {
+
+                is VocabPracticePreviewState.Loaded -> {
+                    itemsIndexed(vocabPracticePreviewState.words) { index, word ->
+                        VocabItem(
+                            listIndex = index,
+                            word = word,
+                            overlayAlpha = wordsHidingOverlayAlpha,
+                            onClick = { selectedWord = word })
+                    }
                 }
+
+                VocabPracticePreviewState.Loading -> {
+                    item { CircularProgressIndicator(Modifier.size(24.dp)) }
+                }
+
             }
 
-            VocabPracticePreviewState.Loading -> {
-                item { CircularProgressIndicator(Modifier.size(24.dp)) }
-            }
+            item { Spacer(Modifier.height(20.dp)) }
 
         }
-
-        item { Spacer(Modifier.height(20.dp)) }
 
     }
 

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -105,6 +107,14 @@ class ExtraListSpacerState {
 fun ExtraListSpacerState.ExtraSpacer(scope: LazyGridScope, minimalSpacing: Dp = 16.dp) {
     scope.item(
         span = { GridItemSpan(maxLineSpan) }
+    ) {
+        ExtraSpacer(minimalSpacing)
+    }
+}
+
+fun ExtraListSpacerState.ExtraSpacer(scope: LazyStaggeredGridScope, minimalSpacing: Dp = 16.dp) {
+    scope.item(
+        span = StaggeredGridItemSpan.FullLine
     ) {
         ExtraSpacer(minimalSpacing)
     }
