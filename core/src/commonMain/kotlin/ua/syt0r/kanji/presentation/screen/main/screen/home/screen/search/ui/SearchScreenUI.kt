@@ -101,8 +101,6 @@ fun SearchScreenUI(
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
-    val bottomSheetHeight = remember { mutableStateOf(100.dp) }
-
     val inputState = rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue())
     }
@@ -126,7 +124,6 @@ fun SearchScreenUI(
                 RadicalSearch(
                     state = radicalsState,
                     selectedRadicals = selectedRadicalsState,
-                    height = bottomSheetHeight,
                     onCharacterClick = {
                         inputState.value = inputState.value.run {
                             TextFieldValue(
@@ -155,10 +152,8 @@ fun SearchScreenUI(
                             onRadicalsSectionExpanded()
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
-                        .trackItemPosition { bottomSheetHeight.value = it.heightFromScreenBottom }
                 )
             }
 

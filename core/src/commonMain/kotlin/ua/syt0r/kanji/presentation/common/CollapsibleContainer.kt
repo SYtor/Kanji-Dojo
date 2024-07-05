@@ -26,6 +26,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.Velocity
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
 
@@ -48,7 +49,7 @@ fun rememberCollapsibleContainerState(): CollapsibleContainerState {
 
 @Composable
 fun CollapsibleContainer(
-    state: CollapsibleContainerState = rememberCollapsibleContainerState(),
+    state: CollapsibleContainerState,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -92,7 +93,7 @@ fun CollapsibleContainer(
             heightOffsetLimit = placeable.height.toFloat() * -1
             val scrollOffset = scrollBehavior.state.heightOffset
             val height = placeable.height.toFloat() + scrollOffset
-            val layoutHeight = height.roundToInt()
+            val layoutHeight = height.roundToInt().absoluteValue
             layout(constraints.maxWidth, layoutHeight) {
                 placeable.place(0, scrollOffset.toInt())
             }

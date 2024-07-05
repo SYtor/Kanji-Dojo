@@ -1,20 +1,49 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.with
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,7 +62,6 @@ import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
-import java.util.*
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -45,11 +73,11 @@ private val ItemHeight: Dp
         return value.dp
     }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadicalSearch(
     state: State<RadicalSearchState>,
     selectedRadicals: MutableState<Set<String>>,
-    height: State<Dp>,
     onCharacterClick: (String) -> Unit
 ) {
 
@@ -57,12 +85,10 @@ fun RadicalSearch(
     val radicalsSectionDataState = remember { derivedStateOf { state.value.radicalsListItems } }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height.value)
+        modifier = Modifier.fillMaxWidth()
     ) {
 
-        DraggableContainerIndicator()
+        BottomSheetDefaults.DragHandle(Modifier.align(Alignment.CenterHorizontally))
         Header(selectedRadicals)
         LoadingIndicator(loadingState = remember { derivedStateOf { state.value.isLoading } })
 
@@ -169,19 +195,6 @@ fun RadicalSearch(
 
         }
     }
-}
-
-@Composable
-private fun DraggableContainerIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentSize()
-            .padding(vertical = 6.dp)
-            .size(width = 60.dp, height = 4.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.outline)
-    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -317,6 +330,7 @@ private fun CharactersLine(
                                 .wrapContentSize()
                         )
                     }
+
                     is RadicalSearchListItem.Character -> {
                         Text(
                             text = it.character,
@@ -365,6 +379,7 @@ private fun CharactersGrid(
                             .wrapContentSize()
                     )
                 }
+
                 is RadicalSearchListItem.Character -> {
                     val textColor = if (it.isEnabled) {
                         Color.Unspecified
