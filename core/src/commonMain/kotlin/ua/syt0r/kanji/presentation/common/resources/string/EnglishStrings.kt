@@ -553,7 +553,6 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val headerWordsMessage: (count: Int) -> String = {
         "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
-    override val wordsBottomSheetTitle: String = "Expressions"
     override val studyFinishedButton: String = "Review"
     override val nextButton: String = "Good"
     override val repeatButton: String = "Bad"

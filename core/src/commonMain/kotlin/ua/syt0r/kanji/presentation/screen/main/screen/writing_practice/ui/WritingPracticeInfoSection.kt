@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,7 +62,9 @@ import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiReadingsContainer
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
+import ua.syt0r.kanji.presentation.common.ui.kanji.getColoredKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterInputState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.KanaVoiceAutoPlayToggle
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.MultipleStrokeInputContentState
@@ -323,19 +323,11 @@ private fun ColumnScope.KanjiDetails(
         }
     }
 
-    details.on.takeIf { it.isNotEmpty() }?.let {
-        KanjiReadingRow(
-            title = resolveString { onyomi },
-            readings = it
-        )
-    }
-
-    details.kun.takeIf { it.isNotEmpty() }?.let {
-        KanjiReadingRow(
-            title = resolveString { kunyomi },
-            readings = it
-        )
-    }
+    KanjiReadingsContainer(
+        on = details.on,
+        kun = details.kun,
+        modifier = Modifier.fillMaxWidth()
+    )
 
     if (details.variants != null) {
 
@@ -409,8 +401,14 @@ private fun AnimatedKanjiSection(
 
         when (shouldHighlight) {
             true -> RadicalKanji(
-                strokes = strokes,
-                radicals = radicals,
+                strokes = getColoredKanjiStrokes(
+                    strokes = strokes,
+                    radicalToStrokeRangeList = radicals.map {
+                        val radicalStrokeRange =
+                            it.startPosition until (it.startPosition + it.strokesCount)
+                        it.radical to radicalStrokeRange
+                    }
+                ),
                 modifier = Modifier.fillMaxSize()
             )
 
@@ -456,48 +454,6 @@ private fun KanjiMeanings(
         }
 
     }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun KanjiReadingRow(
-    title: String,
-    readings: List<String>
-) {
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        Text(
-            text = title,
-            modifier = Modifier
-        )
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-
-            readings.forEach {
-
-                Text(
-                    text = it,
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    maxLines = 1
-                )
-
-            }
-
-        }
-
-    }
-
 }
 
 @Composable

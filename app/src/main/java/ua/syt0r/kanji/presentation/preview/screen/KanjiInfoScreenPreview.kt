@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.getHiraganaReading
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSectionData
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui.KanjiInfoScreenUI
@@ -64,7 +65,7 @@ private fun KanjiPreview() {
             grade = 1,
             jlptLevel = 5,
             frequency = 1,
-            radicals = PreviewKanji.radicals,
+            radicalsSectionData = KanjiRadicalsSectionData(emptyList(), emptyList()),
             displayRadicals = PreviewKanji.radicals.map { it.radical },
             words = rememberUpdatedState(
                 PaginatableJapaneseWordList(200, PreviewKanji.randomWords(30))

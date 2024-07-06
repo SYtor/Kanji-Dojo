@@ -4,12 +4,15 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalDetails
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSectionData
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
@@ -59,13 +62,17 @@ class KanjiInfoLoadDataUseCase(
         val kunReadings = readings.filter { it.value == ReadingType.KUN }
             .map { it.key }
 
-        val radicals = getRadicals(character)
 
         val classifications = characterClassifier.get(character)
+        val strokes = getStrokes(character)
+        val radicals = getRadicals(character).sortedWith(
+            compareBy<CharacterRadical> { it.startPosition }
+                .thenByDescending { it.strokesCount }
+        )
 
         return ScreenState.Loaded.Kanji(
             character = character,
-            strokes = getStrokes(character),
+            strokes = strokes,
             words = getWords(character),
             meanings = appDataRepository.getMeanings(character),
             on = onReadings,
@@ -77,7 +84,16 @@ class KanjiInfoLoadDataUseCase(
                 ?.let { it as CharacterClassification.JLPT }
                 ?.level,
             frequency = kanjiData?.frequency,
-            radicals = radicals,
+            radicalsSectionData = KanjiRadicalsSectionData(
+                strokes = strokes,
+                radicals = radicals.map {
+                    KanjiRadicalDetails(
+                        value = it.radical,
+                        strokeIndicies = it.startPosition until it.startPosition + it.strokesCount,
+                        meanings = appDataRepository.getMeanings(it.radical)
+                    )
+                }
+            ),
             displayRadicals = radicals.map { it.radical }.distinct()
         )
     }

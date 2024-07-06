@@ -468,7 +468,6 @@ interface WritingPracticeStrings {
     val leftHandedModeMessage: String
 
     val headerWordsMessage: (count: Int) -> String
-    val wordsBottomSheetTitle: String
     val studyFinishedButton: String
     val nextButton: String
     val repeatButton: String

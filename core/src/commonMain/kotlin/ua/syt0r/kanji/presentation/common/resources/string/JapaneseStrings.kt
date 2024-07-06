@@ -510,7 +510,6 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val headerWordsMessage: (count: Int) -> String = {
         "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
-    override val wordsBottomSheetTitle: String = "語句"
     override val studyFinishedButton: String = "復習"
     override val nextButton: String = "正解"
     override val repeatButton: String = "もう一度"

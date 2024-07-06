@@ -20,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
-import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterInputState
@@ -90,6 +88,15 @@ fun WritingPracticeWordsBottomSheet(
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
+    var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
+    wordToAddToVocabDeck?.let {
+        AddWordToDeckDialog(
+            wordId = it.id,
+            wordPreviewReading = it.readings.first().withoutAnnotations(),
+            onDismissRequest = { wordToAddToVocabDeck = null }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,26 +108,8 @@ fun WritingPracticeWordsBottomSheet(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        Text(
-            text = resolveString { writingPractice.wordsBottomSheetTitle },
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.titleLarge
-        )
-
         val currentState = state.value
-
-        val listState = remember(currentState.reviewCount) {
-            LazyListState(0)
-        }
-
-        var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
-        wordToAddToVocabDeck?.let {
-            AddWordToDeckDialog(
-                wordId = it.id,
-                wordPreviewReading = it.readings.first().withoutAnnotations(),
-                onDismissRequest = { wordToAddToVocabDeck = null }
-            )
-        }
+        val listState = remember(currentState.reviewCount) { LazyListState(0) }
 
         LazyColumn(
             modifier = Modifier
