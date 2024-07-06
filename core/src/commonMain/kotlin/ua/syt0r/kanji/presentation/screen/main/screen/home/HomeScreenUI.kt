@@ -1,13 +1,19 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,27 +21,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Handshake
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -92,15 +99,25 @@ fun HomeScreenUI(
 
             }
 
-            Surface { screenTabContent.invoke() }
+            Surface(Modifier.weight(1f)) { screenTabContent.invoke() }
 
         }
 
     } else {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = { Text(text = resolveString { home.screenTitle }) },
+                CenterAlignedTopAppBar(
+                    title = {
+                        Crossfade(
+                            targetState = selectedTabState.value,
+                            modifier = Modifier.width(IntrinsicSize.Max)
+                        ) {
+                            Text(
+                                text = resolveString(it.titleResolver),
+                                modifier = Modifier.fillMaxWidth().wrapContentWidth()
+                            )
+                        }
+                    },
                     actions = {
                         IconButton(onClick = onSponsorButtonClick) {
                             Icon(SponsorIcon, null)
@@ -109,29 +126,76 @@ fun HomeScreenUI(
                 )
             },
             bottomBar = {
-                NavigationBar(tonalElevation = 0.dp) {
-                    availableTabs.forEach { tab ->
-                        NavigationBarItem(
-                            selected = tab == selectedTabState.value,
-                            onClick = { onTabSelected(tab) },
-                            icon = { tab.iconContent() },
-                            label = { Text(text = resolveString(tab.titleResolver)) },
-                            colors = NavigationBarItemDefaults.colors(selectedIconColor = Color.White)
-                        )
+
+                Column(Modifier.shadow(10.dp)) {
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .windowInsetsPadding(NavigationBarDefaults.windowInsets)
+                            .wrapContentWidth(align = Alignment.CenterHorizontally)
+                            .padding(horizontal = 20.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        availableTabs.forEach { tab ->
+                            VerticalTabButton(
+                                tab = tab,
+                                selected = selectedTabState.value == tab,
+                                onClick = { onTabSelected(tab) }
+                            )
+                        }
                     }
                 }
+
             }
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
+                    .consumeWindowInsets(it)
             ) {
                 screenTabContent.invoke()
             }
 
         }
 
+    }
+
+}
+
+@Composable
+private fun RowScope.VerticalTabButton(
+    tab: HomeScreenTab,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val backgroundColor = animateColorAsState(
+        if (selected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
+    )
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .weight(1f)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .wrapContentWidth()
+            .size(48.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .background(backgroundColor.value)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick
+            )
+    ) {
+        tab.iconContent()
     }
 
 }
