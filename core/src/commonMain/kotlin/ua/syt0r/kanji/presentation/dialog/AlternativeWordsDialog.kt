@@ -77,7 +77,7 @@ fun AlternativeWordsDialog(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
 
-                        Text("${index + 1}. ", Modifier.alignByBaseline())
+                        Text("${index + 1}.", Modifier.alignByBaseline())
 
                         /*
                          * Align by baseline has issues when aligning text that starts with inline
@@ -113,7 +113,7 @@ fun AlternativeWordsDialog(
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("${index + 1}.  ", Modifier.alignByBaseline())
+                        Text("${index + 1}. ", Modifier.alignByBaseline())
                         Text(
                             text = text.capitalize(Locale.current)
                         )

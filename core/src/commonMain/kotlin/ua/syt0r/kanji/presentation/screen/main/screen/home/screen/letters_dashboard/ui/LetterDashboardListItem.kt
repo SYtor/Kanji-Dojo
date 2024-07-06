@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -133,7 +134,7 @@ fun LetterDashboardListItem(
                 modifier = Modifier
                     .fillMaxHeight()
                     .clickable(onClick = onItemClick)
-                    .padding(horizontal = 20.dp)
+                    .aspectRatio(1f)
                     .wrapContentSize()
             ) {
                 Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)

@@ -16,8 +16,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -125,11 +128,22 @@ private fun ReminderDialog(
         onDismissRequest = onDismissRequest
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier
+                .height(IntrinsicSize.Max)
+                .padding(
+                    top = 20.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 10.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            Text(strings.title, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = strings.title,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 10.dp),
+            )
 
             var notificationEnabled by remember {
                 mutableStateOf(configuration.enabled)
@@ -157,13 +171,12 @@ private fun ReminderDialog(
                             MaterialTheme.colorScheme.error,
                             MaterialTheme.shapes.medium
                         )
-                        .padding(horizontal = 20.dp)
-                        .padding(vertical = 4.dp)
+                        .padding(start = 20.dp, end = 10.dp)
+                        .padding(vertical = 10.dp)
                 ) {
                     Text(
                         text = strings.noPermissionLabel,
                         modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onError
                     )
                     TextButton(
@@ -189,9 +202,17 @@ private fun ReminderDialog(
             }
 
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .weight(1f),
             ) {
-                Text(strings.enabledLabel, Modifier.weight(1f))
+
+                Text(
+                    text = strings.enabledLabel,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
 
                 Switch(
                     checked = notificationEnabled,
@@ -200,9 +221,15 @@ private fun ReminderDialog(
                 )
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .weight(1f)
+            ) {
                 Text(
                     text = strings.timeLabel,
+                    fontWeight = FontWeight.Medium,
                     modifier = Modifier.weight(1f)
                 )
                 BasicTextField(
@@ -234,8 +261,10 @@ private fun ReminderDialog(
             }
 
             Row(
-                modifier = Modifier.align(Alignment.End),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .padding(horizontal = 10.dp)
             ) {
                 TextButton(onClick = onDismissRequest) {
                     Text(strings.cancelButton)

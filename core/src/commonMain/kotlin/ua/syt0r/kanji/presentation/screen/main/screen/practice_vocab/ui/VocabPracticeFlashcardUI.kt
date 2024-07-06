@@ -83,24 +83,6 @@ fun VocabPracticeFlashcardUI(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            val detailsAlpha = if (reviewState.showAnswer.value) 1f else 0f
-
-            TextButton(
-                onClick = { onWordClick(reviewState.word) },
-                enabled = detailsAlpha != 0f,
-                modifier = Modifier.align(Alignment.End).graphicsLayer { alpha = detailsAlpha },
-                colors = ButtonDefaults.neutralTextButtonColors()
-            ) {
-                Text(
-                    text = resolveString { vocabPractice.detailsButton }
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ReadMore,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
-
             if (reviewState.showMeaningInFront) {
 
                 meaningUI()
@@ -119,6 +101,25 @@ fun VocabPracticeFlashcardUI(
                     Spacer(Modifier.height(8.dp))
                     meaningUI()
                 }
+            }
+
+            val detailsAlpha = if (reviewState.showAnswer.value) 1f else 0f
+
+            TextButton(
+                onClick = { onWordClick(reviewState.word) },
+                enabled = detailsAlpha != 0f,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+                    .graphicsLayer { alpha = detailsAlpha },
+                colors = ButtonDefaults.neutralTextButtonColors()
+            ) {
+                Text(
+                    text = resolveString { vocabPractice.detailsButton }
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ReadMore,
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
             }
 
         }

@@ -31,12 +31,14 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -134,7 +136,7 @@ fun HomeScreenUI(
                             .background(MaterialTheme.colorScheme.surface)
                             .windowInsetsPadding(NavigationBarDefaults.windowInsets)
                             .wrapContentWidth(align = Alignment.CenterHorizontally)
-                            .padding(horizontal = 20.dp, vertical = 6.dp),
+                            .padding(horizontal = 20.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         availableTabs.forEach { tab ->
