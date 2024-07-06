@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
@@ -51,6 +52,8 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.ui.AutoSizeText
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreenContract.ScreenState
 import kotlin.math.ceil
 
@@ -85,15 +88,21 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
     val statsData = screenState.stats
     val strings = resolveString { stats }
 
+    val orientation = LocalOrientation.current
+
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalItemSpacing = 12.dp,
         modifier = Modifier.fillMaxSize()
             .wrapContentWidth()
-            .padding(horizontal = 20.dp)
             .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
     ) {
+
+        if (orientation == Orientation.Landscape) {
+            item(span = StaggeredGridItemSpan.FullLine) { Spacer(Modifier.height(20.dp)) }
+        }
 
         item(span = StaggeredGridItemSpan.FullLine) {
             Header(text = strings.todayTitle)
@@ -120,7 +129,8 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             ) {
                 Text(
                     text = strings.monthTitle,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
@@ -142,25 +152,25 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
             Header(text = strings.yearTitle)
         }
 
-        item(span = StaggeredGridItemSpan.FullLine) {
-            YearCalendarUninterrupted(
-                year = statsData.today.year,
-                reviewDates = statsData.yearlyPractices
-            )
-        }
-
         val yearTotalDays = LocalDate(statsData.today.year + 1, 1, 1)
             .minus(1, DateTimeUnit.DAY)
             .dayOfYear
 
         item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                text = strings.yearDaysPracticedLabel(
-                    statsData.yearlyPractices.size,
-                    yearTotalDays
-                ),
-                modifier = Modifier.padding(vertical = 10.dp)
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                YearCalendarUninterrupted(
+                    year = statsData.today.year,
+                    reviewDates = statsData.yearlyPractices
+                )
+                Text(
+                    text = strings.yearDaysPracticedLabel(
+                        statsData.yearlyPractices.size,
+                        yearTotalDays
+                    )
+                )
+            }
         }
 
         item(span = StaggeredGridItemSpan.FullLine) {
@@ -198,8 +208,8 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 private fun Header(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(vertical = 8.dp)
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold
     )
 }
 

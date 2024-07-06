@@ -81,6 +81,8 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 
@@ -165,19 +167,22 @@ private fun ScreenLoadedState(
             .collect()
     }
 
+    val orientation = LocalOrientation.current
+
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalItemSpacing = 8.dp,
-        modifier = Modifier.padding(horizontal = 20.dp)
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
             .wrapContentWidth()
             .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
             .onGloballyPositioned { extraListSpacerState.updateList(it) }
     ) {
 
-        item(span = StaggeredGridItemSpan.FullLine) { Spacer(Modifier.height(4.dp)) }
-
+        if (orientation == Orientation.Landscape) {
+            item(span = StaggeredGridItemSpan.FullLine) { Spacer(Modifier.height(20.dp)) }
+        }
 
         item(span = StaggeredGridItemSpan.FullLine) {
             Text(

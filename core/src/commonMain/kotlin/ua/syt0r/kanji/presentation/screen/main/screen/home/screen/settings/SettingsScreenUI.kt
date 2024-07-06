@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -37,7 +40,9 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.core.user_data.preferences.SupportedTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 
 @Composable
@@ -49,11 +54,18 @@ fun SettingsContent(
         modifier = Modifier
             .fillMaxSize()
             .wrapContentWidth()
-            .widthIn(max = 400.dp)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp)
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp)
     ) {
+
+        val orientation = LocalOrientation.current
+        if (orientation == Orientation.Landscape) {
+            Spacer(Modifier.height(20.dp))
+        }
+
         content()
+
     }
 
 }
@@ -71,18 +83,19 @@ fun SettingsSwitchRow(
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onToggled)
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 20.dp)
+            .widthIn(min = 30.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).padding(vertical = 10.dp)
         ) {
             Text(text = title)
-            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
         }
 
@@ -103,14 +116,14 @@ fun SettingsThemeToggle() {
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .fillMaxWidth()
-            .padding(vertical = 10.dp)
-            .padding(start = 20.dp, end = 10.dp),
+            .padding(start = 20.dp, end = 10.dp)
+            .widthIn(min = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Text(
             text = resolveString { settings.themeTitle },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).padding(vertical = 8.dp)
         )
 
         var isExpanded by remember { mutableStateOf(false) }
@@ -182,7 +195,9 @@ private fun SettingsTextButton(text: String, onClick: () -> Unit) {
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .heightIn(min = 30.dp)
+            .wrapContentHeight(),
     )
 }
 

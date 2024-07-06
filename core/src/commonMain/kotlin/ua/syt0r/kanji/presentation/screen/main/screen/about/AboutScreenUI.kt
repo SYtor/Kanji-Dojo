@@ -63,7 +63,7 @@ fun AboutScreenUI(
                 .verticalScroll(rememberScrollState())
                 .wrapContentWidth()
                 .widthIn(max = 400.dp)
-                .padding(20.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
@@ -123,7 +123,7 @@ private fun AboutTextRow(
             .clip(MaterialTheme.shapes.large)
             .clickable(onClick = onClick)
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
     ) {
         Text(
             text = title,

@@ -222,7 +222,7 @@ object EnglishAddWordToDeckDialogStrings : AddWordToDeckDialogStrings {
 
 object EnglishSettingsStrings : SettingsStrings {
     override val analyticsTitle: String = "Analytics"
-    override val analyticsMessage: String = "Allow sending anonymous data to improve experience"
+    override val analyticsMessage: String = "Allow sending anonymous app usage data"
     override val themeTitle: String = "Theme"
     override val themeSystem: String = "System"
     override val themeLight: String = "Light"

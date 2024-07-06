@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
@@ -82,13 +83,15 @@ fun SettingsReminderNotification(
                 onClick = { shouldShowReminderDialog = true }
             )
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
+            .padding(horizontal = 20.dp)
+            .widthIn(min = 30.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 10.dp)
         ) {
             val strings = resolveString { settings }
             Text(text = strings.reminderTitle)
@@ -212,7 +215,8 @@ private fun ReminderDialog(
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(80.dp)
+                    modifier = Modifier
+                        .width(80.dp)
                         .background(
                             MaterialTheme.colorScheme.surfaceVariant,
                             MaterialTheme.shapes.medium
