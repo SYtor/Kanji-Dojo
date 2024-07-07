@@ -36,9 +36,7 @@ fun VocabDashboardScreen(
             mainNavigationState.navigate(MainDestination.DeckEdit(configuration))
         },
         navigateToPractice = {
-            mainNavigationState.navigate(
-                MainDestination.VocabPractice(wordIds = it.expressionIds)
-            )
+            mainNavigationState.navigate(it)
         }
     )
 

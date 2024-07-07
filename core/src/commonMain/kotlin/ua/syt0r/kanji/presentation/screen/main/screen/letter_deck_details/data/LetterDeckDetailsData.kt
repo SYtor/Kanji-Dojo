@@ -5,7 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
-import ua.syt0r.kanji.core.srs.CharacterProgressStatus
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract
 
 class MutableLetterDeckDetailsLoadedState(
@@ -121,8 +121,8 @@ enum class CharacterReviewState {
     Done
 }
 
-fun CharacterProgressStatus.toReviewState(): CharacterReviewState = when (this) {
-    CharacterProgressStatus.New -> CharacterReviewState.New
-    CharacterProgressStatus.Done -> CharacterReviewState.Done
-    CharacterProgressStatus.Review -> CharacterReviewState.Due
+fun SrsItemStatus.toReviewState(): CharacterReviewState = when (this) {
+    SrsItemStatus.New -> CharacterReviewState.New
+    SrsItemStatus.Done -> CharacterReviewState.Done
+    SrsItemStatus.Review -> CharacterReviewState.Due
 }

@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.srs.use_case
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import ua.syt0r.kanji.core.srs.CharacterProgressStatus
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.srs.CharacterSrsData
 import ua.syt0r.kanji.core.srs.CharacterStudyProgressCache
 import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
@@ -34,9 +34,9 @@ class DefaultGetLetterSrsStatusUseCase(
             ?.toLocalDateTime(TimeZone.currentSystemDefault())
             ?.date
         val status = when {
-            expectedReviewDate == null -> CharacterProgressStatus.New
-            expectedReviewDate > date -> CharacterProgressStatus.Done
-            else -> CharacterProgressStatus.Review
+            expectedReviewDate == null -> SrsItemStatus.New
+            expectedReviewDate > date -> SrsItemStatus.Done
+            else -> SrsItemStatus.Review
         }
         return CharacterSrsData(letter, status, expectedReviewDate, studyProgress)
     }

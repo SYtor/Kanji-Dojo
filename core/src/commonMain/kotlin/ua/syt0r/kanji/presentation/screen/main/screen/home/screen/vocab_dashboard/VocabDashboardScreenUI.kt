@@ -55,6 +55,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomSheet
 
@@ -65,7 +66,7 @@ fun VocabDashboardScreenUI(
     select: (DashboardVocabDeck) -> Unit,
     createDeck: () -> Unit,
     onEditClick: (DashboardVocabDeck) -> Unit,
-    navigateToPractice: (DashboardVocabDeck) -> Unit
+    navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     val extraListSpacerState = rememberExtraListSpacerState()
@@ -113,7 +114,7 @@ private fun ScreenLoadedState(
     extraListSpacerState: ExtraListSpacerState,
     select: (DashboardVocabDeck) -> Unit,
     onEditClick: (DashboardVocabDeck) -> Unit,
-    navigateToPractice: (DashboardVocabDeck) -> Unit
+    navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     val sheetState = rememberModalBottomSheetState()

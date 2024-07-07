@@ -66,6 +66,7 @@ import ua.syt0r.kanji.presentation.common.theme.customBlue
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDeckSelectionState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticePreviewState
@@ -75,7 +76,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabP
 fun VocabDashboardBottomSheet(
     state: State<VocabDeckSelectionState>,
     onEditClick: (DashboardVocabDeck) -> Unit,
-    navigateToPractice: (DashboardVocabDeck) -> Unit
+    navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     val currentState = state.value
@@ -111,7 +112,7 @@ fun VocabDashboardBottomSheet(
                 selectionState = currentState,
                 showWords = wordsVisible,
                 onEditClick = onEditClick,
-                onPracticeClick = { navigateToPractice(currentState.deck) }
+                startPractice = { navigateToPractice(MainDestination.VocabPractice(it)) }
             )
         }
 
@@ -153,13 +154,18 @@ private fun ScreenBottomSheetHeader(
     selectionState: VocabDeckSelectionState.DeckSelected,
     showWords: MutableState<Boolean>,
     onEditClick: (DashboardVocabDeck) -> Unit,
-    onPracticeClick: () -> Unit
+    startPractice: (words: List<Long>) -> Unit
 ) {
 
     var shouldShowSrsDialog by remember { mutableStateOf(false) }
     if (shouldShowSrsDialog) {
         VocabSrsDialog(
-            onDismissRequest = { shouldShowSrsDialog = false }
+            onDismissRequest = { shouldShowSrsDialog = false },
+            initial = selectionState.displayPracticeType.value,
+            onSelected = {
+                selectionState.displayPracticeType.value = it
+                shouldShowSrsDialog = false
+            }
         )
     }
 
@@ -234,29 +240,33 @@ private fun ScreenBottomSheetHeader(
                 style = MaterialTheme.typography.labelLarge
             )
 
+            val displaySrsProgress = selectionState.deck.srsProgress.getValue(
+                key = selectionState.displayPracticeType.value
+            )
+
             SrsButton(
                 color = MaterialTheme.colorScheme.outline,
                 label = "All",
-                count = 10,
-                onClick = onPracticeClick
+                words = displaySrsProgress.all,
+                onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.success,
                 label = "Done",
-                count = 10,
-                onClick = onPracticeClick
+                words = displaySrsProgress.done,
+                onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.outdated,
                 label = "Due",
-                count = 10,
-                onClick = onPracticeClick
+                words = displaySrsProgress.due,
+                onClick = startPractice
             )
             SrsButton(
                 color = customBlue,
                 label = "New",
-                count = 10,
-                onClick = onPracticeClick
+                words = displaySrsProgress.new,
+                onClick = startPractice
             )
 
         }
@@ -268,8 +278,8 @@ private fun ScreenBottomSheetHeader(
 private fun RowScope.SrsButton(
     color: Color,
     label: String,
-    count: Int,
-    onClick: () -> Unit
+    words: List<Long>,
+    onClick: (List<Long>) -> Unit
 ) {
 
     Row(
@@ -278,7 +288,10 @@ private fun RowScope.SrsButton(
         modifier = Modifier.alignByBaseline()
             .fillMaxHeight()
             .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick)
+            .clickable(
+                enabled = words.isNotEmpty(),
+                onClick = { onClick(words) }
+            )
             .padding(vertical = 4.dp, horizontal = 8.dp)
     ) {
 
@@ -291,7 +304,7 @@ private fun RowScope.SrsButton(
         )
 
         Text(
-            text = "$label: $count",
+            text = "$label: ${words.size}",
             fontWeight = FontWeight.Light,
             modifier = Modifier.alignByBaseline()
         )
@@ -327,14 +340,17 @@ private fun VocabItem(
 
 @Composable
 private fun VocabSrsDialog(
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    initial: VocabPracticeType,
+    onSelected: (VocabPracticeType) -> Unit
 ) {
+
+    val selected = remember { mutableStateOf(initial) }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = { Text("SRS Practice Type") },
         content = {
-            val selected = remember { mutableStateOf(VocabPracticeType.Flashcard) }
             Text(
                 text = "Select practice type used to display review statuses",
                 modifier = Modifier.padding(horizontal = 20.dp),
@@ -352,7 +368,7 @@ private fun VocabSrsDialog(
             TextButton(onClick = onDismissRequest) {
                 Text("Cancel")
             }
-            TextButton(onClick = onDismissRequest) {
+            TextButton(onClick = { onSelected(selected.value) }) {
                 Text("Apply")
             }
         },

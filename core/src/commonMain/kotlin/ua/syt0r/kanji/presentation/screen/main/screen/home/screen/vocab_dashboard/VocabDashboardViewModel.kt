@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDeckWordsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 class VocabDashboardViewModel(
     private val viewModelScope: CoroutineScope,
@@ -24,6 +26,7 @@ class VocabDashboardViewModel(
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
     private val invalidationRequests = Channel<Unit>()
+    private val displayPracticeType = mutableStateOf(VocabPracticeType.Flashcard)
     private val deckSelectionState = mutableStateOf<VocabDeckSelectionState>(
         VocabDeckSelectionState.NothingSelected
     )
@@ -35,6 +38,12 @@ class VocabDashboardViewModel(
         MutableStateFlow(LifecycleState.Hidden)
 
     init {
+        snapshotFlow { displayPracticeType.value }
+            .onEach {
+                // todo update repo
+            }
+            .launchIn(viewModelScope)
+
         subscribeOnDashboardVocabDecksUseCase(lifecycleState)
             .onEach { data ->
                 _state.value = when (data) {
@@ -45,6 +54,7 @@ class VocabDashboardViewModel(
 
                     is RefreshableData.Loaded -> {
                         val decks = data.value
+                        // todo update displayPracticeType
                         ScreenState.Loaded(
                             userDecks = decks.userDecks,
                             defaultDecks = decks.defaultDecks,
@@ -66,7 +76,11 @@ class VocabDashboardViewModel(
             value = VocabPracticePreviewState.Loading
         )
 
-        deckSelectionState.value = VocabDeckSelectionState.DeckSelected(deck, wordsState)
+        deckSelectionState.value = VocabDeckSelectionState.DeckSelected(
+            deck = deck,
+            displayPracticeType = displayPracticeType,
+            words = wordsState
+        )
 
         viewModelScope.launch {
             wordsState.value = VocabPracticePreviewState.Loaded(

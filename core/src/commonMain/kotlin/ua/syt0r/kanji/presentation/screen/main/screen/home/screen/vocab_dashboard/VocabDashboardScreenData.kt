@@ -1,13 +1,23 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
+import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 data class DashboardVocabDeck(
     val titleResolver: StringResolveScope<String>,
     val expressionIds: List<Long>,
+    val srsProgress: Map<VocabPracticeType, VocabDeckSrsProgress>,
     val id: Long? = null
+)
+
+data class VocabDeckSrsProgress(
+    val all: List<Long>,
+    val done: List<Long>,
+    val due: List<Long>,
+    val new: List<Long>
 )
 
 sealed interface VocabDeckSelectionState {
@@ -16,6 +26,7 @@ sealed interface VocabDeckSelectionState {
 
     data class DeckSelected(
         val deck: DashboardVocabDeck,
+        val displayPracticeType: MutableState<VocabPracticeType>,
         val words: StateFlow<VocabPracticePreviewState>
     ) : VocabDeckSelectionState
 
@@ -26,9 +37,13 @@ sealed interface VocabPracticePreviewState {
     data class Loaded(val words: List<JapaneseWord>) : VocabPracticePreviewState
 }
 
+data class HardcodedVocabDeck(
+    val titleResolver: StringResolveScope<String>,
+    val expressionIds: List<Long>,
+)
 
 val vocabDecks = listOf(
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleTime },
         expressionIds = listOf(
             1315920,
@@ -61,13 +76,13 @@ val vocabDecks = listOf(
             1548010
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleWeek },
         expressionIds = listOf(
             1545770, 1255890, 1194290, 1372190, 1534890, 1243320, 1445590, 1464900, 1507720, 1333520
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCommonVerbs },
         expressionIds = listOf(
             1578850,
@@ -93,7 +108,7 @@ val vocabDecks = listOf(
             1305990
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleColors },
         expressionIds = listOf(
             2013900,
@@ -112,7 +127,7 @@ val vocabDecks = listOf(
             1243560
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleRegularFood },
         expressionIds = listOf(
             1270590,
@@ -141,7 +156,7 @@ val vocabDecks = listOf(
             1370860
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleJapaneseFood },
         expressionIds = listOf(
             1595650,
@@ -167,7 +182,7 @@ val vocabDecks = listOf(
             1590640
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleGrammarTerms },
         expressionIds = listOf(
             1531570,
@@ -181,7 +196,7 @@ val vocabDecks = listOf(
             1297960
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleAnimals },
         expressionIds = listOf(
             1451470,
@@ -203,7 +218,7 @@ val vocabDecks = listOf(
             1319030
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleBody },
         expressionIds = listOf(
             1582310,
@@ -231,7 +246,7 @@ val vocabDecks = listOf(
             1387010
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCommonPlaces },
         expressionIds = listOf(
             1066710,
@@ -270,7 +285,7 @@ val vocabDecks = listOf(
             1183450
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleCities },
         expressionIds = listOf(
             1447690,
@@ -288,7 +303,7 @@ val vocabDecks = listOf(
             2770680
         )
     ),
-    DashboardVocabDeck(
+    HardcodedVocabDeck(
         titleResolver = { vocabDashboard.deckTitleTransport },
         expressionIds = listOf(
             1323080,

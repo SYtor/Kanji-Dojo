@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.srs.use_case
 
 import kotlinx.datetime.LocalDate
-import ua.syt0r.kanji.core.srs.CharacterProgressStatus
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.srs.DeckStudyProgress
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
@@ -57,11 +57,11 @@ class DefaultGetLetterDeckSrsProgressUseCase(
         date: LocalDate,
     ): DeckStudyProgress {
         val charactersSrsData = characters.map { getLetterSrsStatusUseCase(it, practiceType, date) }
-        val new = charactersSrsData.filter { it.status == CharacterProgressStatus.New }
+        val new = charactersSrsData.filter { it.status == SrsItemStatus.New }
             .map { it.character }
-        val due = charactersSrsData.filter { it.status == CharacterProgressStatus.Review }
+        val due = charactersSrsData.filter { it.status == SrsItemStatus.Review }
             .map { it.character }
-        val done = charactersSrsData.filter { it.status == CharacterProgressStatus.Done }
+        val done = charactersSrsData.filter { it.status == SrsItemStatus.Done }
             .map { it.character }
 
         return DeckStudyProgress(
