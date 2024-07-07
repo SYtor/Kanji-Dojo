@@ -67,13 +67,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.D
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.DeckDetailsLayoutDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsLayoutDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsBottomSheet
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsGroupsUI
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsItemsUI
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsToolbar
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.PracticePreviewScreenFilterOptionDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.PracticePreviewScreenSortDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsFilterDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsSortDialog
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -96,7 +96,7 @@ fun LetterDeckDetailsScreenUI(
     var shouldShowVisibilityDialog by remember { mutableStateOf(false) }
     if (shouldShowVisibilityDialog) {
         val configuration = (state.value as ScreenState.Loaded).visibleDataState.value.configuration
-        DeckDetailsLayoutDialog(
+        LetterDeckDetailsLayoutDialog(
             layout = configuration.layout,
             kanaGroups = configuration.kanaGroups,
             onDismissRequest = { shouldShowVisibilityDialog = false },
@@ -369,7 +369,7 @@ fun LetterDeckDetailsConfigurationRow(
 
     var showFilterOptionDialog by remember { mutableStateOf(false) }
     if (showFilterOptionDialog) {
-        PracticePreviewScreenFilterOptionDialog(
+        LetterDeckDetailsFilterDialog(
             filter = configuration.filterConfiguration,
             onDismissRequest = { showFilterOptionDialog = false },
             onApplyConfiguration = {
@@ -381,7 +381,7 @@ fun LetterDeckDetailsConfigurationRow(
 
     var showSortDialog by remember { mutableStateOf(false) }
     if (showSortDialog) {
-        PracticePreviewScreenSortDialog(
+        LetterDeckDetailsSortDialog(
             sortOption = configuration.sortOption,
             isDesc = configuration.isDescending,
             onDismissRequest = { showSortDialog = false },
@@ -479,7 +479,7 @@ fun LetterDeckDetailsCharacterBox(
         modifier = modifier.size(60.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(1.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
+            .border(2.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .wrapContentSize()
     )

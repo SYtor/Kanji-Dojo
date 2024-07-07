@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -32,8 +33,9 @@ fun MultiplatformDialog(
     title: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
     buttons: @Composable RowScope.() -> Unit,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
-    scrollableContent: Boolean = true
+    contentVerticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
+    scrollableContent: Boolean = true,
+    paddedContent: Boolean = true
 ) {
 
     MultiplatformDialog(
@@ -41,30 +43,35 @@ fun MultiplatformDialog(
     ) {
 
         Column(
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .let { if (scrollableContent) it.verticalScroll(rememberScrollState()) else it }
-                .padding(
-                    top = 20.dp,
-                    start = 20.dp,
-                    end = 20.dp,
-                    bottom = 10.dp
-                )
+                .padding(top = 20.dp, bottom = 10.dp)
         ) {
 
-            CompositionLocalProvider(
-                LocalTextStyle provides MaterialTheme.typography.titleLarge
+            Box(
+                modifier = Modifier.padding(horizontal = 20.dp)
             ) {
-                title()
+                CompositionLocalProvider(
+                    LocalTextStyle provides MaterialTheme.typography.titleLarge
+                ) {
+                    title()
+                }
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            content()
+            Column(
+                modifier = Modifier.padding(horizontal = if (paddedContent) 20.dp else 0.dp),
+                verticalArrangement = contentVerticalArrangement
+            ) {
+                content()
+            }
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.padding(horizontal = 20.dp)
+                    .align(Alignment.End)
             ) { buttons() }
 
         }

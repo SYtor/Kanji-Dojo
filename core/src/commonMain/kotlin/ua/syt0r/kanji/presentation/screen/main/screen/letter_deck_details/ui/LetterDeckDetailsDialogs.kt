@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -12,16 +13,16 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,28 +39,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.customBlue
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsLayout
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.SortOption
 
 
 private data class FilterCheckboxRowData(
     val valueState: MutableState<Boolean>,
     val titleResolver: StringResolveScope<String>,
-    val imageVector: ImageVector
+    val dotColor: Color
 )
 
 @Composable
-fun PracticePreviewScreenFilterOptionDialog(
+fun LetterDeckDetailsFilterDialog(
     filter: FilterConfiguration,
     onDismissRequest: () -> Unit,
     onApplyConfiguration: (FilterConfiguration) -> Unit
@@ -73,21 +77,21 @@ fun PracticePreviewScreenFilterOptionDialog(
         FilterCheckboxRowData(
             valueState = new,
             titleResolver = { reviewStateNew },
-            imageVector = Icons.Default.LocalLibrary
+            dotColor = customBlue
         ),
         FilterCheckboxRowData(
             valueState = due,
             titleResolver = { reviewStateDue },
-            imageVector = Icons.Default.Repeat
+            dotColor = MaterialTheme.extraColorScheme.outdated
         ),
         FilterCheckboxRowData(
             valueState = done,
             titleResolver = { reviewStateDone },
-            imageVector = Icons.Default.Done
+            dotColor = MaterialTheme.extraColorScheme.success
         )
     )
 
-    PracticePreviewScreenBaseDialog(
+    BaseDialog(
         title = resolveString { letterDeckDetails.filterDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = {
@@ -100,42 +104,56 @@ fun PracticePreviewScreenFilterOptionDialog(
             )
         }
     ) {
-
-        filterRowsData.forEach { (valueState, titleResolver, imageVector) ->
-            val toggle: () -> Unit = { valueState.apply { value = !value } }
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .clip(MaterialTheme.shapes.small)
-                    .clickable(onClick = toggle)
-                    .padding(start = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    imageVector = imageVector,
-                    contentDescription = null
-                )
-
-                Text(
-                    text = resolveString(titleResolver),
-                    modifier = Modifier.weight(1f)
-                )
-
-                Checkbox(
-                    checked = valueState.value,
-                    onCheckedChange = { toggle() }
-                )
-
-            }
-        }
-
+        filterRowsData.forEach { FilterRow(it) }
     }
 
 }
 
 @Composable
-fun PracticePreviewScreenSortDialog(
+private fun FilterRow(data: FilterCheckboxRowData) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .clip(MaterialTheme.shapes.small)
+            .clickable(onClick = { data.valueState.value = !data.valueState.value })
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        Box(
+            modifier = Modifier
+                .alignBy { it.measuredHeight }
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(data.dotColor)
+        )
+
+        Text(
+            text = resolveString(data.titleResolver),
+            modifier = Modifier.weight(1f).alignByBaseline()
+        )
+
+        val extraIconPadding = with(LocalDensity.current) { 5.dp.roundToPx() }
+
+        Icon(
+            imageVector = when (data.valueState.value) {
+                true -> Icons.Default.CheckCircle
+                false -> Icons.Default.RemoveCircle
+            },
+            contentDescription = null,
+            tint = when (data.valueState.value) {
+                true -> MaterialTheme.extraColorScheme.success
+                false -> MaterialTheme.colorScheme.primary
+            },
+            modifier = Modifier
+                .size(24.dp)
+                .alignBy { it.measuredHeight - extraIconPadding }
+        )
+
+    }
+}
+
+@Composable
+fun LetterDeckDetailsSortDialog(
     onDismissRequest: () -> Unit,
     onApplyClick: (sortOption: SortOption, isDescending: Boolean) -> Unit,
     sortOption: SortOption,
@@ -145,7 +163,7 @@ fun PracticePreviewScreenSortDialog(
     var selectedSortOption by rememberSaveable { mutableStateOf(sortOption) }
     var isDescending by rememberSaveable { mutableStateOf(isDesc) }
 
-    PracticePreviewScreenBaseDialog(
+    BaseDialog(
         title = resolveString { letterDeckDetails.sortDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyClick(selectedSortOption, isDescending) }
@@ -208,7 +226,7 @@ fun PracticePreviewScreenSortDialog(
 
 
 @Composable
-fun DeckDetailsLayoutDialog(
+fun LetterDeckDetailsLayoutDialog(
     layout: DeckDetailsLayout,
     kanaGroups: Boolean,
     onDismissRequest: () -> Unit,
@@ -218,7 +236,7 @@ fun DeckDetailsLayoutDialog(
     var selectedLayout by remember { mutableStateOf(layout) }
     var selectedKanaGroups by remember { mutableStateOf(kanaGroups) }
 
-    PracticePreviewScreenBaseDialog(
+    BaseDialog(
         title = resolveString { letterDeckDetails.layoutDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selectedLayout, selectedKanaGroups) }
@@ -272,7 +290,7 @@ fun DeckDetailsLayoutDialog(
 
 
 @Composable
-private fun PracticePreviewScreenBaseDialog(
+private fun BaseDialog(
     title: String,
     onDismissRequest: () -> Unit,
     onApplyClick: () -> Unit,
