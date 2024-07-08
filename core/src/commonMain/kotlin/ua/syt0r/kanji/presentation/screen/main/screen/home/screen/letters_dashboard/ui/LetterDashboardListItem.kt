@@ -62,8 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
-import ua.syt0r.kanji.presentation.common.theme.customBlue
-import ua.syt0r.kanji.presentation.common.theme.customOrange
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardItem
@@ -175,13 +173,13 @@ private fun DeckPendingReviewsCountIndicator(
         if (showStudy) {
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(customBlue, CircleShape)
+                    .background(MaterialTheme.extraColorScheme.new, CircleShape)
             )
         }
         if (showDue) {
             Box(
                 modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(customOrange, CircleShape)
+                    .background(MaterialTheme.extraColorScheme.due, CircleShape)
             )
         }
     }
@@ -240,14 +238,14 @@ private fun ListItemDetails(
                 )
 
                 IndicatorTextRow(
-                    color = customOrange,
+                    color = MaterialTheme.extraColorScheme.due,
                     label = strings.itemReview,
                     characters = studyProgress.review,
                     onClick = onQuickPracticeButtonClick
                 )
 
                 IndicatorTextRow(
-                    color = customBlue,
+                    color = MaterialTheme.extraColorScheme.new,
                     label = strings.itemNew,
                     characters = studyProgress.new,
                     onClick = onQuickPracticeButtonClick
@@ -384,6 +382,8 @@ private fun PieIndicator(
 ) {
 
     val knownColor = MaterialTheme.extraColorScheme.success
+    val newColor = MaterialTheme.extraColorScheme.new
+    val dueColor = MaterialTheme.extraColorScheme.due
 
     Canvas(
         modifier = modifier
@@ -412,8 +412,8 @@ private fun PieIndicator(
 
         val strokeParts = listOf(
             knownColor to known.value,
-            customOrange to review.value,
-            customBlue to new.value,
+            dueColor to review.value,
+            newColor to new.value,
         )
 
         var accumulatedAngle = 0f

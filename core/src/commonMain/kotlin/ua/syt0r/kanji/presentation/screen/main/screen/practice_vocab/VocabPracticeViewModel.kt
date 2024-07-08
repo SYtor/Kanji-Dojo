@@ -138,8 +138,7 @@ class VocabPracticeViewModel(
 
     private fun VocabReviewQueueState.Review.toPracticeReviewState(): VocabPracticeReviewState {
         return VocabPracticeReviewState(
-            currentPositionInQueue = progress.current,
-            totalItemsInQueue = progress.total,
+            progress = progress,
             reviewState = state.asImmutable,
             answers = answers
         )

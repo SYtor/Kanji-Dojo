@@ -13,8 +13,9 @@ import kotlin.time.Duration
 
 
 data class VocabQueueProgress(
-    val current: Int,
-    val total: Int
+    val pending: Int,
+    val repeats: Int,
+    val completed: Int
 )
 
 sealed interface VocabQueueItemDescriptor {

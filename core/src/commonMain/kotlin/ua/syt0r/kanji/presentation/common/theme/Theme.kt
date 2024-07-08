@@ -83,21 +83,24 @@ class ExtraColorsScheme(
     val link: Color,
     val success: Color,
     val pending: Color,
-    val outdated: Color
+    val due: Color,
+    val new: Color
 )
 
 val LightExtraColorScheme = ExtraColorsScheme(
-    lightThemeLinkColor,
-    lightThemeSuccessColor,
-    lightThemePendingColor,
-    lightOutdatedColor
+    link = lightThemeLinkColor,
+    success = lightThemeSuccessColor,
+    pending = lightThemePendingColor,
+    due = lightThemeDueColor,
+    new = lightThemeNewColor
 )
 
 val DarkExtraColorScheme = ExtraColorsScheme(
-    darkThemeLinkColor,
-    darkThemeSuccessColor,
-    darkThemePendingColor,
-    darkOutdatedColor
+    link = darkThemeLinkColor,
+    success = darkThemeSuccessColor,
+    pending = darkThemePendingColor,
+    due = darkThemeDueColor,
+    new = darkThemeNewColor
 )
 
 val LocalExtraColors = compositionLocalOf { LightExtraColorScheme }

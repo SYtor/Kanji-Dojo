@@ -144,27 +144,11 @@ fun PracticeToolbar(
             when (val screenState = state.value) {
                 null, PracticeToolbarState.Loading -> {}
                 is PracticeToolbarState.Review -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentSize(align = Alignment.CenterEnd),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        ToolbarCountItem(
-                            count = screenState.pending,
-                            color = MaterialTheme.extraColorScheme.pending
-                        )
-
-                        ToolbarCountItem(
-                            count = screenState.repeat,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-
-                        ToolbarCountItem(
-                            count = screenState.completed,
-                            color = MaterialTheme.extraColorScheme.success
-                        )
-                    }
+                    PracticeProgressCounter(
+                        pending = screenState.pending,
+                        repeat = screenState.repeat,
+                        completed = screenState.completed
+                    )
                 }
 
                 is PracticeToolbarState.Configuration -> {
@@ -189,18 +173,44 @@ fun PracticeToolbar(
 }
 
 @Composable
+fun PracticeProgressCounter(pending: Int, repeat: Int, completed: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize(align = Alignment.CenterEnd),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ToolbarCountItem(
+            count = pending,
+            color = MaterialTheme.extraColorScheme.pending
+        )
+
+        ToolbarCountItem(
+            count = repeat,
+            color = MaterialTheme.extraColorScheme.due
+        )
+
+        ToolbarCountItem(
+            count = completed,
+            color = MaterialTheme.extraColorScheme.success
+        )
+    }
+}
+
+@Composable
 private fun ToolbarCountItem(count: Int, color: Color) {
     val rippleTheme = remember { CustomRippleTheme(colorProvider = { color }) }
     CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
         TextButton(onClick = {}) {
             Box(
                 modifier = Modifier
+                    .alignBy { it.measuredHeight }
                     .size(8.dp)
                     .clip(CircleShape)
                     .background(color)
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = count.toString(), color = color)
+            Text(text = count.toString(), color = color, modifier = Modifier.alignByBaseline())
         }
     }
 }

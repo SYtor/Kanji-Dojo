@@ -36,8 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.minus
 import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.core.PointF
-import ua.syt0r.kanji.presentation.common.theme.customBlue
-import ua.syt0r.kanji.presentation.common.theme.customOrange
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import kotlin.math.max
 
 
@@ -50,8 +49,8 @@ fun LastWeekStudy(
     Column(modifier) {
         GraphCanvas(learnData, reviewData, Modifier.fillMaxWidth().weight(1f))
         Row(Modifier.fillMaxWidth().wrapContentSize()) {
-            IndicatorTextRow(customBlue, "Learn")
-            IndicatorTextRow(customOrange, "Review")
+            IndicatorTextRow(MaterialTheme.extraColorScheme.new, "Learn")
+            IndicatorTextRow(MaterialTheme.extraColorScheme.due, "Review")
         }
     }
 }
@@ -66,6 +65,8 @@ private fun GraphCanvas(
     val textColor = MaterialTheme.colorScheme.onSurface
     val textStyle = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light)
     val textMeasure = rememberTextMeasurer()
+    val newColor = MaterialTheme.extraColorScheme.new
+    val dueColor = MaterialTheme.extraColorScheme.due
 
     Canvas(
         modifier = modifier
@@ -88,8 +89,8 @@ private fun GraphCanvas(
         var a: SeriesPlacementData? = null
 
         clipRect(left = axisLocation.x, top = size.height - axisLocation.y) {
-            a = drawWeekSeries(learnData, axisLocation, maxValue, customBlue)
-            drawWeekSeries(reviewData, axisLocation, maxValue, customOrange)
+            a = drawWeekSeries(learnData, axisLocation, maxValue, newColor)
+            drawWeekSeries(reviewData, axisLocation, maxValue, dueColor)
         }
 
         val yLabelOffset = Offset(

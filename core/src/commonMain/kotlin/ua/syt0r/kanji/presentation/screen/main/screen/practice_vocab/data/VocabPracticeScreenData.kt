@@ -129,8 +129,7 @@ data class VocabPracticeSrsAnswers(
 )
 
 data class VocabPracticeReviewState(
-    val currentPositionInQueue: Int,
-    val totalItemsInQueue: Int,
+    val progress: VocabQueueProgress,
     val reviewState: VocabReviewState,
     val answers: VocabPracticeSrsAnswers
 )

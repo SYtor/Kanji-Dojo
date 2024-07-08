@@ -1,7 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -67,6 +69,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgressCounter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
@@ -167,25 +170,24 @@ private fun ScreenTopBar(
             }
         },
         actions = {
-            val currentToTotal = remember {
+            val progress = remember {
                 derivedStateOf {
                     when (val practiceState = state.value) {
-                        is ScreenState.Review -> {
-                            practiceState.state.value
-                                .run { currentPositionInQueue to totalItemsInQueue }
-                        }
-
+                        is ScreenState.Review -> practiceState.state.value.progress
                         else -> null
                     }
                 }
             }
 
-            currentToTotal.value?.let { (current, total) ->
-                Text(
-                    text = resolveString { vocabPractice.practiceProgressCounter(current, total) },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+            AnimatedContent(
+                targetState = progress.value,
+                contentKey = { it == null },
+                transitionSpec = {
+                    fadeIn() togetherWith fadeOut() using SizeTransform { _, _ -> snap() }
+                }
+            ) {
+                if (it == null) return@AnimatedContent
+                PracticeProgressCounter(it.pending, it.repeats, it.completed)
             }
         }
     )

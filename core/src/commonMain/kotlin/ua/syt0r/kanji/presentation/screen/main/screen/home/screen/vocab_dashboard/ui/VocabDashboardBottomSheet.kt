@@ -62,7 +62,6 @@ import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.customBlue
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
@@ -257,13 +256,13 @@ private fun ScreenBottomSheetHeader(
                 onClick = startPractice
             )
             SrsButton(
-                color = MaterialTheme.extraColorScheme.outdated,
+                color = MaterialTheme.extraColorScheme.due,
                 label = "Due",
                 words = displaySrsProgress.due,
                 onClick = startPractice
             )
             SrsButton(
-                color = customBlue,
+                color = MaterialTheme.extraColorScheme.new,
                 label = "New",
                 words = displaySrsProgress.new,
                 onClick = startPractice

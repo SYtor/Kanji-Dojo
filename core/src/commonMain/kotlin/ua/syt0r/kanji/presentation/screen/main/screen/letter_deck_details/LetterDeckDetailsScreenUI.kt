@@ -307,7 +307,7 @@ private fun ScreenLoadedState(
 @Composable
 fun CharacterReviewState.toColor(): Color = when (this) {
     CharacterReviewState.Done -> MaterialTheme.extraColorScheme.success
-    CharacterReviewState.Due -> MaterialTheme.extraColorScheme.outdated
+    CharacterReviewState.Due -> MaterialTheme.extraColorScheme.due
     else -> MaterialTheme.colorScheme.surfaceVariant
 }
 

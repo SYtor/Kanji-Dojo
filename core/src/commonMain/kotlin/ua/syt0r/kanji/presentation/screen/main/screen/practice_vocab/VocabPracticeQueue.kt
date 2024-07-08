@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,7 @@ interface VocabPracticeQueue {
 data class VocabPracticeQueueItem(
     val descriptor: VocabQueueItemDescriptor,
     val srsItem: SrsItemData,
+    val repeats: Int,
     val deferredState: Deferred<VocabPracticeItemData>
 )
 
@@ -103,9 +105,11 @@ class DefaultVocabPracticeQueue(
     }
 
     private fun getProgress(): VocabQueueProgress {
-        val total = queue.size + summaryItems.size
-        val current = total - queue.size + 1
-        return VocabQueueProgress(current, total)
+        return VocabQueueProgress(
+            pending = queue.count { it.repeats == 0 },
+            repeats = queue.count { it.repeats > 0 },
+            completed = summaryItems.size
+        )
     }
 
     private suspend fun handleAnswer(srsItem: SrsItemData) {
@@ -151,7 +155,8 @@ class DefaultVocabPracticeQueue(
         return VocabPracticeQueueItem(
             descriptor = this,
             srsItem = fsrsItemRepository.get(toSrsItemKey()),
-            deferredState = coroutineScope.async(start = CoroutineStart.LAZY) {
+            repeats = 0,
+            deferredState = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
                 when (this@toQueueItem) {
                     is VocabQueueItemDescriptor.Flashcard -> {
                         getFlashcardReviewStateUseCase(this@toQueueItem)
@@ -180,11 +185,14 @@ class DefaultVocabPracticeQueue(
             .takeIf { it != -1 }
             ?.let {
                 if (it == 0 && queue.size > 0) min(2, queue.size)
-                else it
+                else min(it, 10)
             }
-            ?: queue.size
+            ?: min(queue.size, 10)
 
-        val updatedQueueItem = queueItem.copy(srsItem = updatedSrsItem)
+        val updatedQueueItem = queueItem.copy(
+            srsItem = updatedSrsItem,
+            repeats = queueItem.repeats + 1
+        )
         queue.add(insertPosition, updatedQueueItem)
     }
 

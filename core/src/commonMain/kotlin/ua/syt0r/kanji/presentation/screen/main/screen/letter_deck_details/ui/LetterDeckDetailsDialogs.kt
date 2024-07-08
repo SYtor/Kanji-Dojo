@@ -48,7 +48,6 @@ import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.customBlue
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsLayout
@@ -77,12 +76,12 @@ fun LetterDeckDetailsFilterDialog(
         FilterCheckboxRowData(
             valueState = new,
             titleResolver = { reviewStateNew },
-            dotColor = customBlue
+            dotColor = MaterialTheme.extraColorScheme.new
         ),
         FilterCheckboxRowData(
             valueState = due,
             titleResolver = { reviewStateDue },
-            dotColor = MaterialTheme.extraColorScheme.outdated
+            dotColor = MaterialTheme.extraColorScheme.due
         ),
         FilterCheckboxRowData(
             valueState = done,
