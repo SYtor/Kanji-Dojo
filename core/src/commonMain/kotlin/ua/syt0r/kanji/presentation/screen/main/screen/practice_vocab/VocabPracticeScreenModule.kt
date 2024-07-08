@@ -3,25 +3,25 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 import org.koin.dsl.module
 import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetPrioritizedWordReadingUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabFlashcardReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeFlashcardDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeQueueDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeSummaryItemUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabReadingReviewStateUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabWritingReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeReadingDataUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.DefaultGetVocabPracticeWritingDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetPrioritizedWordReadingUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabFlashcardReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeFlashcardDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabReadingReviewStateUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabWritingReviewStateUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeReadingDataUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeWritingDataUseCase
 
 val vocabPracticeScreenModule = module {
 
 
     factory<GetPrioritizedWordReadingUseCase> { DefaultGetPrioritizedWordReadingUseCase() }
 
-    factory<GetVocabFlashcardReviewStateUseCase> {
-        DefaultGetVocabFlashcardReviewStateUseCase(
+    factory<GetVocabPracticeFlashcardDataUseCase> {
+        DefaultGetVocabPracticeFlashcardDataUseCase(
             appDataRepository = get(),
             getPrioritizedWordReadingUseCase = get()
         )
@@ -31,15 +31,15 @@ val vocabPracticeScreenModule = module {
 
     factory<GetVocabPracticeSummaryItemUseCase> { DefaultGetVocabPracticeSummaryItemUseCase() }
 
-    factory<GetVocabReadingReviewStateUseCase> {
-        DefaultGetVocabReadingReviewStateUseCase(
+    factory<GetVocabPracticeReadingDataUseCase> {
+        DefaultGetVocabPracticeReadingDataUseCase(
             appDataRepository = get(),
             getPrioritizedWordReadingUseCase = get()
         )
     }
 
-    factory<GetVocabWritingReviewStateUseCase> {
-        DefaultGetVocabWritingReviewStateUseCase(
+    factory<GetVocabPracticeWritingDataUseCase> {
+        DefaultGetVocabPracticeWritingDataUseCase(
             appDataRepository = get(),
             getPrioritizedWordReadingUseCase = get()
         )
@@ -50,6 +50,8 @@ val vocabPracticeScreenModule = module {
         DefaultVocabPracticeQueue(
             coroutineScope = it.component1(),
             timeUtils = get(),
+            fsrsItemRepository = get(),
+            srsScheduler = get(),
             getFlashcardReviewStateUseCase = get(),
             getReadingReviewStateUseCase = get(),
             getWritingReviewStateUseCase = get(),

@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.srs.SrsItemData
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
@@ -98,8 +99,8 @@ class VocabPracticeViewModel(
         }
     }
 
-    override fun next() {
-        viewModelScope.launch { practiceQueue.completeCurrentReview() }
+    override fun next(srsItemData: SrsItemData) {
+        viewModelScope.launch { practiceQueue.completeCurrentReview(srsItemData) }
     }
 
     override fun reportScreenShown() {
@@ -139,7 +140,8 @@ class VocabPracticeViewModel(
         return VocabPracticeReviewState(
             currentPositionInQueue = progress.current,
             totalItemsInQueue = progress.total,
-            reviewState = state.asImmutable
+            reviewState = state.asImmutable,
+            answers = answers
         )
     }
 

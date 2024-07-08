@@ -10,8 +10,11 @@ data class SrsItemKey(
 
 interface SrsItemData {
     val key: SrsItemKey
+    val lastReview: Instant?
     val interval: Duration
 }
+
+enum class SrsItemStatus { New, Done, Review }
 
 interface SrsAnswer
 

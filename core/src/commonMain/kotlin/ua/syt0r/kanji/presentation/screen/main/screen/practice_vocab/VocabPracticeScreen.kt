@@ -26,7 +26,7 @@ fun VocabPracticeScreen(
         onConfigured = { viewModel.configure() },
         onFlashcardAnswerRevealClick = { viewModel.revealFlashcard() },
         onReadingPickerAnswerSelected = { viewModel.submitReadingPickerAnswer(it) },
-        onNext = { viewModel.next() },
+        onNext = { viewModel.next(it) },
         onFeedback = {
             mainNavigationState.navigate(
                 MainDestination.Feedback(

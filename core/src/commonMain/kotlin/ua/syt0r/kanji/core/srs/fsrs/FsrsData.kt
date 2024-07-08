@@ -14,7 +14,14 @@ data class FsrsItemData(
     val status: FsrsCardStatus,
     val lapses: Int,
     val repeats: Int
-) : SrsItemData
+) : SrsItemData {
+
+    override val lastReview: Instant? = when (card) {
+        FsrsCard.New -> null
+        is FsrsCard.Existing -> card.reviewTime
+    }
+
+}
 
 enum class FsrsCardStatus {
     New, Learning, Review, Relearning

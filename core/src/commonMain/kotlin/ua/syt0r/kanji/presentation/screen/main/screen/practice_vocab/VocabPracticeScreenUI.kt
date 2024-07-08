@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.srs.SrsItemData
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -75,6 +76,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabS
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
+import kotlin.time.Duration
 
 @Composable
 fun VocabPracticeScreenUI(
@@ -82,7 +84,7 @@ fun VocabPracticeScreenUI(
     onConfigured: () -> Unit,
     onFlashcardAnswerRevealClick: () -> Unit,
     onReadingPickerAnswerSelected: (String) -> Unit,
-    onNext: () -> Unit,
+    onNext: (SrsItemData) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit
 ) {
@@ -256,7 +258,7 @@ private fun ScreenReview(
     screenState: ScreenState.Review,
     onFlashcardAnswerRevealClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
-    onNextClick: () -> Unit,
+    onNextClick: (SrsItemData) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -271,11 +273,12 @@ private fun ScreenReview(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-
-        when (val currentState = screenState.state.value.reviewState) {
+        val reviewState = screenState.state.value
+        when (val currentState = reviewState.reviewState) {
             is VocabReviewState.Flashcard -> {
                 VocabPracticeFlashcardUI(
                     reviewState = currentState,
+                    answers = reviewState.answers,
                     onRevealAnswerClick = onFlashcardAnswerRevealClick,
                     onNextClick = onNextClick,
                     onWordClick = { alternativeWordsDialogWord = it },
@@ -287,7 +290,7 @@ private fun ScreenReview(
                     reviewState = currentState,
                     onWordClick = { alternativeWordsDialogWord = it },
                     onAnswerSelected = onAnswerSelected,
-                    onNextClick = onNextClick,
+                    onNextClick = { onNextClick(reviewState.answers.good) },
                     onFeedbackClick = onFeedbackClick
                 )
             }
@@ -295,7 +298,7 @@ private fun ScreenReview(
             is VocabReviewState.Writing -> {
                 VocabPracticeWritingUI(
                     reviewState = currentState,
-                    onNextClick = onNextClick,
+                    onNextClick = { onNextClick(reviewState.answers.good) },
                     onWordClick = { alternativeWordsDialogWord = it },
                     onFeedbackClick = onFeedbackClick
                 )
@@ -479,4 +482,26 @@ fun VocabPracticeNextButton(
 
 }
 
+fun srsFormatDuration(duration: Duration): String = when {
+    duration.inWholeDays > 0 -> buildString {
+        append("${duration.inWholeDays}d")
+        appendIfNot0(duration.inWholeHours % 24) { " ${it}h" }
+    }
+
+    duration.inWholeHours > 0 -> buildString {
+        append("${duration.inWholeHours}h")
+        appendIfNot0(duration.inWholeMinutes % 60) { " ${it}m" }
+    }
+
+    duration.inWholeMinutes > 0 -> buildString {
+        append("${duration.inWholeMinutes}m")
+        appendIfNot0(duration.inWholeSeconds % 60) { " ${it}s" }
+    }
+
+    else -> "${duration.inWholeSeconds}s"
+}
+
+private fun StringBuilder.appendIfNot0(number: Long, text: (Long) -> String) {
+    if (number != 0L) append(text(number))
+}
 

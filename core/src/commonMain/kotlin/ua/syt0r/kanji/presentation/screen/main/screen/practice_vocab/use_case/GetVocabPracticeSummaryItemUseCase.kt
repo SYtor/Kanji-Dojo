@@ -1,44 +1,35 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingStatus
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterPracticeResult
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeQueueItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 
 interface GetVocabPracticeSummaryItemUseCase {
-    operator fun invoke(state: MutableVocabReviewState): VocabSummaryItem
+    operator fun invoke(item: VocabPracticeQueueItem): VocabSummaryItem
 }
 
 class DefaultGetVocabPracticeSummaryItemUseCase : GetVocabPracticeSummaryItemUseCase {
 
-    override fun invoke(state: MutableVocabReviewState): VocabSummaryItem {
-        return when (state) {
-            is MutableVocabReviewState.Flashcard -> VocabSummaryItem.Flashcard(
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun invoke(item: VocabPracticeQueueItem): VocabSummaryItem {
+        return when (val state = item.deferredState.getCompleted()) {
+            is VocabPracticeItemData.Flashcard -> VocabSummaryItem.Flashcard(
                 word = state.word,
-                reading = state.summaryReading
+                reading = state.reading
             )
 
-            is MutableVocabReviewState.Reading -> VocabSummaryItem.ReadingPicker(
+            is VocabPracticeItemData.Reading -> VocabSummaryItem.ReadingPicker(
                 word = state.word,
-                reading = state.summaryReading,
+                reading = state.revealedReading,
                 character = state.questionCharacter,
-                isCorrect = state.isCorrectAnswer()!!
+                isCorrect = true // todo
             )
 
-            is MutableVocabReviewState.Writing -> VocabSummaryItem.Writing(
+            is VocabPracticeItemData.Writing -> VocabSummaryItem.Writing(
                 word = state.word,
                 reading = state.summaryReading,
-                results = state.charactersData
-                    .filterIsInstance<VocabCharacterWritingData.WithStrokes>()
-                    .map { writingData ->
-                        VocabCharacterPracticeResult(
-                            character = writingData.character,
-                            isCorrect = writingData.writerState.writingStatus
-                                .let { it.value as CharacterWritingStatus.Completed }
-                                .isCorrect
-                        )
-                    }
+                results = emptyList() // todo
             )
         }
     }

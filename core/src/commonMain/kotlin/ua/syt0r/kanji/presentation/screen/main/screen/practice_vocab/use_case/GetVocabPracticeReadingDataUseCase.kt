@@ -2,23 +2,23 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
 
-interface GetVocabReadingReviewStateUseCase {
+interface GetVocabPracticeReadingDataUseCase {
     suspend operator fun invoke(
         descriptor: VocabQueueItemDescriptor.ReadingPicker
-    ): MutableVocabReviewState.Reading
+    ): VocabPracticeItemData.Reading
 }
 
-class DefaultGetVocabReadingReviewStateUseCase(
+class DefaultGetVocabPracticeReadingDataUseCase(
     private val appDataRepository: AppDataRepository,
     private val getPrioritizedWordReadingUseCase: GetPrioritizedWordReadingUseCase
-) : GetVocabReadingReviewStateUseCase {
+) : GetVocabPracticeReadingDataUseCase {
 
     override suspend fun invoke(
         descriptor: VocabQueueItemDescriptor.ReadingPicker
-    ): MutableVocabReviewState.Reading {
+    ): VocabPracticeItemData.Reading {
         val word = appDataRepository.getWord(descriptor.wordId)
         val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)
 
@@ -43,7 +43,7 @@ class DefaultGetVocabReadingReviewStateUseCase(
             .take(ANSWERS_COUNT)
             .shuffled()
 
-        return MutableVocabReviewState.Reading(
+        return VocabPracticeItemData.Reading(
             word = word,
             questionCharacter = questionCharacter,
             revealedReading = reading,

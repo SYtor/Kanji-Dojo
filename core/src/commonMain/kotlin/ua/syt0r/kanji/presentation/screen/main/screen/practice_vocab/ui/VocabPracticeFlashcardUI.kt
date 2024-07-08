@@ -1,6 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,18 +26,22 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsItemData
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.srsFormatDuration
 
 @Composable
 fun VocabPracticeFlashcardUI(
     reviewState: VocabReviewState.Flashcard,
+    answers: VocabPracticeSrsAnswers,
     onRevealAnswerClick: () -> Unit,
-    onNextClick: () -> Unit,
+    onNextClick: (SrsItemData) -> Unit,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
@@ -43,23 +50,34 @@ fun VocabPracticeFlashcardUI(
             .wrapContentWidth()
             .widthIn(max = 400.dp),
         bottomOverlayContent = {
-            Button(
-                onClick = {
-                    when (reviewState.showAnswer.value) {
-                        true -> onNextClick()
-                        false -> onRevealAnswerClick()
+            when (reviewState.showAnswer.value) {
+                false -> {
+                    Button(
+                        onClick = onRevealAnswerClick,
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        colors = ButtonDefaults.neutralButtonColors()
+                    ) {
+                        Text("Show answer")
                     }
-                },
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                colors = ButtonDefaults.neutralButtonColors()
-            ) {
-                Text(
-                    text = when (reviewState.showAnswer.value) {
-                        true -> "Next"
-                        false -> "Show answer"
+                }
+
+                true -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        SrsButton(
+                            text = "Bad - ${srsFormatDuration(answers.bad.interval)}",
+                            onClick = { onNextClick(answers.bad) }
+                        )
+                        SrsButton(
+                            text = "Good - ${srsFormatDuration(answers.good.interval)}",
+                            onClick = { onNextClick(answers.good) }
+                        )
                     }
-                )
+                }
             }
+
         }
     ) {
 
@@ -124,6 +142,22 @@ fun VocabPracticeFlashcardUI(
 
         }
 
+    }
+
+}
+
+@Composable
+private fun RowScope.SrsButton(
+    text: String,
+    onClick: () -> Unit
+) {
+
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.neutralTextButtonColors(),
+        modifier = Modifier.weight(1f)
+    ) {
+        Text(text)
     }
 
 }

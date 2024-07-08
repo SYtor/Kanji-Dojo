@@ -1,6 +1,10 @@
 package ua.syt0r.kanji.core.srs
 
 import org.koin.core.module.Module
+import ua.syt0r.kanji.core.srs.fsrs.DefaultFsrsItemRepository
+import ua.syt0r.kanji.core.srs.fsrs.Fsrs45Algorithm
+import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
+import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultNotifySrsPreferencesChangedUseCase
@@ -41,5 +45,9 @@ fun Module.applySrsDefinitions() {
     factory<GetLetterSrsStatusUseCase> {
         DefaultGetLetterSrsStatusUseCase(characterStudyProgressCache = get())
     }
+
+    single<FsrsItemRepository> { DefaultFsrsItemRepository() }
+
+    factory<FsrsScheduler> { FsrsScheduler(Fsrs45Algorithm()) }
 
 }

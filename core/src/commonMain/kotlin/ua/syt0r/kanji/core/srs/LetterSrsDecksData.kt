@@ -10,8 +10,6 @@ data class LetterSrsDecksData(
     val dailyProgress: DailyProgress
 )
 
-enum class SrsItemStatus { New, Done, Review }
-
 data class CharacterSrsData(
     val character: String,
     val status: SrsItemStatus,

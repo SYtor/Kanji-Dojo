@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsItemData
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -122,10 +123,16 @@ data class SelectedReadingAnswer(
     val isCorrect = selected == correct
 }
 
+data class VocabPracticeSrsAnswers(
+    val good: SrsItemData,
+    val bad: SrsItemData
+)
+
 data class VocabPracticeReviewState(
     val currentPositionInQueue: Int,
     val totalItemsInQueue: Int,
-    val reviewState: VocabReviewState
+    val reviewState: VocabReviewState,
+    val answers: VocabPracticeSrsAnswers
 )
 
 sealed interface VocabSummaryItem {
