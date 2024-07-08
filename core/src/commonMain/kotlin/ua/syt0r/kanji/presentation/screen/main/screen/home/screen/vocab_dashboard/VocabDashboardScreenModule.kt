@@ -14,12 +14,21 @@ val vocabDashboardScreenModule = module {
             viewModelScope = it.component1(),
             subscribeOnDashboardVocabDecksUseCase = get(),
             getVocabDeckWordsUseCase = get(),
+            preferencesRepository = get(),
             analyticsManager = get()
         )
     }
 
-    factory<SubscribeOnDashboardVocabDecksUseCase> { DefaultSubscribeOnDashboardVocabDecksUseCase(get()) }
+    factory<SubscribeOnDashboardVocabDecksUseCase> {
+        DefaultSubscribeOnDashboardVocabDecksUseCase(
+            repository = get(),
+            srsItemRepository = get(),
+            timeUtils = get()
+        )
+    }
 
-    factory<GetVocabDeckWordsUseCase> { DefaultGetVocabDeckWordsUseCase(get()) }
+    factory<GetVocabDeckWordsUseCase> {
+        DefaultGetVocabDeckWordsUseCase(appDataRepository = get())
+    }
 
 }

@@ -30,7 +30,7 @@ class VocabPracticeViewModel(
     private val analyticsManager: AnalyticsManager
 ) : VocabPracticeScreenContract.ViewModel {
 
-    private lateinit var expressions: List<Long>
+    private lateinit var words: List<Long>
 
     private lateinit var _reviewState: MutableState<VocabReviewQueueState.Review>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -39,11 +39,12 @@ class VocabPracticeViewModel(
         get() = _state
 
     override fun initialize(words: List<Long>) {
-        if (::expressions.isInitialized) return
-        this.expressions = words
+        if (this::words.isInitialized) return
+        this.words = words
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
+                words = words,
                 practiceType = mutableStateOf(
                     VocabPracticeType.from(userPreferencesRepository.vocabPracticeType.get())
                 ),
@@ -77,7 +78,7 @@ class VocabPracticeViewModel(
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
             }
 
-            val data = getQueueDataUseCase(expressions, configurationState)
+            val data = getQueueDataUseCase(words, configurationState)
             practiceQueue.initialize(expressions = data)
 
             practiceQueue.state

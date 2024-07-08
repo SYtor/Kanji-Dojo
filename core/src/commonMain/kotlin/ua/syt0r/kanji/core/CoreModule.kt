@@ -55,7 +55,8 @@ val coreModule = module {
 
     single<VocabPracticeRepository> {
         SqlDelightVocabPracticeRepository(
-            databaseManager = get()
+            databaseManager = get(),
+            srsItemRepository = get()
         )
     }
 

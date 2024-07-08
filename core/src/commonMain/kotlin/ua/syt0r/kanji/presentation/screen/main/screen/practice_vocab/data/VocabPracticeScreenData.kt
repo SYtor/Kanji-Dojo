@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemData
+import ua.syt0r.kanji.core.srs.SrsItemKey
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -36,6 +37,19 @@ enum class VocabPracticeType(
     }
 
 }
+
+fun VocabPracticeType.toSrsItemKey(wordId: Long): SrsItemKey {
+    return SrsItemKey(
+        itemKey = wordId.toString(),
+        practiceType = vocabPracticeTypeToSrsPracticeTypeMapping.getValue(this)
+    )
+}
+
+private val vocabPracticeTypeToSrsPracticeTypeMapping = mapOf(
+    VocabPracticeType.Flashcard to "flashcard",
+    VocabPracticeType.ReadingPicker to "read_pick",
+    VocabPracticeType.Writing to "writing",
+)
 
 enum class VocabPracticeReadingPriority(
     override val titleResolver: StringResolveScope<String>,

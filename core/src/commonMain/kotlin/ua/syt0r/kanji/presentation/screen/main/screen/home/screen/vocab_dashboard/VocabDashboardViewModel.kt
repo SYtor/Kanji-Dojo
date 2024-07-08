@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
@@ -22,6 +23,7 @@ class VocabDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     subscribeOnDashboardVocabDecksUseCase: SubscribeOnDashboardVocabDecksUseCase,
     private val getVocabDeckWordsUseCase: GetVocabDeckWordsUseCase,
+    private val preferencesRepository: PracticeUserPreferencesRepository,
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
@@ -39,9 +41,7 @@ class VocabDashboardViewModel(
 
     init {
         snapshotFlow { displayPracticeType.value }
-            .onEach {
-                // todo update repo
-            }
+            .onEach { preferencesRepository.vocabPracticeType.set(it.preferencesType) }
             .launchIn(viewModelScope)
 
         subscribeOnDashboardVocabDecksUseCase(lifecycleState)
@@ -54,7 +54,9 @@ class VocabDashboardViewModel(
 
                     is RefreshableData.Loaded -> {
                         val decks = data.value
-                        // todo update displayPracticeType
+                        displayPracticeType.value = VocabPracticeType.from(
+                            preferencesRepository.vocabPracticeType.get()
+                        )
                         ScreenState.Loaded(
                             userDecks = decks.userDecks,
                             defaultDecks = decks.defaultDecks,

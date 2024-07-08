@@ -6,12 +6,15 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
+import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDeckSrsProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.vocabDecks
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toSrsItemKey
 
 interface SubscribeOnDashboardVocabDecksUseCase {
     operator fun invoke(
@@ -25,7 +28,9 @@ data class VocabDecks(
 )
 
 class DefaultSubscribeOnDashboardVocabDecksUseCase(
-    private val repository: VocabPracticeRepository
+    private val repository: VocabPracticeRepository,
+    private val srsItemRepository: FsrsItemRepository,
+    private val timeUtils: TimeUtils
 ) : SubscribeOnDashboardVocabDecksUseCase {
 
     override fun invoke(
@@ -44,10 +49,19 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         val userDecks = repository.getDecks()
 
         val deckWords = userDecks.flatMap { repository.getDeckWords(it.id) }.distinct()
-        val wordProgresses: Map<Long, WordSrsProgress> = deckWords.associateWith {
+        val instant = timeUtils.now()
+
+        val wordProgresses: Map<Long, WordSrsProgress> = deckWords.associateWith { wordId ->
             WordSrsProgress(
-                statuses = VocabPracticeType.values()
-                    .associateWith { SrsItemStatus.New }
+                statuses = VocabPracticeType.values().associateWith { practiceType ->
+                    val srsItemData = srsItemRepository.get(practiceType.toSrsItemKey(wordId))
+
+                    when {
+                        srsItemData.lastReview == null -> SrsItemStatus.New
+                        srsItemData.lastReview + srsItemData.interval > instant -> SrsItemStatus.Done
+                        else -> SrsItemStatus.Review
+                    }
+                }
             )
         }
 

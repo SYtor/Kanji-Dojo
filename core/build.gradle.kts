@@ -42,6 +42,8 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                // todo remove, need to updated kotlin later https://youtrack.jetbrains.com/issue/KT-62368
+                implementation(kotlin("test-junit5"))
             }
         }
         val androidMain by getting {

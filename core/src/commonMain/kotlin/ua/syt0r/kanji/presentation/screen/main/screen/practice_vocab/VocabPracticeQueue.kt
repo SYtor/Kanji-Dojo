@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.debounceFirst
 import ua.syt0r.kanji.core.srs.SrsItemData
-import ua.syt0r.kanji.core.srs.SrsItemKey
 import ua.syt0r.kanji.core.srs.fsrs.FsrsAnswer
 import ua.syt0r.kanji.core.srs.fsrs.FsrsItemData
 import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
@@ -22,11 +21,11 @@ import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toSrsItemKey
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeFlashcardDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeReadingDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
@@ -48,19 +47,6 @@ data class VocabPracticeQueueItem(
     val repeats: Int,
     val deferredState: Deferred<VocabPracticeItemData>
 )
-
-val vocabPracticeTypeToSrsPracticeTypeMapping = mapOf(
-    VocabPracticeType.Flashcard to "flashcard",
-    VocabPracticeType.ReadingPicker to "read_pick",
-    VocabPracticeType.Writing to "writing",
-)
-
-fun VocabQueueItemDescriptor.toSrsItemKey(): SrsItemKey {
-    return SrsItemKey(
-        itemKey = wordId.toString(),
-        practiceType = vocabPracticeTypeToSrsPracticeTypeMapping.getValue(practiceType)
-    )
-}
 
 class DefaultVocabPracticeQueue(
     private val coroutineScope: CoroutineScope,
@@ -154,7 +140,7 @@ class DefaultVocabPracticeQueue(
     private suspend fun VocabQueueItemDescriptor.toQueueItem(): VocabPracticeQueueItem {
         return VocabPracticeQueueItem(
             descriptor = this,
-            srsItem = fsrsItemRepository.get(toSrsItemKey()),
+            srsItem = fsrsItemRepository.get(practiceType.toSrsItemKey(wordId)),
             repeats = 0,
             deferredState = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
                 when (this@toQueueItem) {
