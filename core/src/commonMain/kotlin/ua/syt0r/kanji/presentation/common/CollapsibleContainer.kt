@@ -10,6 +10,8 @@ import androidx.compose.animation.core.animateTo
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -65,10 +67,18 @@ fun CollapsibleContainer(
         }
     }
 
-    val appBarDragModifier = if (!scrollBehavior.isPinned) {
-        Modifier.draggable(
+    val appBarDragModifier = Modifier
+        .scrollable(
+            state = rememberScrollableState { delta ->
+                scrollBehavior.state
+                scrollBehavior.state.heightOffset += delta
+                delta
+            },
+            orientation = Orientation.Vertical
+        )
+        .draggable(
             orientation = Orientation.Vertical,
-            state = rememberDraggableState { delta -> scrollBehavior.state.heightOffset += delta },
+            state = rememberDraggableState { },
             onDragStopped = { velocity ->
                 settleAppBar(
                     scrollBehavior.state,
@@ -78,9 +88,6 @@ fun CollapsibleContainer(
                 )
             }
         )
-    } else {
-        Modifier
-    }
 
     Layout(
         content = content,
