@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.srs.SrsItemData
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
@@ -44,7 +45,10 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
-                words = words,
+                itemsSelectorState = PracticeConfigurationItemsSelectorState(
+                    items = words,
+                    shuffle = true
+                ),
                 practiceType = mutableStateOf(
                     VocabPracticeType.from(userPreferencesRepository.vocabPracticeType.get())
                 ),
@@ -78,7 +82,11 @@ class VocabPracticeViewModel(
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
             }
 
-            val data = getQueueDataUseCase(words, configurationState)
+            val data = getQueueDataUseCase(
+                words = configurationState.itemsSelectorState.result,
+                state = configurationState
+            )
+
             practiceQueue.initialize(expressions = data)
 
             practiceQueue.state

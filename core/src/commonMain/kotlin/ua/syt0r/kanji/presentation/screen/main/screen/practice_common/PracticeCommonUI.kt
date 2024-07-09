@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,6 +59,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
@@ -68,6 +70,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -82,6 +85,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
+import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import kotlin.time.Duration
@@ -249,54 +253,63 @@ fun PracticeConfigurationContainer(
 
 }
 
-class PracticeConfigurationCharactersState(
-    val characters: List<String>,
+class PracticeConfigurationItemsSelectorState<T>(
+    val items: List<T>,
     shuffle: Boolean
 ) {
 
-    val selectedCountState = mutableStateOf(characters.size)
+    val selectedCountState = mutableStateOf(items.size)
 
-    val selectedShuffle = mutableStateOf(shuffle)
-    val sortedCharacters = mutableStateOf(if (shuffle) characters.shuffled() else characters)
+    val shuffleEnabled = mutableStateOf(shuffle)
+    val sortedList = mutableStateOf(if (shuffle) items.shuffled() else items)
 
-    val result: List<String>
-        get() = sortedCharacters.value.take(selectedCountState.value)
+    val result: List<T>
+        get() = sortedList.value.take(selectedCountState.value)
 
 }
 
 @Composable
-fun rememberPracticeConfigurationCharactersSelectionState(
-    characters: List<String>,
+fun <T> rememberPracticeConfigurationItemsSelectorState(
+    characters: List<T>,
     shuffle: Boolean
-): PracticeConfigurationCharactersState {
-    return remember { PracticeConfigurationCharactersState(characters, shuffle) }
+): PracticeConfigurationItemsSelectorState<T> {
+    return remember { PracticeConfigurationItemsSelectorState<T>(characters, shuffle) }
 }
 
+
 @Composable
-fun PracticeConfigurationCharactersSelection(
-    state: PracticeConfigurationCharactersState
+fun <T> PracticeConfigurationItemsSelector(
+    state: PracticeConfigurationItemsSelectorState<T>
 ) {
 
-    var shuffle by state.selectedShuffle
-    var resultCharacters by state.sortedCharacters
+    var shuffle by state.shuffleEnabled
+    var resultList by state.sortedList
+
     var selectedCharactersCount by state.selectedCountState
-
-    var previewExpanded by remember { mutableStateOf(false) }
+    var selectedCharactersCountText by rememberSaveable {
+        mutableStateOf(selectedCharactersCount.toString())
+    }
 
     Row(
         modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = resolveString {
-                commonPractice.configurationCharactersCount(
-                    selectedCharactersCount,
-                    state.characters.size
-                )
-            },
+            text = resolveString { "Selected: " },
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f).wrapContentSize()
+            modifier = Modifier.alignByBaseline()
         )
+
+        FilledTextField(
+            value = selectedCharactersCountText,
+            onValueChange = {
+                selectedCharactersCountText = it
+                it.toIntOrNull()?.also { selectedCharactersCount = it }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.widthIn(min = 80.dp).alignByBaseline()
+        )
+
     }
 
     Row(
@@ -307,16 +320,20 @@ fun PracticeConfigurationCharactersSelection(
     ) {
 
         Text(text = 1.toString())
+        val range = 1f..state.items.size.toFloat()
 
         Slider(
-            value = selectedCharactersCount.toFloat(),
-            onValueChange = { selectedCharactersCount = it.toInt() },
-            steps = state.characters.size,
-            valueRange = 1f..state.characters.size.toFloat(),
+            value = selectedCharactersCount.toFloat().coerceIn(range),
+            onValueChange = {
+                selectedCharactersCount = it.toInt()
+                selectedCharactersCountText = it.toInt().toString()
+            },
+            steps = state.items.size,
+            valueRange = range,
             modifier = Modifier.weight(1f)
         )
 
-        Text(text = state.characters.size.toString())
+        Text(text = state.items.size.toString())
 
     }
 
@@ -326,10 +343,20 @@ fun PracticeConfigurationCharactersSelection(
         checked = shuffle,
         onChange = {
             shuffle = it
-            resultCharacters = if (it) state.characters.shuffled()
-            else state.characters
+            resultList = if (it) state.items.shuffled()
+            else state.items
         }
     )
+
+}
+
+@Composable
+fun ColumnScope.PracticeConfigurationCharactersPreview(
+    characters: List<String>,
+    selectedCharactersCount: State<Int>
+) {
+
+    var previewExpanded by remember { mutableStateOf(false) }
 
     Row(
         Modifier.clip(MaterialTheme.shapes.medium)
@@ -355,10 +382,10 @@ fun PracticeConfigurationCharactersSelection(
     if (previewExpanded) {
         Text(
             text = buildAnnotatedString {
-                append(resultCharacters.joinToString(""))
+                append(characters.joinToString(""))
                 addStyle(
                     style = SpanStyle(color = MaterialTheme.colorScheme.surfaceVariant),
-                    start = selectedCharactersCount,
+                    start = selectedCharactersCount.value,
                     end = length
                 )
             },
@@ -366,7 +393,6 @@ fun PracticeConfigurationCharactersSelection(
             style = MaterialTheme.typography.titleLarge
         )
     }
-
 }
 
 

@@ -62,11 +62,13 @@ import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
+import ua.syt0r.kanji.presentation.common.theme.snappyCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgressCounter
@@ -116,7 +118,7 @@ fun VocabPracticeScreenUI(
 
         AnimatedContent(
             targetState = state.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            transitionSpec = snappyCrossfadeTransitionSpec(),
             modifier = Modifier.fillMaxSize().padding(paddingValues)
         ) {
 
@@ -201,19 +203,16 @@ private fun ScreenConfiguration(
 
     PracticeConfigurationContainer(onClick = onConfigured) {
 
+        PracticeConfigurationItemsSelector(
+            state = screenState.itemsSelectorState
+        )
+
         PracticeConfigurationEnumSelector(
             title = resolveString { vocabPractice.practiceTypeConfigurationTitle },
             subtitle = resolveString { vocabPractice.practiceTypeConfigurationMessage },
             values = VocabPracticeType.values(),
             selected = screenState.practiceType.value,
             onSelected = { screenState.practiceType.value = it }
-        )
-
-        PracticeConfigurationOption(
-            title = resolveString { commonPractice.shuffleConfigurationTitle },
-            subtitle = resolveString { commonPractice.shuffleConfigurationMessage },
-            checked = screenState.shuffle.value,
-            onChange = { screenState.shuffle.value = it }
         )
 
         var readingPriority by screenState.readingPriority

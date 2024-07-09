@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,8 @@ fun FilledTextField(
     trailingContent: (@Composable () -> Unit)? = null,
     hintContent: (@Composable () -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     FilledTextFieldDecorations(
@@ -51,6 +55,8 @@ fun FilledTextField(
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { isInputFocused.value = it.isFocused },

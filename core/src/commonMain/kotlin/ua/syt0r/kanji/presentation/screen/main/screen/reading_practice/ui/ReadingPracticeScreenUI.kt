@@ -73,8 +73,9 @@ import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersPreview
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
@@ -82,7 +83,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSa
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeSelectedOption
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingScreenConfiguration
@@ -166,11 +167,10 @@ fun ReadingPracticeScreenUI(
                 }
 
                 is ScreenState.Configuration -> {
-                    val characterSelectionState =
-                        rememberPracticeConfigurationCharactersSelectionState(
-                            characters = screenState.characters,
-                            shuffle = true
-                        )
+                    val characterSelectionState = rememberPracticeConfigurationItemsSelectorState(
+                        characters = screenState.characters,
+                        shuffle = true
+                    )
                     var kanaRomaji by remember { mutableStateOf(screenState.kanaRomaji) }
                     PracticeConfigurationContainer(
                         onClick = {
@@ -182,7 +182,15 @@ fun ReadingPracticeScreenUI(
                             )
                         }
                     ) {
-                        PracticeConfigurationCharactersSelection(characterSelectionState)
+                        PracticeConfigurationItemsSelector(
+                            state = characterSelectionState
+                        )
+
+                        PracticeConfigurationCharactersPreview(
+                            characters = characterSelectionState.sortedList.value,
+                            selectedCharactersCount = characterSelectionState.selectedCountState
+                        )
+
                         PracticeConfigurationOption(
                             title = resolveString { readingPractice.kanaRomajiTitle },
                             subtitle = resolveString { readingPractice.kanaRomajiMessage },

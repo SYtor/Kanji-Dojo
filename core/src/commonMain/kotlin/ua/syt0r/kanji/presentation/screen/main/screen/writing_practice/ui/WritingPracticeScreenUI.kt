@@ -52,9 +52,10 @@ import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersSelection
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersPreview
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedState
@@ -62,7 +63,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSa
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationCharactersSelectionState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.rememberPracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.ReviewUserAction
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeInputMode
@@ -229,7 +230,7 @@ private fun ConfiguringState(
 
     val strings = resolveString { writingPractice }
 
-    val characterSelectionState = rememberPracticeConfigurationCharactersSelectionState(
+    val characterSelectionState = rememberPracticeConfigurationItemsSelectorState(
         characters = state.characters,
         shuffle = true
     )
@@ -258,7 +259,7 @@ private fun ConfiguringState(
         onClick = {
             val configuration = WritingScreenConfiguration(
                 characters = characterSelectionState.result,
-                shuffle = characterSelectionState.selectedShuffle.value,
+                shuffle = characterSelectionState.shuffleEnabled.value,
                 hintMode = selectedHintMode.value,
                 inputMode = selectedInputMode.value,
                 useRomajiForKanaWords = kanaRomaji,
@@ -270,8 +271,13 @@ private fun ConfiguringState(
         }
     ) {
 
-        PracticeConfigurationCharactersSelection(
+        PracticeConfigurationItemsSelector(
             state = characterSelectionState
+        )
+
+        PracticeConfigurationCharactersPreview(
+            characters = characterSelectionState.sortedList.value,
+            selectedCharactersCount = characterSelectionState.selectedCountState
         )
 
         PracticeConfigurationEnumSelector(
