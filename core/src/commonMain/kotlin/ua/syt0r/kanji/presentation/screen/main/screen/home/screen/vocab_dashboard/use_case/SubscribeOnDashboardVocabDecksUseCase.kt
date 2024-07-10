@@ -5,8 +5,8 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
+import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsItemStatus
-import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.LifecycleState
@@ -23,13 +23,13 @@ interface SubscribeOnDashboardVocabDecksUseCase {
 }
 
 data class VocabDecks(
-    val userDecks: List<DashboardVocabDeck>,
-    val defaultDecks: List<DashboardVocabDeck>
+    val userDecks: List<DashboardVocabDeck.User>,
+    val defaultDecks: List<DashboardVocabDeck.Default>
 )
 
 class DefaultSubscribeOnDashboardVocabDecksUseCase(
     private val repository: VocabPracticeRepository,
-    private val srsItemRepository: FsrsItemRepository,
+    private val srsItemRepository: SrsItemRepository,
     private val timeUtils: TimeUtils
 ) : SubscribeOnDashboardVocabDecksUseCase {
 
@@ -47,8 +47,10 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         Logger.logMethod()
 
         val userDecks = repository.getDecks()
+        val userDeckWords = userDecks.flatMap { repository.getDeckWords(it.id) }.toSet()
+        val defaultDeckWords = vocabDecks.flatMap { it.expressionIds }.toSet()
+        val deckWords = userDeckWords + defaultDeckWords
 
-        val deckWords = userDecks.flatMap { repository.getDeckWords(it.id) }.distinct()
         val instant = timeUtils.now()
 
         val wordProgresses: Map<Long, WordSrsProgress> = deckWords.associateWith { wordId ->
@@ -57,7 +59,7 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
                     val srsItemData = srsItemRepository.get(practiceType.toSrsItemKey(wordId))
 
                     when {
-                        srsItemData.lastReview == null -> SrsItemStatus.New
+                        srsItemData?.lastReview == null -> SrsItemStatus.New
                         srsItemData.lastReview + srsItemData.interval > instant -> SrsItemStatus.Done
                         else -> SrsItemStatus.Review
                     }
@@ -68,18 +70,19 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         return VocabDecks(
             userDecks = userDecks.map {
                 val words = repository.getDeckWords(it.id)
-                DashboardVocabDeck(
+                DashboardVocabDeck.User(
                     titleResolver = { it.title },
-                    expressionIds = words,
+                    words = words,
                     srsProgress = getVocabDeckSrsProgress(words, wordProgresses),
                     id = it.id
                 )
             },
-            defaultDecks = vocabDecks.map {
-                DashboardVocabDeck(
+            defaultDecks = vocabDecks.mapIndexed { index, it ->
+                DashboardVocabDeck.Default(
                     titleResolver = it.titleResolver,
-                    expressionIds = it.expressionIds,
-                    srsProgress = getVocabDeckSrsProgress(it.expressionIds, wordProgresses)
+                    words = it.expressionIds,
+                    srsProgress = getVocabDeckSrsProgress(it.expressionIds, wordProgresses),
+                    index = index
                 )
             }
         )

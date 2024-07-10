@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -73,19 +72,20 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabP
 
 @Composable
 fun VocabDashboardBottomSheet(
-    state: State<VocabDeckSelectionState>,
+    state: State<VocabDeckSelectionState?>,
     onEditClick: (DashboardVocabDeck) -> Unit,
     navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     val currentState = state.value
-
-    if (currentState == VocabDeckSelectionState.NothingSelected) {
-        CircularProgressIndicator(Modifier.fillMaxWidth().wrapContentWidth())
+    if (currentState !is VocabDeckSelectionState.DeckSelected) {
+        CircularProgressIndicator(
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(min = 200.dp, max = 400.dp)
+                .wrapContentSize()
+        )
         return
     }
-
-    currentState as VocabDeckSelectionState.DeckSelected
 
     var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
     selectedWord?.also {
@@ -189,9 +189,9 @@ private fun ScreenBottomSheetHeader(
                 onClick = { onEditClick(selectionState.deck) }
             ) {
                 Icon(
-                    imageVector = when (selectionState.deck.id) {
-                        null -> Icons.AutoMirrored.Filled.PlaylistAdd
-                        else -> Icons.Default.Edit
+                    imageVector = when (selectionState.deck is DashboardVocabDeck.Default) {
+                        true -> Icons.AutoMirrored.Filled.PlaylistAdd
+                        false -> Icons.Default.Edit
                     },
                     contentDescription = null
                 )

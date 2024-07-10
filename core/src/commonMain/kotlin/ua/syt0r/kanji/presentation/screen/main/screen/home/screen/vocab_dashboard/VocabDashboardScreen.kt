@@ -30,9 +30,10 @@ fun VocabDashboardScreen(
         },
         onEditClick = { deck ->
             val title = deck.titleResolver(getStrings())
-            val configuration = deck.id
-                ?.let { VocabDeck.Edit(title, it) }
-                ?: VocabDeck.CreateDerived(title, deck.expressionIds)
+            val configuration = when (deck) {
+                is DashboardVocabDeck.Default -> VocabDeck.CreateDerived(title, deck.words)
+                is DashboardVocabDeck.User -> VocabDeck.Edit(title, deck.id)
+            }
             mainNavigationState.navigate(MainDestination.DeckEdit(configuration))
         },
         navigateToPractice = {

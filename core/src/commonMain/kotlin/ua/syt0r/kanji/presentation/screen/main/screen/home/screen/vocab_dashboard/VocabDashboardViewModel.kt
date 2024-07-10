@@ -17,6 +17,7 @@ import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDeckWordsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.VocabDecks
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 class VocabDashboardViewModel(
@@ -30,7 +31,7 @@ class VocabDashboardViewModel(
     private val invalidationRequests = Channel<Unit>()
     private val displayPracticeType = mutableStateOf(VocabPracticeType.Flashcard)
     private val deckSelectionState = mutableStateOf<VocabDeckSelectionState>(
-        VocabDeckSelectionState.NothingSelected
+        VocabDeckSelectionState.Loading
     )
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -44,11 +45,16 @@ class VocabDashboardViewModel(
             .onEach { preferencesRepository.vocabPracticeType.set(it.preferencesType) }
             .launchIn(viewModelScope)
 
+        var lastSelectedDeck: DashboardVocabDeck? = null
+
         subscribeOnDashboardVocabDecksUseCase(lifecycleState)
             .onEach { data ->
                 _state.value = when (data) {
                     is RefreshableData.Loading -> {
-                        deckSelectionState.value = VocabDeckSelectionState.NothingSelected
+                        lastSelectedDeck = deckSelectionState.value
+                            .let { it as? VocabDeckSelectionState.DeckSelected }
+                            ?.deck
+                        deckSelectionState.value = VocabDeckSelectionState.Loading
                         ScreenState.Loading
                     }
 
@@ -57,6 +63,9 @@ class VocabDashboardViewModel(
                         displayPracticeType.value = VocabPracticeType.from(
                             preferencesRepository.vocabPracticeType.get()
                         )
+
+                        updateBottomSheetState(decks, lastSelectedDeck)
+
                         ScreenState.Loaded(
                             userDecks = decks.userDecks,
                             defaultDecks = decks.defaultDecks,
@@ -86,7 +95,7 @@ class VocabDashboardViewModel(
 
         viewModelScope.launch {
             wordsState.value = VocabPracticePreviewState.Loaded(
-                words = getVocabDeckWordsUseCase(deck.expressionIds)
+                words = getVocabDeckWordsUseCase(deck.words)
             )
         }
     }
@@ -94,4 +103,21 @@ class VocabDashboardViewModel(
     override fun reportScreenShown() {
         analyticsManager.setScreen("vocab_dashboard")
     }
+
+    private fun updateBottomSheetState(decks: VocabDecks, lastSelectedDeck: DashboardVocabDeck?) {
+        when (lastSelectedDeck) {
+            null -> {}
+            is DashboardVocabDeck.Default -> {
+                val updatedDeck = decks.defaultDecks.first { it.index == lastSelectedDeck.index }
+                select(updatedDeck)
+            }
+
+            is DashboardVocabDeck.User -> {
+                val updatedDeck = decks.userDecks.find { it.id == lastSelectedDeck.id }
+                if (updatedDeck != null) select(updatedDeck)
+                else deckSelectionState.value = VocabDeckSelectionState.Hidden
+            }
+        }
+    }
+
 }

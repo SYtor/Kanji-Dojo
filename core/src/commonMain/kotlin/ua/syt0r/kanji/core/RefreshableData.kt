@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
@@ -32,4 +33,7 @@ fun <T> refreshableDataFlow(
             send(RefreshableData.Loaded(valueProvider()))
         }
 
+}.distinctUntilChanged { old, new ->
+    if (old::class == new::class && old::class == RefreshableData.Loading::class) true
+    else old == new
 }

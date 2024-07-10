@@ -34,8 +34,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -46,7 +48,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
@@ -60,6 +62,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomSheet
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabDashboardScreenUI(
     state: State<ScreenState>,
@@ -70,6 +73,36 @@ fun VocabDashboardScreenUI(
 ) {
 
     val extraListSpacerState = rememberExtraListSpacerState()
+
+    val deckSelectionState = remember {
+        derivedStateOf { state.value.let { it as? ScreenState.Loaded }?.deckSelectionState?.value }
+    }
+
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            tonalElevation = 0.dp
+        ) {
+            VocabDashboardBottomSheet(
+                state = deckSelectionState,
+                onEditClick = { onEditClick(it) },
+                navigateToPractice = navigateToPractice
+            )
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { deckSelectionState.value }
+            .filterIsInstance<VocabDeckSelectionState.Hidden>()
+            .onEach {
+                sheetState.hide()
+                showBottomSheet = false
+            }
+            .collect()
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -86,9 +119,10 @@ fun VocabDashboardScreenUI(
                 is ScreenState.Loaded -> ScreenLoadedState(
                     screenState = screenState,
                     extraListSpacerState = extraListSpacerState,
-                    select = select,
-                    onEditClick = onEditClick,
-                    navigateToPractice = navigateToPractice
+                    select = {
+                        select(it)
+                        showBottomSheet = true
+                    }
                 )
             }
 
@@ -107,38 +141,12 @@ fun VocabDashboardScreenUI(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScreenLoadedState(
     screenState: ScreenState.Loaded,
     extraListSpacerState: ExtraListSpacerState,
-    select: (DashboardVocabDeck) -> Unit,
-    onEditClick: (DashboardVocabDeck) -> Unit,
-    navigateToPractice: (MainDestination.VocabPractice) -> Unit
+    select: (DashboardVocabDeck) -> Unit
 ) {
-
-    val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-    if (showBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = sheetState,
-            tonalElevation = 0.dp
-        ) {
-            VocabDashboardBottomSheet(
-                state = screenState.deckSelectionState,
-                onEditClick = onEditClick,
-                navigateToPractice = navigateToPractice
-            )
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        snapshotFlow { screenState.deckSelectionState.value }
-            .filter { it == VocabDeckSelectionState.NothingSelected }
-            .onEach { sheetState.hide() }
-            .collect()
-    }
 
     val orientation = LocalOrientation.current
 
@@ -169,10 +177,7 @@ private fun ScreenLoadedState(
             items(screenState.userDecks) {
                 PracticeGridItem(
                     title = resolveString(it.titleResolver),
-                    onClick = {
-                        select(it)
-                        showBottomSheet = true
-                    }
+                    onClick = { select(it) }
                 )
             }
         } else {
@@ -194,10 +199,7 @@ private fun ScreenLoadedState(
         items(screenState.defaultDecks) { vocabPracticeSet ->
             PracticeGridItem(
                 title = resolveString(vocabPracticeSet.titleResolver),
-                onClick = {
-                    select(vocabPracticeSet)
-                    showBottomSheet = true
-                }
+                onClick = { select(vocabPracticeSet) }
             )
         }
 
