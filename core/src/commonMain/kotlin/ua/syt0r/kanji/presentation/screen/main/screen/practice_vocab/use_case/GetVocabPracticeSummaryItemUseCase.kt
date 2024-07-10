@@ -13,23 +13,24 @@ class DefaultGetVocabPracticeSummaryItemUseCase : GetVocabPracticeSummaryItemUse
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun invoke(item: VocabPracticeQueueItem): VocabSummaryItem {
+        val nextReview = item.srsCard.run { lastReview!! + interval }
         return when (val state = item.deferredState.getCompleted()) {
-            is VocabPracticeItemData.Flashcard -> VocabSummaryItem.Flashcard(
+            is VocabPracticeItemData.Flashcard -> VocabSummaryItem(
                 word = state.word,
-                reading = state.reading
+                reading = state.reading,
+                nextReview = nextReview
             )
 
-            is VocabPracticeItemData.Reading -> VocabSummaryItem.ReadingPicker(
+            is VocabPracticeItemData.Reading -> VocabSummaryItem(
                 word = state.word,
                 reading = state.revealedReading,
-                character = state.questionCharacter,
-                isCorrect = true // todo
+                nextReview = nextReview
             )
 
-            is VocabPracticeItemData.Writing -> VocabSummaryItem.Writing(
+            is VocabPracticeItemData.Writing -> VocabSummaryItem(
                 word = state.word,
                 reading = state.summaryReading,
-                results = emptyList() // todo
+                nextReview = nextReview
             )
         }
     }

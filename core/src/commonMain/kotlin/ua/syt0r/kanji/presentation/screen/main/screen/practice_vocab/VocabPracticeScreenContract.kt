@@ -3,7 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.srs.SrsItemData
+import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
@@ -22,7 +22,7 @@ interface VocabPracticeScreenContract {
 
         fun revealFlashcard()
         fun submitReadingPickerAnswer(answer: String)
-        fun next(srsItemData: SrsItemData)
+        fun next(srsCard: SrsCard)
 
         fun reportScreenShown()
     }

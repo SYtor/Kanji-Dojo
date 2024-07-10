@@ -8,26 +8,19 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
@@ -52,17 +45,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.Clock
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.srs.SrsItemData
+import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
-import ua.syt0r.kanji.presentation.common.theme.snappyCrossfadeTransitionSpec
+import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
@@ -89,7 +81,7 @@ fun VocabPracticeScreenUI(
     onConfigured: () -> Unit,
     onFlashcardAnswerRevealClick: () -> Unit,
     onReadingPickerAnswerSelected: (String) -> Unit,
-    onNext: (SrsItemData) -> Unit,
+    onNext: (SrsCard) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit
 ) {
@@ -118,7 +110,7 @@ fun VocabPracticeScreenUI(
 
         AnimatedContent(
             targetState = state.value,
-            transitionSpec = snappyCrossfadeTransitionSpec(),
+            transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
             modifier = Modifier.fillMaxSize().padding(paddingValues)
         ) {
 
@@ -259,7 +251,7 @@ private fun ScreenReview(
     screenState: ScreenState.Review,
     onFlashcardAnswerRevealClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
-    onNextClick: (SrsItemData) -> Unit,
+    onNextClick: (SrsCard) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -357,84 +349,28 @@ private fun SummaryItem(
     index: Int,
     item: VocabSummaryItem
 ) {
-    when (item) {
-        is VocabSummaryItem.Flashcard -> {
-            FuriganaText(
-                furiganaString = buildFuriganaString {
-                    append("${index + 1}. ")
-                    append(item.reading)
-                },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-            )
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(IntrinsicSize.Min),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
 
-        is VocabSummaryItem.ReadingPicker -> {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .height(IntrinsicSize.Min),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        FuriganaText(
+            furiganaString = buildFuriganaString {
+                append("${index + 1}. ")
+                append(item.reading)
+            },
+            modifier = Modifier.weight(1f).alignByBaseline()
+        )
 
-                FuriganaText(
-                    furiganaString = buildFuriganaString {
-                        append("${index + 1}. ")
-                        append(item.reading)
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+        Text(
+            text = "Next review: ${srsFormatDuration(item.nextReview - Clock.System.now())}",
+            modifier = Modifier.alignByBaseline()
+        )
 
-                SummaryCharacterResult(
-                    character = item.character,
-                    isCorrect = item.isCorrect
-                )
-
-            }
-        }
-
-        is VocabSummaryItem.Writing -> {
-            Column(
-                modifier = Modifier.padding(vertical = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                FuriganaText(
-                    furiganaString = buildFuriganaString {
-                        append("${index + 1}. ")
-                        append(item.reading)
-                    }
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Spacer(Modifier.width(20.dp))
-                    item.results.forEach { SummaryCharacterResult(it.character, it.isCorrect) }
-                }
-            }
-        }
     }
-
 }
-
-@Composable
-private fun SummaryCharacterResult(character: String, isCorrect: Boolean) {
-    Text(
-        text = character,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.clip(MaterialTheme.shapes.small)
-            .clickable { }
-            .border(
-                width = 2.dp,
-                color = when {
-                    isCorrect -> MaterialTheme.extraColorScheme.success
-                    else -> MaterialTheme.colorScheme.error
-                },
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(vertical = 8.dp, horizontal = 12.dp)
-    )
-}
-
 
 @Composable
 fun VocabPracticeNextButton(

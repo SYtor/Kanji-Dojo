@@ -2,10 +2,11 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsItemData
-import ua.syt0r.kanji.core.srs.SrsItemKey
+import ua.syt0r.kanji.core.srs.SrsCard
+import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -38,8 +39,8 @@ enum class VocabPracticeType(
 
 }
 
-fun VocabPracticeType.toSrsItemKey(wordId: Long): SrsItemKey {
-    return SrsItemKey(
+fun VocabPracticeType.toSrsItemKey(wordId: Long): SrsCardKey {
+    return SrsCardKey(
         itemKey = wordId.toString(),
         practiceType = vocabPracticeTypeToSrsPracticeTypeMapping.getValue(this)
     )
@@ -138,8 +139,8 @@ data class SelectedReadingAnswer(
 }
 
 data class VocabPracticeSrsAnswers(
-    val good: SrsItemData,
-    val bad: SrsItemData
+    val good: SrsCard,
+    val again: SrsCard
 )
 
 data class VocabPracticeReviewState(
@@ -148,32 +149,8 @@ data class VocabPracticeReviewState(
     val answers: VocabPracticeSrsAnswers
 )
 
-sealed interface VocabSummaryItem {
-
-    val word: JapaneseWord
-    val reading: FuriganaString
-
-    data class Flashcard(
-        override val word: JapaneseWord,
-        override val reading: FuriganaString
-    ) : VocabSummaryItem
-
-    data class ReadingPicker(
-        override val word: JapaneseWord,
-        override val reading: FuriganaString,
-        val character: String,
-        val isCorrect: Boolean
-    ) : VocabSummaryItem
-
-    data class Writing(
-        override val word: JapaneseWord,
-        override val reading: FuriganaString,
-        val results: List<VocabCharacterPracticeResult>
-    ) : VocabSummaryItem
-
-}
-
-data class VocabCharacterPracticeResult(
-    val character: String,
-    val isCorrect: Boolean
+data class VocabSummaryItem(
+    val word: JapaneseWord,
+    val reading: FuriganaString,
+    val nextReview: Instant
 )

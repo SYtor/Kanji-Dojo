@@ -1,25 +1,45 @@
 package ua.syt0r.kanji.core.srs.fsrs
 
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.srs.SrsAnswer
-import ua.syt0r.kanji.core.srs.SrsItemData
-import ua.syt0r.kanji.core.srs.SrsItemKey
 import kotlin.time.Duration
 
-
-data class FsrsItemData(
-    override val key: SrsItemKey,
-    override val interval: Duration,
-    val card: FsrsCard,
+data class FsrsCard(
     val status: FsrsCardStatus,
+    val params: FsrsCardParams,
+    val interval: Duration,
     val lapses: Int,
     val repeats: Int
-) : SrsItemData {
+) {
 
-    override val lastReview: Instant? = when (card) {
-        FsrsCard.New -> null
-        is FsrsCard.Existing -> card.reviewTime
+    val lastReview: Instant? = when (params) {
+        FsrsCardParams.New -> null
+        is FsrsCardParams.Existing -> params.reviewTime
     }
+
+    fun next(
+        status: FsrsCardStatus = this.status,
+        params: FsrsCardParams = this.params,
+        interval: Duration = this.interval,
+        lapses: Int = this.lapses
+    ): FsrsCard = copy(
+        status = status,
+        params = params,
+        interval = interval,
+        lapses = lapses,
+        repeats = repeats + 1
+    )
+
+}
+
+sealed interface FsrsCardParams {
+
+    object New : FsrsCardParams
+
+    data class Existing(
+        val difficulty: Double,
+        val stability: Double,
+        val reviewTime: Instant
+    ) : FsrsCardParams
 
 }
 
@@ -27,20 +47,13 @@ enum class FsrsCardStatus {
     New, Learning, Review, Relearning
 }
 
-sealed interface FsrsCard {
-
-    object New : FsrsCard
-
-    data class Existing(
-        val difficulty: Double,
-        val stability: Double,
-        val reviewTime: Instant
-    ) : FsrsCard
-
-}
-
-enum class FsrsAnswer(
-    val grade: Int
-) : SrsAnswer {
+enum class FsrsReviewRating(val grade: Int) {
     Again(1), Hard(2), Good(3), Easy(4)
 }
+
+data class FsrsAnswers(
+    val again: FsrsCard,
+    val hard: FsrsCard,
+    val good: FsrsCard,
+    val easy: FsrsCard
+)

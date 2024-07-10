@@ -50,7 +50,7 @@ val vocabPracticeScreenModule = module {
         DefaultVocabPracticeQueue(
             coroutineScope = it.component1(),
             timeUtils = get(),
-            fsrsItemRepository = get(),
+            srsItemRepository = get(),
             srsScheduler = get(),
             getFlashcardReviewStateUseCase = get(),
             getReadingReviewStateUseCase = get(),

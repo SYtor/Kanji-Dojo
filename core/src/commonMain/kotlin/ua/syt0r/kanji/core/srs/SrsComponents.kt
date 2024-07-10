@@ -1,29 +1,77 @@
 package ua.syt0r.kanji.core.srs
 
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
+import ua.syt0r.kanji.core.srs.fsrs.FsrsCard
+import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
+import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import kotlin.time.Duration
 
-data class SrsItemKey(
+data class SrsCardKey(
     val itemKey: String,
     val practiceType: String
 )
 
-interface SrsItemData {
-    val key: SrsItemKey
-    val lastReview: Instant?
-    val interval: Duration
+data class SrsCard(
+    val fsrsCard: FsrsCard
+) {
+    val lastReview: Instant? = fsrsCard.lastReview
+    val interval: Duration = fsrsCard.interval
 }
 
 enum class SrsItemStatus { New, Done, Review }
 
-interface SrsAnswer
+data class SrsAnswer(
+    val again: SrsCard,
+    val good: SrsCard
+)
+
+interface SrsItemRepository {
+
+    val updatesFlow: SharedFlow<Unit>
+
+    suspend fun get(key: SrsCardKey): SrsCard?
+    suspend fun update(key: SrsCardKey, card: SrsCard)
+
+}
 
 interface SrsScheduler {
+    fun newCard(): SrsCard
+    fun answers(data: SrsCard, reviewTime: Instant): SrsAnswer
+}
 
-    fun get(
-        data: SrsItemData,
-        answer: SrsAnswer,
+class DefaultSrsItemRepository(
+    private val fsrsItemRepository: FsrsItemRepository
+) : SrsItemRepository {
+
+    override val updatesFlow: SharedFlow<Unit> = fsrsItemRepository.updatesFlow
+
+    override suspend fun get(key: SrsCardKey): SrsCard? {
+        return fsrsItemRepository.get(key)?.let { SrsCard(it) }
+    }
+
+    override suspend fun update(key: SrsCardKey, card: SrsCard) {
+        fsrsItemRepository.update(key, card.fsrsCard)
+    }
+
+}
+
+class DefaultSrsScheduler(
+    private val fsrsScheduler: FsrsScheduler
+) : SrsScheduler {
+
+    override fun newCard(): SrsCard = SrsCard(fsrsScheduler.newCard())
+
+    override fun answers(
+        data: SrsCard,
         reviewTime: Instant
-    ): SrsItemData
+    ): SrsAnswer {
+        return fsrsScheduler.schedule(data.fsrsCard, reviewTime).let {
+            SrsAnswer(
+                again = SrsCard(it.again),
+                good = SrsCard(it.good)
+            )
+        }
+    }
 
 }

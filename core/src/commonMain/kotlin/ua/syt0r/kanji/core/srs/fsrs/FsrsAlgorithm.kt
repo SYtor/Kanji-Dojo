@@ -8,56 +8,62 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
 
 interface FsrsAlgorithm {
-    fun updatedCard(card: FsrsCard, answer: FsrsAnswer, reviewTime: Instant): FsrsCard.Existing
-    fun nextInterval(card: FsrsCard.Existing): Duration
+
+    fun updatedParams(
+        cardParams: FsrsCardParams,
+        rating: FsrsReviewRating,
+        reviewTime: Instant
+    ): FsrsCardParams.Existing
+
+    fun nextInterval(
+        cardParams: FsrsCardParams.Existing
+    ): Duration
+
 }
 
-class Fsrs45Algorithm(
-    private val w: Array<Double> = DefaultWeights,
-    private val decay: Double = -0.5,
-    private val factor: Double = 19.0 / 81.0,
-    private val requestRetention: Double = 0.9
+abstract class Fsrs(
+    private val w: Array<Double>
 ) : FsrsAlgorithm {
 
-    override fun updatedCard(
-        card: FsrsCard,
-        answer: FsrsAnswer,
+    override fun updatedParams(
+        cardParams: FsrsCardParams,
+        rating: FsrsReviewRating,
         reviewTime: Instant
-    ): FsrsCard.Existing {
-        return when (card) {
-            FsrsCard.New -> FsrsCard.Existing(
-                difficulty = initialDifficulty(answer.grade),
-                stability = initialStability(answer.grade),
+    ): FsrsCardParams.Existing {
+        return when (cardParams) {
+            FsrsCardParams.New -> FsrsCardParams.Existing(
+                difficulty = initialDifficulty(rating.grade),
+                stability = initialStability(rating.grade),
                 reviewTime = reviewTime
             )
 
-            is FsrsCard.Existing -> {
+            is FsrsCardParams.Existing -> {
                 val difficulty = difficulty(
-                    difficulty = card.difficulty,
-                    grade = answer.grade
+                    difficulty = cardParams.difficulty,
+                    grade = rating.grade
                 )
 
                 val retrievability = retrievability(
-                    elapsedDuration = reviewTime - card.reviewTime,
-                    stability = card.stability
+                    elapsedDuration = reviewTime - cardParams.reviewTime,
+                    stability = cardParams.stability
                 )
 
-                val stability = when (answer) {
-                    FsrsAnswer.Again -> forgetStability(
-                        difficulty = card.difficulty,
-                        stability = card.stability,
+                val stability = when (rating) {
+                    FsrsReviewRating.Again -> forgetStability(
+                        difficulty = cardParams.difficulty,
+                        stability = cardParams.stability,
                         retrievability = retrievability
                     )
 
                     else -> recallStability(
-                        difficulty = card.difficulty,
-                        stability = card.stability,
+                        difficulty = cardParams.difficulty,
+                        stability = cardParams.stability,
                         retrievability = retrievability,
-                        grade = answer.grade
+                        grade = rating.grade
                     )
                 }
 
-                FsrsCard.Existing(
+                FsrsCardParams.Existing(
                     difficulty = difficulty,
                     stability = stability,
                     reviewTime = reviewTime
@@ -66,11 +72,7 @@ class Fsrs45Algorithm(
         }
     }
 
-    override fun nextInterval(card: FsrsCard.Existing): Duration {
-        val retrievability = requestRetention
-        val interval = card.stability / factor * (retrievability.pow(1 / decay) - 1)
-        return interval.days
-    }
+    protected abstract fun retrievability(elapsedDuration: Duration, stability: Double): Double
 
     private fun initialStability(grade: Int): Double {
         return w[grade - 1]
@@ -84,11 +86,6 @@ class Fsrs45Algorithm(
     private fun difficulty(difficulty: Double, grade: Int): Double {
         val value = w[7] * initialDifficulty(3) + (1 - w[7]) * (difficulty - w[6] * (grade - 3))
         return value.coerceIn(1.0, 10.0)
-    }
-
-    private fun retrievability(elapsedDuration: Duration, stability: Double): Double {
-        val days = elapsedDuration.toDouble(DurationUnit.DAYS)
-        return (1 + factor * days / stability).pow(decay)
     }
 
     private fun recallStability(
@@ -124,22 +121,90 @@ class Fsrs45Algorithm(
 
 }
 
-private val DefaultWeights = arrayOf(
-    0.4,
-    0.6,
-    2.4,
-    5.8,
-    4.93,
-    0.94,
-    0.86,
-    0.01,
-    1.49,
-    0.14,
-    0.94,
-    2.18,
-    0.05,
-    0.34,
-    1.26,
-    0.29,
-    2.61
-)
+class Fsrs4(
+    w: Array<Double> = WEIGHTS,
+    private val decay: Double = DECAY,
+    private val factor: Double = FACTOR,
+    private val requestRetention: Double = REQUEST_RETENTION
+) : Fsrs(w) {
+
+    override fun retrievability(elapsedDuration: Duration, stability: Double): Double {
+        val days = elapsedDuration.toDouble(DurationUnit.DAYS)
+        return (1 + factor * days / stability).pow(decay)
+    }
+
+    override fun nextInterval(cardParams: FsrsCardParams.Existing): Duration {
+        return (9 * cardParams.stability * (1 / requestRetention - 1)).days
+    }
+
+    companion object {
+        val WEIGHTS = arrayOf(
+            0.4,
+            0.6,
+            2.4,
+            5.8,
+            4.93,
+            0.94,
+            0.86,
+            0.01,
+            1.49,
+            0.14,
+            0.94,
+            2.18,
+            0.05,
+            0.34,
+            1.26,
+            0.29,
+            2.61
+        )
+        const val DECAY = -1.0
+        const val FACTOR = 1.0 / 9
+        const val REQUEST_RETENTION = 0.9
+    }
+
+}
+
+class Fsrs45(
+    w: Array<Double> = WEIGHTS,
+    private val decay: Double = DECAY,
+    private val factor: Double = FACTOR,
+    private val requestRetention: Double = REQUEST_RETENTION
+) : Fsrs(w) {
+
+    override fun retrievability(elapsedDuration: Duration, stability: Double): Double {
+        val days = elapsedDuration.inWholeDays.toDouble()
+        return (1.0 + factor * days / stability).pow(decay)
+    }
+
+    override fun nextInterval(cardParams: FsrsCardParams.Existing): Duration {
+        val retrievability = requestRetention
+        val interval = cardParams.stability / factor * (retrievability.pow(1 / decay) - 1)
+        return interval.days
+    }
+
+    companion object {
+        val WEIGHTS = arrayOf(
+            0.4872,
+            1.4003,
+            3.7145,
+            13.8206,
+            5.1618,
+            1.2298,
+            0.8975,
+            0.031,
+            1.6474,
+            0.1367,
+            1.0461,
+            2.1072,
+            0.0793,
+            0.3246,
+            1.587,
+            0.2272,
+            2.8755
+        )
+        const val DECAY = -0.5
+        const val FACTOR = 19.0 / 81.0
+        const val REQUEST_RETENTION = 0.9
+    }
+
+}

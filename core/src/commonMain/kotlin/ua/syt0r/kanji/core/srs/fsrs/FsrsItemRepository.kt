@@ -2,41 +2,23 @@ package ua.syt0r.kanji.core.srs.fsrs
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import ua.syt0r.kanji.core.srs.SrsItemKey
-import kotlin.time.Duration
+import ua.syt0r.kanji.core.srs.SrsCardKey
 
-interface FsrsItemRepository {
 
-    val updatesFlow: SharedFlow<Unit>
-
-    suspend fun get(key: SrsItemKey): FsrsItemData
-    suspend fun update(data: FsrsItemData)
-
-}
-
-class DefaultFsrsItemRepository : FsrsItemRepository {
+class FsrsItemRepository {
 
     private val _updatesFlow = MutableSharedFlow<Unit>()
-    override val updatesFlow: SharedFlow<Unit> = _updatesFlow
+    val updatesFlow: SharedFlow<Unit> = _updatesFlow
 
-    private val inMemoryCache = mutableMapOf<SrsItemKey, FsrsItemData>()
+    private val inMemoryCache = mutableMapOf<SrsCardKey, FsrsCard>()
 
-    override suspend fun get(key: SrsItemKey): FsrsItemData {
-        return inMemoryCache[key] ?: newCard(key)
+    suspend fun get(key: SrsCardKey): FsrsCard? {
+        return inMemoryCache[key]
     }
 
-    override suspend fun update(data: FsrsItemData) {
-        inMemoryCache[data.key] = data
+    suspend fun update(key: SrsCardKey, card: FsrsCard) {
+        inMemoryCache[key] = card
         _updatesFlow.emit(Unit)
     }
-
-    private fun newCard(key: SrsItemKey) = FsrsItemData(
-        key = key,
-        interval = Duration.ZERO,
-        card = FsrsCard.New,
-        status = FsrsCardStatus.New,
-        lapses = 0,
-        repeats = 0
-    )
 
 }

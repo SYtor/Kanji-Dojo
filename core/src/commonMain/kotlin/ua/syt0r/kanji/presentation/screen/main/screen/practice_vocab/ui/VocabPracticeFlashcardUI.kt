@@ -22,13 +22,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsItemData
+import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -41,7 +43,7 @@ fun VocabPracticeFlashcardUI(
     reviewState: VocabReviewState.Flashcard,
     answers: VocabPracticeSrsAnswers,
     onRevealAnswerClick: () -> Unit,
-    onNextClick: (SrsItemData) -> Unit,
+    onNextClick: (SrsCard) -> Unit,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 
@@ -67,12 +69,14 @@ fun VocabPracticeFlashcardUI(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         SrsButton(
-                            text = "Bad - ${srsFormatDuration(answers.bad.interval)}",
-                            onClick = { onNextClick(answers.bad) }
+                            text = "Again - ${srsFormatDuration(answers.again.interval)}",
+                            onClick = { onNextClick(answers.again) },
+                            MaterialTheme.colorScheme.error
                         )
                         SrsButton(
                             text = "Good - ${srsFormatDuration(answers.good.interval)}",
-                            onClick = { onNextClick(answers.good) }
+                            onClick = { onNextClick(answers.good) },
+                            MaterialTheme.extraColorScheme.success
                         )
                     }
                 }
@@ -149,12 +153,16 @@ fun VocabPracticeFlashcardUI(
 @Composable
 private fun RowScope.SrsButton(
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color
 ) {
 
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.neutralTextButtonColors(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color,
+            contentColor = MaterialTheme.colorScheme.surface
+        ),
         modifier = Modifier.weight(1f)
     ) {
         Text(text)
