@@ -66,11 +66,16 @@ sealed interface StrokeProcessingResult {
 sealed interface CharacterInputState {
 
     interface SingleStroke : CharacterInputState {
+
         val isStudyMode: Boolean
         val drawnStrokesCount: State<Int>
         val currentStrokeMistakes: State<Int>
         val totalMistakes: State<Int>
+        val hintClicksSharedFlow: SharedFlow<Unit>
         val inputProcessingResults: SharedFlow<StrokeProcessingResult>
+
+        suspend fun notifyHintClick()
+
     }
 
     sealed interface MultipleStroke : CharacterInputState {
@@ -101,8 +106,15 @@ private data class MutableSingleStrokeInputState(
     override val drawnStrokesCount: MutableState<Int>,
     override val currentStrokeMistakes: MutableState<Int>,
     override val totalMistakes: MutableState<Int>,
+    override val hintClicksSharedFlow: MutableSharedFlow<Unit>,
     override val inputProcessingResults: MutableSharedFlow<StrokeProcessingResult>
-) : CharacterInputState.SingleStroke
+) : CharacterInputState.SingleStroke {
+
+    override suspend fun notifyHintClick() {
+        hintClicksSharedFlow.emit(Unit)
+    }
+
+}
 
 private data class MutableMultiStrokeInputState(
     override val contentState: MutableState<MultipleStrokeInputContentState>
@@ -162,6 +174,7 @@ class DefaultCharacterWriterState(
                     drawnStrokesCount = mutableStateOf(0),
                     currentStrokeMistakes = mutableStateOf(0),
                     totalMistakes = mutableStateOf(0),
+                    hintClicksSharedFlow = MutableSharedFlow(),
                     inputProcessingResults = MutableSharedFlow()
                 )
             }

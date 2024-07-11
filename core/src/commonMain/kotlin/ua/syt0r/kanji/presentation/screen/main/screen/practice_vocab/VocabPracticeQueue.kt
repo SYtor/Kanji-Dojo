@@ -127,8 +127,10 @@ class DefaultVocabPracticeQueue(
                 progress = getProgress(),
                 state = item.deferredState.await().toReviewState(coroutineScope),
                 answers = VocabPracticeSrsAnswers(
+                    again = srsAnswers.again,
+                    hard = srsAnswers.hard,
                     good = srsAnswers.good,
-                    again = srsAnswers.again
+                    easy = srsAnswers.easy
                 )
             )
 

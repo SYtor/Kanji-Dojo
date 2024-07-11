@@ -139,8 +139,10 @@ data class SelectedReadingAnswer(
 }
 
 data class VocabPracticeSrsAnswers(
+    val again: SrsCard,
+    val hard: SrsCard,
     val good: SrsCard,
-    val again: SrsCard
+    val easy: SrsCard
 )
 
 data class VocabPracticeReviewState(

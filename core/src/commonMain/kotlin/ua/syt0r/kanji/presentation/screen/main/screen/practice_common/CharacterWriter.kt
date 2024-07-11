@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -45,6 +43,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.Help
+import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedStroke
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
@@ -60,9 +59,6 @@ fun CharacterWriter(
     modifier: Modifier = Modifier
 ) {
 
-    val coroutineScope = rememberCoroutineScope()
-    val hintClicksSharedFlow = remember { MutableSharedFlow<Unit>() }
-
     Box(modifier) {
         when (val inputState = state.inputState) {
 
@@ -71,33 +67,14 @@ fun CharacterWriter(
                 SingleStrokeInputContent(
                     strokes = state.strokes,
                     inputState = inputState,
-                    onStrokeDrawn = { state.submit(it) },
-                    hintClicksFlow = hintClicksSharedFlow
-                )
-
-                val isHintButtonVisible = remember {
-                    derivedStateOf {
-                        inputState.run { drawnStrokesCount.value < state.strokes.size }
-                    }
-                }
-
-                HintButton(
-                    onHintClick = {
-                        coroutineScope.launch {
-                            hintClicksSharedFlow.emit(Unit)
-                            state.notifyHintClick()
-                        }
-                    },
-                    visible = isHintButtonVisible
+                    onStrokeDrawn = { state.submit(it) }
                 )
 
             }
 
             is CharacterInputState.MultipleStroke -> {
                 MultipleStrokeInputContent(
-                    characterStrokes = state.strokes,
                     state = inputState,
-                    submit = { state.submit(it) }
                 )
             }
         }
@@ -105,12 +82,9 @@ fun CharacterWriter(
 
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun BoxScope.MultipleStrokeInputContent(
-    characterStrokes: List<Path>,
-    state: CharacterInputState.MultipleStroke,
-    submit: (CharacterInputData.MultipleStrokes) -> Unit
+    state: CharacterInputState.MultipleStroke
 ) {
 
     val currentState = state.contentState.value
@@ -169,49 +143,13 @@ private fun BoxScope.MultipleStrokeInputContent(
 
     }
 
-    val transition = updateTransition(targetState = state.contentState.value)
-
-    transition.AnimatedVisibility(
-        visible = { it is MultipleStrokeInputContentState.Writing },
-        modifier = Modifier.align(Alignment.BottomEnd)
-    ) {
-        IconButton(
-            onClick = {
-                val writingState = currentState as MultipleStrokeInputContentState.Writing
-                submit(
-                    CharacterInputData.MultipleStrokes(
-                        characterStrokes = characterStrokes,
-                        inputStrokes = writingState.strokes.value
-                    )
-                )
-            }
-        ) {
-            Icon(Icons.Default.Check, null)
-        }
-    }
-
-    transition.AnimatedVisibility(
-        visible = { it is MultipleStrokeInputContentState.Writing },
-        modifier = Modifier.align(Alignment.BottomStart)
-    ) {
-        IconButton(
-            onClick = {
-                val writingState = currentState as MultipleStrokeInputContentState.Writing
-                writingState.strokes.value = writingState.strokes.value.dropLast(1)
-            }
-        ) {
-            Icon(Icons.Default.Undo, null)
-        }
-    }
-
 }
 
 @Composable
 private fun SingleStrokeInputContent(
     strokes: List<Path>,
     inputState: CharacterInputState.SingleStroke,
-    onStrokeDrawn: (CharacterInputData.SingleStroke) -> Unit,
-    hintClicksFlow: Flow<Unit>
+    onStrokeDrawn: (CharacterInputData.SingleStroke) -> Unit
 ) {
 
     val isAnimatingCorrectStroke = remember { mutableStateOf(false) }
@@ -239,7 +177,7 @@ private fun SingleStrokeInputContent(
             StudyStroke(
                 strokes = strokes,
                 drawnStrokesCount = adjustedDrawnStrokesCount,
-                hintClicksFlow = hintClicksFlow
+                hintClicksFlow = inputState.hintClicksSharedFlow
             )
         }
 
@@ -247,7 +185,7 @@ private fun SingleStrokeInputContent(
             HintStroke(
                 strokes = strokes,
                 inputState = inputState,
-                hintClicksFlow = hintClicksFlow
+                hintClicksFlow = inputState.hintClicksSharedFlow
             )
         }
     }
@@ -301,27 +239,9 @@ private fun SingleStrokeInputContent(
 }
 
 @Composable
-private fun BoxScope.HintButton(
-    onHintClick: () -> Unit,
-    visible: State<Boolean>
-) {
-
-    AnimatedVisibility(
-        visible = visible.value,
-        modifier = Modifier.align(Alignment.TopEnd)
-    ) {
-        IconButton(
-            onClick = onHintClick
-        ) {
-            Icon(ExtraIcons.Help, null)
-        }
-    }
-
-}
-
-@Composable
 fun CharacterWriterDecorations(
     modifier: Modifier,
+    state: State<CharacterWriterState?>,
     content: @Composable BoxScope.() -> Unit
 ) {
     val inputShape = MaterialTheme.shapes.extraLarge
@@ -339,8 +259,90 @@ fun CharacterWriterDecorations(
                 shape = inputShape
             )
     ) {
+
         KanjiBackground(Modifier.fillMaxSize())
+
         content()
+
+        val hintButtonTransition = updateTransition(
+            targetState = derivedStateOf {
+                val writerState = state.value
+                val inputState = writerState?.inputState
+                    ?.let { it as? CharacterInputState.SingleStroke }
+                val writingStatus = writerState?.writingStatus?.value
+
+                inputState?.takeIf { writingStatus == CharacterWritingStatus.InProcess }
+            }.value
+        )
+
+        hintButtonTransition.AnimatedContent(
+            transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
+            modifier = Modifier.align(Alignment.TopEnd)
+        ) {
+            if (it == null) return@AnimatedContent
+
+            val coroutineScope = rememberCoroutineScope()
+            IconButton(
+                onClick = {
+                    coroutineScope.launch { it.notifyHintClick() }
+                }
+            ) {
+                Icon(ExtraIcons.Help, null)
+            }
+
+        }
+
+        val multipleStrokeButtonsTransition = updateTransition(
+            targetState = derivedStateOf {
+                val writerState = state.value
+                val multipleStrokesContentState = writerState?.inputState
+                    ?.let { it as? CharacterInputState.MultipleStroke }
+                    ?.contentState
+                    ?.value
+                writerState to multipleStrokesContentState
+            }.value
+        )
+
+        multipleStrokeButtonsTransition.AnimatedContent(
+            contentKey = { (_, contentState) -> contentState },
+            transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) { (writerState, contentState) ->
+            if (contentState !is MultipleStrokeInputContentState.Writing) return@AnimatedContent
+
+            IconButton(
+                onClick = {
+                    writerState!!.submit(
+                        CharacterInputData.MultipleStrokes(
+                            characterStrokes = writerState.strokes,
+                            inputStrokes = contentState.strokes.value
+                        )
+                    )
+                }
+            ) {
+                Icon(Icons.Default.Check, null)
+            }
+        }
+
+        multipleStrokeButtonsTransition.AnimatedContent(
+            contentKey = { (_, contentState) -> contentState },
+            transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
+            modifier = Modifier.align(Alignment.BottomStart)
+        ) { (_, contentState) ->
+            if (contentState !is MultipleStrokeInputContentState.Writing) {
+                Box(Modifier)
+                return@AnimatedContent
+            }
+
+            IconButton(
+                onClick = {
+                    contentState.strokes.value = contentState.strokes.value.dropLast(1)
+                }
+            ) {
+                Icon(Icons.Default.Undo, null)
+            }
+        }
+
     }
 }
 

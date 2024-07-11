@@ -1,5 +1,13 @@
 package ua.syt0r.kanji.presentation.common.theme
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.AnimationConstants
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -180,4 +188,13 @@ fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorSche
         disabledLabelColor = labelColor,
         cursorColor = onSurface
     )
+}
+
+fun <S> snapToBiggerContainerCrossfadeTransitionSpec(
+    snapToSmallerContainerDelay: Int = AnimationConstants.DefaultDurationMillis
+): AnimatedContentTransitionScope<S>.() -> ContentTransform = {
+    fadeIn() togetherWith fadeOut() using SizeTransform { initial, target ->
+        if (target.width > initial.width || target.height > initial.height) snap()
+        else snap(snapToSmallerContainerDelay)
+    }
 }

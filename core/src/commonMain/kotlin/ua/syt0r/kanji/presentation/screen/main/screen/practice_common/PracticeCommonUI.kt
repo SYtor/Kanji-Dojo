@@ -214,7 +214,12 @@ private fun ToolbarCountItem(count: Int, color: Color) {
                     .background(color)
             )
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = count.toString(), color = color, modifier = Modifier.alignByBaseline())
+            Text(
+                text = count.toString(),
+                color = color,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.alignByBaseline()
+            )
         }
     }
 }

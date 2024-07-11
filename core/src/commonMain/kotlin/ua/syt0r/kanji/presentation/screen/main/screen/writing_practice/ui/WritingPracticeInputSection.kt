@@ -95,7 +95,8 @@ fun WritingPracticeInputSection(
 ) {
 
     CharacterWriterDecorations(
-        modifier = modifier
+        modifier = modifier,
+        state = derivedStateOf { state.value.writerState }
     ) {
 
         val transition = updateTransition(

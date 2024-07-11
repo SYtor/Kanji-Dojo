@@ -1,42 +1,52 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReadMore
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeAnswersRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.srsFormatDuration
 
 @Composable
 fun VocabPracticeFlashcardUI(
@@ -52,34 +62,62 @@ fun VocabPracticeFlashcardUI(
             .wrapContentWidth()
             .widthIn(max = 400.dp),
         bottomOverlayContent = {
-            when (reviewState.showAnswer.value) {
-                false -> {
-                    Button(
-                        onClick = onRevealAnswerClick,
-                        modifier = Modifier.fillMaxWidth().padding(20.dp),
-                        colors = ButtonDefaults.neutralButtonColors()
-                    ) {
-                        Text("Show answer")
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth()
+                    .width(IntrinsicSize.Max)
+                    .height(IntrinsicSize.Max)
+                    .padding(vertical = 20.dp)
+            ) {
+
+                val hiddenButton = @Composable {
+                    val focusRequester = remember { FocusRequester() }
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    Text(
+                        text = "Show answer",
+                        modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .focusable()
+                            .focusRequester(focusRequester)
+                            .onKeyEvent {
+                                if (it.type == KeyEventType.KeyUp && it.key == Key.Spacebar) {
+                                    onRevealAnswerClick()
+                                    true
+                                } else false
+                            }
+                            .clickable(onClick = onRevealAnswerClick)
+                            .wrapContentSize()
+                    )
+                }
+
+                val revealedButton = @Composable { isVisible: Boolean ->
+                    val alphaValue = if (isVisible) 1f else 0f
+                    VocabPracticeAnswersRow(
+                        answers = answers,
+                        onClick = { if (isVisible) onNextClick(it) },
+                        contentModifier = Modifier.padding(horizontal = 20.dp)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .clip(MaterialTheme.shapes.medium)
+                            .graphicsLayer { alpha = alphaValue }
+                    )
+                }
+
+                // Laying out both for static button size
+                when (reviewState.showAnswer.value) {
+                    false -> {
+                        revealedButton(false)
+                        hiddenButton()
+                    }
+
+                    true -> {
+                        hiddenButton()
+                        revealedButton(true)
                     }
                 }
 
-                true -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        SrsButton(
-                            text = "Again - ${srsFormatDuration(answers.again.interval)}",
-                            onClick = { onNextClick(answers.again) },
-                            MaterialTheme.colorScheme.error
-                        )
-                        SrsButton(
-                            text = "Good - ${srsFormatDuration(answers.good.interval)}",
-                            onClick = { onNextClick(answers.good) },
-                            MaterialTheme.extraColorScheme.success
-                        )
-                    }
-                }
             }
 
         }
@@ -146,26 +184,6 @@ fun VocabPracticeFlashcardUI(
 
         }
 
-    }
-
-}
-
-@Composable
-private fun RowScope.SrsButton(
-    text: String,
-    onClick: () -> Unit,
-    color: Color
-) {
-
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = color,
-            contentColor = MaterialTheme.colorScheme.surface
-        ),
-        modifier = Modifier.weight(1f)
-    ) {
-        Text(text)
     }
 
 }

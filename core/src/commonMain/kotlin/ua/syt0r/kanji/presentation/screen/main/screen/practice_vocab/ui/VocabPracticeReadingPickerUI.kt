@@ -23,33 +23,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeNextButton
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRowState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 
 @Composable
 fun VocabPracticeReadingPickerUI(
     reviewState: VocabReviewState.Reading,
+    answers: VocabPracticeSrsAnswers,
     onWordClick: (JapaneseWord) -> Unit,
     onAnswerSelected: (String) -> Unit,
-    onNextClick: () -> Unit,
+    onNextClick: (SrsCard) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-            .padding(horizontal = 20.dp)
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
 
         val selectedAnswer by reviewState.selectedAnswer
@@ -106,12 +110,21 @@ fun VocabPracticeReadingPickerUI(
             }
         }
 
-        VocabPracticeNextButton(
-            showNextButton = remember(reviewState) {
-                derivedStateOf { reviewState.selectedAnswer.value != null }
+        val updatedState = rememberUpdatedState(reviewState to answers)
+
+        ExpandableVocabPracticeAnswersRow(
+            state = remember {
+                derivedStateOf {
+                    val (state, updatedAnswers) = updatedState.value
+                    ExpandableVocabPracticeAnswersRowState(
+                        answers = updatedAnswers,
+                        showButton = state.selectedAnswer.value != null
+                    )
+                }
             },
             onClick = onNextClick,
-            onFeedbackClick = { onFeedbackClick(reviewState.word) }
+            modifier = Modifier.width(IntrinsicSize.Max),
+            contentModifier = Modifier.padding(20.dp).clip(MaterialTheme.shapes.medium)
         )
     }
 }

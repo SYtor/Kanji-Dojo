@@ -31,7 +31,7 @@ val md_theme_light_inversePrimary = Color(0xFFFCFCFC)
 val lightThemeLinkColor = Color(0xff0054d7)
 val lightThemeSuccessColor = Color(0xFF38CE3F)
 val lightThemePendingColor = Color(0xFF857372)
-val lightThemeDueColor = Color(0xFFFBC02D)
+val lightThemeDueColor = Color(0xFFFEBC2E)
 val lightThemeNewColor = Color(0xFF03A9F4)
 
 val md_theme_dark_primary = Color(0xFFff5555)

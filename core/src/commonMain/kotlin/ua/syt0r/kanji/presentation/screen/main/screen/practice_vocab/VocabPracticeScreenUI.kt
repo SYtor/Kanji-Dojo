@@ -8,34 +8,38 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.NavigateNext
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -45,7 +49,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Clock
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
@@ -53,6 +65,7 @@ import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
@@ -67,6 +80,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticePr
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
@@ -281,9 +295,10 @@ private fun ScreenReview(
             is VocabReviewState.Reading -> {
                 VocabPracticeReadingPickerUI(
                     reviewState = currentState,
+                    answers = reviewState.answers,
                     onWordClick = { alternativeWordsDialogWord = it },
                     onAnswerSelected = onAnswerSelected,
-                    onNextClick = { onNextClick(reviewState.answers.good) },
+                    onNextClick = onNextClick,
                     onFeedbackClick = onFeedbackClick
                 )
             }
@@ -291,6 +306,7 @@ private fun ScreenReview(
             is VocabReviewState.Writing -> {
                 VocabPracticeWritingUI(
                     reviewState = currentState,
+                    answers = reviewState.answers,
                     onNextClick = { onNextClick(reviewState.answers.good) },
                     onWordClick = { alternativeWordsDialogWord = it },
                     onFeedbackClick = onFeedbackClick
@@ -373,48 +389,137 @@ private fun SummaryItem(
 }
 
 @Composable
-fun VocabPracticeNextButton(
-    showNextButton: State<Boolean>,
-    onClick: () -> Unit,
-    onFeedbackClick: () -> Unit,
+fun VocabPracticeAnswersRow(
+    answers: VocabPracticeSrsAnswers,
+    onClick: (SrsCard) -> Unit,
+    enableKeyboardControls: Boolean = true,
+    modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
+) {
+
+    val keyboardControlsModifier = if (enableKeyboardControls) {
+        val focusRequester = remember { FocusRequester() }
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+        Modifier.focusable()
+            .focusRequester(focusRequester)
+            .onKeyEvent { event ->
+                if (event.type != KeyEventType.KeyUp) return@onKeyEvent false
+
+                val srsCard = when (event.key) {
+                    Key.One -> answers.again
+                    Key.Two -> answers.hard
+                    Key.Three -> answers.good
+                    Key.Four -> answers.easy
+                    else -> null
+                }
+
+                srsCard?.let { onClick(it); true } ?: false
+            }
+    } else {
+        Modifier
+    }
+
+    Row(
+        modifier = modifier.horizontalScroll(rememberScrollState())
+            .then(contentModifier)
+            .then(keyboardControlsModifier)
+            .width(IntrinsicSize.Max)
+            .height(IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        AnswerButton(
+            srsCard = answers.again,
+            label = "Again",
+            onClick = onClick,
+            modifier = Modifier.background(MaterialTheme.colorScheme.error)
+                .padding(start = 2.dp)
+        )
+        AnswerButton(
+            srsCard = answers.hard,
+            label = "Hard",
+            onClick = onClick,
+            modifier = Modifier.background(MaterialTheme.extraColorScheme.due)
+        )
+        AnswerButton(
+            srsCard = answers.good,
+            label = "Good",
+            onClick = onClick,
+            modifier = Modifier.background(MaterialTheme.extraColorScheme.success)
+        )
+        AnswerButton(
+            srsCard = answers.easy,
+            label = "Easy",
+            onClick = onClick,
+            modifier = Modifier.background(MaterialTheme.extraColorScheme.new)
+                .padding(end = 2.dp)
+        )
+    }
+
+}
+
+data class ExpandableVocabPracticeAnswersRowState(
+    val answers: VocabPracticeSrsAnswers,
+    val showButton: Boolean
+)
+
+@Composable
+fun ExpandableVocabPracticeAnswersRow(
+    state: State<ExpandableVocabPracticeAnswersRowState>,
+    onClick: (SrsCard) -> Unit,
+    modifier: Modifier = Modifier,
+    contentModifier: Modifier = Modifier,
+) {
+
+    AnimatedContent(
+        targetState = state.value,
+        contentKey = {},
+        transitionSpec = { fadeIn(snap()) togetherWith fadeOut(snap()) },
+        modifier = modifier
+    ) { data ->
+
+        val offset = animateFloatAsState(if (data.showButton) 0f else 1f)
+
+        VocabPracticeAnswersRow(
+            answers = data.answers,
+            onClick = onClick,
+            enableKeyboardControls = data.showButton,
+            modifier = Modifier.fillMaxSize()
+                .graphicsLayer { translationY = size.height * offset.value },
+            contentModifier = contentModifier
+        )
+
+    }
+
+}
+
+@Composable
+private fun RowScope.AnswerButton(
+    srsCard: SrsCard,
+    label: String,
+    onClick: (SrsCard) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    val offset = animateFloatAsState(if (showNextButton.value) 0f else 1f)
-
-    Row(
-        modifier = modifier.graphicsLayer { translationY = size.height * offset.value }
-            .fillMaxWidth()
-            .wrapContentWidth()
-            .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp)
-            .height(IntrinsicSize.Min)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-            .padding(vertical = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        modifier = Modifier.weight(1f)
+            .fillMaxHeight()
+            .clickable(onClick = { onClick(srsCard) })
+            .then(modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        IconButton(
-            onClick = onFeedbackClick,
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            modifier = Modifier.fillMaxHeight()
-                .aspectRatio(1f)
-        ) {
-            Icon(Icons.Default.Flag, null)
-        }
-
-        Button(
-            onClick = onClick,
-            colors = ButtonDefaults.neutralButtonColors(),
-            modifier = Modifier.weight(1f).fillMaxHeight()
-        ) {
-            Text(
-                text = resolveString { vocabPractice.nextButton },
-                style = MaterialTheme.typography.titleMedium
-            )
-            Icon(Icons.AutoMirrored.Filled.NavigateNext, null)
-        }
+        Text(
+            text = srsFormatDuration(srsCard.interval),
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White
+        )
     }
 
 }

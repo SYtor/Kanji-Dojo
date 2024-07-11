@@ -23,7 +23,9 @@ enum class SrsItemStatus { New, Done, Review }
 
 data class SrsAnswer(
     val again: SrsCard,
-    val good: SrsCard
+    val hard: SrsCard,
+    val good: SrsCard,
+    val easy: SrsCard
 )
 
 interface SrsItemRepository {
@@ -69,7 +71,9 @@ class DefaultSrsScheduler(
         return fsrsScheduler.schedule(data.fsrsCard, reviewTime).let {
             SrsAnswer(
                 again = SrsCard(it.again),
-                good = SrsCard(it.good)
+                hard = SrsCard(it.hard),
+                good = SrsCard(it.good),
+                easy = SrsCard(it.easy)
             )
         }
     }

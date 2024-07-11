@@ -39,6 +39,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -65,14 +67,17 @@ import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterDecorations
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingStatus
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeNextButton
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRowState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 
 @Composable
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
-    onNextClick: () -> Unit,
+    answers: VocabPracticeSrsAnswers,
+    onNextClick: (SrsCard) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
@@ -83,6 +88,18 @@ fun VocabPracticeWritingUI(
         derivedStateOf {
             reviewState.charactersData.filterIsInstance<VocabCharacterWritingData.WithStrokes>()
                 .all { it.writerState.writingStatus.value is CharacterWritingStatus.Completed }
+        }
+    }
+
+    val updatedState = rememberUpdatedState(showNextButton to answers)
+
+    val answersRowState = remember {
+        derivedStateOf {
+            val (updatedShowNextButtonState, updatedAnswers) = updatedState.value
+            ExpandableVocabPracticeAnswersRowState(
+                answers = updatedAnswers,
+                showButton = updatedShowNextButtonState.value
+            )
         }
     }
 
@@ -97,6 +114,8 @@ fun VocabPracticeWritingUI(
                     bottomOverlayContent = {
                         Input(
                             state = reviewState.selected,
+                            answersState = answersRowState,
+                            onNextClick = onNextClick,
                             modifier = Modifier.fillMaxWidth()
                                 .padding(20.dp)
                                 .wrapContentSize()
@@ -131,6 +150,8 @@ fun VocabPracticeWritingUI(
 
                     Input(
                         state = reviewState.selected,
+                        answersState = answersRowState,
+                        onNextClick = onNextClick,
                         modifier = Modifier.weight(1f)
                             .fillMaxHeight()
                             .padding(20.dp)
@@ -142,13 +163,6 @@ fun VocabPracticeWritingUI(
                 }
             }
         }
-
-        VocabPracticeNextButton(
-            showNextButton = showNextButton,
-            onClick = onNextClick,
-            onFeedbackClick = { onFeedbackClick(reviewState.word) },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
 
     }
 
@@ -216,10 +230,16 @@ private fun Progress(
 @Composable
 private fun Input(
     state: State<VocabCharacterWritingData>,
+    answersState: State<ExpandableVocabPracticeAnswersRowState>,
+    onNextClick: (SrsCard) -> Unit,
     modifier: Modifier
 ) {
+
     CharacterWriterDecorations(
-        modifier = modifier
+        modifier = modifier,
+        state = derivedStateOf {
+            state.value.let { it as? VocabCharacterWritingData.WithStrokes }?.writerState
+        }
     ) {
 
         Crossfade(
@@ -235,7 +255,18 @@ private fun Input(
             }
 
         }
+
+        ExpandableVocabPracticeAnswersRow(
+            state = answersState,
+            onClick = onNextClick,
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max)
+                .align(Alignment.BottomCenter),
+            contentModifier = Modifier.padding(20.dp).clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface)
+        )
+
     }
+
 }
 
 private enum class CharacterWritingDisplayState { NoWritingData, Writing, Correct, Failed }

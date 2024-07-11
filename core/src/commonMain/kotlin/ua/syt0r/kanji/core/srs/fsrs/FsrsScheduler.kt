@@ -63,6 +63,7 @@ class DefaultFsrsScheduler(
                 )
                 easy = card.next(
                     status = FsrsCardStatus.Review,
+                    params = easyParams,
                     interval = fsrsAlgorithm.nextInterval(easyParams)
                 )
             }
