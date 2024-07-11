@@ -34,10 +34,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -58,6 +56,7 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.BottomSheetState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomSheet
 
@@ -65,7 +64,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VocabDashboardScreenUI(
-    state: State<ScreenState>,
+    screenState: State<ScreenState>,
+    bottomSheetState: State<BottomSheetState>,
     select: (DashboardVocabDeck) -> Unit,
     createDeck: () -> Unit,
     onEditClick: (DashboardVocabDeck) -> Unit,
@@ -73,10 +73,6 @@ fun VocabDashboardScreenUI(
 ) {
 
     val extraListSpacerState = rememberExtraListSpacerState()
-
-    val deckSelectionState = remember {
-        derivedStateOf { state.value.let { it as? ScreenState.Loaded }?.deckSelectionState?.value }
-    }
 
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -87,7 +83,7 @@ fun VocabDashboardScreenUI(
             tonalElevation = 0.dp
         ) {
             VocabDashboardBottomSheet(
-                state = deckSelectionState,
+                state = bottomSheetState,
                 onEditClick = { onEditClick(it) },
                 navigateToPractice = navigateToPractice
             )
@@ -95,8 +91,8 @@ fun VocabDashboardScreenUI(
     }
 
     LaunchedEffect(Unit) {
-        snapshotFlow { deckSelectionState.value }
-            .filterIsInstance<VocabDeckSelectionState.Hidden>()
+        snapshotFlow { bottomSheetState.value }
+            .filterIsInstance<BottomSheetState.Hidden>()
             .onEach {
                 sheetState.hide()
                 showBottomSheet = false
@@ -109,7 +105,7 @@ fun VocabDashboardScreenUI(
     ) {
 
         AnimatedContent(
-            targetState = state.value,
+            targetState = screenState.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             modifier = Modifier.fillMaxSize()
         ) { screenState ->

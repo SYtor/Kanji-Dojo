@@ -16,12 +16,12 @@ fun VocabDashboardScreen(
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.invalidate()
         viewModel.reportScreenShown()
     }
 
     VocabDashboardScreenUI(
-        state = viewModel.state.collectAsState(),
+        screenState = viewModel.screenState.collectAsState(),
+        bottomSheetState = viewModel.bottomSheetState.collectAsState(),
         select = { viewModel.select(it) },
         createDeck = {
             mainNavigationState.navigate(

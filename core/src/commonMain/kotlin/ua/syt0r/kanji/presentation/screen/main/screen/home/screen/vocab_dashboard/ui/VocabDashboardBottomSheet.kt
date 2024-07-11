@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -57,6 +58,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
@@ -66,25 +68,38 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDeckSelectionState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.BottomSheetState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDeckSrsProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticePreviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 @Composable
 fun VocabDashboardBottomSheet(
-    state: State<VocabDeckSelectionState?>,
+    state: State<BottomSheetState?>,
     onEditClick: (DashboardVocabDeck) -> Unit,
     navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     val currentState = state.value
-    if (currentState !is VocabDeckSelectionState.DeckSelected) {
+    if (currentState !is BottomSheetState.DeckSelected) {
         CircularProgressIndicator(
             modifier = Modifier.fillMaxWidth()
                 .heightIn(min = 200.dp, max = 400.dp)
                 .wrapContentSize()
         )
         return
+    }
+
+    var shouldShowSrsDialog by remember { mutableStateOf(false) }
+    if (shouldShowSrsDialog) {
+        VocabSrsDialog(
+            onDismissRequest = { shouldShowSrsDialog = false },
+            initial = currentState.srsPracticeType.value,
+            onSelected = {
+                currentState.srsPracticeType.value = it
+                shouldShowSrsDialog = false
+            }
+        )
     }
 
     var selectedWord by remember { mutableStateOf<JapaneseWord?>(null) }
@@ -95,25 +110,33 @@ fun VocabDashboardBottomSheet(
         )
     }
 
-    val wordsState = currentState.words.collectAsState()
-    val wordsVisible = rememberSaveable(currentState.deck.titleResolver) { mutableStateOf(false) }
-    val wordsHidingOverlayAlpha = animateFloatAsState(
-        targetValue = if (wordsVisible.value) 0f else 1f
+    val displaySrsProgress = currentState.deck.srsProgress.getValue(
+        key = currentState.srsPracticeType.value
     )
+
+    val wordsVisible = rememberSaveable(currentState.deck) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.heightIn(min = 400.dp)
     ) {
 
         val collapsibleContainerState = rememberCollapsibleContainerState()
+
         CollapsibleContainer(collapsibleContainerState) {
             ScreenBottomSheetHeader(
-                selectionState = currentState,
+                deck = currentState.deck,
+                srsProgress = displaySrsProgress,
                 showWords = wordsVisible,
+                onSrsConfigClick = { shouldShowSrsDialog = true },
                 onEditClick = onEditClick,
                 startPractice = { navigateToPractice(MainDestination.VocabPractice(it)) }
             )
         }
+
+        val wordsState = currentState.words.collectAsState()
+        val wordsHidingOverlayAlpha = animateFloatAsState(
+            targetValue = if (wordsVisible.value) 0f else 1f
+        )
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -129,8 +152,17 @@ fun VocabDashboardBottomSheet(
                         VocabItem(
                             listIndex = index,
                             word = word,
+                            srsItemStatus = when {
+                                displaySrsProgress.new.contains(word.id) -> SrsItemStatus.New
+                                displaySrsProgress.due.contains(word.id) -> SrsItemStatus.Review
+                                displaySrsProgress.done.contains(word.id) -> SrsItemStatus.Done
+                                else -> {
+                                    throw IllegalStateException("No srs status for word[${word.id}]")
+                                }
+                            },
                             overlayAlpha = wordsHidingOverlayAlpha,
-                            onClick = { selectedWord = word })
+                            onClick = { selectedWord = word }
+                        )
                     }
                 }
 
@@ -150,23 +182,13 @@ fun VocabDashboardBottomSheet(
 
 @Composable
 private fun ScreenBottomSheetHeader(
-    selectionState: VocabDeckSelectionState.DeckSelected,
+    deck: DashboardVocabDeck,
+    srsProgress: VocabDeckSrsProgress,
     showWords: MutableState<Boolean>,
+    onSrsConfigClick: () -> Unit,
     onEditClick: (DashboardVocabDeck) -> Unit,
     startPractice: (words: List<Long>) -> Unit
 ) {
-
-    var shouldShowSrsDialog by remember { mutableStateOf(false) }
-    if (shouldShowSrsDialog) {
-        VocabSrsDialog(
-            onDismissRequest = { shouldShowSrsDialog = false },
-            initial = selectionState.displayPracticeType.value,
-            onSelected = {
-                selectionState.displayPracticeType.value = it
-                shouldShowSrsDialog = false
-            }
-        )
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
@@ -180,16 +202,16 @@ private fun ScreenBottomSheetHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = resolveString(selectionState.deck.titleResolver),
+                text = resolveString(deck.titleResolver),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
 
             IconButton(
-                onClick = { onEditClick(selectionState.deck) }
+                onClick = { onEditClick(deck) }
             ) {
                 Icon(
-                    imageVector = when (selectionState.deck is DashboardVocabDeck.Default) {
+                    imageVector = when (deck is DashboardVocabDeck.Default) {
                         true -> Icons.AutoMirrored.Filled.PlaylistAdd
                         false -> Icons.Default.Edit
                     },
@@ -228,7 +250,7 @@ private fun ScreenBottomSheetHeader(
                     .wrapContentSize()
                     .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { shouldShowSrsDialog = true }
+                    .clickable(onClick = onSrsConfigClick)
                     .padding(4.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -239,32 +261,28 @@ private fun ScreenBottomSheetHeader(
                 style = MaterialTheme.typography.labelLarge
             )
 
-            val displaySrsProgress = selectionState.deck.srsProgress.getValue(
-                key = selectionState.displayPracticeType.value
-            )
-
             SrsButton(
                 color = MaterialTheme.colorScheme.outline,
                 label = "All",
-                words = displaySrsProgress.all,
+                words = srsProgress.all,
                 onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.success,
                 label = "Done",
-                words = displaySrsProgress.done,
+                words = srsProgress.done,
                 onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.due,
                 label = "Due",
-                words = displaySrsProgress.due,
+                words = srsProgress.due,
                 onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.new,
                 label = "New",
-                words = displaySrsProgress.new,
+                words = srsProgress.new,
                 onClick = startPractice
             )
 
@@ -315,25 +333,44 @@ private fun RowScope.SrsButton(
 private fun VocabItem(
     listIndex: Int,
     word: JapaneseWord,
+    srsItemStatus: SrsItemStatus,
     overlayAlpha: State<Float>,
     onClick: () -> Unit
 ) {
     val hiddenColor = MaterialTheme.colorScheme.surfaceVariant
-    FuriganaText(
-        furiganaString = word.orderedPreview(listIndex),
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.small)
-            .drawWithContent {
-                drawContent()
-                drawRoundRect(
-                    color = hiddenColor.copy(alpha = overlayAlpha.value),
-                    size = size,
-                    cornerRadius = CornerRadius(4.dp.toPx())
-                )
-            }
-            .clickable(enabled = overlayAlpha.value == 0f, onClick = onClick)
-            .padding(horizontal = 8.dp)
-    )
+    val srsIndicatorColor = when (srsItemStatus) {
+        SrsItemStatus.New -> MaterialTheme.extraColorScheme.new
+        SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
+        SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
+    }
+    Row(
+        modifier = Modifier.height(IntrinsicSize.Max),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+
+        Box(
+            Modifier.width(6.dp).fillMaxHeight()
+                .background(srsIndicatorColor, MaterialTheme.shapes.small)
+        )
+
+        FuriganaText(
+            furiganaString = word.orderedPreview(listIndex),
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.small)
+                .drawWithContent {
+                    drawContent()
+                    drawRoundRect(
+                        color = hiddenColor.copy(alpha = overlayAlpha.value),
+                        size = size,
+                        cornerRadius = CornerRadius(4.dp.toPx())
+                    )
+                }
+                .clickable(enabled = overlayAlpha.value == 0f, onClick = onClick)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+
+    }
+
 }
 
 

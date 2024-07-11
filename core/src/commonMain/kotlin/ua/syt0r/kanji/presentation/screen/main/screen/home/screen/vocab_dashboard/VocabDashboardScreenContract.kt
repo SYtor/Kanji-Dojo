@@ -1,13 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.flow.StateFlow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 interface VocabDashboardScreenContract {
 
     interface ViewModel {
-        val state: StateFlow<ScreenState>
-        fun invalidate()
+        val screenState: StateFlow<ScreenState>
+        val bottomSheetState: StateFlow<BottomSheetState>
         fun select(deck: DashboardVocabDeck)
         fun reportScreenShown()
     }
@@ -18,9 +19,22 @@ interface VocabDashboardScreenContract {
 
         data class Loaded(
             val userDecks: List<DashboardVocabDeck>,
-            val defaultDecks: List<DashboardVocabDeck>,
-            val deckSelectionState: State<VocabDeckSelectionState>
+            val defaultDecks: List<DashboardVocabDeck>
         ) : ScreenState
+
+    }
+
+    sealed interface BottomSheetState {
+
+        object Loading : BottomSheetState
+
+        object Hidden : BottomSheetState
+
+        data class DeckSelected(
+            val deck: DashboardVocabDeck,
+            val srsPracticeType: MutableState<VocabPracticeType>,
+            val words: StateFlow<VocabPracticePreviewState>
+        ) : BottomSheetState
 
     }
 

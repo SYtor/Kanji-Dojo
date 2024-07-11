@@ -1,7 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
-import androidx.compose.runtime.MutableState
-import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
@@ -34,20 +32,6 @@ data class VocabDeckSrsProgress(
     val due: List<Long>,
     val new: List<Long>
 )
-
-sealed interface VocabDeckSelectionState {
-
-    object Loading : VocabDeckSelectionState
-
-    object Hidden : VocabDeckSelectionState
-
-    data class DeckSelected(
-        val deck: DashboardVocabDeck,
-        val displayPracticeType: MutableState<VocabPracticeType>,
-        val words: StateFlow<VocabPracticePreviewState>
-    ) : VocabDeckSelectionState
-
-}
 
 sealed interface VocabPracticePreviewState {
     object Loading : VocabPracticePreviewState
