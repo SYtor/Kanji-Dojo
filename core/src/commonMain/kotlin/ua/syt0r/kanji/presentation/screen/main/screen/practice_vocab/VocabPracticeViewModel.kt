@@ -112,6 +112,10 @@ class VocabPracticeViewModel(
         viewModelScope.launch { practiceQueue.completeCurrentReview(srsCard) }
     }
 
+    override fun finishPractice() {
+        practiceQueue.finishPractice()
+    }
+
     override fun reportScreenShown() {
         analyticsManager.setScreen("expression_practice")
     }

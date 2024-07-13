@@ -38,6 +38,7 @@ interface VocabPracticeQueue {
 
     suspend fun initialize(expressions: List<VocabQueueItemDescriptor>)
     suspend fun completeCurrentReview(srsItem: SrsCard)
+    fun finishPractice()
 }
 
 data class VocabPracticeQueueItem(
@@ -90,6 +91,13 @@ class DefaultVocabPracticeQueue(
         nextRequests.send(srsItem)
     }
 
+    override fun finishPractice() {
+        _state.value = VocabReviewQueueState.Summary(
+            duration = timeUtils.now() - practiceStartInstant,
+            items = summaryItems
+        )
+    }
+
     private fun getProgress(): VocabQueueProgress {
         return VocabQueueProgress(
             pending = queue.count { it.repeats == 0 },
@@ -113,10 +121,7 @@ class DefaultVocabPracticeQueue(
     private suspend fun updateState() {
         val item = queue.getOrNull(0)
         if (item == null) {
-            _state.value = VocabReviewQueueState.Summary(
-                duration = timeUtils.now() - practiceStartInstant,
-                items = summaryItems
-            )
+            finishPractice()
         } else {
             if (!item.deferredState.isCompleted) {
                 _state.value = VocabReviewQueueState.Loading

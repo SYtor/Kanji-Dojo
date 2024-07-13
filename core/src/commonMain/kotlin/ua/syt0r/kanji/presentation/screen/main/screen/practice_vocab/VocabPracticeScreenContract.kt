@@ -23,6 +23,7 @@ interface VocabPracticeScreenContract {
         fun revealFlashcard()
         fun submitReadingPickerAnswer(answer: String)
         fun next(srsCard: SrsCard)
+        fun finishPractice()
 
         fun reportScreenShown()
     }

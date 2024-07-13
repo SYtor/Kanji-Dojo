@@ -32,11 +32,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +66,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
+import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
@@ -75,7 +78,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeLeaveConfirmationDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgressCounter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
@@ -97,14 +99,18 @@ fun VocabPracticeScreenUI(
     onReadingPickerAnswerSelected: (String) -> Unit,
     onNext: (SrsCard) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    finishPractice: () -> Unit
 ) {
 
-    var showLeaveConfirmation by rememberSaveable { mutableStateOf(false) }
-    if (showLeaveConfirmation) {
-        PracticeLeaveConfirmationDialog(
-            onDismissRequest = { showLeaveConfirmation = false },
-            onConfirmClick = navigateBack
+    var showPracticeFinishDialog by rememberSaveable { mutableStateOf(false) }
+    if (showPracticeFinishDialog) {
+        PracticeEarlyFinishDialog(
+            onDismissRequest = { showPracticeFinishDialog = false },
+            onConfirmClick = {
+                finishPractice()
+                showPracticeFinishDialog = false
+            }
         )
     }
 
@@ -114,7 +120,7 @@ fun VocabPracticeScreenUI(
         }
 
         if (isSafeToLeave) navigateBack()
-        else showLeaveConfirmation = true
+        else showPracticeFinishDialog = true
     }
 
     Scaffold(
@@ -334,7 +340,9 @@ private fun ScreenSummary(
             Button(
                 onClick = onFinishClick,
                 colors = ButtonDefaults.neutralButtonColors(),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+                modifier = Modifier.fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface.copy(0.4f))
+                    .padding(vertical = 20.dp)
             ) {
                 Text(text = resolveString { commonPractice.savedButton })
             }
@@ -354,7 +362,10 @@ private fun ScreenSummary(
             data = resolveString { screenState.results.size.toString() }
         )
 
-        screenState.results.forEachIndexed { index, item -> SummaryItem(index, item) }
+        screenState.results.forEachIndexed { index, item ->
+            SummaryItem(index, item)
+            if (index != screenState.results.size - 1) HorizontalDivider()
+        }
 
     }
 
@@ -365,11 +376,10 @@ private fun SummaryItem(
     index: Int,
     item: VocabSummaryItem
 ) {
-    Row(
+    Column(
         modifier = Modifier.fillMaxWidth()
             .padding(vertical = 4.dp)
-            .height(IntrinsicSize.Min),
-        verticalAlignment = Alignment.CenterVertically
+            .height(IntrinsicSize.Min)
     ) {
 
         FuriganaText(
@@ -377,13 +387,19 @@ private fun SummaryItem(
                 append("${index + 1}. ")
                 append(item.reading)
             },
-            modifier = Modifier.weight(1f).alignByBaseline()
+            modifier = Modifier
         )
 
-        Text(
-            text = "Next review: ${srsFormatDuration(item.nextReview - Clock.System.now())}",
-            modifier = Modifier.alignByBaseline()
-        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = "Next review:",
+                modifier = Modifier.weight(1f).alignByBaseline()
+            )
+            Text(
+                text = srsFormatDuration(duration = item.nextReview - Clock.System.now()),
+                modifier = Modifier.alignByBaseline()
+            )
+        }
 
     }
 }
@@ -545,5 +561,38 @@ fun srsFormatDuration(duration: Duration): String = when {
 
 private fun StringBuilder.appendIfNot0(number: Long, text: (Long) -> String) {
     if (number != 0L) append(text(number))
+}
+
+@Composable
+private fun PracticeEarlyFinishDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+
+    val strings = resolveString { commonPractice }
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = resolveString { "Finish practice?" },
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        content = {
+            Text(
+                text = resolveString { "Navigate to the summary, your current progress is saved" },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = resolveString { "Cancel" })
+            }
+            TextButton(onClick = onConfirmClick) {
+                Text(text = resolveString { "OK" })
+            }
+        }
+    )
 }
 
