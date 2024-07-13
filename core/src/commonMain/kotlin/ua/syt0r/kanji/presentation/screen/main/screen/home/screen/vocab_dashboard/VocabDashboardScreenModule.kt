@@ -23,7 +23,7 @@ val vocabDashboardScreenModule = module {
         DefaultSubscribeOnDashboardVocabDecksUseCase(
             repository = get(),
             srsItemRepository = get(),
-            timeUtils = get()
+            getSrsStatusUseCase = get()
         )
     }
 

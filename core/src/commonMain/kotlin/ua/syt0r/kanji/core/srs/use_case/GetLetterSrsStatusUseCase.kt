@@ -3,7 +3,6 @@ package ua.syt0r.kanji.core.srs.use_case
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.srs.CharacterSrsData
 import ua.syt0r.kanji.core.srs.CharacterStudyProgressCache
 import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
@@ -20,7 +19,8 @@ interface GetLetterSrsStatusUseCase {
 }
 
 class DefaultGetLetterSrsStatusUseCase(
-    private val characterStudyProgressCache: CharacterStudyProgressCache
+    private val characterStudyProgressCache: CharacterStudyProgressCache,
+    private val getSrsStatusUseCase: GetSrsStatusUseCase
 ) : GetLetterSrsStatusUseCase {
 
     override suspend fun invoke(
@@ -31,14 +31,15 @@ class DefaultGetLetterSrsStatusUseCase(
         val studyProgress: CharacterStudyProgress? = characterStudyProgressCache.get(letter)
             .find { it.practiceType == practiceType }
         val expectedReviewDate = studyProgress?.getExpectedReviewTime(DEFAULT_SRS_INTERVAL)
-            ?.toLocalDateTime(TimeZone.currentSystemDefault())
-            ?.date
-        val status = when {
-            expectedReviewDate == null -> SrsItemStatus.New
-            expectedReviewDate > date -> SrsItemStatus.Done
-            else -> SrsItemStatus.Review
-        }
-        return CharacterSrsData(letter, status, expectedReviewDate, studyProgress)
+        val status = getSrsStatusUseCase(expectedReviewDate)
+        return CharacterSrsData(
+            character = letter,
+            status = status,
+            expectedReviewDate = expectedReviewDate
+                ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                ?.date,
+            studyProgress = studyProgress
+        )
     }
 
     companion object {

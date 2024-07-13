@@ -1,4 +1,4 @@
-PRAGMA user_version = 7;
+PRAGMA user_version = 8;
 
 CREATE TABLE IF NOT EXISTS practice (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -61,6 +61,25 @@ CREATE TABLE IF NOT EXISTS vocab_deck_entry (
     FOREIGN KEY(deck_id) REFERENCES vocab_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS fsrs_card (
+    key TEXT NOT NULL,
+    practice_type TEXT NOT NULL,
+    status INTEGER NOT NULL,
+    stability REAL NOT NULL,
+    difficulty REAL NOT NULL,
+    lapses INTEGER NOT NULL,
+    repeats INTEGER NOT NULL,
+    last_review INTEGER NOT NULL,
+    interval INTEGER NOT NULL,
+    PRIMARY KEY(key, practice_type)
+);
+
+upsertFsrsCard:
+INSERT OR REPLACE INTO fsrs_card
+VALUES ?;
+
+getFsrsCards:
+SELECT * FROM fsrs_card;
 
 getLastInsertRowId:
 SELECT last_insert_rowid();

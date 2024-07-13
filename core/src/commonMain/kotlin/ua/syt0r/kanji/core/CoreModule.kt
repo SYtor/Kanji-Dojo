@@ -27,7 +27,9 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.practice.FsrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.SqlDelightFsrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightLetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
@@ -57,6 +59,12 @@ val coreModule = module {
         SqlDelightVocabPracticeRepository(
             databaseManager = get(),
             srsItemRepository = get()
+        )
+    }
+
+    single<FsrsItemRepository> {
+        SqlDelightFsrsItemRepository(
+            userDataDatabaseManager = get()
         )
     }
 

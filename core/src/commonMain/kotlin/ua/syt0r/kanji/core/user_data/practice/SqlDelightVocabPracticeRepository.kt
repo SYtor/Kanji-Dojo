@@ -5,7 +5,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import ua.syt0r.kanji.core.mergeSharedFlows
-import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 

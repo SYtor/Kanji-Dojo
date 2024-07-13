@@ -3,7 +3,7 @@ package ua.syt0r.kanji.core.srs
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCard
-import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
+import ua.syt0r.kanji.core.user_data.practice.FsrsItemRepository
 import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import kotlin.time.Duration
 

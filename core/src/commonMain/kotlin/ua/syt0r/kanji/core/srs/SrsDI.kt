@@ -3,13 +3,14 @@ package ua.syt0r.kanji.core.srs
 import org.koin.core.module.Module
 import ua.syt0r.kanji.core.srs.fsrs.DefaultFsrsScheduler
 import ua.syt0r.kanji.core.srs.fsrs.Fsrs45
-import ua.syt0r.kanji.core.srs.fsrs.FsrsItemRepository
 import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterSrsStatusUseCase
+import ua.syt0r.kanji.core.srs.use_case.DefaultGetSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultNotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
+import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 
 fun Module.applySrsDefinitions() {
@@ -42,15 +43,20 @@ fun Module.applySrsDefinitions() {
         )
     }
 
+    factory<GetSrsStatusUseCase> {
+        DefaultGetSrsStatusUseCase(timeUtils = get())
+    }
+
     factory<GetLetterSrsStatusUseCase> {
-        DefaultGetLetterSrsStatusUseCase(characterStudyProgressCache = get())
+        DefaultGetLetterSrsStatusUseCase(
+            characterStudyProgressCache = get(),
+            getSrsStatusUseCase = get()
+        )
     }
 
     single<SrsItemRepository> {
         DefaultSrsItemRepository(fsrsItemRepository = get())
     }
-
-    single { FsrsItemRepository() }
 
     factory<SrsScheduler> { DefaultSrsScheduler(fsrsScheduler = get()) }
     factory<FsrsScheduler> { DefaultFsrsScheduler(Fsrs45()) }

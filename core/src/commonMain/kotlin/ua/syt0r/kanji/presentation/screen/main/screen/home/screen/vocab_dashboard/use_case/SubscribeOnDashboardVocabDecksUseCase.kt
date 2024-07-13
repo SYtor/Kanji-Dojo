@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsItemStatus
-import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
@@ -30,7 +30,7 @@ data class VocabDecks(
 class DefaultSubscribeOnDashboardVocabDecksUseCase(
     private val repository: VocabPracticeRepository,
     private val srsItemRepository: SrsItemRepository,
-    private val timeUtils: TimeUtils
+    private val getSrsStatusUseCase: GetSrsStatusUseCase
 ) : SubscribeOnDashboardVocabDecksUseCase {
 
     override fun invoke(
@@ -51,18 +51,12 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         val defaultDeckWords = vocabDecks.flatMap { it.expressionIds }.toSet()
         val deckWords = userDeckWords + defaultDeckWords
 
-        val instant = timeUtils.now()
-
         val wordProgresses: Map<Long, WordSrsProgress> = deckWords.associateWith { wordId ->
             WordSrsProgress(
                 statuses = VocabPracticeType.values().associateWith { practiceType ->
                     val srsItemData = srsItemRepository.get(practiceType.toSrsItemKey(wordId))
-
-                    when {
-                        srsItemData?.lastReview == null -> SrsItemStatus.New
-                        srsItemData.lastReview + srsItemData.interval > instant -> SrsItemStatus.Done
-                        else -> SrsItemStatus.Review
-                    }
+                    val expectedReviewTime = srsItemData?.lastReview?.plus(srsItemData.interval)
+                    getSrsStatusUseCase(expectedReviewTime)
                 }
             )
         }
