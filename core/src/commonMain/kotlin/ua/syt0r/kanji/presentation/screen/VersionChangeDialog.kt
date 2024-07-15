@@ -42,6 +42,16 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.0.8", LocalDate(2024, 7, 16)) {
+                    append(
+                        """
+                        - Implemented FSRS support for vocab practice
+                        - Added text field in addition to slider for items selection when configuring practice
+                        - Added more info about radicals on kanji info screen
+                        - UI updates
+                        """.trimIndent()
+                    )
+                }
                 version("2.0.7", LocalDate(2024, 6, 27)) {
                     append(
                         """

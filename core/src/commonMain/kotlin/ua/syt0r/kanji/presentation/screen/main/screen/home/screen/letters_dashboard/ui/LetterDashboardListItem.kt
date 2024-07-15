@@ -94,7 +94,7 @@ fun LetterDashboardListItem(
 
             Column(
                 modifier = Modifier.weight(1f)
-                    .padding(start = 20.dp)
+                    .padding(start = 16.dp)
                     .padding(vertical = 10.dp),
             ) {
 
