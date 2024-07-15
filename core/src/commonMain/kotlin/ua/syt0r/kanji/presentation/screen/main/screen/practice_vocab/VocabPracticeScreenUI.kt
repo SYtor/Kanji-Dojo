@@ -89,7 +89,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabS
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
-import kotlin.time.Duration
 
 @Composable
 fun VocabPracticeScreenUI(
@@ -390,13 +389,17 @@ private fun SummaryItem(
             modifier = Modifier
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
-                text = "Next review:",
+                text = resolveString { vocabPractice.summaryNextReviewLabel },
                 modifier = Modifier.weight(1f).alignByBaseline()
             )
             Text(
-                text = srsFormatDuration(duration = item.nextReview - Clock.System.now()),
+                text = resolveString {
+                    vocabPractice.formattedSrsInterval(item.nextReview - Clock.System.now())
+                },
                 modifier = Modifier.alignByBaseline()
             )
         }
@@ -446,26 +449,26 @@ fun VocabPracticeAnswersRow(
     ) {
         AnswerButton(
             srsCard = answers.again,
-            label = "Again",
+            label = resolveString { vocabPractice.againButton },
             onClick = onClick,
             modifier = Modifier.background(MaterialTheme.colorScheme.error)
                 .padding(start = 2.dp)
         )
         AnswerButton(
             srsCard = answers.hard,
-            label = "Hard",
+            label = resolveString { vocabPractice.hardButton },
             onClick = onClick,
             modifier = Modifier.background(MaterialTheme.extraColorScheme.due)
         )
         AnswerButton(
             srsCard = answers.good,
-            label = "Good",
+            label = resolveString { vocabPractice.goodButton },
             onClick = onClick,
             modifier = Modifier.background(MaterialTheme.extraColorScheme.success)
         )
         AnswerButton(
             srsCard = answers.easy,
-            label = "Easy",
+            label = resolveString { vocabPractice.easyButton },
             onClick = onClick,
             modifier = Modifier.background(MaterialTheme.extraColorScheme.new)
                 .padding(end = 2.dp)
@@ -527,7 +530,7 @@ private fun RowScope.AnswerButton(
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
-            text = srsFormatDuration(srsCard.interval),
+            text = resolveString { vocabPractice.formattedSrsInterval(srsCard.interval) },
             style = MaterialTheme.typography.labelMedium,
             color = Color.White
         )
@@ -540,57 +543,34 @@ private fun RowScope.AnswerButton(
 
 }
 
-fun srsFormatDuration(duration: Duration): String = when {
-    duration.inWholeDays > 0 -> buildString {
-        append("${duration.inWholeDays}d")
-        appendIfNot0(duration.inWholeHours % 24) { " ${it}h" }
-    }
-
-    duration.inWholeHours > 0 -> buildString {
-        append("${duration.inWholeHours}h")
-        appendIfNot0(duration.inWholeMinutes % 60) { " ${it}m" }
-    }
-
-    duration.inWholeMinutes > 0 -> buildString {
-        append("${duration.inWholeMinutes}m")
-        appendIfNot0(duration.inWholeSeconds % 60) { " ${it}s" }
-    }
-
-    else -> "${duration.inWholeSeconds}s"
-}
-
-private fun StringBuilder.appendIfNot0(number: Long, text: (Long) -> String) {
-    if (number != 0L) append(text(number))
-}
-
 @Composable
 private fun PracticeEarlyFinishDialog(
     onDismissRequest: () -> Unit,
     onConfirmClick: () -> Unit
 ) {
 
-    val strings = resolveString { commonPractice }
+    val strings = resolveString { vocabPractice }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {
             Text(
-                text = resolveString { "Finish practice?" },
+                text = strings.earlyFinishDialogTitle,
                 style = MaterialTheme.typography.headlineSmall
             )
         },
         content = {
             Text(
-                text = resolveString { "Navigate to the summary, your current progress is saved" },
+                text = strings.earlyFinishDialogMessage,
                 style = MaterialTheme.typography.bodyMedium
             )
         },
         buttons = {
             TextButton(onClick = onDismissRequest) {
-                Text(text = resolveString { "Cancel" })
+                Text(text = strings.earlyFinishDialogCancelButton)
             }
             TextButton(onClick = onConfirmClick) {
-                Text(text = resolveString { "OK" })
+                Text(text = strings.earlyFinishDialogAcceptButton)
             }
         }
     )

@@ -135,8 +135,16 @@ object EnglishVocabDashboardStrings : VocabDashboardStrings {
     override val userDecksEmptyMessage: String =
         "No decks saved. Use default decks to review vocabulary or create your own decks"
     override val defaultDecksTitle: String = "Default Decks"
-    override val reviewButton: String = "Review"
-    override val wordsCount: (Int) -> String = { "Words count: $it" }
+    override val reviewLabel: String = "Start Review:"
+    override val newWordsCounter: (Int) -> String = { "New: $it" }
+    override val dueWordsCounter: (Int) -> String = { "Due: $it" }
+    override val doneWordsCounter: (Int) -> String = { "Done: $it" }
+    override val totalWordsCounter: (Int) -> String = { "All: $it" }
+    override val practiceTypeDialogTitle: String = "SRS Practice Type"
+    override val practiceTypeDialogMessage: String =
+        "Select practice type used to display review statuses"
+    override val practiceTypeDialogCancelButton: String = "Cancel"
+    override val practiceTypeDialogApplyButton: String = "Apply"
     override val deckTitleTime: String = "Time"
     override val deckTitleWeek: String = "Week Days"
     override val deckTitleCommonVerbs: String = "Common Verbs"
@@ -497,9 +505,7 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogButton: String = "Confirm"
 
     override val configurationTitle: String = "Practice Configuration"
-    override val configurationCharactersCount = { selected: Int, total: Int ->
-        "Selected characters $selected/$total"
-    }
+    override val configurationSelectedItemsLabel: String = "Selected:"
     override val configurationCharactersPreview: String = "Characters preview"
     override val shuffleConfigurationTitle: String = "Shuffle"
     override val shuffleConfigurationMessage: String = "Randomizes review order"
@@ -596,8 +602,47 @@ object EnglishVocabPracticeStrings : VocabPracticeStrings {
     override val translationInFrontConfigurationMessage: String =
         "Show translation instead of word when flashcard is hidden"
     override val detailsButton: String = "Details"
-    override val nextButton: String = "Next"
+    override val formattedSrsInterval: (Duration) -> String = { formattedSrsDuration(it) }
+    override val againButton: String = "Again"
+    override val hardButton: String = "Hard"
+    override val goodButton: String = "Good"
+    override val easyButton: String = "Easy"
     override val summaryItemsCountTitle: String = "Reviewed Words"
+    override val summaryNextReviewLabel: String = "Next review:"
+    override val earlyFinishDialogTitle: String = "Finish practice?"
+    override val earlyFinishDialogMessage: String =
+        "Navigate to the summary, your current progress is already saved"
+    override val earlyFinishDialogCancelButton: String = "Cancel"
+    override val earlyFinishDialogAcceptButton: String = "Finish"
+}
+
+fun formattedSrsDuration(
+    duration: Duration,
+    dayLabel: String = "d",
+    hourLabel: String = "h",
+    minuteLabel: String = "m",
+    secondLabel: String = "s",
+): String = when {
+    duration.inWholeDays > 0 -> buildString {
+        append("${duration.inWholeDays}$dayLabel")
+        appendIfNot0(duration.inWholeHours % 24) { " ${it}$hourLabel" }
+    }
+
+    duration.inWholeHours > 0 -> buildString {
+        append("${duration.inWholeHours}$hourLabel")
+        appendIfNot0(duration.inWholeMinutes % 60) { " ${it}$minuteLabel" }
+    }
+
+    duration.inWholeMinutes > 0 -> buildString {
+        append("${duration.inWholeMinutes}$minuteLabel")
+        appendIfNot0(duration.inWholeSeconds % 60) { " ${it}$secondLabel" }
+    }
+
+    else -> "${duration.inWholeSeconds}$secondLabel"
+}
+
+private fun StringBuilder.appendIfNot0(number: Long, text: (Long) -> String) {
+    if (number != 0L) append(text(number))
 }
 
 object EnglishKanjiInfoStrings : KanjiInfoStrings {

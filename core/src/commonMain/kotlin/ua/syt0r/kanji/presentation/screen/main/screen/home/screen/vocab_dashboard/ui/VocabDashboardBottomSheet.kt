@@ -242,47 +242,36 @@ private fun ScreenBottomSheetHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Icon(
-                imageVector = Icons.Outlined.Settings,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize()
-                    .aspectRatio(1f, true)
-                    .wrapContentSize()
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable(onClick = onSrsConfigClick)
-                    .padding(4.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            val strings = resolveString { vocabDashboard }
 
             Text(
-                text = "Review Options:",
+                text = strings.reviewLabel,
                 modifier = Modifier.padding(vertical = 4.dp).alignByBaseline(),
                 style = MaterialTheme.typography.labelLarge
             )
 
             SrsButton(
-                color = MaterialTheme.colorScheme.outline,
-                label = "All",
-                words = srsProgress.all,
-                onClick = startPractice
-            )
-            SrsButton(
-                color = MaterialTheme.extraColorScheme.success,
-                label = "Done",
-                words = srsProgress.done,
+                color = MaterialTheme.extraColorScheme.new,
+                text = strings.newWordsCounter(srsProgress.new.size),
+                words = srsProgress.new,
                 onClick = startPractice
             )
             SrsButton(
                 color = MaterialTheme.extraColorScheme.due,
-                label = "Due",
+                text = strings.dueWordsCounter(srsProgress.due.size),
                 words = srsProgress.due,
                 onClick = startPractice
             )
             SrsButton(
-                color = MaterialTheme.extraColorScheme.new,
-                label = "New",
-                words = srsProgress.new,
+                color = MaterialTheme.extraColorScheme.success,
+                text = strings.doneWordsCounter(srsProgress.done.size),
+                words = srsProgress.done,
+                onClick = startPractice
+            )
+            SrsButton(
+                color = MaterialTheme.colorScheme.outline,
+                text = strings.totalWordsCounter(srsProgress.all.size),
+                words = srsProgress.all,
                 onClick = startPractice
             )
 
@@ -294,7 +283,7 @@ private fun ScreenBottomSheetHeader(
 @Composable
 private fun RowScope.SrsButton(
     color: Color,
-    label: String,
+    text: String,
     words: List<Long>,
     onClick: (List<Long>) -> Unit
 ) {
@@ -321,7 +310,7 @@ private fun RowScope.SrsButton(
         )
 
         Text(
-            text = "$label: ${words.size}",
+            text = text,
             fontWeight = FontWeight.Light,
             modifier = Modifier.alignByBaseline()
         )
@@ -382,15 +371,15 @@ private fun VocabSrsDialog(
 ) {
 
     val selected = remember { mutableStateOf(initial) }
+    val strings = resolveString { vocabDashboard }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("SRS Practice Type") },
+        title = { Text(strings.practiceTypeDialogTitle) },
         content = {
             Text(
-                text = "Select practice type used to display review statuses",
-                modifier = Modifier.padding(horizontal = 20.dp),
-                style = MaterialTheme.typography.labelSmall
+                text = strings.practiceTypeDialogMessage,
+                modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 10.dp)
             )
             VocabPracticeType.values().forEach {
                 SelectableRow(
@@ -402,10 +391,10 @@ private fun VocabSrsDialog(
         },
         buttons = {
             TextButton(onClick = onDismissRequest) {
-                Text("Cancel")
+                Text(strings.practiceTypeDialogCancelButton)
             }
             TextButton(onClick = { onSelected(selected.value) }) {
-                Text("Apply")
+                Text(strings.practiceTypeDialogApplyButton)
             }
         },
         paddedContent = false

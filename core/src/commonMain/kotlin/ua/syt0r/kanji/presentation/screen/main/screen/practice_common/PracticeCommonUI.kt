@@ -300,7 +300,7 @@ fun <T> PracticeConfigurationItemsSelector(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = resolveString { "Selected: " },
+            text = resolveString { commonPractice.configurationSelectedItemsLabel },
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.alignByBaseline()
         )

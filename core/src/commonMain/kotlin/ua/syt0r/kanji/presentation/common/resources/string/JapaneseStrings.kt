@@ -134,8 +134,18 @@ object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDash
     override val userDecksEmptyMessage: String =
         "デッキが保存されていません。既定デッキを使用して単語を復習するか、自分でデッキを作成してください。"
     override val defaultDecksTitle: String = "既定デッキ"
-    override val reviewButton: String = "練習へ"
-    override val wordsCount: (Int) -> String = { "単語の数：$it" }
+
+    override val reviewLabel: String = "復習を開始:"
+    override val newWordsCounter: (Int) -> String = { "未習: $it" }
+    override val dueWordsCounter: (Int) -> String = { "復習: $it" }
+    override val doneWordsCounter: (Int) -> String = { "完了: $it" }
+    override val totalWordsCounter: (Int) -> String = { "全て: $it" }
+
+    override val practiceTypeDialogTitle: String = "SRS 練習タイプ"
+    override val practiceTypeDialogMessage: String =
+        "単語の復讐状態を表示するために使用する練習タイプを選択してください"
+    override val practiceTypeDialogCancelButton: String = "キャンセル"
+    override val practiceTypeDialogApplyButton: String = "適用"
 }
 
 object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
@@ -459,9 +469,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val leaveDialogButton: String = "やめる"
 
     override val configurationTitle: String = "練習の設定"
-    override val configurationCharactersCount: (Int, Int) -> String = { selected, total ->
-        "練習の数 ($selected/$total)"
-    }
+    override val configurationSelectedItemsLabel: String = "練習の数:"
     override val configurationCharactersPreview: String = "文字のプレビュー"
     override val shuffleConfigurationTitle: String = "順序のシャッフル"
     override val shuffleConfigurationMessage: String = "復習順をランダムにする"
@@ -552,8 +560,22 @@ object JapaneseVocabPracticeStrings : VocabPracticeStrings {
     override val translationInFrontConfigurationMessage: String =
         "フラッシュカードが隠れているときに単語の代わりに翻訳を表示する"
     override val detailsButton: String = "詳細"
-    override val nextButton: String = "次へ"
+
+    override val formattedSrsInterval: (Duration) -> String = {
+        formattedSrsDuration(it, "日", "時", "分", "秒")
+    }
+    override val againButton: String = "もう一度"
+    override val hardButton: String = "難しい"
+    override val goodButton: String = "良い"
+    override val easyButton: String = "簡単"
+
     override val summaryItemsCountTitle: String = "練習した単語の数"
+    override val summaryNextReviewLabel: String = "次の復習:"
+    override val earlyFinishDialogTitle: String = "練習を終了しますか？"
+    override val earlyFinishDialogMessage: String =
+        "まとめに移動します。現在の進捗はすでに保存されています"
+    override val earlyFinishDialogCancelButton: String = "キャンセル"
+    override val earlyFinishDialogAcceptButton: String = "終了"
 }
 
 object JapaneseKanjiInfoStrings : KanjiInfoStrings {

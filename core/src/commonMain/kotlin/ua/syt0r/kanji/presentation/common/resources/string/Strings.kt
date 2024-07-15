@@ -99,8 +99,16 @@ interface VocabDashboardStrings {
     val userDecksEmptyMessage: String
     val defaultDecksTitle: String
 
-    val reviewButton: String
-    val wordsCount: (Int) -> String
+    val reviewLabel: String
+    val newWordsCounter: (Int) -> String
+    val dueWordsCounter: (Int) -> String
+    val doneWordsCounter: (Int) -> String
+    val totalWordsCounter: (Int) -> String
+
+    val practiceTypeDialogTitle: String
+    val practiceTypeDialogMessage: String
+    val practiceTypeDialogCancelButton: String
+    val practiceTypeDialogApplyButton: String
 
     val deckTitleTime: String
     val deckTitleWeek: String
@@ -422,7 +430,7 @@ interface LetterDeckDetailDialogCommonStrings {
 
 interface CommonPracticeStrings {
     val configurationTitle: String
-    val configurationCharactersCount: (selected: Int, total: Int) -> String
+    val configurationSelectedItemsLabel: String
     val configurationCharactersPreview: String
     val shuffleConfigurationTitle: String
     val shuffleConfigurationMessage: String
@@ -497,23 +505,35 @@ interface VocabPracticeStrings {
     val practiceTypeReadingPicker: String
     val practiceTypeFlashcard: String
     val practiceTypeWriting: String
+
     val readingPriorityConfigurationTitle: String
     val readingPriorityConfigurationMessage: String
     val readingPriorityConfigurationDefault: String
     val readingPriorityConfigurationKanji: String
     val readingPriorityConfigurationKana: String
+
     val readingMeaningConfigurationTitle: String
     val readingMeaningConfigurationMessage: String
+
     val translationInFrontConfigurationTitle: String
     val translationInFrontConfigurationMessage: String
 
-    val practiceProgressCounter: (current: Int, total: Int) -> String
-        get() = { a, b -> "$a / $b" }
-
     val detailsButton: String
-    val nextButton: String
+
+    val formattedSrsInterval: (Duration) -> String
+    val againButton: String
+    val hardButton: String
+    val goodButton: String
+    val easyButton: String
 
     val summaryItemsCountTitle: String
+    val summaryNextReviewLabel: String
+
+    val earlyFinishDialogTitle: String
+    val earlyFinishDialogMessage: String
+    val earlyFinishDialogCancelButton: String
+    val earlyFinishDialogAcceptButton: String
+
 }
 
 interface KanjiInfoStrings {
