@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,7 @@ class VocabDashboardViewModel(
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
-    private lateinit var srsPracticeType: VocabPracticeType
+    private lateinit var srsPracticeType: MutableState<VocabPracticeType>
 
     private val _screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     private val _bottomSheetState = MutableStateFlow<BottomSheetState>(BottomSheetState.Loading)
@@ -56,13 +57,25 @@ class VocabDashboardViewModel(
                     is RefreshableData.Loaded -> {
                         val decks = data.value
 
-                        srsPracticeType = VocabPracticeType.from(
+                        val newPracticeType = VocabPracticeType.from(
                             preferencesRepository.vocabPracticeType.get()
                         )
+
+                        if (::srsPracticeType.isInitialized)
+                            srsPracticeType.value = newPracticeType
+                        else {
+                            srsPracticeType = mutableStateOf(newPracticeType)
+                            snapshotFlow { srsPracticeType.value }
+                                .onEach {
+                                    preferencesRepository.vocabPracticeType.set(it.preferencesType)
+                                }
+                                .launchIn(viewModelScope)
+                        }
 
                         updateBottomSheetState(decks, lastSelectedDeck)
 
                         ScreenState.Loaded(
+                            srsPracticeType = srsPracticeType,
                             userDecks = decks.userDecks,
                             defaultDecks = decks.defaultDecks
                         )
@@ -74,25 +87,17 @@ class VocabDashboardViewModel(
     }
 
     override fun select(deck: DashboardVocabDeck) {
-        val srsPracticeTypeState = mutableStateOf(srsPracticeType)
         val wordsState = MutableStateFlow<VocabPracticePreviewState>(
             value = VocabPracticePreviewState.Loading
         )
 
         _bottomSheetState.value = BottomSheetState.DeckSelected(
             deck = deck,
-            srsPracticeType = srsPracticeTypeState,
+            srsPracticeType = srsPracticeType,
             words = wordsState
         )
 
         viewModelScope.launch {
-            snapshotFlow { srsPracticeTypeState.value }
-                .onEach {
-                    srsPracticeType = it
-                    preferencesRepository.vocabPracticeType.set(it.preferencesType)
-                }
-                .launchIn(viewModelScope)
-
             wordsState.value = VocabPracticePreviewState.Loaded(
                 words = getVocabDeckWordsUseCase(deck.words)
             )

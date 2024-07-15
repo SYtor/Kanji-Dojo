@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -52,6 +54,7 @@ import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
@@ -169,10 +172,13 @@ private fun ScreenLoadedState(
             )
         }
 
+        val srsPracticeType = screenState.srsPracticeType.value
+
         if (screenState.userDecks.isNotEmpty()) {
             items(screenState.userDecks) {
                 PracticeGridItem(
                     title = resolveString(it.titleResolver),
+                    hasDue = it.srsProgress.getValue(srsPracticeType).due.isNotEmpty(),
                     onClick = { select(it) }
                 )
             }
@@ -195,6 +201,7 @@ private fun ScreenLoadedState(
         items(screenState.defaultDecks) { vocabPracticeSet ->
             PracticeGridItem(
                 title = resolveString(vocabPracticeSet.titleResolver),
+                hasDue = vocabPracticeSet.srsProgress.getValue(srsPracticeType).due.isNotEmpty(),
                 onClick = { select(vocabPracticeSet) }
             )
         }
@@ -208,6 +215,7 @@ private fun ScreenLoadedState(
 @Composable
 private fun PracticeGridItem(
     title: String,
+    hasDue: Boolean,
     onClick: () -> Unit
 ) {
 
@@ -222,7 +230,14 @@ private fun PracticeGridItem(
         Text(
             text = title,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).alignByBaseline()
         )
+        if (hasDue) {
+            Box(
+                modifier = Modifier.alignBy { it.measuredHeight }
+                    .size(10.dp)
+                    .background(MaterialTheme.extraColorScheme.due, CircleShape)
+            )
+        }
     }
 }
