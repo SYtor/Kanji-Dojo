@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -11,9 +12,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -53,15 +52,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemStatus
-import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
-import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -120,18 +116,14 @@ fun VocabDashboardBottomSheet(
         modifier = Modifier.heightIn(min = 400.dp)
     ) {
 
-        val collapsibleContainerState = rememberCollapsibleContainerState()
-
-        CollapsibleContainer(collapsibleContainerState) {
-            ScreenBottomSheetHeader(
-                deck = currentState.deck,
-                srsProgress = displaySrsProgress,
-                showWords = wordsVisible,
-                onSrsConfigClick = { shouldShowSrsDialog = true },
-                onEditClick = onEditClick,
-                startPractice = { navigateToPractice(MainDestination.VocabPractice(it)) }
-            )
-        }
+        ScreenBottomSheetHeader(
+            deck = currentState.deck,
+            srsProgress = displaySrsProgress,
+            showWords = wordsVisible,
+            onSrsConfigClick = { shouldShowSrsDialog = true },
+            onEditClick = onEditClick,
+            startPractice = { navigateToPractice(MainDestination.VocabPractice(it)) }
+        )
 
         val wordsState = currentState.words.collectAsState()
         val wordsHidingOverlayAlpha = animateFloatAsState(
@@ -141,7 +133,6 @@ fun VocabDashboardBottomSheet(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
-                .nestedScroll(collapsibleContainerState.nestedScrollConnection)
                 .padding(horizontal = 20.dp)
         ) {
 
@@ -231,6 +222,14 @@ private fun ScreenBottomSheetHeader(
                 )
             }
 
+            IconButton(
+                onClick = onSrsConfigClick
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null,
+                )
+            }
         }
 
         Row(
@@ -238,7 +237,7 @@ private fun ScreenBottomSheetHeader(
                 .height(IntrinsicSize.Max)
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -406,11 +405,11 @@ private fun VocabSrsDialog(
 private fun SelectableRow(title: String, selected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 10.dp)
+            .padding(horizontal = 20.dp)
             .clip(MaterialTheme.shapes.small)
             .let { if (selected) it.background(MaterialTheme.colorScheme.surfaceVariant) else it }
             .clickable(onClick = onClick)
-            .padding(10.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
