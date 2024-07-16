@@ -49,6 +49,7 @@ fun VersionChangeDialog(
                         - Added text field in addition to slider for items selection when configuring practice
                         - Added more info about radicals on kanji info screen
                         - UI updates
+                        - Added macOs builds to Github Releases
                         """.trimIndent()
                     )
                 }

@@ -65,8 +65,59 @@ jobs:
           path: core/build/compose/jars/*.jar
           retention-days: 1
 
+  build-desktop-mac-intel:
+    runs-on: macos-13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build
+        run: ./gradlew core:packageUberJarForCurrentOS
+
+      - name: Upload Desktop Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-intel
+          path: core/build/compose/jars/*.jar
+          retention-days: 1
+
+
+  build-desktop-mac-arm:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup build environment
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Build
+        run: ./gradlew core:packageUberJarForCurrentOS
+
+      - name: Upload Desktop Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-arm
+          path: core/build/compose/jars/*.jar
+          retention-days: 1
+
   verify-uploaded-builds:
-    needs: [ build-android-and-desktop-linux, build-desktop-windows ]
+    needs:
+      - build-android-and-desktop-linux
+      - build-desktop-windows
+      - build-desktop-mac-intel
+      - build-desktop-mac-arm
     runs-on: ubuntu-latest
     steps:
       - name: Downloading artifacts
