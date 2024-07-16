@@ -86,7 +86,7 @@ class DefaultPracticeUserPreferencesRepository(
         registerProperty {
             createEnumProperty(
                 key = "vocab_practice_type",
-                initialValueProvider = { PreferencesVocabPracticeType.ReadingPicker }
+                initialValueProvider = { PreferencesVocabPracticeType.Flashcard }
             )
         }
 

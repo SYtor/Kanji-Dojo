@@ -18,13 +18,13 @@ enum class VocabPracticeType(
     override val titleResolver: StringResolveScope<String>
 ) : DisplayableEnum {
 
-    ReadingPicker(
-        preferencesType = PreferencesVocabPracticeType.ReadingPicker,
-        titleResolver = { vocabPractice.practiceTypeReadingPicker }
-    ),
     Flashcard(
         preferencesType = PreferencesVocabPracticeType.Flashcard,
         titleResolver = { vocabPractice.practiceTypeFlashcard }
+    ),
+    ReadingPicker(
+        preferencesType = PreferencesVocabPracticeType.ReadingPicker,
+        titleResolver = { vocabPractice.practiceTypeReadingPicker }
     ),
     Writing(
         preferencesType = PreferencesVocabPracticeType.Writing,
