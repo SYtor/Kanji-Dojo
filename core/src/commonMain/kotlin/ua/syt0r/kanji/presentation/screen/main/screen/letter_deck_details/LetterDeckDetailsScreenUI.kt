@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -47,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -67,13 +69,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.D
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsLayoutDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsBottomSheet
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsFilterDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsGroupsUI
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsItemsUI
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsToolbar
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsFilterDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsLayoutDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsSortDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsToolbar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -118,8 +120,12 @@ fun LetterDeckDetailsScreenUI(
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
+        modifier = Modifier.clipToBounds(),
         sheetBackgroundColor = MaterialTheme.colorScheme.surface,
-        sheetShape = MaterialTheme.shapes.large,
+        sheetShape = MaterialTheme.shapes.large.copy(
+            bottomStart = ZeroCornerSize,
+            bottomEnd = ZeroCornerSize
+        ),
         sheetContent = {
             LetterDeckDetailsBottomSheet(
                 state = state,

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,7 +82,7 @@ private fun RadicalDetailsRow(
         }
 
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min).width(IntrinsicSize.Min)
+            modifier = Modifier.height(IntrinsicSize.Max).width(IntrinsicSize.Min)
         ) {
             Text(
                 text = radicalDetails.value,
@@ -92,6 +93,7 @@ private fun RadicalDetailsRow(
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { onRadicalClick(radicalDetails.value) }
                     .padding(8.dp)
+                    .wrapContentSize(unbounded = true)
             )
 
             RadicalKanji(
