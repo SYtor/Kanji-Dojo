@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.data
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.materialPath
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -12,6 +13,7 @@ import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
@@ -24,6 +26,27 @@ enum class HomeScreenTab(
     val content: @Composable (MainNavigationState) -> Unit
 ) {
 
+    Home(
+        iconContent = {
+            Icon(androidx.compose.material.icons.materialIcon("HomeFilled") {
+                materialPath {
+                    // Move to starting point
+                    moveTo(12f, 3f)
+                    lineTo(4f, 9f)
+                    lineTo(4f, 21f)
+                    lineTo(9f, 21f)
+                    lineTo(9f, 14f)
+                    lineTo(15f, 14f)
+                    lineTo(15f, 21f)
+                    lineTo(20f, 21f)
+                    lineTo(20f, 9f)
+//                    addPath("M12,3L4,9v12h5v-7h6v7h5V9z")
+                }
+            }, null)
+        },
+        titleResolver = { "Home" },
+        content = { GeneralDashboardScreen() }
+    ),
     LettersDashboard(
         iconContent = {
             Text(
@@ -66,7 +89,7 @@ enum class HomeScreenTab(
     );
 
     companion object {
-        val Default = LettersDashboard
+        val Default = Home
         val VisibleTabs: List<HomeScreenTab> = HomeScreenTab.values().toList()
     }
 

@@ -93,6 +93,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabS
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
+import kotlin.time.Duration
 
 @Composable
 fun VocabPracticeScreenUI(
@@ -472,32 +473,32 @@ fun VocabPracticeAnswersRow(
             space = if (theme.isDarkTheme) 4.dp else 2.dp
         )
     ) {
-        AnswerButton(
-            srsCard = answers.again,
+        SrsAnswerButton(
             label = resolveString { vocabPractice.againButton },
-            onClick = onClick,
+            interval = answers.again.interval,
+            onClick = { onClick(answers.again) },
             color = MaterialTheme.colorScheme.error,
             outerModifier = buttonThemeModifier,
             innerModifier = Modifier.padding(start = 2.dp)
         )
-        AnswerButton(
-            srsCard = answers.hard,
+        SrsAnswerButton(
             label = resolveString { vocabPractice.hardButton },
-            onClick = onClick,
+            interval = answers.hard.interval,
+            onClick = { onClick(answers.hard) },
             color = MaterialTheme.extraColorScheme.due,
             outerModifier = buttonThemeModifier
         )
-        AnswerButton(
-            srsCard = answers.good,
+        SrsAnswerButton(
             label = resolveString { vocabPractice.goodButton },
-            onClick = onClick,
+            interval = answers.good.interval,
+            onClick = { onClick(answers.good) },
             color = MaterialTheme.extraColorScheme.success,
             outerModifier = buttonThemeModifier
         )
-        AnswerButton(
-            srsCard = answers.easy,
+        SrsAnswerButton(
             label = resolveString { vocabPractice.easyButton },
-            onClick = onClick,
+            interval = answers.easy.interval,
+            onClick = { onClick(answers.easy) },
             color = MaterialTheme.extraColorScheme.new,
             outerModifier = buttonThemeModifier,
             innerModifier = Modifier.padding(end = 2.dp)
@@ -541,11 +542,11 @@ fun ExpandableVocabPracticeAnswersRow(
 }
 
 @Composable
-private fun RowScope.AnswerButton(
-    srsCard: SrsCard,
+fun RowScope.SrsAnswerButton(
     label: String,
+    interval: Duration,
     color: Color,
-    onClick: (SrsCard) -> Unit,
+    onClick: () -> Unit,
     outerModifier: Modifier,
     innerModifier: Modifier = Modifier
 ) {
@@ -555,12 +556,12 @@ private fun RowScope.AnswerButton(
         modifier = Modifier.weight(1f)
             .fillMaxHeight()
             .then(outerModifier)
-            .clickable(onClick = { onClick(srsCard) })
+            .clickable(onClick = onClick)
             .then(innerModifier)
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
-            text = resolveString { vocabPractice.formattedSrsInterval(srsCard.interval) },
+            text = resolveString { vocabPractice.formattedSrsInterval(interval) },
             style = MaterialTheme.typography.labelMedium,
             color = color,
         )
