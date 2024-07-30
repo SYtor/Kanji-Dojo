@@ -72,6 +72,7 @@ fun VocabDashboardScreenUI(
     select: (DashboardVocabDeck) -> Unit,
     createDeck: () -> Unit,
     onEditClick: (DashboardVocabDeck) -> Unit,
+    onDetailsClick: (DashboardVocabDeck) -> Unit,
     navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
@@ -88,6 +89,7 @@ fun VocabDashboardScreenUI(
             VocabDashboardBottomSheet(
                 state = bottomSheetState,
                 onEditClick = { onEditClick(it) },
+                onDetailsClick = onDetailsClick,
                 navigateToPractice = navigateToPractice
             )
         }

@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.core.srs
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.Module
 import ua.syt0r.kanji.core.srs.fsrs.DefaultFsrsScheduler
 import ua.syt0r.kanji.core.srs.fsrs.Fsrs45
@@ -60,5 +62,14 @@ fun Module.applySrsDefinitions() {
 
     factory<SrsScheduler> { DefaultSrsScheduler(fsrsScheduler = get()) }
     factory<FsrsScheduler> { DefaultFsrsScheduler(Fsrs45()) }
+
+    single<VocabSrsManager> {
+        DefaultVocabSrsManager(
+            practiceRepository = get(),
+            srsItemRepository = get(),
+            getSrsStatusUseCase = get(),
+            coroutineScope = CoroutineScope(Dispatchers.IO)
+        )
+    }
 
 }

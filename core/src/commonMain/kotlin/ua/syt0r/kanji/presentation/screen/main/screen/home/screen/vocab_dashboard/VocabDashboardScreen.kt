@@ -36,6 +36,8 @@ fun VocabDashboardScreen(
             }
             mainNavigationState.navigate(MainDestination.DeckEdit(configuration))
         },
+        onDetailsClick = {
+        },
         navigateToPractice = {
             mainNavigationState.navigate(it)
         }

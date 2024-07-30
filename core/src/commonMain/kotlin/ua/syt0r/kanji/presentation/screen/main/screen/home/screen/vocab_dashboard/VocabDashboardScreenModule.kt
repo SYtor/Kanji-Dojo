@@ -21,9 +21,7 @@ val vocabDashboardScreenModule = module {
 
     factory<SubscribeOnDashboardVocabDecksUseCase> {
         DefaultSubscribeOnDashboardVocabDecksUseCase(
-            practiceRepository = get(),
-            srsItemRepository = get(),
-            getSrsStatusUseCase = get()
+            vocabSrsManager = get()
         )
     }
 

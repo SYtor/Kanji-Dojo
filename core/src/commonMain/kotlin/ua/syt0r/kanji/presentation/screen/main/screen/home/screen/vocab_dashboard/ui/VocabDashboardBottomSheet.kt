@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,15 +58,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.core.srs.VocabDeckSrsProgress
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.BottomSheetState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDeckSrsProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabPracticePreviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import kotlin.math.roundToInt
@@ -74,6 +76,7 @@ import kotlin.math.roundToInt
 fun VocabDashboardBottomSheet(
     state: State<BottomSheetState?>,
     onEditClick: (DashboardVocabDeck) -> Unit,
+    onDetailsClick: (DashboardVocabDeck) -> Unit,
     navigateToPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
@@ -133,6 +136,13 @@ fun VocabDashboardBottomSheet(
             onEditClick = onEditClick,
             startPractice = { navigateToPractice(MainDestination.VocabPractice(it)) }
         )
+
+        TextButton(
+            onClick = { onDetailsClick(currentState.deck) },
+            colors = ButtonDefaults.neutralTextButtonColors(),
+        ) {
+            Text("Details")
+        }
 
         val wordsState = currentState.words.collectAsState()
         val wordsHidingOverlayAlpha = animateFloatAsState(
