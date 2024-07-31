@@ -190,6 +190,8 @@ fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorSche
     )
 }
 
+fun snapSizeTransform(): SizeTransform = SizeTransform() { _, _ -> snap() }
+
 fun <S> snapToBiggerContainerCrossfadeTransitionSpec(
     snapToSmallerContainerDelay: Int = AnimationConstants.DefaultDurationMillis
 ): AnimatedContentTransitionScope<S>.() -> ContentTransform = {

@@ -31,62 +31,12 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.getBottomLineShape
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LetterDecksMergeRequestData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardListMode
 
-
-@Composable
-fun MergeConfirmationDialog(
-    listMode: LettersDashboardListMode.MergeMode,
-    onDismissRequest: () -> Unit,
-    onConfirmed: (LetterDecksMergeRequestData) -> Unit
-) {
-    val strings = resolveString { lettersDashboard }
-    MultiplatformDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(
-                text = strings.mergeDialogTitle,
-                style = MaterialTheme.typography.titleLarge
-            )
-        },
-        content = {
-            val title = listMode.title.value
-            val decksIdList = listMode.selected.value.toList()
-            val mergedDeckTitles = listMode.items
-                .filter { decksIdList.contains(it.deckId) }
-                .map { it.title }
-            Text(
-                text = strings.mergeDialogMessage(title, mergedDeckTitles),
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        buttons = {
-            TextButton(onClick = onDismissRequest) {
-                Text(strings.mergeDialogCancelButton)
-            }
-            TextButton(
-                onClick = {
-                    onConfirmed(
-                        LetterDecksMergeRequestData(
-                            title = listMode.title.value,
-                            deckIds = listMode.selected.value.toList()
-                        )
-                    )
-                }
-            ) {
-                Text(strings.mergeDialogAcceptButton)
-            }
-        }
-    )
-}
 
 @Composable
 fun DailyGoalDialog(

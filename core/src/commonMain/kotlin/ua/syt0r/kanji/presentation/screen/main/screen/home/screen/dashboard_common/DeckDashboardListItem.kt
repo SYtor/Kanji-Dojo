@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,22 +26,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Draw
-import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -52,7 +45,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -63,19 +55,17 @@ import androidx.compose.ui.unit.sp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardItem
+import kotlin.time.Duration
 
 
 @Composable
-fun LetterDashboardListItem(
-    item: LettersDashboardItem,
-    dailyGoalEnabled: Boolean,
-    onItemClick: () -> Unit,
-    quickPractice: (MainDestination.Practice) -> Unit
+fun DeckDashboardListItemContainer(
+    itemKey: Any,
+    header: @Composable RowScope.() -> Unit,
+    details: @Composable () -> Unit
 ) {
 
-    var expanded by rememberSaveable(item.deckId) { mutableStateOf(false) }
+    var expanded by rememberSaveable(itemKey) { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.clip(MaterialTheme.shapes.large)
@@ -91,53 +81,7 @@ fun LetterDashboardListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            Column(
-                modifier = Modifier.weight(1f)
-                    .padding(start = 16.dp)
-                    .padding(vertical = 10.dp),
-            ) {
-
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text(
-                    text = resolveString {
-                        lettersDashboard.itemTimeMessage(item.timeSinceLastReview)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                )
-
-            }
-
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                DeckPendingReviewsCountIndicator(
-                    icon = Icons.Default.Draw,
-                    dailyGoalEnabled = dailyGoalEnabled,
-                    study = item.writingProgress.quickLearn.size,
-                    review = item.writingProgress.quickReview.size
-                )
-
-                DeckPendingReviewsCountIndicator(
-                    icon = Icons.Default.LocalLibrary,
-                    dailyGoalEnabled = dailyGoalEnabled,
-                    study = item.readingProgress.quickLearn.size,
-                    review = item.readingProgress.quickReview.size
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .clickable(onClick = onItemClick)
-                    .aspectRatio(1f)
-                    .wrapContentSize()
-            ) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-            }
-
+            header()
         }
 
         AnimatedVisibility(
@@ -145,7 +89,7 @@ fun LetterDashboardListItem(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            ListItemDetails(item, quickPractice)
+            details()
         }
 
     }
@@ -153,64 +97,60 @@ fun LetterDashboardListItem(
 }
 
 @Composable
-private fun DeckPendingReviewsCountIndicator(
-    icon: ImageVector,
-    dailyGoalEnabled: Boolean,
-    study: Int,
-    review: Int
+fun RowScope.DeckDashboardListItemHeader(
+    title: String,
+    elapsedSinceLastReview: Duration?,
+    onDetailsClick: () -> Unit,
+    extraIndicatorContent: @Composable RowScope.() -> Unit
 ) {
-    val showStudy = study > 0 && dailyGoalEnabled
-    val showDue = review > 0
-    if (!showStudy && !showDue) return
 
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+    Column(
+        modifier = Modifier.weight(1f)
+            .padding(start = 16.dp)
+            .padding(vertical = 10.dp),
+    ) {
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium
         )
-        if (showStudy) {
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(MaterialTheme.extraColorScheme.new, CircleShape)
-            )
-        }
-        if (showDue) {
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(MaterialTheme.extraColorScheme.due, CircleShape)
-            )
-        }
+
+        Text(
+            text = resolveString {
+                lettersDashboard.itemTimeMessage(elapsedSinceLastReview)
+            },
+            style = MaterialTheme.typography.bodySmall,
+        )
+
     }
+
+    extraIndicatorContent()
+
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .clickable(onClick = onDetailsClick)
+            .aspectRatio(1f)
+            .wrapContentSize()
+    ) {
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+    }
+
 }
 
 @Composable
-private fun ListItemDetails(
-    data: LettersDashboardItem,
-    quickPractice: (MainDestination.Practice) -> Unit
+fun <T> DeckDashboardListItemDetails(
+    studyProgress: DeckStudyProgress<T>,
+    extraIndicatorContent: @Composable ColumnScope.() -> Unit,
+    navigateToPractice: (List<T>) -> Unit
 ) {
-
-    val strings = resolveString { lettersDashboard }
-
-    val isReadingMode = rememberSaveable(data.deckId) { mutableStateOf(false) }
-    val studyProgress by remember {
-        derivedStateOf { if (isReadingMode.value) data.readingProgress else data.writingProgress }
-    }
-
-    val onQuickPracticeButtonClick: (characters: List<String>) -> Unit = lambda@{
-        if (it.isEmpty()) return@lambda
-        val destination = when (isReadingMode.value) {
-            true -> MainDestination.Practice.Reading(data.deckId, it)
-            false -> MainDestination.Practice.Writing(data.deckId, it)
-        }
-        quickPractice(destination)
-    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.padding(horizontal = 10.dp)
     ) {
+
+        val strings = resolveString { lettersDashboard }
 
         Row(
             modifier = Modifier.height(IntrinsicSize.Min),
@@ -221,34 +161,34 @@ private fun ListItemDetails(
                 modifier = Modifier.weight(1f).fillMaxSize()
             ) {
 
-                PracticeTypeSwitch(isReadingMode = isReadingMode)
+                extraIndicatorContent()
 
                 IndicatorTextRow(
                     color = MaterialTheme.colorScheme.outline,
                     label = strings.itemTotal,
-                    characters = studyProgress.all,
-                    onClick = onQuickPracticeButtonClick
+                    items = studyProgress.all,
+                    onClick = navigateToPractice
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.success,
                     label = strings.itemDone,
-                    characters = studyProgress.known,
-                    onClick = onQuickPracticeButtonClick
+                    items = studyProgress.known,
+                    onClick = navigateToPractice
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.due,
                     label = strings.itemReview,
-                    characters = studyProgress.review,
-                    onClick = onQuickPracticeButtonClick
+                    items = studyProgress.review,
+                    onClick = navigateToPractice
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.new,
                     label = strings.itemNew,
-                    characters = studyProgress.new,
-                    onClick = onQuickPracticeButtonClick
+                    items = studyProgress.new,
+                    onClick = navigateToPractice
                 )
 
             }
@@ -280,7 +220,9 @@ private fun ListItemDetails(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 22.textDp
                             )
-                        ) { append(strings.itemGraphProgressValue(studyProgress.completionPercentage)) }
+                        ) {
+                            append(strings.itemGraphProgressValue(studyProgress.completionPercentage()))
+                        }
                     },
                     textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
@@ -303,13 +245,13 @@ private fun ListItemDetails(
             QuickPracticeButton(
                 enabled = studyProgress.quickLearn.isNotEmpty(),
                 text = strings.itemQuickPracticeLearn(studyProgress.quickLearn.size),
-                onClick = { onQuickPracticeButtonClick(studyProgress.quickLearn) }
+                onClick = { navigateToPractice(studyProgress.quickLearn) }
             )
 
             QuickPracticeButton(
                 enabled = studyProgress.quickReview.isNotEmpty(),
                 text = strings.itemQuickPracticeReview(studyProgress.quickReview.size),
-                onClick = { onQuickPracticeButtonClick(studyProgress.quickReview) }
+                onClick = { navigateToPractice(studyProgress.quickReview) }
             )
 
         }
@@ -319,11 +261,11 @@ private fun ListItemDetails(
 }
 
 @Composable
-private fun ColumnScope.IndicatorTextRow(
+private fun <T> ColumnScope.IndicatorTextRow(
     color: Color,
     label: String,
-    characters: List<String>,
-    onClick: (List<String>) -> Unit
+    items: List<T>,
+    onClick: (List<T>) -> Unit
 ) {
 
     Row(
@@ -332,7 +274,7 @@ private fun ColumnScope.IndicatorTextRow(
         modifier = Modifier
             .fillMaxWidth(fraction = 0.8f)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = { onClick(characters) })
+            .clickable(onClick = { onClick(items) })
             .padding(horizontal = 10.dp)
     ) {
 
@@ -357,7 +299,7 @@ private fun ColumnScope.IndicatorTextRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 22.sp
                     )
-                ) { append(" ${characters.size}") }
+                ) { append(" ${items.size}") }
             },
             textAlign = TextAlign.Center
         )
@@ -431,53 +373,6 @@ private fun PieIndicator(
         }
 
     }
-}
-
-@Composable
-private fun ColumnScope.PracticeTypeSwitch(
-    isReadingMode: MutableState<Boolean>
-) {
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.align(Alignment.Start)
-    ) {
-
-        Switch(
-            checked = isReadingMode.value,
-            onCheckedChange = { isReadingMode.value = !isReadingMode.value },
-            thumbContent = {
-                val icon = if (isReadingMode.value) Icons.Default.LocalLibrary
-                else Icons.Default.Draw
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
-                )
-            },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.outline,
-                checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-        )
-
-        Text(
-            text = resolveString {
-                if (isReadingMode.value) lettersDashboard.itemReadingTitle else lettersDashboard.itemWritingTitle
-            },
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.ExtraLight
-        )
-
-    }
-
 }
 
 @Composable

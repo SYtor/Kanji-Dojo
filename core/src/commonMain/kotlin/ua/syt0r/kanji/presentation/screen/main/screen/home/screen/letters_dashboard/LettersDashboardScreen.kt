@@ -5,6 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
 
 @Composable
 fun LettersDashboardScreen(
@@ -18,23 +20,28 @@ fun LettersDashboardScreen(
 
     LettersDashboardScreenUI(
         state = viewModel.state,
-        startMerge = { viewModel.enablePracticeMergeMode() },
-        merge = { viewModel.merge(it) },
-        startReorder = { viewModel.enablePracticeReorderMode() },
-        reorder = { viewModel.reorder(it) },
-        enableDefaultMode = { viewModel.enableDefaultMode() },
+        mergeDecks = { viewModel.mergeDecks(it) },
+        sortDecks = { viewModel.sortDecks(it) },
+        updateDailyGoalConfiguration = { viewModel.updateDailyGoal(it) },
         navigateToDeckDetails = {
-            mainNavigationState.navigate(MainDestination.LetterDeckDetails(it.deckId))
+            val configuration = DeckDetailsScreenConfiguration.LetterDeck(it.id)
+            mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
         },
-        startQuickPractice = {
-            mainNavigationState.navigate(it)
+        startQuickPractice = { item, studyType, letters ->
+            val destination: MainDestination.Practice = when (studyType) {
+                LetterDeckStudyType.Writing -> {
+                    MainDestination.Practice.Writing(item.id, letters)
+                }
+
+                LetterDeckStudyType.Reading -> {
+                    MainDestination.Practice.Reading(item.id, letters)
+                }
+
+                else -> throw IllegalStateException()
+            }
+            mainNavigationState.navigate(destination)
         },
-        updateDailyGoalConfiguration = {
-            viewModel.updateDailyGoal(it)
-        },
-        navigateToDeckPicker = {
-            mainNavigationState.navigate(MainDestination.LetterDeckPicker)
-        }
+        navigateToDeckPicker = { mainNavigationState.navigate(MainDestination.LetterDeckPicker) }
     )
 
 }

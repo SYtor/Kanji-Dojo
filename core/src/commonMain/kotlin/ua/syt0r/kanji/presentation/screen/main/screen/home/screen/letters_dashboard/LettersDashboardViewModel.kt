@@ -18,6 +18,11 @@ import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.use_case.SortDeckDashboardItemsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
 import kotlin.time.Duration.Companion.seconds
 
@@ -26,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 class LettersDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     loadDataUseCase: LettersDashboardScreenContract.LoadDataUseCase,
-    private val applySortUseCase: LettersDashboardScreenContract.ApplySortUseCase,
+    private val sortDecksUseCase: SortDeckDashboardItemsUseCase,
     private val updateSortUseCase: LettersDashboardScreenContract.UpdateSortUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val notifySrsPreferencesChangedUseCase: NotifySrsPreferencesChangedUseCase,
@@ -37,10 +42,7 @@ class LettersDashboardViewModel(
     override val lifecycleState: MutableStateFlow<LifecycleState> =
         MutableStateFlow(LifecycleState.Hidden)
 
-    private var sortByTimeEnabled: Boolean = false
-    private lateinit var listMode: MutableStateFlow<LettersDashboardListMode>
-
-    private val sortRequestsChannel = Channel<LetterDecksReorderRequestData>()
+    private val sortRequestsChannel = Channel<DecksSortRequestData>()
 
     override val state = mutableStateOf<ScreenState>(ScreenState.Loading)
 
@@ -50,11 +52,15 @@ class LettersDashboardViewModel(
                 state.value = when (it) {
                     is RefreshableData.Loaded -> {
                         val screenData = it.value
-                        sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
-                        val sortedItems = applySortUseCase.sort(sortByTimeEnabled, screenData.items)
-                        listMode = MutableStateFlow(LettersDashboardListMode.Default(sortedItems))
+                        val sortByTimeEnabled = userPreferencesRepository.dashboardSortByTime.get()
+                        val sortedItems = sortDecksUseCase(sortByTimeEnabled, screenData.items)
+                        val listState = DeckDashboardListState(
+                            items = sortedItems,
+                            appliedSortByReviewTime = mutableStateOf(sortByTimeEnabled),
+                            mode = mutableStateOf(DeckDashboardListMode.Browsing)
+                        )
                         ScreenState.Loaded(
-                            mode = listMode,
+                            listState = listState,
                             dailyIndicatorData = screenData.dailyIndicatorData
                         )
                     }
@@ -85,40 +91,16 @@ class LettersDashboardViewModel(
         }
     }
 
-    override fun enablePracticeMergeMode() {
-        listMode.value = LettersDashboardListMode.MergeMode(
-            items = listMode.value.items,
-            selected = mutableStateOf(emptySet()),
-            title = mutableStateOf("")
-        )
-    }
-
-    override fun merge(data: LetterDecksMergeRequestData) {
+    override fun mergeDecks(data: DecksMergeRequestData) {
         Logger.d("data[$data]")
         state.value = ScreenState.Loading
-        viewModelScope.launch { mergeDecksUseCase.merge(data) }
+        viewModelScope.launch { mergeDecksUseCase(data) }
     }
 
-    override fun enablePracticeReorderMode() {
-        val items = listMode.value.items
-        listMode.value = LettersDashboardListMode.SortMode(
-            items = items,
-            reorderedList = mutableStateOf(items),
-            sortByReviewTime = mutableStateOf(sortByTimeEnabled)
-        )
-    }
-
-    override fun reorder(data: LetterDecksReorderRequestData) {
+    override fun sortDecks(data: DecksSortRequestData) {
         Logger.d("data[$data]")
         state.value = ScreenState.Loading
-        sortByTimeEnabled = data.sortByTime
         viewModelScope.launch { sortRequestsChannel.send(data) }
-    }
-
-    override fun enableDefaultMode() {
-        listMode.value = LettersDashboardListMode.Default(
-            items = listMode.value.items
-        )
     }
 
     override fun reportScreenShown() {

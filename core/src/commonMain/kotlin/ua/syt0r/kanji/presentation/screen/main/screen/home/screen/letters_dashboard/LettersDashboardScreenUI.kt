@@ -4,98 +4,80 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Mediation
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.filled.Draw
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
-import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.textDp
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
-import ua.syt0r.kanji.presentation.common.ui.FilledTextField
-import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
-import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardEmptyState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemDetails
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemHeader
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addMergeItems
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addSortItems
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui.LetterDashboardBottomBarUI
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui.LetterDashboardListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui.MergeConfirmationDialog
 
 @Composable
 fun LettersDashboardScreenUI(
     state: State<ScreenState>,
-    startMerge: () -> Unit,
-    merge: (LetterDecksMergeRequestData) -> Unit,
-    startReorder: () -> Unit,
-    reorder: (LetterDecksReorderRequestData) -> Unit,
-    enableDefaultMode: () -> Unit,
-    navigateToDeckDetails: (LettersDashboardItem) -> Unit,
-    startQuickPractice: (MainDestination.Practice) -> Unit,
+    mergeDecks: (DecksMergeRequestData) -> Unit,
+    sortDecks: (DecksSortRequestData) -> Unit,
+    navigateToDeckDetails: (LetterDeckDashboardItem) -> Unit,
+    startQuickPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit,
     updateDailyGoalConfiguration: (DailyGoalConfiguration) -> Unit,
     navigateToDeckPicker: () -> Unit
 ) {
 
-    val extraListSpacerState = rememberExtraListSpacerState()
-
     Box {
+
+        val extraListSpacerState = rememberExtraListSpacerState()
 
         AnimatedContent(
             targetState = state.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() },
         ) { screenState ->
             when (screenState) {
                 ScreenState.Loading -> {
@@ -103,23 +85,44 @@ fun LettersDashboardScreenUI(
                 }
 
                 is ScreenState.Loaded -> {
-                    val mode = screenState.mode.collectAsState()
-                    val isEmpty by remember { derivedStateOf { mode.value.items.isEmpty() } }
-                    if (isEmpty) {
-                        EmptyState()
+                    if (screenState.listState.items.isEmpty()) {
+                        DeckDashboardEmptyState()
                     } else {
-                        LoadedState(
-                            listMode = mode,
-                            dailyIndicatorData = screenState.dailyIndicatorData,
-                            extraListSpacerState = extraListSpacerState,
-                            startMerge = startMerge,
-                            merge = merge,
-                            startReorder = startReorder,
-                            reorder = reorder,
-                            enableDefaultMode = enableDefaultMode,
-                            onDetailsClick = navigateToDeckDetails,
-                            startQuickPractice = startQuickPractice
-                        )
+                        DeckDashboardLoadedStateContainer(extraListSpacerState) {
+
+                            if (screenState.listState.items.size > 1) {
+                                deckDashboardListModeButtons(
+                                    listState = screenState.listState,
+                                    mergeDecks = mergeDecks,
+                                    sortDecks = sortDecks
+                                )
+                            }
+
+                            when (val currentMode = screenState.listState.mode.value) {
+                                is DeckDashboardListMode.Browsing -> {
+                                    screenState.listState.addBrowseItems(
+                                        scope = this,
+                                        dailyGoalEnabled = screenState.dailyIndicatorData.configuration.enabled,
+                                        navigateToDetails = navigateToDeckDetails,
+                                        navigateToPractice = startQuickPractice
+                                    )
+                                }
+
+                                is DeckDashboardListMode.MergeMode -> {
+                                    screenState.listState.addMergeItems(
+                                        scope = this,
+                                        listMode = currentMode
+                                    )
+                                }
+
+                                is DeckDashboardListMode.SortMode -> {
+                                    screenState.listState.addSortItems(
+                                        scope = this,
+                                        listMode = currentMode
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -142,454 +145,181 @@ private fun LoadingState() {
     FancyLoading(Modifier.fillMaxSize().wrapContentSize())
 }
 
-@Composable
-private fun LoadedState(
-    listMode: State<LettersDashboardListMode>,
-    dailyIndicatorData: DailyIndicatorData,
-    extraListSpacerState: ExtraListSpacerState,
-    startMerge: () -> Unit,
-    merge: (LetterDecksMergeRequestData) -> Unit,
-    startReorder: () -> Unit,
-    reorder: (LetterDecksReorderRequestData) -> Unit,
-    enableDefaultMode: () -> Unit,
-    onDetailsClick: (LettersDashboardItem) -> Unit,
-    startQuickPractice: (MainDestination.Practice) -> Unit
-) {
-
-    val orientation = LocalOrientation.current
-
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentWidth()
-            .widthIn(max = 400.dp)
-            .onGloballyPositioned { extraListSpacerState.updateList(it) }
-    ) {
-
-        if (orientation == Orientation.Landscape) {
-            item { Spacer(Modifier.height(20.dp)) }
-        }
-
-        val currentMode = listMode.value
-
-        if (currentMode.items.size > 1) {
-            item {
-                ListModeButtons(
-                    listMode = listMode,
-                    startMerge = startMerge,
-                    merge = merge,
-                    startReorder = startReorder,
-                    reorder = reorder,
-                    enableDefaultMode = enableDefaultMode
-                )
-            }
-        }
-
-        when (currentMode) {
-            is LettersDashboardListMode.Default -> {
-                addContent(currentMode, dailyIndicatorData, onDetailsClick, startQuickPractice)
-            }
-
-            is LettersDashboardListMode.MergeMode -> {
-                addContent(currentMode)
-            }
-
-            is LettersDashboardListMode.SortMode -> {
-                addContent(currentMode)
-            }
-        }
-
-        item { extraListSpacerState.ExtraSpacer() }
-
-    }
-
-}
-
-private fun LazyListScope.addContent(
-    listMode: LettersDashboardListMode.Default,
-    dailyIndicatorData: DailyIndicatorData,
-    onDetailsClick: (LettersDashboardItem) -> Unit,
-    startQuickPractice: (MainDestination.Practice) -> Unit
-) {
+fun DeckDashboardListState.addBrowseItems(
+    scope: LazyListScope,
+    dailyGoalEnabled: Boolean,
+    navigateToDetails: (LetterDeckDashboardItem) -> Unit,
+    navigateToPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit,
+) = scope.apply {
 
     items(
-        items = listMode.items,
-        key = { listMode::class.simpleName to it.deckId }
+        items = items,
+        key = { DeckDashboardListMode.Browsing::class.simpleName to it.id }
     ) {
 
-        LetterDashboardListItem(
-            item = it,
-            dailyGoalEnabled = dailyIndicatorData.configuration.enabled,
-            onItemClick = { onDetailsClick(it) },
-            quickPractice = startQuickPractice
+        LetterDeckItem(
+            item = it as LetterDeckDashboardItem,
+            dailyGoalEnabled = dailyGoalEnabled,
+            navigateToDetails = { navigateToDetails(it) },
+            navigateToPractice = navigateToPractice,
         )
 
     }
 
 }
 
-private fun LazyListScope.addContent(
-    listMode: LettersDashboardListMode.MergeMode
+@Composable
+private fun LetterDeckItem(
+    item: LetterDeckDashboardItem,
+    dailyGoalEnabled: Boolean,
+    navigateToDetails: () -> Unit,
+    navigateToPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit
 ) {
 
-    item {
-        Column(
-            modifier = Modifier,
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            val strings = resolveString { lettersDashboard }
-            Text(
-                text = strings.mergeTitle,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+    val studyType: MutableState<DeckStudyType> = remember {
+        mutableStateOf(LetterDeckStudyType.Writing)
+    }
 
-            FilledTextField(
-                value = listMode.title.value,
-                onValueChange = { listMode.title.value = it },
-                modifier = Modifier.fillMaxWidth(),
-                hintContent = {
-                    Text(
-                        text = strings.mergeTitleHint,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                },
-            )
+    val studyProgress = remember {
+        derivedStateOf { item.studyProgress.getValue(studyType.value) }
+    }
 
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+    DeckDashboardListItemContainer(
+        itemKey = item.id,
+        header = {
+
+            DeckDashboardListItemHeader(
+                title = item.title,
+                elapsedSinceLastReview = item.elapsedSinceLastReview,
+                onDetailsClick = navigateToDetails
             ) {
-                Text(
-                    text = strings.mergeSelectedCount(listMode.selected.value.size),
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.weight(1f)
-                )
-                TextButton(
-                    onClick = { listMode.selected.value = emptySet() },
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurface
+
+                Column(
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    val writingProgress = item.studyProgress.getValue(LetterDeckStudyType.Writing)
+                    DeckPendingReviewsCountIndicator(
+                        icon = Icons.Default.Draw,
+                        dailyGoalEnabled = dailyGoalEnabled,
+                        study = writingProgress.quickLearn.size,
+                        review = writingProgress.quickReview.size
                     )
-                ) {
-                    Text(strings.mergeClearSelectionButton)
-                    Icon(Icons.Default.Clear, null)
+
+                    val readingProgress = item.studyProgress.getValue(LetterDeckStudyType.Reading)
+                    DeckPendingReviewsCountIndicator(
+                        icon = Icons.Default.LocalLibrary,
+                        dailyGoalEnabled = dailyGoalEnabled,
+                        study = readingProgress.quickLearn.size,
+                        review = readingProgress.quickReview.size
+                    )
                 }
+
             }
-
-        }
-
-    }
-
-    items(
-        items = listMode.items,
-        key = { listMode::class.simpleName to it.deckId }
-    ) {
-        val isSelected = listMode.selected.value.contains(it.deckId)
-        val onClick = {
-            listMode.selected.value = listMode.selected.value.run {
-                if (isSelected) minus(it.deckId)
-                else plus(it.deckId)
-            }
-        }
-        Row(
-            modifier = Modifier
-                .clip(MaterialTheme.shapes.large)
-                .clickable(onClick = onClick)
-                .fillMaxWidth()
-                .padding(start = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = it.title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            RadioButton(
-                selected = isSelected,
-                onClick = onClick
+        },
+        details = {
+            DeckDashboardListItemDetails(
+                studyProgress = studyProgress.value,
+                extraIndicatorContent = { PracticeTypeSwitch(studyType) },
+                navigateToPractice = { navigateToPractice(item, studyType.value, it) }
             )
         }
-    }
-
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-private fun LazyListScope.addContent(
-    listMode: LettersDashboardListMode.SortMode
-) {
-
-    item {
-        Text(
-            text = resolveString { lettersDashboard.sortTitle },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.fillMaxWidth().wrapContentSize()
-        )
-    }
-
-    item {
-        val toggleSwitchValue = {
-            listMode.sortByReviewTime.value = listMode.sortByReviewTime.value.not()
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.clip(MaterialTheme.shapes.large)
-                .clickable(onClick = toggleSwitchValue)
-                .padding(horizontal = 10.dp)
-        ) {
-            Text(
-                text = resolveString { lettersDashboard.sortByTimeTitle },
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = listMode.sortByReviewTime.value,
-                onCheckedChange = { toggleSwitchValue() }
-            )
-        }
-    }
-
-    val sortEnabled = !listMode.sortByReviewTime.value
-
-    itemsIndexed(
-        items = listMode.reorderedList.value,
-        key = { _, item -> listMode::class.simpleName to item.deckId }
-    ) { index, item ->
-        Row(
-            modifier = Modifier
-                .animateItemPlacement()
-                .clip(MaterialTheme.shapes.large)
-                .fillMaxWidth()
-                .padding(start = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            Row {
-                IconButton(
-                    onClick = {
-                        val currentList = listMode.reorderedList.value
-                        if (index == currentList.size - 1) return@IconButton
-                        listMode.reorderedList.value = currentList.withSwappedItems(
-                            index1 = index,
-                            index2 = index + 1
-                        )
-                    },
-                    enabled = sortEnabled
-                ) {
-                    Icon(Icons.Default.KeyboardArrowDown, null)
-                }
-                IconButton(
-                    onClick = {
-                        if (index == 0) return@IconButton
-                        val currentList = listMode.reorderedList.value
-                        listMode.reorderedList.value = currentList.withSwappedItems(
-                            index1 = index,
-                            index2 = index - 1
-                        )
-                    },
-                    enabled = sortEnabled
-                ) {
-                    Icon(Icons.Default.KeyboardArrowUp, null)
-                }
-            }
-        }
-    }
-
-}
-
-fun <T> List<T>.withSwappedItems(index1: Int, index2: Int): List<T> {
-    val item1 = get(index1)
-    val item2 = get(index2)
-    return mapIndexed { index, item ->
-        when (index) {
-            index1 -> item2
-            index2 -> item1
-            else -> item
-        }
-    }
+    )
 }
 
 @Composable
-private fun ListModeButtons(
-    listMode: State<LettersDashboardListMode>,
-    startMerge: () -> Unit,
-    merge: (LetterDecksMergeRequestData) -> Unit,
-    startReorder: () -> Unit,
-    reorder: (LetterDecksReorderRequestData) -> Unit,
-    enableDefaultMode: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(MaterialTheme.shapes.large)
-    ) {
-        AnimatedContent(
-            targetState = listMode.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() }
-        ) {
-            val strings = resolveString { lettersDashboard }
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                when (it) {
-                    is LettersDashboardListMode.Default -> {
-                        OptionButton(
-                            title = strings.mergeButton,
-                            icon = Icons.Default.Mediation,
-                            onClick = startMerge,
-                            alignment = Alignment.Start
-                        )
-                        OptionButton(
-                            title = strings.sortButton,
-                            icon = Icons.AutoMirrored.Filled.Sort,
-                            onClick = startReorder,
-                            alignment = Alignment.End
-                        )
-                    }
-
-                    is LettersDashboardListMode.MergeMode -> {
-                        val showConfirmationDialog = remember { mutableStateOf(false) }
-                        if (showConfirmationDialog.value) {
-                            MergeConfirmationDialog(
-                                listMode = it,
-                                onDismissRequest = { showConfirmationDialog.value = false },
-                                onConfirmed = merge
-                            )
-                        }
-                        OptionButton(
-                            title = strings.mergeCancelButton,
-                            icon = Icons.Default.Clear,
-                            onClick = enableDefaultMode,
-                            alignment = Alignment.Start
-                        )
-                        val mergeButtonEnabled = remember {
-                            derivedStateOf {
-                                it.title.value.isNotEmpty() &&
-                                        it.selected.value.size > 1
-                            }
-                        }
-                        OptionButton(
-                            title = strings.mergeAcceptButton,
-                            icon = Icons.Default.Check,
-                            onClick = { showConfirmationDialog.value = true },
-                            alignment = Alignment.End,
-                            enabled = mergeButtonEnabled.value
-                        )
-                    }
-
-                    is LettersDashboardListMode.SortMode -> {
-                        OptionButton(
-                            title = strings.sortCancelButton,
-                            icon = Icons.Default.Clear,
-                            onClick = enableDefaultMode,
-                            alignment = Alignment.Start
-                        )
-                        OptionButton(
-                            title = strings.sortAcceptButton,
-                            icon = Icons.Default.Check,
-                            onClick = {
-                                reorder(
-                                    LetterDecksReorderRequestData(
-                                        reorderedList = it.reorderedList.value,
-                                        sortByTime = it.sortByReviewTime.value
-                                    )
-                                )
-                            },
-                            alignment = Alignment.End
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-private val modeButtonCornerRadius = 12.dp
-
-@Composable
-private fun RowScope.OptionButton(
-    title: String,
+private fun DeckPendingReviewsCountIndicator(
     icon: ImageVector,
-    onClick: () -> Unit,
-    alignment: Alignment.Horizontal,
-    enabled: Boolean = true
+    dailyGoalEnabled: Boolean,
+    study: Int,
+    review: Int
 ) {
-    val buttonShape = when (alignment) {
-        Alignment.End -> RoundedCornerShape(
-            topEnd = modeButtonCornerRadius,
-            bottomEnd = modeButtonCornerRadius
-        )
+    val showStudy = study > 0 && dailyGoalEnabled
+    val showDue = review > 0
+    if (!showStudy && !showDue) return
 
-        Alignment.Start -> RoundedCornerShape(
-            topStart = modeButtonCornerRadius,
-            bottomStart = modeButtonCornerRadius
-        )
-
-        else -> throw IllegalStateException("Unsupported alignment")
-    }
-    FilledTonalButton(
-        onClick = onClick,
-        modifier = Modifier.weight(1f),
-        shape = buttonShape,
-        colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        enabled = enabled
-    ) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.align(Alignment.CenterVertically)
-                .padding(end = 8.dp)
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
         )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        )
+        if (showStudy) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
+                    .background(MaterialTheme.extraColorScheme.new, CircleShape)
+            )
+        }
+        if (showDue) {
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
+                    .background(MaterialTheme.extraColorScheme.due, CircleShape)
+            )
+        }
     }
 }
 
-private const val InlineIconId = "icon"
-
 @Composable
-private fun EmptyState() {
-    Text(
-        text = resolveString { lettersDashboard.emptyScreenMessage(InlineIconId) },
-        inlineContent = mapOf(
-            InlineIconId to InlineTextContent(
-                placeholder = Placeholder(
-                    width = 24.textDp,
-                    height = 24.textDp,
-                    placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                ),
-                children = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.fillMaxSize()
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.shapes.small
-                            )
-                            .padding(4.dp)
-                    )
-                }
+private fun ColumnScope.PracticeTypeSwitch(
+    studyType: MutableState<DeckStudyType>
+) {
+
+    val switchEnabled: Boolean
+    val icon: ImageVector
+    val title: String
+
+    when (studyType.value) {
+        LetterDeckStudyType.Writing -> {
+            switchEnabled = false
+            icon = Icons.Default.Draw
+            title = resolveString { lettersDashboard.itemWritingTitle }
+        }
+
+        LetterDeckStudyType.Reading -> {
+            switchEnabled = true
+            icon = Icons.Default.LocalLibrary
+            title = resolveString { lettersDashboard.itemReadingTitle }
+        }
+
+        else -> throw IllegalStateException()
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.align(Alignment.Start)
+    ) {
+
+        Switch(
+            checked = switchEnabled,
+            onCheckedChange = {
+                if (it) studyType.value = LetterDeckStudyType.Reading
+                else studyType.value = LetterDeckStudyType.Writing
+            },
+            thumbContent = {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(SwitchDefaults.IconSize)
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.outline,
+                checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
+                uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
             )
-        ),
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize()
-            .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp),
-        textAlign = TextAlign.Center
-    )
+        )
+
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.ExtraLight
+        )
+
+    }
+
 }

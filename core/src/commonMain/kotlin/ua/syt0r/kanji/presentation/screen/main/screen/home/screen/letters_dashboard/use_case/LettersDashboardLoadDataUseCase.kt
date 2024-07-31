@@ -10,12 +10,12 @@ import ua.syt0r.kanji.core.srs.DeckStudyProgress
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyIndicatorData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.PracticeStudyProgress
 
 class LettersDashboardLoadDataUseCase(
     private val srsManager: LetterSrsManager,
@@ -40,21 +40,23 @@ class LettersDashboardLoadDataUseCase(
         return LettersDashboardScreenData(
             items = srsDecksData.decks
                 .map { deckInfo ->
-                    LettersDashboardItem(
-                        deckId = deckInfo.id,
+                    val writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
+                        configuration = srsDecksData.dailyGoalConfiguration,
+                        leftToStudy = srsDecksData.dailyProgress.leftToStudy,
+                        leftToReview = srsDecksData.dailyProgress.leftToReview
+                    )
+                    val readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
+                        configuration = srsDecksData.dailyGoalConfiguration,
+                        leftToStudy = srsDecksData.dailyProgress.leftToStudy,
+                        leftToReview = srsDecksData.dailyProgress.leftToReview
+                    )
+                    LetterDeckDashboardItem(
+                        id = deckInfo.id,
                         title = deckInfo.title,
                         position = deckInfo.position,
-                        timeSinceLastReview = deckInfo.lastReviewTime?.let { time - it },
-                        writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
-                            configuration = srsDecksData.dailyGoalConfiguration,
-                            leftToStudy = srsDecksData.dailyProgress.leftToStudy,
-                            leftToReview = srsDecksData.dailyProgress.leftToReview
-                        ),
-                        readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
-                            configuration = srsDecksData.dailyGoalConfiguration,
-                            leftToStudy = srsDecksData.dailyProgress.leftToStudy,
-                            leftToReview = srsDecksData.dailyProgress.leftToReview
-                        )
+                        elapsedSinceLastReview = deckInfo.lastReviewTime?.let { time - it },
+                        writingProgress = writingProgress,
+                        readingProgress = readingProgress
                     )
                 },
             dailyIndicatorData = DailyIndicatorData(
@@ -72,8 +74,8 @@ class LettersDashboardLoadDataUseCase(
         configuration: DailyGoalConfiguration,
         leftToStudy: Int,
         leftToReview: Int,
-    ): PracticeStudyProgress {
-        return PracticeStudyProgress(
+    ): LetterDeckStudyProgress {
+        return LetterDeckStudyProgress(
             all = all.map { it.character },
             known = done,
             review = review,

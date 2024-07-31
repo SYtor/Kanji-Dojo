@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
 
 interface LettersDashboardScreenContract {
 
@@ -14,14 +17,8 @@ interface LettersDashboardScreenContract {
         val state: State<ScreenState>
 
         fun updateDailyGoal(configuration: DailyGoalConfiguration)
-
-        fun enablePracticeMergeMode()
-        fun merge(data: LetterDecksMergeRequestData)
-
-        fun enablePracticeReorderMode()
-        fun reorder(data: LetterDecksReorderRequestData)
-
-        fun enableDefaultMode()
+        fun mergeDecks(data: DecksMergeRequestData)
+        fun sortDecks(data: DecksSortRequestData)
 
         fun reportScreenShown()
 
@@ -32,7 +29,7 @@ interface LettersDashboardScreenContract {
         object Loading : ScreenState()
 
         data class Loaded(
-            val mode: StateFlow<LettersDashboardListMode>,
+            val listState: DeckDashboardListState,
             val dailyIndicatorData: DailyIndicatorData
         ) : ScreenState()
 
@@ -45,18 +42,11 @@ interface LettersDashboardScreenContract {
     }
 
     interface MergeDecksUseCase {
-        suspend fun merge(data: LetterDecksMergeRequestData)
-    }
-
-    interface ApplySortUseCase {
-        fun sort(
-            sortByTime: Boolean,
-            items: List<LettersDashboardItem>
-        ): List<LettersDashboardItem>
+        suspend operator fun invoke(data: DecksMergeRequestData)
     }
 
     interface UpdateSortUseCase {
-        suspend fun update(data: LetterDecksReorderRequestData)
+        suspend fun update(data: DecksSortRequestData)
     }
 
 }
