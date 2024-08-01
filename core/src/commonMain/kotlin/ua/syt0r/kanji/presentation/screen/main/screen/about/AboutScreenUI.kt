@@ -32,8 +32,6 @@ import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.VersionChangeDialog
 
-private const val KanjiDojoGithubLink = "https://github.com/syt0r/Kanji-Dojo"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreenUI(

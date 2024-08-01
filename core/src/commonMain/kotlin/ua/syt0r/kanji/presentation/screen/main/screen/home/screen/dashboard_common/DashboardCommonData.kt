@@ -1,17 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common
 
 import androidx.compose.runtime.MutableState
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import kotlin.time.Duration
 
 
-interface DeckStudyType
+interface DeckStudyType : DisplayableEnum
 
-sealed interface LetterDeckStudyType : DeckStudyType {
-    object Writing : LetterDeckStudyType
-    object Reading : LetterDeckStudyType
-}
-
-sealed interface VocabDeckStudyType : DeckStudyType {
+enum class LetterDeckStudyType(
+    override val titleResolver: StringResolveScope<String>
+) : DeckStudyType {
+    Writing(titleResolver = { lettersDashboard.itemWritingTitle }),
+    Reading(titleResolver = { lettersDashboard.itemReadingTitle })
 }
 
 data class DeckStudyProgress<T>(

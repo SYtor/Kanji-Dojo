@@ -3,13 +3,14 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.data
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.materialPath
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import org.koin.java.KoinJavaComponent.getKoin
+import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
+import ua.syt0r.kanji.presentation.common.resources.icon.HomeOutline
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -27,25 +28,9 @@ enum class HomeScreenTab(
 ) {
 
     Home(
-        iconContent = {
-            Icon(androidx.compose.material.icons.materialIcon("HomeFilled") {
-                materialPath {
-                    // Move to starting point
-                    moveTo(12f, 3f)
-                    lineTo(4f, 9f)
-                    lineTo(4f, 21f)
-                    lineTo(9f, 21f)
-                    lineTo(9f, 14f)
-                    lineTo(15f, 14f)
-                    lineTo(15f, 21f)
-                    lineTo(20f, 21f)
-                    lineTo(20f, 9f)
-//                    addPath("M12,3L4,9v12h5v-7h6v7h5V9z")
-                }
-            }, null)
-        },
+        iconContent = { Icon(ExtraIcons.HomeOutline, null) },
         titleResolver = { "Home" },
-        content = { GeneralDashboardScreen() }
+        content = { GeneralDashboardScreen(it) }
     ),
     LettersDashboard(
         iconContent = {

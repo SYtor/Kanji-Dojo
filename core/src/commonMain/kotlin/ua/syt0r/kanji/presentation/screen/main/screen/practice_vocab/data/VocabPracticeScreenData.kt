@@ -9,6 +9,7 @@ import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import kotlin.time.Duration
@@ -16,7 +17,7 @@ import kotlin.time.Duration
 enum class VocabPracticeType(
     val preferencesType: PreferencesVocabPracticeType,
     override val titleResolver: StringResolveScope<String>
-) : DisplayableEnum {
+) : DeckStudyType, DisplayableEnum {
 
     Flashcard(
         preferencesType = PreferencesVocabPracticeType.Flashcard,
