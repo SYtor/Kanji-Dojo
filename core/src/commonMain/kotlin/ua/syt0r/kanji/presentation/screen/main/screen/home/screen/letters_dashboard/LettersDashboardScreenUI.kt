@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -67,7 +67,7 @@ fun LettersDashboardScreenUI(
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (LetterDeckDashboardItem) -> Unit,
     startQuickPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit,
-    updateDailyGoalConfiguration: (DailyGoalConfiguration) -> Unit,
+    updateDailyLimit: (DailyLimitConfiguration) -> Unit,
     navigateToDeckPicker: () -> Unit
 ) {
 
@@ -131,7 +131,7 @@ fun LettersDashboardScreenUI(
         LetterDashboardBottomBarUI(
             state = state,
             navigateToDeckPicker = navigateToDeckPicker,
-            updateConfiguration = updateDailyGoalConfiguration,
+            updateConfiguration = updateDailyLimit,
             modifier = Modifier.align(Alignment.BottomCenter)
                 .onGloballyPositioned { extraListSpacerState.updateOverlay(it) },
         )

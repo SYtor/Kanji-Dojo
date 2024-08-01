@@ -1,10 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard
 
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
 
 data class DailyIndicatorData(
-    val configuration: DailyGoalConfiguration,
+    val configuration: DailyLimitConfiguration,
     val progress: DailyProgress
 )
 

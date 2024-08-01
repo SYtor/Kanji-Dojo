@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.getBottomLineShape
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -40,9 +40,9 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 @Composable
 fun DailyGoalDialog(
-    configuration: DailyGoalConfiguration,
+    configuration: DailyLimitConfiguration,
     onDismissRequest: () -> Unit,
-    onUpdateConfiguration: (DailyGoalConfiguration) -> Unit
+    onUpdateConfiguration: (DailyLimitConfiguration) -> Unit
 ) {
 
     val strings = resolveString { dailyGoalDialog }
@@ -71,10 +71,10 @@ fun DailyGoalDialog(
                 mutableStateOf(configuration.enabled)
             }
             val learnValue = remember {
-                mutableStateOf(configuration.learnLimit.toString())
+                mutableStateOf(configuration.newLimit.toString())
             }
             val reviewValue = remember {
-                mutableStateOf(configuration.reviewLimit.toString())
+                mutableStateOf(configuration.dueLimit.toString())
             }
 
             Column(
@@ -117,10 +117,10 @@ fun DailyGoalDialog(
 
                 TextButton(
                     onClick = {
-                        val updatedConfig = DailyGoalConfiguration(
+                        val updatedConfig = DailyLimitConfiguration(
                             enabled = enabledValue.value,
-                            learnLimit = learnValue.value.toInt(),
-                            reviewLimit = reviewValue.value.toInt()
+                            newLimit = learnValue.value.toInt(),
+                            dueLimit = reviewValue.value.toInt()
                         )
                         onUpdateConfiguration(updatedConfig)
                     },

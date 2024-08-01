@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.core.srs.use_case
 
 import kotlinx.datetime.LocalDate
-import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.srs.DeckStudyProgress
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 
@@ -20,24 +20,11 @@ class DefaultGetLetterDeckSrsProgressUseCase(
         val deckInfo = repository.getPracticeInfo(deckId)
         val characters = repository.getKanjiForPractice(deckId)
 
-        val lastWritingReviewTime = repository.getLastReviewTime(
-            practiceId = deckId,
-            type = PracticeType.Writing
-        )
-
-        val lastReadingReviewTime = repository.getLastReviewTime(
-            practiceId = deckId,
-            type = PracticeType.Reading
-        )
-
-        val reviewTime = listOfNotNull(lastWritingReviewTime, lastReadingReviewTime).maxOrNull()
-
         return LetterSrsDeckInfo(
             id = deckId,
             title = deckInfo.name,
             position = deckInfo.position,
             characters = characters,
-            lastReviewTime = reviewTime,
             writingDetails = getProgressForPracticeType(
                 characters = characters,
                 practiceType = PracticeType.Writing,
@@ -57,17 +44,20 @@ class DefaultGetLetterDeckSrsProgressUseCase(
         date: LocalDate,
     ): DeckStudyProgress {
         val charactersSrsData = characters.map { getLetterSrsStatusUseCase(it, practiceType, date) }
+
         val new = charactersSrsData.filter { it.status == SrsItemStatus.New }
             .map { it.character }
         val due = charactersSrsData.filter { it.status == SrsItemStatus.Review }
+            .sortedByDescending { it.expectedReviewDate }
             .map { it.character }
         val done = charactersSrsData.filter { it.status == SrsItemStatus.Done }
             .map { it.character }
 
         return DeckStudyProgress(
-            all = charactersSrsData,
+            charactersData = charactersSrsData.associateBy { it.character },
+            all = charactersSrsData.map { it.character },
             done = done.toList(),
-            review = due.toList(),
+            due = due.toList(),
             new = new.toList()
         )
     }

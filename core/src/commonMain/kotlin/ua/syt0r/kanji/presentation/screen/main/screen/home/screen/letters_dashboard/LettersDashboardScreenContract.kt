@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
@@ -16,7 +16,7 @@ interface LettersDashboardScreenContract {
 
         val state: State<ScreenState>
 
-        fun updateDailyGoal(configuration: DailyGoalConfiguration)
+        fun updateDailyLimit(configuration: DailyLimitConfiguration)
         fun mergeDecks(data: DecksMergeRequestData)
         fun sortDecks(data: DecksSortRequestData)
 

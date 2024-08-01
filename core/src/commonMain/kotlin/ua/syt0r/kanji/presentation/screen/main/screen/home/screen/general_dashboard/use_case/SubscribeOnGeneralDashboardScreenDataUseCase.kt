@@ -79,10 +79,13 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                     }
                     .forEach {
                         new.addAll(it.new)
-                        due.addAll(it.review)
+                        due.addAll(it.due)
                     }
 
-                LetterDecksStudyProgress(new, due)
+                LetterDecksStudyProgress(
+                    new = new.take(data.dailyProgress.newLeft).toSet(),
+                    due = due.take(data.dailyProgress.dueLeft).toSet()
+                )
             }
         )
     }

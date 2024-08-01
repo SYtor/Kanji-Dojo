@@ -34,10 +34,10 @@ class ReminderNotificationHandleScheduledActionUseCase(
         val dailyProgress = srsData.dailyProgress
 
         Logger.d("Preparing to show notification: dailyProgress[$dailyProgress]")
-        if (dailyProgress.leftToStudy > 0 || dailyProgress.leftToReview > 0) {
+        if (dailyProgress.newLeft > 0 || dailyProgress.dueLeft > 0) {
             notificationManager.showNotification(
-                learn = dailyProgress.leftToStudy,
-                review = dailyProgress.leftToReview
+                learn = dailyProgress.newLeft,
+                review = dailyProgress.dueLeft
             )
             analyticsManager.sendEvent("showing_notification")
         } else {

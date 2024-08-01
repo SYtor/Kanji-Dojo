@@ -22,7 +22,7 @@ fun LettersDashboardScreen(
         state = viewModel.state,
         mergeDecks = { viewModel.mergeDecks(it) },
         sortDecks = { viewModel.sortDecks(it) },
-        updateDailyGoalConfiguration = { viewModel.updateDailyGoal(it) },
+        updateDailyLimit = { viewModel.updateDailyLimit(it) },
         navigateToDeckDetails = {
             val configuration = DeckDetailsScreenConfiguration.LetterDeck(it.id)
             mainNavigationState.navigate(MainDestination.DeckDetails(configuration))

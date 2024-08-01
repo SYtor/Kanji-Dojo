@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.PreviewKanji
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
@@ -21,7 +21,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val dailyIndicatorData = DailyIndicatorData(
-    configuration = DailyGoalConfiguration(true, 6, 12),
+    configuration = DailyLimitConfiguration(true, 6, 12),
     progress = DailyProgress.Completed
 )
 
@@ -68,7 +68,7 @@ private fun ScreenPreview(
                 navigateToDeckPicker = {},
                 navigateToDeckDetails = {},
                 startQuickPractice = { _, _, _ -> },
-                updateDailyGoalConfiguration = {},
+                updateDailyLimit = {},
                 mergeDecks = { },
                 sortDecks = { },
             )

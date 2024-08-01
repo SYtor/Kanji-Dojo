@@ -18,7 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract.ScreenState
 import kotlin.math.max
 
@@ -28,7 +28,7 @@ import kotlin.math.max
 fun LetterDashboardBottomBarUI(
     state: State<ScreenState>,
     navigateToDeckPicker: () -> Unit,
-    updateConfiguration: (DailyGoalConfiguration) -> Unit,
+    updateConfiguration: (DailyLimitConfiguration) -> Unit,
     modifier: Modifier
 ) {
 

@@ -62,10 +62,10 @@ class DefaultLetterSrsManager(
     }
 
     override suspend fun getUpdatedDecksData(): LetterSrsDecksData {
-        val dailyGoalConfiguration = DailyGoalConfiguration(
+        val dailyLimitConfiguration = DailyLimitConfiguration(
             enabled = userPreferencesRepository.dailyLimitEnabled.get(),
-            learnLimit = userPreferencesRepository.dailyLearnLimit.get(),
-            reviewLimit = userPreferencesRepository.dailyReviewLimit.get()
+            newLimit = userPreferencesRepository.dailyLearnLimit.get(),
+            dueLimit = userPreferencesRepository.dailyReviewLimit.get()
         )
 
         val currentDate = getSrsDate()
@@ -74,10 +74,10 @@ class DefaultLetterSrsManager(
 
         return LetterSrsDecksData(
             decks = decksInfo,
-            dailyGoalConfiguration = dailyGoalConfiguration,
+            dailyLimitConfiguration = dailyLimitConfiguration,
             dailyProgress = getDailyProgress(
                 date = currentDate,
-                dailyGoalConfiguration = dailyGoalConfiguration,
+                dailyLimitConfiguration = dailyLimitConfiguration,
                 decksInfo = decksInfo
             )
         )
@@ -99,9 +99,9 @@ class DefaultLetterSrsManager(
 
     private suspend fun getDailyProgress(
         date: LocalDate,
-        dailyGoalConfiguration: DailyGoalConfiguration,
+        dailyLimitConfiguration: DailyLimitConfiguration,
         decksInfo: List<LetterSrsDeckInfo>,
-    ): DailyProgress {
+    ): LetterDailyProgress {
 
         val characterProgresses = studyProgressCache.get().asSequence().flatMap { it.value }
 
@@ -109,31 +109,31 @@ class DefaultLetterSrsManager(
             .filter { getSrsDate(it.lastReviewTime) == date }
             .toList()
 
-        val studiedToday = charactersUpdatedToday.filter {
+        val newReviewedToday = charactersUpdatedToday.filter {
             practiceRepository.getFirstReviewTime(it.character, it.practiceType)
                 ?.let { getSrsDate(it) } == date
         }
 
-        val reviewedToday = charactersUpdatedToday.size - studiedToday.size
+        val reviewedToday = charactersUpdatedToday.size - newReviewedToday.size
 
         val totalNew = decksInfo.totalNew()
         val totalReview = decksInfo.totalReview()
 
         val leftToStudy = max(
             a = 0,
-            b = min(dailyGoalConfiguration.learnLimit - studiedToday.size, totalNew)
+            b = min(dailyLimitConfiguration.newLimit - newReviewedToday.size, totalNew)
         )
 
         val leftToReview = max(
             a = 0,
-            b = min(dailyGoalConfiguration.reviewLimit - reviewedToday, totalReview)
+            b = min(dailyLimitConfiguration.dueLimit - reviewedToday, totalReview)
         )
 
-        return DailyProgress(
-            studied = studiedToday.size,
-            reviewed = reviewedToday,
-            leftToStudy = leftToStudy,
-            leftToReview = leftToReview
+        return LetterDailyProgress(
+            newReviewed = newReviewedToday.size,
+            dueReviewed = reviewedToday,
+            newLeft = leftToStudy,
+            dueLeft = leftToReview
         )
     }
 
@@ -150,8 +150,8 @@ class DefaultLetterSrsManager(
 
 
     private fun List<LetterSrsDeckInfo>.totalReview(): Int {
-        return flatMap { it.writingDetails.review }.distinct().size +
-                flatMap { it.readingDetails.review }.distinct().size
+        return flatMap { it.writingDetails.due }.distinct().size +
+                flatMap { it.readingDetails.due }.distinct().size
     }
 
 }
