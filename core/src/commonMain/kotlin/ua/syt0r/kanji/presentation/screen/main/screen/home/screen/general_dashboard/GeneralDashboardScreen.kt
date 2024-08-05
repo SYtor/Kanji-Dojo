@@ -14,16 +14,13 @@ fun GeneralDashboardScreen(
     viewModel: GeneralDashboardScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
-    val urlHandler = rememberUrlHandler()
-
     GeneralDashboardScreenUI(
         state = viewModel.state.collectAsState(),
         navigateToDailyLimitConfiguration = {},
         navigateToCreateLetterDeck = { mainNavigationState.navigate(MainDestination.LetterDeckPicker) },
         navigateToCreateVocabDeck = { mainNavigationState.navigate(MainDestination.LetterDeckPicker) },
         navigateToLetterPractice = { mainNavigationState.navigate(it) },
-        navigateToVocabPractice = { mainNavigationState.navigate(it) },
-        navigateToGithub = { urlHandler.openInBrowser(KanjiDojoGithubLink) }
+        navigateToVocabPractice = { mainNavigationState.navigate(it) }
     )
 
 }

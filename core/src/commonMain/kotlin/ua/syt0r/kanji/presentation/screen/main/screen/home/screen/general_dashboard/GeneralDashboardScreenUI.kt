@@ -40,7 +40,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -59,8 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
-import ua.syt0r.kanji.presentation.common.resources.icon.Github
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
@@ -83,8 +80,7 @@ fun GeneralDashboardScreenUI(
     navigateToCreateLetterDeck: () -> Unit,
     navigateToCreateVocabDeck: () -> Unit,
     navigateToLetterPractice: (MainDestination.Practice) -> Unit,
-    navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit,
-    navigateToGithub: () -> Unit
+    navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
     var showTutorialDialog by remember { mutableStateOf(false) }
@@ -262,17 +258,6 @@ fun GeneralDashboardScreenUI(
                             )
                         }
                     )
-                }
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp, end = 20.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                IconButton(onClick = navigateToGithub) {
-                    Icon(imageVector = ExtraIcons.Github, contentDescription = null)
                 }
             }
 
