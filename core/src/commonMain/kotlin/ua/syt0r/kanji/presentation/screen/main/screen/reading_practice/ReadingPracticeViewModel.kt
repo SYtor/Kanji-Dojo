@@ -15,10 +15,10 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.tts.KanaTtsManager
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.practice.CharacterReadingReviewResult
 import ua.syt0r.kanji.core.user_data.practice.CharacterReviewOutcome
+import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCharacterReviewResult
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavingResult
@@ -36,7 +36,7 @@ class ReadingPracticeViewModel(
     private val timeUtils: TimeUtils
 ) : ReadingPracticeContract.ViewModel {
 
-    private var practiceId: Long? = null
+    private var deckId: Long? = null
     private lateinit var screenConfiguration: ReadingScreenConfiguration
 
     private lateinit var reviewManager: ReadingCharacterReviewManager
@@ -48,8 +48,8 @@ class ReadingPracticeViewModel(
     override val state: MutableState<ScreenState> = mutableStateOf(ScreenState.Loading)
 
     override fun initialize(configuration: MainDestination.Practice.Reading) {
-        if (practiceId != null) return
-        practiceId = configuration.practiceId
+        if (deckId != null) return
+        deckId = configuration.deckId
         state.value = ScreenState.Loading
 
         viewModelScope.launch {
@@ -222,7 +222,7 @@ class ReadingPracticeViewModel(
                 val summaryCharacterData = summary.characterSummaries.getValue(character)
                 CharacterReadingReviewResult(
                     character = character,
-                    practiceId = practiceId!!,
+                    practiceId = deckId!!,
                     mistakes = summaryCharacterData.details.repeats,
                     reviewDuration = summaryCharacterData.reviewDuration,
                     outcome = outcome

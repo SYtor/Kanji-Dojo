@@ -49,7 +49,7 @@ object JapaneseStrings : Strings {
 
     override val letterDeckPicker: LetterDeckPickerStrings = JapaneseLetterDeckPickerStrings
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
-    override val letterDeckDetails: LetterDeckDetailsStrings = JapaneseLetterDeckDetailsStrings
+    override val deckDetails: DeckDetailsStrings = JapaneseDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = JapaneseWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = JapaneseReadingPracticeString
@@ -387,7 +387,7 @@ object JapaneseDeckEditStrings : DeckEditStrings {
 
 }
 
-object JapaneseLetterDeckDetailsStrings : LetterDeckDetailsStrings {
+object JapaneseDeckDetailsStrings : DeckDetailsStrings {
     override val emptyListMessage: String = "何もありません"
     override val detailsGroupTitle: (index: Int) -> String = { "グループ $it" }
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
@@ -427,6 +427,9 @@ object JapaneseLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val filterAllLabel: String = "すべて"
     override val filterNoneLabel: String = "何も"
     override val kanaGroupsModeActivatedLabel: String = "仮名グループモード"
+
+    override val shareLetterDeckClipboardMessage: String =
+        "デッキからの文字がクリップボードにコピーされました"
 }
 
 object JapaneseLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {

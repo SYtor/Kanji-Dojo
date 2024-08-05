@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,34 +34,36 @@ import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsConfigurationRow
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.toColor
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsConfigurationRow
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.toColor
 
 
 private enum class GroupItemState { Default, Selected, Unselected }
 
 @Composable
-fun LetterDeckDetailsGroupsUI(
+fun DeckDetailsGroupsUI(
+    configuration: DeckDetailsConfiguration.LetterDeckConfiguration,
     visibleData: DeckDetailsVisibleData.Groups,
+    selectionModeEnabled: MutableState<Boolean>,
     extraListSpacerState: ExtraListSpacerState,
-    onConfigurationUpdate: (LetterDeckDetailsConfiguration) -> Unit,
+    onConfigurationUpdate: (DeckDetailsConfiguration.LetterDeckConfiguration) -> Unit,
     selectGroup: (DeckDetailsListItem.Group) -> Unit,
     toggleGroupSelection: (DeckDetailsListItem.Group) -> Unit,
 ) {
 
     if (visibleData.items.isEmpty()) {
         Column {
-            LetterDeckDetailsConfigurationRow(
-                configuration = visibleData.configuration,
+            DeckDetailsConfigurationRow(
+                configuration = configuration,
                 kanaGroupsMode = visibleData.kanaGroupsMode,
                 onConfigurationUpdate = onConfigurationUpdate
             )
 
             Text(
-                text = resolveString { letterDeckDetails.emptyListMessage },
+                text = resolveString { deckDetails.emptyListMessage },
                 modifier = Modifier.padding(horizontal = 20.dp)
                     .weight(1f)
                     .fillMaxWidth()
@@ -78,8 +81,8 @@ fun LetterDeckDetailsGroupsUI(
             state = collapsibleConfigurationContainerState,
             modifier = Modifier.fillMaxWidth()
         ) {
-            LetterDeckDetailsConfigurationRow(
-                configuration = visibleData.configuration,
+            DeckDetailsConfigurationRow(
+                configuration = configuration,
                 kanaGroupsMode = visibleData.kanaGroupsMode,
                 onConfigurationUpdate = onConfigurationUpdate
             )
@@ -104,12 +107,12 @@ fun LetterDeckDetailsGroupsUI(
                 PracticeGroup(
                     group = group,
                     state = when {
-                        !visibleData.isSelectionModeEnabled.value -> GroupItemState.Default
+                        !selectionModeEnabled.value -> GroupItemState.Default
                         group.selected.value -> GroupItemState.Selected
                         else -> GroupItemState.Unselected
                     },
                     onClick = {
-                        if (visibleData.isSelectionModeEnabled.value) {
+                        if (selectionModeEnabled.value) {
                             toggleGroupSelection(group)
                         } else {
                             selectGroup(group)
@@ -154,7 +157,7 @@ private fun PracticeGroup(
 
         Text(
             text = resolveString {
-                letterDeckDetails.listGroupTitle(
+                deckDetails.listGroupTitle(
                     group.index,
                     group.items.joinToString("") { it.character }
                 )

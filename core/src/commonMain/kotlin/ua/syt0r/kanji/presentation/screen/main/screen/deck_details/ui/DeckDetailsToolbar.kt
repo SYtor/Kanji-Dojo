@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -30,28 +30,25 @@ import ua.syt0r.kanji.presentation.common.resources.icon.DeselectAll
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.SelectAll
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun LetterDeckDetailsToolbar(
+fun DeckDetailsToolbar(
     state: State<ScreenState>,
     upButtonClick: () -> Unit,
-    dismissMultiSelectButtonClick: () -> Unit,
     shareButtonClick: (String) -> Unit,
     onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
-    selectAllClick: () -> Unit,
-    deselectAllClick: () -> Unit,
 ) {
 
     TopAppBar(
         title = { ToolbarTitle(state) },
         navigationIcon = {
             NavigationIcon(
-                state,
-                upButtonClick,
-                dismissMultiSelectButtonClick
+                state = state,
+                upButtonClick = upButtonClick
             )
         },
         actions = {
@@ -59,9 +56,7 @@ fun LetterDeckDetailsToolbar(
                 state = state,
                 shareButtonClick = shareButtonClick,
                 onVisibilityButtonClick = onVisibilityButtonClick,
-                editButtonClick = editButtonClick,
-                selectAllClick = selectAllClick,
-                deselectAllClick = deselectAllClick
+                editButtonClick = editButtonClick
             )
         }
     )
@@ -71,28 +66,27 @@ fun LetterDeckDetailsToolbar(
 @Composable
 fun NavigationIcon(
     state: State<ScreenState>,
-    upButtonClick: () -> Unit,
-    dismissMultiSelectButtonClick: () -> Unit
+    upButtonClick: () -> Unit
 ) {
-    val shouldShowMultiselectDismissButton by remember {
-        derivedStateOf {
-            state.value
-                .let { it as? ScreenState.Loaded }
-                ?.visibleDataState?.value
-                ?.isSelectionModeEnabled?.value == true
+    val loadedState = remember {
+        derivedStateOf { state.value.let { it as? ScreenState.Loaded } }
+    }.value
+
+    when {
+        loadedState != null && loadedState.isSelectionModeEnabled.value -> {
+            IconButton(
+                onClick = { loadedState.isSelectionModeEnabled.value = false }
+            ) {
+                Icon(Icons.Default.Close, null)
+            }
         }
-    }
-    if (shouldShowMultiselectDismissButton) {
-        IconButton(
-            onClick = dismissMultiSelectButtonClick
-        ) {
-            Icon(Icons.Default.Close, null)
-        }
-    } else {
-        IconButton(
-            onClick = upButtonClick
-        ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+
+        else -> {
+            IconButton(
+                onClick = upButtonClick
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+            }
         }
     }
 }
@@ -109,7 +103,7 @@ private fun ToolbarTitle(state: State<ScreenState>) {
         derivedStateOf {
             state.value.let { it as? ScreenState.Loaded }
                 ?.let { loadedState ->
-                    if (loadedState.visibleDataState.value.isSelectionModeEnabled.value) {
+                    if (loadedState.isSelectionModeEnabled.value) {
                         ToolbarTitleData.Selection(
                             count = loadedState.visibleDataState.value
                                 .items.count { it.selected.value }
@@ -129,12 +123,16 @@ private fun ToolbarTitle(state: State<ScreenState>) {
         }
 
         is ToolbarTitleData.Selection -> {
-            Text(text = resolveString { letterDeckDetails.multiselectTitle(data.count) })
+            Text(text = resolveString { deckDetails.multiselectTitle(data.count) })
         }
     }
 }
 
-private enum class DisplayingToolbarActions { Nothing, Default, Selection }
+private sealed interface DisplayingToolbarActions {
+    data class Default(val sharableDeckData: String?) : DisplayingToolbarActions
+    object Nothing : DisplayingToolbarActions
+    data class Selection(val items: List<DeckDetailsListItem>) : DisplayingToolbarActions
+}
 
 @Composable
 private fun ToolbarActions(
@@ -142,19 +140,23 @@ private fun ToolbarActions(
     shareButtonClick: (String) -> Unit,
     onVisibilityButtonClick: () -> Unit,
     editButtonClick: () -> Unit,
-    selectAllClick: () -> Unit,
-    deselectAllClick: () -> Unit,
 ) {
 
     val selectableDataState: DisplayingToolbarActions by remember {
         derivedStateOf {
+            val loadedState = state.value.let { it as? ScreenState.Loaded }
             when (
-                state.value.let { it as? ScreenState.Loaded }
-                    ?.visibleDataState?.value
-                    ?.isSelectionModeEnabled?.value
+                loadedState?.isSelectionModeEnabled?.value
             ) {
-                true -> DisplayingToolbarActions.Selection
-                false -> DisplayingToolbarActions.Default
+                true -> DisplayingToolbarActions.Selection(
+                    items = loadedState.visibleDataState.value.items
+                )
+
+                false -> DisplayingToolbarActions.Default(
+                    sharableDeckData = loadedState.let { it as? ScreenState.Loaded.Letters }
+                        ?.sharableDeckData
+                )
+
                 null -> DisplayingToolbarActions.Nothing
             }
         }
@@ -172,13 +174,13 @@ private fun ToolbarActions(
                     Box(Modifier.width(200.dp))
                 }
 
-                DisplayingToolbarActions.Default -> {
-                    IconButton(
-                        onClick = {
-                            shareButtonClick((state.value as ScreenState.Loaded).sharePractice)
+                is DisplayingToolbarActions.Default -> {
+                    if (it.sharableDeckData != null) {
+                        IconButton(
+                            onClick = { shareButtonClick(it.sharableDeckData) }
+                        ) {
+                            Icon(Icons.Default.Share, null)
                         }
-                    ) {
-                        Icon(Icons.Default.Share, null)
                     }
                     IconButton(
                         onClick = onVisibilityButtonClick
@@ -192,14 +194,14 @@ private fun ToolbarActions(
                     }
                 }
 
-                DisplayingToolbarActions.Selection -> {
+                is DisplayingToolbarActions.Selection -> {
                     IconButton(
-                        onClick = deselectAllClick
+                        onClick = { it.items.forEach { it.selected.value = false } }
                     ) {
                         Icon(ExtraIcons.DeselectAll, null)
                     }
                     IconButton(
-                        onClick = selectAllClick
+                        onClick = { it.items.forEach { it.selected.value = true } }
                     ) {
                         Icon(ExtraIcons.SelectAll, null)
                     }

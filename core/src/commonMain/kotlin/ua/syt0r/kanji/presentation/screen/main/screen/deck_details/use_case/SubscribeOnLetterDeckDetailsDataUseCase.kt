@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.use_case
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -16,41 +16,37 @@ import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
 import ua.syt0r.kanji.presentation.LifecycleState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsItemData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeItemSummary
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.toReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeItemSummary
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
-interface SubscribeOnLetterDeckDetailsDataUseCase {
+interface SubscribeOnDeckDetailsDataUseCase {
     operator fun invoke(
-        deckId: Long,
+        configuration: DeckDetailsScreenConfiguration.LetterDeck,
         lifecycleState: StateFlow<LifecycleState>
-    ): Flow<RefreshableData<LetterDeckDetailsData>>
+    ): Flow<RefreshableData<DeckDetailsData.LetterDeckData>>
 }
 
-data class LetterDeckDetailsData(
-    val deckTitle: String,
-    val items: List<LetterDeckDetailsItemData>,
-    val sharePractice: String,
-)
-
-class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
+class DefaultSubscribeOnDeckDetailsDataUseCase(
     private val letterSrsManager: LetterSrsManager,
     private val appDataRepository: AppDataRepository,
     private val practiceRepository: LetterPracticeRepository,
     private val coroutineContext: CoroutineContext = Dispatchers.IO
-) : SubscribeOnLetterDeckDetailsDataUseCase {
+) : SubscribeOnDeckDetailsDataUseCase {
 
     override operator fun invoke(
-        deckId: Long,
+        configuration: DeckDetailsScreenConfiguration.LetterDeck,
         lifecycleState: StateFlow<LifecycleState>,
-    ): Flow<RefreshableData<LetterDeckDetailsData>> {
+    ): Flow<RefreshableData<DeckDetailsData.LetterDeckData>> {
+        val deckId = configuration.deckId
         return refreshableDataFlow(
             dataChangeFlow = letterSrsManager.dataChangeFlow,
             lifecycleState = lifecycleState,
             valueProvider = {
-                var data: LetterDeckDetailsData
+                var data: DeckDetailsData.LetterDeckData
                 val timeToRefreshData = measureTimeMillis { data = getUpdatedData(deckId) }
                 Logger.d("timeToRefreshData[$timeToRefreshData]")
                 data
@@ -60,7 +56,7 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
 
     private suspend fun getUpdatedData(
         deckId: Long
-    ): LetterDeckDetailsData = withContext(coroutineContext) {
+    ): DeckDetailsData.LetterDeckData = withContext(coroutineContext) {
         Logger.logMethod()
 
         val deckInfo: LetterSrsDeckInfo
@@ -69,8 +65,8 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
 
         val timeToGetDeckInfo = measureTimeMillis {
             deckInfo = letterSrsManager.getUpdatedDeckInfo(deckId)
-            writingMap = deckInfo.writingDetails.all.associateBy { it.character }
-            readingMap = deckInfo.readingDetails.all.associateBy { it.character }
+            writingMap = deckInfo.writingDetails.charactersData
+            readingMap = deckInfo.readingDetails.charactersData
         }
         Logger.d("timeToGetDeckInfo[$timeToGetDeckInfo]")
 
@@ -80,7 +76,7 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
             val writingData = writingMap.getValue(character)
             val readingData = readingMap.getValue(character)
 
-            LetterDeckDetailsItemData(
+            DeckDetailsItemData.LetterData(
                 character = character,
                 positionInPractice = index,
                 frequency = appDataRepository.getData(character)?.frequency,
@@ -93,7 +89,7 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
                     expectedReviewDate = writingData.expectedReviewDate,
                     lapses = writingData.studyProgress?.lapses ?: 0,
                     repeats = writingData.studyProgress?.repeats ?: 0,
-                    state = writingData.status.toReviewState()
+                    srsItemStatus = writingData.status
                 ),
                 readingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
@@ -104,15 +100,15 @@ class DefaultSubscribeOnLetterDeckDetailsDataUseCase(
                     expectedReviewDate = readingData.expectedReviewDate,
                     lapses = readingData.studyProgress?.lapses ?: 0,
                     repeats = readingData.studyProgress?.repeats ?: 0,
-                    state = readingData.status.toReviewState()
+                    srsItemStatus = readingData.status
                 )
             )
         }
 
-        LetterDeckDetailsData(
+        DeckDetailsData.LetterDeckData(
             deckTitle = deckInfo.title,
             items = items,
-            sharePractice = items.joinToString("") { it.character }
+            sharableDeckData = items.joinToString("") { it.character }
         )
 
     }

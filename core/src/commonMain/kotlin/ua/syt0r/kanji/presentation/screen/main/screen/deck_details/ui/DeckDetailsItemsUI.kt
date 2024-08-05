@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +16,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,32 +28,34 @@ import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsCharacterBox
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsConfigurationRow
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsConfigurationRow
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 
 @Composable
-fun LetterDeckDetailsItemsUI(
+fun DeckDetailsItemsUI(
+    configuration: DeckDetailsConfiguration.LetterDeckConfiguration,
+    selectionModeEnabled: MutableState<Boolean>,
     visibleData: DeckDetailsVisibleData.Items,
     extraListSpacerState: ExtraListSpacerState,
-    onConfigurationUpdate: (LetterDeckDetailsConfiguration) -> Unit,
+    onConfigurationUpdate: (DeckDetailsConfiguration.LetterDeckConfiguration) -> Unit,
     onCharacterClick: (String) -> Unit,
     onSelectionToggled: (DeckDetailsListItem) -> Unit,
 ) {
 
     if (visibleData.items.isEmpty()) {
         Column {
-            LetterDeckDetailsConfigurationRow(
-                configuration = visibleData.configuration,
+            DeckDetailsConfigurationRow(
+                configuration = configuration,
                 kanaGroupsMode = false,
                 onConfigurationUpdate = onConfigurationUpdate
             )
 
             Text(
-                text = resolveString { letterDeckDetails.emptyListMessage },
+                text = resolveString { deckDetails.emptyListMessage },
                 modifier = Modifier.padding(horizontal = 20.dp)
                     .weight(1f)
                     .fillMaxWidth()
@@ -66,8 +70,8 @@ fun LetterDeckDetailsItemsUI(
         val collapsibleConfigurationContainerState = rememberCollapsibleContainerState()
 
         CollapsibleContainer(collapsibleConfigurationContainerState) {
-            LetterDeckDetailsConfigurationRow(
-                configuration = visibleData.configuration,
+            DeckDetailsConfigurationRow(
+                configuration = configuration,
                 kanaGroupsMode = false,
                 onConfigurationUpdate = onConfigurationUpdate
             )
@@ -83,11 +87,12 @@ fun LetterDeckDetailsItemsUI(
 
             items(
                 items = visibleData.items,
-                key = { it.item.character },
+                key = { it.key },
             ) {
                 LetterListItem(
-                    it = it,
-                    visibleData = visibleData,
+                    item = it,
+                    isSelectionModeEnabled = selectionModeEnabled,
+                    configuration = configuration,
                     onCharacterClick = onCharacterClick,
                     onSelectionToggled = onSelectionToggled
                 )
@@ -103,8 +108,9 @@ fun LetterDeckDetailsItemsUI(
 
 @Composable
 private fun LetterListItem(
-    it: DeckDetailsListItem.Letter,
-    visibleData: DeckDetailsVisibleData.Items,
+    item: DeckDetailsListItem.Letter,
+    isSelectionModeEnabled: State<Boolean>,
+    configuration: DeckDetailsConfiguration.LetterDeckConfiguration,
     onCharacterClick: (String) -> Unit,
     onSelectionToggled: (DeckDetailsListItem.Letter) -> Unit
 ) {
@@ -112,23 +118,23 @@ private fun LetterListItem(
     Row(
         modifier = Modifier.fillMaxWidth()
             .clip(MaterialTheme.shapes.large)
-            .clickable(visibleData.isSelectionModeEnabled.value) {
-                onSelectionToggled(it)
+            .clickable(isSelectionModeEnabled.value) {
+                onSelectionToggled(item)
             }
             .padding(horizontal = 10.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Top
     ) {
 
-        val summary = when (visibleData.configuration.practiceType) {
-            PracticeType.Writing -> it.item.writingSummary
-            PracticeType.Reading -> it.item.readingSummary
+        val summary = when (configuration.practiceType) {
+            PracticeType.Writing -> item.data.writingSummary
+            PracticeType.Reading -> item.data.readingSummary
         }
 
-        LetterDeckDetailsCharacterBox(
-            character = it.item.character,
-            reviewState = summary.state,
-            onClick = { onCharacterClick(it.item.character) }
+        DeckDetailsCharacterBox(
+            character = item.data.character,
+            reviewState = summary.srsItemStatus,
+            onClick = { onCharacterClick(item.data.character) }
         )
 
         Column(
@@ -136,7 +142,7 @@ private fun LetterListItem(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
 
-            val strings = resolveString { letterDeckDetails }
+            val strings = resolveString { deckDetails }
 
             Text(
                 text = strings.expectedReviewDate(summary.expectedReviewDate),
@@ -156,10 +162,10 @@ private fun LetterListItem(
             )
         }
 
-        if (visibleData.isSelectionModeEnabled.value) {
+        if (isSelectionModeEnabled.value) {
             RadioButton(
-                selected = it.selected.value,
-                onClick = { onSelectionToggled(it) },
+                selected = item.selected.value,
+                onClick = { onSelectionToggled(item) },
                 colors = RadioButtonDefaults.colors(
                     selectedColor = MaterialTheme.colorScheme.onSurface
                 )

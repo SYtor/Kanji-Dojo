@@ -45,7 +45,7 @@ class WritingPracticeViewModel(
     private val kanaTtsManager: KanaTtsManager
 ) : WritingPracticeScreenContract.ViewModel {
 
-    private var practiceId: Long? = null
+    private var deckId: Long? = null
     private lateinit var screenConfiguration: WritingScreenConfiguration
 
     private lateinit var radicalsHighlight: MutableState<Boolean>
@@ -61,9 +61,9 @@ class WritingPracticeViewModel(
     private lateinit var kanjiStrokeEvaluator: KanjiStrokeEvaluator
 
     override fun init(configuration: MainDestination.Practice.Writing) {
-        if (practiceId != null) return
+        if (deckId != null) return
 
-        practiceId = configuration.practiceId
+        deckId = configuration.deckId
 
         viewModelScope.launch {
             state.value = ScreenState.Configuring(
@@ -130,7 +130,7 @@ class WritingPracticeViewModel(
                 val characterReviewSummary = reviewSummary.characterSummaries.getValue(character)
                 CharacterWritingReviewResult(
                     character = character,
-                    practiceId = practiceId!!,
+                    practiceId = deckId!!,
                     mistakes = mistakes,
                     reviewDuration = characterReviewSummary.reviewDuration,
                     outcome = result.outcomes.getValue(character),

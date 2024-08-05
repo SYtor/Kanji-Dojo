@@ -49,7 +49,7 @@ object EnglishStrings : Strings {
 
     override val letterDeckPicker: LetterDeckPickerStrings = EnglishLetterDeckPickerStrings
     override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
-    override val letterDeckDetails: LetterDeckDetailsStrings = EnglishLetterDeckDetailsStrings
+    override val deckDetails: DeckDetailsStrings = EnglishDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
     override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
     override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
@@ -423,7 +423,7 @@ object EnglishDeckEditStrings : DeckEditStrings {
     override val leaveConfirmationAccept: String = "Leave"
 }
 
-object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
+object EnglishDeckDetailsStrings : DeckDetailsStrings {
     override val emptyListMessage: String = "Nothing here"
     override val detailsGroupTitle: (index: Int) -> String = { "Group $it" }
     override val firstTimeReviewMessage: (LocalDateTime?) -> String = {
@@ -463,6 +463,9 @@ object EnglishLetterDeckDetailsStrings : LetterDeckDetailsStrings {
     override val filterAllLabel: String = "All"
     override val filterNoneLabel: String = "None"
     override val kanaGroupsModeActivatedLabel: String = "Kana Groups Mode"
+    override val shareLetterDeckClipboardMessage: String =
+        "Letters from deck were copied to the clipboard"
+
 }
 
 object EnglishLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {

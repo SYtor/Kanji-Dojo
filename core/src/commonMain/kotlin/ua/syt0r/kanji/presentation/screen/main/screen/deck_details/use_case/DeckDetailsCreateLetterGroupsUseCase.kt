@@ -1,36 +1,32 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.use_case
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import ua.syt0r.kanji.core.japanese.hiraganaToKatakana
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItemKey
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsItemData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeGroupSummary
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
+import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItemKey
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeGroupSummary
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 
-interface LetterDeckDetailsCreatePracticeGroupsUseCase {
+interface DeckDetailsCreateLetterGroupsUseCase {
 
     operator fun invoke(
-        items: List<LetterDeckDetailsItemData>,
-        visibleItems: List<LetterDeckDetailsItemData>,
+        items: List<DeckDetailsItemData.LetterData>,
+        visibleItems: List<DeckDetailsItemData>,
         type: PracticeType,
         probeKanaGroups: Boolean,
-        previousSelectionStates: Map<DeckDetailsListItemKey, MutableState<Boolean>>?,
-    ): PracticeGroupsCreationResult
+        previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
+    ): LetterGroupsCreationResult
 
 }
 
-data class PracticeGroupsCreationResult(
+data class LetterGroupsCreationResult(
     val kanaGroups: Boolean,
-    val groups: List<DeckDetailsListItem.Group>,
-    val selectionStates: Map<DeckDetailsListItemKey, MutableState<Boolean>>,
+    val groups: List<DeckDetailsListItem.Group>
 )
 
-class DefaultLetterDeckDetailsCreatePracticeGroupsUseCase :
-    LetterDeckDetailsCreatePracticeGroupsUseCase {
+class DefaultDeckDetailsCreateLetterGroupsUseCase :
+    DeckDetailsCreateLetterGroupsUseCase {
 
     companion object {
         private const val CharactersInGroup = 6
@@ -67,17 +63,17 @@ class DefaultLetterDeckDetailsCreatePracticeGroupsUseCase :
 
 
     override fun invoke(
-        items: List<LetterDeckDetailsItemData>,
-        visibleItems: List<LetterDeckDetailsItemData>,
+        items: List<DeckDetailsItemData.LetterData>,
+        visibleItems: List<DeckDetailsItemData>,
         type: PracticeType,
         probeKanaGroups: Boolean,
-        previousSelectionStates: Map<DeckDetailsListItemKey, MutableState<Boolean>>?,
-    ): PracticeGroupsCreationResult {
+        previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
+    ): LetterGroupsCreationResult {
 
         val itemsMap = items.associateBy { it.character }
         val characters = itemsMap.keys
 
-        val (chunkedGroups: List<List<LetterDeckDetailsItemData>>, kanaGroupsFound: Boolean) = when {
+        val (chunkedGroups: List<List<DeckDetailsItemData>>, kanaGroupsFound: Boolean) = when {
             !probeKanaGroups -> visibleItems.chunked(CharactersInGroup) to false
 
             HiraganaBaseGroups.areMatchingSets(characters) -> {
@@ -99,19 +95,18 @@ class DefaultLetterDeckDetailsCreatePracticeGroupsUseCase :
             else -> visibleItems.chunked(CharactersInGroup) to false
         }
 
-        val selectionStates = mutableMapOf<DeckDetailsListItemKey, MutableState<Boolean>>()
         val groups = chunkedGroups.mapIndexed { index, groupItems ->
-            val selectionState = mutableStateOf(false)
-            val group = createGroup(index, groupItems, type, selectionState)
-            previousSelectionStates?.get(group.key)?.value?.also { selectionState.value = it }
-            selectionStates[group.key] = selectionState
-            group
+            createGroup(
+                index = index,
+                groupItems = groupItems as List<DeckDetailsItemData.LetterData>,
+                practiceType = type,
+                previousSelectionStates = previousSelectionStates,
+            )
         }
 
-        return PracticeGroupsCreationResult(
+        return LetterGroupsCreationResult(
             kanaGroups = kanaGroupsFound,
-            groups = groups,
-            selectionStates = selectionStates
+            groups = groups
         )
     }
 
@@ -121,27 +116,27 @@ class DefaultLetterDeckDetailsCreatePracticeGroupsUseCase :
     }
 
     private fun List<String>.associateGroupsWithItems(
-        itemsMap: Map<String, LetterDeckDetailsItemData>,
-    ): List<List<LetterDeckDetailsItemData>> = map { groupString ->
+        itemsMap: Map<String, DeckDetailsItemData>,
+    ): List<List<DeckDetailsItemData>> = map { groupString ->
         groupString.map { char -> itemsMap.getValue(char.toString()) }
     }
 
     private fun createGroup(
         index: Int,
-        groupItems: List<LetterDeckDetailsItemData>,
+        groupItems: List<DeckDetailsItemData.LetterData>,
         practiceType: PracticeType,
-        selectionState: State<Boolean>,
+        previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
     ): DeckDetailsListItem.Group {
 
         val itemReviewStates = when (practiceType) {
-            PracticeType.Writing -> groupItems.map { it.writingSummary.state }
-            PracticeType.Reading -> groupItems.map { it.readingSummary.state }
+            PracticeType.Writing -> groupItems.map { it.writingSummary.srsItemStatus }
+            PracticeType.Reading -> groupItems.map { it.readingSummary.srsItemStatus }
         }
 
         val groupReviewState = when {
-            itemReviewStates.all { it == CharacterReviewState.Done } -> CharacterReviewState.Done
-            itemReviewStates.any { it == CharacterReviewState.Due } -> CharacterReviewState.Due
-            else -> CharacterReviewState.New
+            itemReviewStates.all { it == SrsItemStatus.Done } -> SrsItemStatus.Done
+            itemReviewStates.any { it == SrsItemStatus.Review } -> SrsItemStatus.Review
+            else -> SrsItemStatus.New
         }
 
         val summary = when (practiceType) {
@@ -166,12 +161,17 @@ class DefaultLetterDeckDetailsCreatePracticeGroupsUseCase :
             )
         }
 
+        val key = DeckDetailsListItemKey(
+            value = groupItems.joinToString("") { it.character }
+        )
+
         return DeckDetailsListItem.Group(
             index = index + 1,
+            key = key,
             items = groupItems,
             summary = summary,
             reviewState = groupReviewState,
-            selected = selectionState
+            initialSelectionState = previousSelectionStates?.get(key) ?: false
         )
     }
 

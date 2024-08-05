@@ -63,7 +63,7 @@ interface Strings {
     val sponsor: SponsorStrings
 
     val letterDeckPicker: LetterDeckPickerStrings
-    val letterDeckDetails: LetterDeckDetailsStrings
+    val deckDetails: DeckDetailsStrings
     val deckEdit: DeckEditStrings
 
     val commonPractice: CommonPracticeStrings
@@ -358,7 +358,7 @@ interface DeckEditStrings {
     val leaveConfirmationAccept: String
 }
 
-interface LetterDeckDetailsStrings {
+interface DeckDetailsStrings {
 
     val emptyListMessage: String
     fun listGroupTitle(index: Int, characters: String): String = "$index. $characters"
@@ -392,6 +392,8 @@ interface LetterDeckDetailsStrings {
     val filterDialog: FilterDialogStrings
     val sortDialog: SortDialogStrings
     val layoutDialog: PracticePreviewLayoutDialogStrings
+
+    val shareLetterDeckClipboardMessage: String
 
 }
 

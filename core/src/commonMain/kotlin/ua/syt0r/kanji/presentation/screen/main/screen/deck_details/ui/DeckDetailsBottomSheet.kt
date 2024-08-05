@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -44,17 +44,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsCharacterBox
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.toColor
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.toColor
 
 private sealed interface SheetContentState {
 
@@ -73,16 +73,16 @@ private sealed interface SheetContentState {
 private fun State<ScreenState>.toSheetContentState(): State<SheetContentState> {
     return remember {
         derivedStateOf {
-            val currentState = value
-                .let { it as? ScreenState.Loaded }
+            val screenState = value.let { it as? ScreenState.Loaded.Letters }
                 ?: return@derivedStateOf SheetContentState.Loading
 
+            val visibleData = screenState.visibleDataState.value
+            if (visibleData !is DeckDetailsVisibleData.Groups)
+                return@derivedStateOf SheetContentState.Loading
+
             SheetContentState.Loaded(
-                practiceType = currentState.visibleDataState.value.configuration.practiceType,
-                group = currentState.visibleDataState.value
-                    .let { it as? DeckDetailsVisibleData.Groups }
-                    ?.selectedItem
-                    ?.value
+                practiceType = screenState.configuration.value.practiceType,
+                group = visibleData.selectedItem.value
                     ?: return@derivedStateOf SheetContentState.NothingSelected
             )
 
@@ -92,7 +92,7 @@ private fun State<ScreenState>.toSheetContentState(): State<SheetContentState> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LetterDeckDetailsBottomSheet(
+fun DeckDetailsBottomSheet(
     state: State<ScreenState>,
     onCharacterClick: (String) -> Unit,
     onStudyClick: (DeckDetailsListItem.Group) -> Unit,
@@ -155,7 +155,7 @@ private fun PracticeGroupDetails(
         ) {
 
             Text(
-                text = resolveString { letterDeckDetails.detailsGroupTitle(group.index) },
+                text = resolveString { deckDetails.detailsGroupTitle(group.index) },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 1.dp) // TODO text alignment api
             )
@@ -191,15 +191,15 @@ private fun PracticeGroupDetails(
                         Text(
                             text = resolveString {
                                 when (group.reviewState) {
-                                    CharacterReviewState.Done -> {
+                                    SrsItemStatus.Done -> {
                                         reviewStateDone
                                     }
 
-                                    CharacterReviewState.Due -> {
+                                    SrsItemStatus.Review -> {
                                         reviewStateDue
                                     }
 
-                                    CharacterReviewState.New -> {
+                                    SrsItemStatus.New -> {
                                         reviewStateNew
                                     }
                                 }
@@ -214,14 +214,14 @@ private fun PracticeGroupDetails(
 
         Text(
             text = resolveString {
-                letterDeckDetails.firstTimeReviewMessage(group.summary.firstReviewDate)
+                deckDetails.firstTimeReviewMessage(group.summary.firstReviewDate)
             },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
         Text(
             text = resolveString {
-                letterDeckDetails.lastTimeReviewMessage(group.summary.lastReviewDate)
+                deckDetails.lastTimeReviewMessage(group.summary.lastReviewDate)
             },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
@@ -237,11 +237,11 @@ private fun PracticeGroupDetails(
             items(group.items) {
 
                 val reviewState = when (practiceType) {
-                    PracticeType.Writing -> it.writingSummary.state
-                    PracticeType.Reading -> it.readingSummary.state
+                    PracticeType.Writing -> it.writingSummary.srsItemStatus
+                    PracticeType.Reading -> it.readingSummary.srsItemStatus
                 }
 
-                LetterDeckDetailsCharacterBox(
+                DeckDetailsCharacterBox(
                     character = it.character,
                     reviewState = reviewState,
                     onClick = { onCharacterClick(it.character) },
@@ -268,7 +268,7 @@ private fun PracticeGroupDetails(
                 modifier = Modifier.weight(1f).padding(vertical = 6.dp),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text(text = resolveString { letterDeckDetails.groupDetailsButton })
+                Text(text = resolveString { deckDetails.groupDetailsButton })
             }
 
         }

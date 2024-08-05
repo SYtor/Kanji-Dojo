@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,9 +50,9 @@ import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsLayout
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.FilterConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.SortOption
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsLayout
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.FilterConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.LettersSortOption
 
 
 private data class FilterCheckboxRowData(
@@ -62,7 +62,7 @@ private data class FilterCheckboxRowData(
 )
 
 @Composable
-fun LetterDeckDetailsFilterDialog(
+fun DeckDetailsFilterDialog(
     filter: FilterConfiguration,
     onDismissRequest: () -> Unit,
     onApplyConfiguration: (FilterConfiguration) -> Unit
@@ -91,7 +91,7 @@ fun LetterDeckDetailsFilterDialog(
     )
 
     BaseDialog(
-        title = resolveString { letterDeckDetails.filterDialog.title },
+        title = resolveString { deckDetails.filterDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = {
             onApplyConfiguration(
@@ -152,10 +152,10 @@ private fun FilterRow(data: FilterCheckboxRowData) {
 }
 
 @Composable
-fun LetterDeckDetailsSortDialog(
+fun DeckDetailsSortDialog(
     onDismissRequest: () -> Unit,
-    onApplyClick: (sortOption: SortOption, isDescending: Boolean) -> Unit,
-    sortOption: SortOption,
+    onApplyClick: (sortOption: LettersSortOption, isDescending: Boolean) -> Unit,
+    sortOption: LettersSortOption,
     isDesc: Boolean
 ) {
 
@@ -163,12 +163,12 @@ fun LetterDeckDetailsSortDialog(
     var isDescending by rememberSaveable { mutableStateOf(isDesc) }
 
     BaseDialog(
-        title = resolveString { letterDeckDetails.sortDialog.title },
+        title = resolveString { deckDetails.sortDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyClick(selectedSortOption, isDescending) }
     ) {
 
-        SortOption.values().forEach {
+        LettersSortOption.values().forEach {
 
             SelectableRow(
                 isSelected = it == selectedSortOption,
@@ -225,7 +225,7 @@ fun LetterDeckDetailsSortDialog(
 
 
 @Composable
-fun LetterDeckDetailsLayoutDialog(
+fun DeckDetailsLayoutDialog(
     layout: DeckDetailsLayout,
     kanaGroups: Boolean,
     onDismissRequest: () -> Unit,
@@ -236,7 +236,7 @@ fun LetterDeckDetailsLayoutDialog(
     var selectedKanaGroups by remember { mutableStateOf(kanaGroups) }
 
     BaseDialog(
-        title = resolveString { letterDeckDetails.layoutDialog.title },
+        title = resolveString { deckDetails.layoutDialog.title },
         onDismissRequest = onDismissRequest,
         onApplyClick = { onApplyConfiguration(selectedLayout, selectedKanaGroups) }
     ) {
@@ -274,9 +274,9 @@ fun LetterDeckDetailsLayoutDialog(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Column(Modifier.weight(1f)) {
-                Text(text = resolveString { letterDeckDetails.layoutDialog.kanaGroupsTitle })
+                Text(text = resolveString { deckDetails.layoutDialog.kanaGroupsTitle })
                 Text(
-                    text = resolveString { letterDeckDetails.layoutDialog.kanaGroupsSubtitle },
+                    text = resolveString { deckDetails.layoutDialog.kanaGroupsSubtitle },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -302,10 +302,10 @@ private fun BaseDialog(
         content = content,
         buttons = {
             TextButton(onClick = onDismissRequest) {
-                Text(text = resolveString { letterDeckDetails.dialogCommon.buttonCancel })
+                Text(text = resolveString { deckDetails.dialogCommon.buttonCancel })
             }
             TextButton(onClick = onApplyClick) {
-                Text(text = resolveString { letterDeckDetails.dialogCommon.buttonApply })
+                Text(text = resolveString { deckDetails.dialogCommon.buttonApply })
             }
         }
     )

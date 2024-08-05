@@ -15,7 +15,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.LetterDeckPickerScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
@@ -103,13 +104,13 @@ interface MainDestination {
     }
 
     @Serializable
-    data class LetterDeckDetails(
-        val id: Long
+    data class DeckDetails(
+        val configuration: DeckDetailsScreenConfiguration
     ) : MainDestination {
         @Composable
         override fun Draw(state: MainNavigationState) {
-            LetterDeckDetailsScreen(
-                deckId = id,
+            DeckDetailsScreen(
+                configuration = configuration,
                 mainNavigationState = state
             )
         }
@@ -120,7 +121,7 @@ interface MainDestination {
 
         @Serializable
         data class Writing(
-            val practiceId: Long,
+            val deckId: Long,
             val characterList: List<String>
         ) : Practice {
 
@@ -136,7 +137,7 @@ interface MainDestination {
 
         @Serializable
         data class Reading(
-            val practiceId: Long,
+            val deckId: Long,
             val characterList: List<String>
         ) : Practice {
 
@@ -270,7 +271,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Credits.configuration(),
     MainDestination.Sponsor.configuration(),
     MainDestination.LetterDeckPicker.configuration(),
-    MainDestination.LetterDeckDetails::class.configuration(),
+    MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),
     MainDestination.Feedback::class.configuration(),
     MainDestination.KanjiInfo::class.configuration(),

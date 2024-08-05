@@ -5,7 +5,7 @@ import ua.syt0r.kanji.core.coreModule
 import ua.syt0r.kanji.presentation.screen.main.mainScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.about.aboutScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.backupScreenModule
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.letterDeckDetailsScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.deckDetailsScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.deckEditScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.feedbackScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.home.homeScreenModule
@@ -33,7 +33,7 @@ private val screenModules = listOf(
     aboutScreenModule,
     letterDeckPickerScreenModule,
     deckEditScreenModule,
-    letterDeckDetailsScreenModule,
+    deckDetailsScreenModule,
     writingPracticeScreenModule,
     readingPracticeScreenModule,
     vocabPracticeScreenModule,

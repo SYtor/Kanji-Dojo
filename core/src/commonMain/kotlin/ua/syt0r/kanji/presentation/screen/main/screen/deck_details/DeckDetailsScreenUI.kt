@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -39,7 +39,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +53,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
@@ -63,48 +63,44 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.LetterDeckDetailsContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.CharacterReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.LetterDeckDetailsConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.data.PracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsBottomSheet
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsFilterDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsGroupsUI
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsItemsUI
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsLayoutDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsSortDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details.ui.LetterDeckDetailsToolbar
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsBottomSheet
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsFilterDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsGroupsUI
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsItemsUI
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsLayoutDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsSortDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsToolbar
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LetterDeckDetailsScreenUI(
+fun DeckDetailsScreenUI(
     state: State<ScreenState>,
-    updateConfiguration: (LetterDeckDetailsConfiguration) -> Unit,
     navigateUp: () -> Unit,
     navigateToDeckEdit: () -> Unit,
     navigateToCharacterDetails: (String) -> Unit,
-    showGroupDetails: (DeckDetailsListItem.Group) -> Unit,
-    startSelectionMode: () -> Unit,
-    leaveSelectionMode: () -> Unit,
-    toggleSelection: (DeckDetailsListItem) -> Unit,
-    selectAllClick: () -> Unit,
-    deselectAllClick: () -> Unit,
     startGroupReview: (DeckDetailsListItem.Group) -> Unit,
     startMultiselectReview: () -> Unit,
 ) {
 
     var shouldShowVisibilityDialog by remember { mutableStateOf(false) }
     if (shouldShowVisibilityDialog) {
-        val configuration = (state.value as ScreenState.Loaded).visibleDataState.value.configuration
-        LetterDeckDetailsLayoutDialog(
+        val loadedState = state.value.let { it as ScreenState.Loaded.Letters }
+        val configuration = loadedState.configuration.value
+        DeckDetailsLayoutDialog(
             layout = configuration.layout,
             kanaGroups = configuration.kanaGroups,
             onDismissRequest = { shouldShowVisibilityDialog = false },
             onApplyConfiguration = { layout, kanaGroups ->
                 shouldShowVisibilityDialog = false
-                updateConfiguration(configuration.copy(layout = layout, kanaGroups = kanaGroups))
+                loadedState.configuration.value = configuration.copy(
+                    layout = layout,
+                    kanaGroups = kanaGroups
+                )
             }
         )
     }
@@ -127,7 +123,7 @@ fun LetterDeckDetailsScreenUI(
             bottomEnd = ZeroCornerSize
         ),
         sheetContent = {
-            LetterDeckDetailsBottomSheet(
+            DeckDetailsBottomSheet(
                 state = state,
                 onCharacterClick = navigateToCharacterDetails,
                 onStudyClick = startGroupReview,
@@ -138,37 +134,25 @@ fun LetterDeckDetailsScreenUI(
 
         Scaffold(
             topBar = {
-                LetterDeckDetailsToolbar(
+                DeckDetailsToolbar(
                     state = state,
                     upButtonClick = navigateUp,
-                    dismissMultiSelectButtonClick = leaveSelectionMode,
                     onVisibilityButtonClick = { shouldShowVisibilityDialog = true },
                     editButtonClick = navigateToDeckEdit,
-                    selectAllClick = selectAllClick,
-                    deselectAllClick = deselectAllClick,
                     shareButtonClick = { practiceSharer.share(it) }
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { paddingValues ->
 
-            val noGroupsSelectedMessage = resolveString {
-                letterDeckDetails.multiselectNoSelected
-            }
+            val noGroupsSelectedMessage = resolveString { deckDetails.multiselectNoSelected }
 
             ScreenContent(
                 state = state,
-                updateConfiguration = updateConfiguration,
                 navigateToCharacterDetails = navigateToCharacterDetails,
-                selectGroup = {
-                    coroutineScope.launch {
-                        showGroupDetails(it)
-                        bottomSheetState.show()
-                    }
+                showGroupSheet = {
+                    coroutineScope.launch { bottomSheetState.show() }
                 },
-                toggleSelection = toggleSelection,
-                startSelectionMode = startSelectionMode,
-                leaveSelectionMode = leaveSelectionMode,
                 startMultiselectReview = startMultiselectReview,
                 showNoSelectionMessage = {
                     coroutineScope.launch {
@@ -190,12 +174,8 @@ fun LetterDeckDetailsScreenUI(
 @Composable
 private fun ScreenContent(
     state: State<ScreenState>,
-    updateConfiguration: (LetterDeckDetailsConfiguration) -> Unit,
     navigateToCharacterDetails: (String) -> Unit,
-    selectGroup: (DeckDetailsListItem.Group) -> Unit,
-    toggleSelection: (DeckDetailsListItem) -> Unit,
-    startSelectionMode: () -> Unit,
-    leaveSelectionMode: () -> Unit,
+    showGroupSheet: () -> Unit,
     startMultiselectReview: () -> Unit,
     showNoSelectionMessage: () -> Unit,
     modifier: Modifier,
@@ -219,14 +199,15 @@ private fun ScreenContent(
                 ScreenLoadedState(
                     screenState = screenState,
                     extraListSpacerState = extraListSpacerState,
-                    onConfigurationUpdate = updateConfiguration,
                     onCharacterClick = navigateToCharacterDetails,
-                    selectGroup = selectGroup,
-                    toggleItemSelection = toggleSelection
+                    showGroupSheet = showGroupSheet,
+                    toggleItemSelection = { it.selected.run { value = !value } }
                 )
 
-                if (screenState.visibleDataState.value.isSelectionModeEnabled.value) {
-                    MultiplatformBackHandler(onBack = leaveSelectionMode)
+                if (screenState.isSelectionModeEnabled.value) {
+                    MultiplatformBackHandler(
+                        onBack = { screenState.isSelectionModeEnabled.value = false }
+                    )
                 }
             }
         }
@@ -256,7 +237,7 @@ private fun ScreenContent(
                     showNoSelectionMessage()
                 }
             },
-            startSelectionMode = startSelectionMode
+            startSelectionMode = { screenState.isSelectionModeEnabled.apply { value = !value } }
         )
     }
 
@@ -266,9 +247,8 @@ private fun ScreenContent(
 private fun ScreenLoadedState(
     screenState: ScreenState.Loaded,
     extraListSpacerState: ExtraListSpacerState,
-    onConfigurationUpdate: (LetterDeckDetailsConfiguration) -> Unit,
     onCharacterClick: (String) -> Unit,
-    selectGroup: (DeckDetailsListItem.Group) -> Unit,
+    showGroupSheet: () -> Unit,
     toggleItemSelection: (DeckDetailsListItem) -> Unit,
 ) {
 
@@ -280,28 +260,39 @@ private fun ScreenLoadedState(
             targetState = screenState.visibleDataState.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             modifier = Modifier.fillMaxSize()
-        ) {
+        ) { visibleData ->
 
-            when (it) {
+            when (visibleData) {
                 is DeckDetailsVisibleData.Groups -> {
-                    LetterDeckDetailsGroupsUI(
-                        visibleData = it,
+                    screenState as ScreenState.Loaded.Letters
+                    DeckDetailsGroupsUI(
+                        configuration = screenState.configuration.value,
+                        selectionModeEnabled = screenState.isSelectionModeEnabled,
+                        visibleData = visibleData,
                         extraListSpacerState = extraListSpacerState,
-                        onConfigurationUpdate = onConfigurationUpdate,
-                        selectGroup = selectGroup,
+                        onConfigurationUpdate = { screenState.configuration.value = it },
+                        selectGroup = {
+                            visibleData.selectedItem.value = it
+                            showGroupSheet()
+                        },
                         toggleGroupSelection = toggleItemSelection
                     )
                 }
 
                 is DeckDetailsVisibleData.Items -> {
-                    LetterDeckDetailsItemsUI(
-                        visibleData = it,
+                    screenState as ScreenState.Loaded.Letters
+                    DeckDetailsItemsUI(
+                        configuration = screenState.configuration.value,
+                        selectionModeEnabled = screenState.isSelectionModeEnabled,
+                        visibleData = visibleData,
                         extraListSpacerState = extraListSpacerState,
-                        onConfigurationUpdate = onConfigurationUpdate,
+                        onConfigurationUpdate = { screenState.configuration.value = it },
                         onCharacterClick = onCharacterClick,
                         onSelectionToggled = toggleItemSelection
                     )
                 }
+
+                is DeckDetailsVisibleData.Vocab -> TODO()
             }
 
         }
@@ -311,9 +302,9 @@ private fun ScreenLoadedState(
 }
 
 @Composable
-fun CharacterReviewState.toColor(): Color = when (this) {
-    CharacterReviewState.Done -> MaterialTheme.extraColorScheme.success
-    CharacterReviewState.Due -> MaterialTheme.extraColorScheme.due
+fun SrsItemStatus.toColor(): Color = when (this) {
+    SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
+    SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
     else -> MaterialTheme.colorScheme.surfaceVariant
 }
 
@@ -325,15 +316,9 @@ private fun FAB(
     startSelectionMode: () -> Unit,
 ) {
 
-    val selectionModeEnabled = remember {
-        derivedStateOf {
-            screenState.visibleDataState.value.isSelectionModeEnabled.value
-        }
-    }
-
     FloatingActionButton(
         onClick = {
-            if (selectionModeEnabled.value) {
+            if (screenState.isSelectionModeEnabled.value) {
                 startPractice()
             } else {
                 startSelectionMode()
@@ -346,7 +331,7 @@ private fun FAB(
     ) {
 
         AnimatedContent(
-            targetState = selectionModeEnabled.value,
+            targetState = screenState.isSelectionModeEnabled.value,
             transitionSpec = {
                 fadeIn(tween(150, 150)) togetherWith fadeOut(tween(150))
             }
@@ -367,15 +352,15 @@ private fun FAB(
 }
 
 @Composable
-fun LetterDeckDetailsConfigurationRow(
-    configuration: LetterDeckDetailsConfiguration,
+fun DeckDetailsConfigurationRow(
+    configuration: DeckDetailsConfiguration.LetterDeckConfiguration,
     kanaGroupsMode: Boolean,
-    onConfigurationUpdate: (LetterDeckDetailsConfiguration) -> Unit,
+    onConfigurationUpdate: (DeckDetailsConfiguration.LetterDeckConfiguration) -> Unit,
 ) {
 
     var showFilterOptionDialog by remember { mutableStateOf(false) }
     if (showFilterOptionDialog) {
-        LetterDeckDetailsFilterDialog(
+        DeckDetailsFilterDialog(
             filter = configuration.filterConfiguration,
             onDismissRequest = { showFilterOptionDialog = false },
             onApplyConfiguration = {
@@ -387,7 +372,7 @@ fun LetterDeckDetailsConfigurationRow(
 
     var showSortDialog by remember { mutableStateOf(false) }
     if (showSortDialog) {
-        LetterDeckDetailsSortDialog(
+        DeckDetailsSortDialog(
             sortOption = configuration.sortOption,
             isDesc = configuration.isDescending,
             onDismissRequest = { showSortDialog = false },
@@ -423,7 +408,7 @@ fun LetterDeckDetailsConfigurationRow(
                 enabled = false,
                 onClick = {},
                 modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-                label = { Text(resolveString { letterDeckDetails.kanaGroupsModeActivatedLabel }) },
+                label = { Text(resolveString { deckDetails.kanaGroupsModeActivatedLabel }) },
             )
         } else {
             FilterChip(
@@ -435,8 +420,8 @@ fun LetterDeckDetailsConfigurationRow(
                         text = resolveString {
                             configuration.filterConfiguration.run {
                                 when {
-                                    showNew && showDue && showDone -> letterDeckDetails.filterAllLabel
-                                    !(showNew || showDue || showDone) -> letterDeckDetails.filterNoneLabel
+                                    showNew && showDue && showDone -> deckDetails.filterAllLabel
+                                    !(showNew || showDue || showDone) -> deckDetails.filterNoneLabel
                                     else -> {
                                         val appliedFilters = mutableListOf<String>()
                                         if (showNew) appliedFilters.add(reviewStateNew)
@@ -473,9 +458,9 @@ fun LetterDeckDetailsConfigurationRow(
 
 
 @Composable
-fun LetterDeckDetailsCharacterBox(
+fun DeckDetailsCharacterBox(
     character: String,
-    reviewState: CharacterReviewState,
+    reviewState: SrsItemStatus,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {

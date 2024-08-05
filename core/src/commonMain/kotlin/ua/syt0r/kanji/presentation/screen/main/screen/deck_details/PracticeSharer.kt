@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_details
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_details
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
