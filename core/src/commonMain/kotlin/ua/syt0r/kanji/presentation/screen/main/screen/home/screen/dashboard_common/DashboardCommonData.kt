@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_com
 import androidx.compose.runtime.MutableState
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import kotlin.time.Duration
 
 
@@ -63,8 +64,10 @@ data class VocabDeckDashboardItem(
     override val title: String,
     override val position: Int,
     override val elapsedSinceLastReview: Duration?,
-    override val studyProgress: Map<DeckStudyType, VocabDeckStudyProgress>
-) : DeckDashboardItem
+    override val studyProgress: Map<DeckStudyType, VocabDeckStudyProgress>,
+) : DeckDashboardItem {
+
+}
 
 data class DeckDashboardListState(
     val items: List<DeckDashboardItem>,

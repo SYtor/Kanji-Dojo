@@ -145,7 +145,7 @@ private fun LoadingState() {
     FancyLoading(Modifier.fillMaxSize().wrapContentSize())
 }
 
-fun DeckDashboardListState.addBrowseItems(
+private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
     dailyGoalEnabled: Boolean,
     navigateToDetails: (LetterDeckDashboardItem) -> Unit,

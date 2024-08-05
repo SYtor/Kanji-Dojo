@@ -39,12 +39,32 @@ class SqlDelightVocabPracticeRepository(
         words.forEach { insertVocabDeckEntry(it, deckId) }
     }
 
+    override suspend fun createDeckAndMerge(
+        title: String,
+        deckIdToMerge: List<Long>
+    ) = databaseManager.runModifyingTransaction {
+        insertVocabDeck(title = title)
+        val deckId = getLastInsertRowId().executeAsOne()
+
+        migrateVocabDeckEntries(deckId, deckIdToMerge)
+
+        deckIdToMerge.forEach { deleteVocabDeck(it) }
+    }
+
+    override suspend fun updateDeckPositions(
+        deckIdToPositionMap: Map<Long, Int>
+    ) = databaseManager.runModifyingTransaction {
+        deckIdToPositionMap.forEach { (deckId, position) ->
+            updateVocabDeckPosition(position.toLong(), deckId)
+        }
+    }
+
     override suspend fun deleteDeck(id: Long) = databaseManager.runModifyingTransaction {
         deleteVocabDeck(id)
     }
 
     override suspend fun getDecks(): List<VocabDeck> = databaseManager.runTransaction {
-        getVocabDecks().executeAsList().map { VocabDeck(it.id, it.title, it.position) }
+        getVocabDecks().executeAsList().map { VocabDeck(it.id, it.title, it.position.toInt()) }
     }
 
     override suspend fun updateDeck(

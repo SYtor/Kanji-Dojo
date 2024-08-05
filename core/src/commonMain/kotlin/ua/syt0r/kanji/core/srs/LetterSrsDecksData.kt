@@ -14,8 +14,8 @@ data class LetterSrsDeckInfo(
     val title: String,
     val position: Int,
     val characters: List<String>,
-    val writingDetails: DeckStudyProgress,
-    val readingDetails: DeckStudyProgress
+    val writingDetails: LetterDeckSrsProgress,
+    val readingDetails: LetterDeckSrsProgress
 )
 
 data class DailyLimitConfiguration(
@@ -31,7 +31,7 @@ data class LetterDailyProgress(
     val dueLeft: Int
 )
 
-data class DeckStudyProgress(
+data class LetterDeckSrsProgress(
     val charactersData: Map<String, CharacterSrsData>,
     val all: List<String>,
     val done: List<String>,

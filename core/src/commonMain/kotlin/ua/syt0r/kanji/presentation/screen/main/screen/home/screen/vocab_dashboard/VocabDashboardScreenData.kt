@@ -5,27 +5,11 @@ import ua.syt0r.kanji.core.srs.VocabDeckSrsProgress
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
-sealed interface DashboardVocabDeck {
-
-    val titleResolver: StringResolveScope<String>
-    val words: List<Long>
-    val srsProgress: Map<VocabPracticeType, VocabDeckSrsProgress>
-
-    data class User(
-        override val titleResolver: StringResolveScope<String>,
-        override val words: List<Long>,
-        override val srsProgress: Map<VocabPracticeType, VocabDeckSrsProgress>,
-        val id: Long
-    ) : DashboardVocabDeck
-
-    data class Default(
-        override val titleResolver: StringResolveScope<String>,
-        override val words: List<Long>,
-        override val srsProgress: Map<VocabPracticeType, VocabDeckSrsProgress>,
-        val index: Int
-    ) : DashboardVocabDeck
-
-}
+data class DashboardVocabDeck(
+    val id: Long,
+    val title: String,
+    val srsProgress: Map<VocabPracticeType, VocabDeckSrsProgress>,
+)
 
 sealed interface VocabPracticePreviewState {
     object Loading : VocabPracticePreviewState

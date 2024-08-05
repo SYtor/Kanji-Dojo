@@ -7,6 +7,8 @@ interface VocabPracticeRepository {
     val changesFlow: SharedFlow<Unit>
 
     suspend fun createDeck(title: String, words: List<Long>)
+    suspend fun createDeckAndMerge(title: String, deckIdToMerge: List<Long>)
+    suspend fun updateDeckPositions(deckIdToPositionMap: Map<Long, Int>)
     suspend fun deleteDeck(id: Long)
     suspend fun getDecks(): List<VocabDeck>
     suspend fun updateDeck(
@@ -25,5 +27,5 @@ interface VocabPracticeRepository {
 data class VocabDeck(
     val id: Long,
     val title: String,
-    val position: Long
+    val position: Int
 )

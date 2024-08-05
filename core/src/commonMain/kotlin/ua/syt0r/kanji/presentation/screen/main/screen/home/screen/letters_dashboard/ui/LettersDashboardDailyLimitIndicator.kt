@@ -16,7 +16,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import ua.syt0r.kanji.core.srs.DailyGoalConfiguration
+import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.LettersDashboardStrings
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -27,7 +27,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashbo
 @Composable
 fun LettersDashboardDailyLimitIndicator(
     data: DailyIndicatorData,
-    updateConfiguration: (DailyGoalConfiguration) -> Unit
+    updateConfiguration: (DailyLimitConfiguration) -> Unit
 ) {
 
     var shouldShowDialog by remember { mutableStateOf(false) }

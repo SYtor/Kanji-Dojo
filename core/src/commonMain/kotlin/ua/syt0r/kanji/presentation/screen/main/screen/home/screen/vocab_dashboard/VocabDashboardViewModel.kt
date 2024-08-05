@@ -2,126 +2,109 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboa
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.BottomSheetState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.use_case.SortDeckDashboardItemsUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.GetVocabDeckWordsUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.MergeVocabDecksUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.VocabDecks
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.UpdateVocabDecksOrderUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import kotlin.time.Duration.Companion.seconds
 
 class VocabDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     subscribeOnDashboardVocabDecksUseCase: SubscribeOnDashboardVocabDecksUseCase,
-    private val getVocabDeckWordsUseCase: GetVocabDeckWordsUseCase,
-    private val preferencesRepository: PracticeUserPreferencesRepository,
+    private val sortDecksUseCase: SortDeckDashboardItemsUseCase,
+    private val mergeVocabDecksUseCase: MergeVocabDecksUseCase,
+    private val updateDecksOrderUseCase: UpdateVocabDecksOrderUseCase,
+    private val preferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
     private lateinit var srsPracticeType: MutableState<VocabPracticeType>
 
-    private val _screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
-    private val _bottomSheetState = MutableStateFlow<BottomSheetState>(BottomSheetState.Loading)
+    private val sortRequestsChannel = Channel<DecksSortRequestData>()
 
+    private val _screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val screenState: StateFlow<ScreenState> = _screenState
-    override val bottomSheetState: StateFlow<BottomSheetState> = _bottomSheetState
 
     override val lifecycleState: MutableStateFlow<LifecycleState> =
         MutableStateFlow(LifecycleState.Hidden)
 
     init {
-        var lastSelectedDeck: DashboardVocabDeck? = null
+
+        lifecycleState
+            .filter { it == LifecycleState.Visible }
+            .distinctUntilChanged()
+            .onEach { reportScreenShown() }
+            .launchIn(viewModelScope)
 
         subscribeOnDashboardVocabDecksUseCase(lifecycleState)
             .onEach { data ->
                 _screenState.value = when (data) {
-                    is RefreshableData.Loading -> {
-                        lastSelectedDeck = _bottomSheetState.value
-                            .let { it as? BottomSheetState.DeckSelected }
-                            ?.deck
-                        _bottomSheetState.value = BottomSheetState.Loading
+                    is RefreshableData.Loading ->
                         ScreenState.Loading
-                    }
 
                     is RefreshableData.Loaded -> {
-                        val decks = data.value
+                        if (::srsPracticeType.isInitialized.not())
+                            srsPracticeType = mutableStateOf(VocabPracticeType.Flashcard)
 
-                        val newPracticeType = VocabPracticeType.from(
-                            preferencesRepository.vocabPracticeType.get()
+                        val screenData = data.value
+                        val sortByTimeEnabled = preferencesRepository.dashboardSortByTime.get()
+                        val sortedItems = sortDecksUseCase(sortByTimeEnabled, screenData.decks)
+                        val listState = DeckDashboardListState(
+                            items = sortedItems,
+                            appliedSortByReviewTime = mutableStateOf(sortByTimeEnabled),
+                            mode = mutableStateOf(DeckDashboardListMode.Browsing)
                         )
-
-                        if (::srsPracticeType.isInitialized)
-                            srsPracticeType.value = newPracticeType
-                        else {
-                            srsPracticeType = mutableStateOf(newPracticeType)
-                            snapshotFlow { srsPracticeType.value }
-                                .onEach {
-                                    preferencesRepository.vocabPracticeType.set(it.preferencesType)
-                                }
-                                .launchIn(viewModelScope)
-                        }
-
-                        updateBottomSheetState(decks, lastSelectedDeck)
-
                         ScreenState.Loaded(
-                            srsPracticeType = srsPracticeType,
-                            userDecks = decks.userDecks,
-                            defaultDecks = decks.defaultDecks
+                            listState = listState,
+                            srsPracticeType = srsPracticeType
                         )
                     }
                 }
 
             }
             .launchIn(viewModelScope)
+
+        sortRequestsChannel.consumeAsFlow()
+            // To avoid infinite loading when rapidly clicking on apply sort button
+            .debounce(1.seconds)
+            .onEach { updateDecksOrderUseCase.update(it) }
+            .launchIn(viewModelScope)
     }
 
-    override fun select(deck: DashboardVocabDeck) {
-        val wordsState = MutableStateFlow<VocabPracticePreviewState>(
-            value = VocabPracticePreviewState.Loading
-        )
-
-        _bottomSheetState.value = BottomSheetState.DeckSelected(
-            deck = deck,
-            srsPracticeType = srsPracticeType,
-            words = wordsState
-        )
-
-        viewModelScope.launch {
-            wordsState.value = VocabPracticePreviewState.Loaded(
-                words = getVocabDeckWordsUseCase(deck.words)
-            )
-        }
+    override fun mergeDecks(data: DecksMergeRequestData) {
+        _screenState.value = ScreenState.Loading
+        viewModelScope.launch { mergeVocabDecksUseCase(data) }
     }
 
-    override fun reportScreenShown() {
+    override fun sortDecks(data: DecksSortRequestData) {
+        _screenState.value = ScreenState.Loading
+        viewModelScope.launch { sortRequestsChannel.send(data) }
+    }
+
+    private fun reportScreenShown() {
         analyticsManager.setScreen("vocab_dashboard")
-    }
-
-    private fun updateBottomSheetState(decks: VocabDecks, lastSelectedDeck: DashboardVocabDeck?) {
-        when (lastSelectedDeck) {
-            null -> {}
-            is DashboardVocabDeck.Default -> {
-                val updatedDeck = decks.defaultDecks.first { it.index == lastSelectedDeck.index }
-                select(updatedDeck)
-            }
-
-            is DashboardVocabDeck.User -> {
-                val updatedDeck = decks.userDecks.find { it.id == lastSelectedDeck.id }
-                if (updatedDeck != null) select(updatedDeck)
-                else _bottomSheetState.value = BottomSheetState.Hidden
-            }
-        }
     }
 
 }

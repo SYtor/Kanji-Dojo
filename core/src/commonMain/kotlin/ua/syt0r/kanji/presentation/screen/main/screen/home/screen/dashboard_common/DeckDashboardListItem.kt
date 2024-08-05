@@ -274,7 +274,7 @@ private fun <T> ColumnScope.IndicatorTextRow(
         modifier = Modifier
             .fillMaxWidth(fraction = 0.8f)
             .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = { onClick(items) })
+            .clickable(enabled = items.isNotEmpty(), onClick = { onClick(items) })
             .padding(horizontal = 10.dp)
     ) {
 

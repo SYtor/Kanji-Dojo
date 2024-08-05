@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
@@ -25,14 +26,22 @@ data class SrsDecksData(
 data class SrsDeckInfo(
     val id: Long,
     val title: String,
+    val position: Int,
+    val words: List<Long>,
     val summaries: Map<VocabPracticeType, VocabDeckSrsProgress>
 )
 
 data class VocabDeckSrsProgress(
+    val wordsData: Map<Long, VocabSrsData>,
     val all: List<Long>,
     val done: List<Long>,
     val due: List<Long>,
     val new: List<Long>
+)
+
+data class VocabSrsData(
+    val status: SrsItemStatus,
+    val lastReviewTime: Instant?
 )
 
 class DefaultVocabSrsManager(
@@ -48,7 +57,7 @@ class DefaultVocabSrsManager(
     private var cache: SrsDecksData? = null
 
     init {
-        srsItemRepository.updatesFlow
+        practiceRepository.changesFlow
             .onEach {
                 cache = null
                 _dataChangeFlow.emit(Unit)
@@ -73,6 +82,8 @@ class DefaultVocabSrsManager(
             SrsDeckInfo(
                 id = it.id,
                 title = it.title,
+                position = it.position,
+                words = deckItems,
                 summaries = VocabPracticeType.values()
                     .associateWith { getVocabDeckSummary(deckItems, srsCardsMap, it) }
             )
@@ -86,15 +97,20 @@ class DefaultVocabSrsManager(
         srsCards: Map<SrsCardKey, SrsCard>,
         practiceType: VocabPracticeType
     ): VocabDeckSrsProgress {
+        val wordsData = mutableMapOf<Long, VocabSrsData>()
         val done = mutableListOf<Long>()
         val due = mutableListOf<Long>()
         val new = mutableListOf<Long>()
         items.forEach { wordId ->
             val key = practiceType.toSrsItemKey(wordId)
-            val status = srsCards[key]
-                ?.let { it.lastReview?.plus(it.interval) }
+            val srsCard = srsCards[key]
+            val status = srsCard?.let { it.lastReview?.plus(it.interval) }
                 ?.let { getSrsStatusUseCase(it) }
                 ?: SrsItemStatus.New
+            wordsData[wordId] = VocabSrsData(
+                status = status,
+                lastReviewTime = srsCard?.lastReview
+            )
             val list = when (status) {
                 SrsItemStatus.New -> new
                 SrsItemStatus.Done -> done
@@ -103,6 +119,7 @@ class DefaultVocabSrsManager(
             list.add(wordId)
         }
         return VocabDeckSrsProgress(
+            wordsData = wordsData,
             all = items,
             done = done,
             due = due,

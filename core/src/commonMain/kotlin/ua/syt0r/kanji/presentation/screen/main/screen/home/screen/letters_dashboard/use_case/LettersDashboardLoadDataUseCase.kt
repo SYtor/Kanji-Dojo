@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
-import ua.syt0r.kanji.core.srs.DeckStudyProgress
+import ua.syt0r.kanji.core.srs.LetterDeckSrsProgress
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -72,7 +72,7 @@ class LettersDashboardLoadDataUseCase(
         )
     }
 
-    private fun DeckStudyProgress.toPracticeStudyProgress(
+    private fun LetterDeckSrsProgress.toPracticeStudyProgress(
         configuration: DailyLimitConfiguration,
         leftToStudy: Int,
         leftToReview: Int,

@@ -228,11 +228,19 @@ UPDATE vocab_deck SET title = ? WHERE id = ?;
 deleteVocabDeck:
 DELETE FROM vocab_deck WHERE id = ?;
 
+updateVocabDeckPosition:
+UPDATE vocab_deck SET position=? WHERE id=?;
+
 insertVocabDeckEntry:
 INSERT OR IGNORE INTO vocab_deck_entry(word_id, deck_id) VALUES (?, ?);
 
 deleteVocabDeckEntry:
 DELETE FROM vocab_deck_entry WHERE word_id = ? AND deck_id = ?;
+
+migrateVocabDeckEntries:
+UPDATE OR REPLACE vocab_deck_entry
+SET deck_id = :deckId
+WHERE deck_id IN :deckIdToMigrate;
 
 getVocabDecks:
 SELECT * FROM vocab_deck;

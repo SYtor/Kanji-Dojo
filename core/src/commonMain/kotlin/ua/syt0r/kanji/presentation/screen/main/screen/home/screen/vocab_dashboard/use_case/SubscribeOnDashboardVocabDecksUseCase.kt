@@ -5,28 +5,31 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
+import ua.syt0r.kanji.core.srs.VocabDeckSrsProgress
 import ua.syt0r.kanji.core.srs.VocabSrsManager
+import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.DashboardVocabDeck
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.VocabDeckDashboardItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.VocabDeckStudyProgress
 
 interface SubscribeOnDashboardVocabDecksUseCase {
     operator fun invoke(
         lifecycleState: StateFlow<LifecycleState>
-    ): Flow<RefreshableData<VocabDecks>>
+    ): Flow<RefreshableData<VocabDashboardScreenData>>
 }
 
-data class VocabDecks(
-    val userDecks: List<DashboardVocabDeck.User>,
-    val defaultDecks: List<DashboardVocabDeck.Default>
+data class VocabDashboardScreenData(
+    val decks: List<VocabDeckDashboardItem>
 )
 
 class DefaultSubscribeOnDashboardVocabDecksUseCase(
-    private val vocabSrsManager: VocabSrsManager
+    private val vocabSrsManager: VocabSrsManager,
+    private val timeUtils: TimeUtils
 ) : SubscribeOnDashboardVocabDecksUseCase {
 
     override fun invoke(
         lifecycleState: StateFlow<LifecycleState>
-    ): Flow<RefreshableData<VocabDecks>> {
+    ): Flow<RefreshableData<VocabDashboardScreenData>> {
         return refreshableDataFlow(
             dataChangeFlow = vocabSrsManager.dataChangeFlow,
             lifecycleState = lifecycleState,
@@ -34,19 +37,34 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         )
     }
 
-    private suspend fun getUpdatedDecks(): VocabDecks {
+    private suspend fun getUpdatedDecks(): VocabDashboardScreenData {
         Logger.logMethod()
         val decks = vocabSrsManager.getUpdatedDecksData().decks
-        return VocabDecks(
-            userDecks = decks.map {
-                DashboardVocabDeck.User(
-                    titleResolver = { it.title },
-                    words = it.summaries.values.first().all,
-                    srsProgress = it.summaries,
-                    id = it.id
+        val now = timeUtils.now()
+        return VocabDashboardScreenData(
+            decks = decks.map {
+                VocabDeckDashboardItem(
+                    id = it.id,
+                    title = it.title,
+                    position = it.position,
+                    elapsedSinceLastReview = it.summaries
+                        .flatMap { it.value.wordsData.mapNotNull { it.value.lastReviewTime } }
+                        .maxOrNull()
+                        ?.let { now.minus(it) },
+                    studyProgress = it.summaries.mapValues { it.value.toStudyProgress() },
                 )
-            },
-            defaultDecks = emptyList()
+            }
+        )
+    }
+
+    private fun VocabDeckSrsProgress.toStudyProgress(): VocabDeckStudyProgress {
+        return VocabDeckStudyProgress(
+            all = all,
+            known = done,
+            review = due,
+            new = new,
+            quickLearn = new,
+            quickReview = due
         )
     }
 
