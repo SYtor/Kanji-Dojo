@@ -129,7 +129,11 @@ private fun ToolbarTitle(state: State<ScreenState>) {
 }
 
 private sealed interface DisplayingToolbarActions {
-    data class Default(val sharableDeckData: String?) : DisplayingToolbarActions
+    data class Default(
+        val showVisibilityButton: Boolean,
+        val sharableDeckData: String?
+    ) : DisplayingToolbarActions
+
     object Nothing : DisplayingToolbarActions
     data class Selection(val items: List<DeckDetailsListItem>) : DisplayingToolbarActions
 }
@@ -153,6 +157,7 @@ private fun ToolbarActions(
                 )
 
                 false -> DisplayingToolbarActions.Default(
+                    showVisibilityButton = loadedState is ScreenState.Loaded.Letters,
                     sharableDeckData = loadedState.let { it as? ScreenState.Loaded.Letters }
                         ?.sharableDeckData
                 )
@@ -182,10 +187,12 @@ private fun ToolbarActions(
                             Icon(Icons.Default.Share, null)
                         }
                     }
-                    IconButton(
-                        onClick = onVisibilityButtonClick
-                    ) {
-                        Icon(Icons.Default.Visibility, null)
+                    if (it.showVisibilityButton) {
+                        IconButton(
+                            onClick = onVisibilityButtonClick
+                        ) {
+                            Icon(Icons.Default.Visibility, null)
+                        }
                     }
                     IconButton(
                         onClick = editButtonClick

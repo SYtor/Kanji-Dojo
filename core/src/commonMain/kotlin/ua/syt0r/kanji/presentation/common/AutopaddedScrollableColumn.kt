@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
@@ -118,4 +119,8 @@ fun ExtraListSpacerState.ExtraSpacer(scope: LazyStaggeredGridScope, minimalSpaci
     ) {
         ExtraSpacer(minimalSpacing)
     }
+}
+
+fun ExtraListSpacerState.ExtraSpacer(scope: LazyListScope, minimalSpacing: Dp = 16.dp) {
+    scope.item { ExtraSpacer(minimalSpacing) }
 }

@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.ExperimentalMaterialApi
@@ -67,6 +69,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsSc
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsBottomSheet
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsFilterDialog
@@ -75,6 +78,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetail
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsLayoutDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsSortDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsToolbar
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsVocabUI
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -292,7 +297,16 @@ private fun ScreenLoadedState(
                     )
                 }
 
-                is DeckDetailsVisibleData.Vocab -> TODO()
+                is DeckDetailsVisibleData.Vocab -> {
+                    screenState as ScreenState.Loaded.Vocab
+                    DeckDetailsVocabUI(
+                        screenState = screenState,
+                        visibleData = visibleData,
+                        extraListSpacerState = extraListSpacerState,
+                        onConfigurationUpdate = { screenState.configuration.value = it },
+                        toggleItemSelection = toggleItemSelection
+                    )
+                }
             }
 
         }
@@ -411,31 +425,12 @@ fun DeckDetailsConfigurationRow(
                 label = { Text(resolveString { deckDetails.kanaGroupsModeActivatedLabel }) },
             )
         } else {
-            FilterChip(
-                selected = true,
-                onClick = { showFilterOptionDialog = true },
-                modifier = Modifier.wrapContentSize(Alignment.CenterStart),
-                label = {
-                    Text(
-                        text = resolveString {
-                            configuration.filterConfiguration.run {
-                                when {
-                                    showNew && showDue && showDone -> deckDetails.filterAllLabel
-                                    !(showNew || showDue || showDone) -> deckDetails.filterNoneLabel
-                                    else -> {
-                                        val appliedFilters = mutableListOf<String>()
-                                        if (showNew) appliedFilters.add(reviewStateNew)
-                                        if (showDue) appliedFilters.add(reviewStateDue)
-                                        if (showDone) appliedFilters.add(reviewStateDone)
-                                        appliedFilters.joinToString()
-                                    }
-                                }
-                            }
-                        }
-                    )
-                },
-                trailingIcon = { Icon(Icons.Default.FilterAlt, null) }
+
+            SrsFilterChip(
+                filterConfiguration = configuration.filterConfiguration,
+                onClick = { showFilterOptionDialog = true }
             )
+
             FilterChip(
                 selected = true,
                 onClick = { showSortDialog = true },
@@ -454,6 +449,87 @@ fun DeckDetailsConfigurationRow(
         }
 
     }
+}
+
+@Composable
+private fun SrsFilterChip(
+    filterConfiguration: FilterConfiguration,
+    onClick: () -> Unit
+) {
+    FilterChip(
+        selected = true,
+        onClick = onClick,
+        modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+        label = {
+            Text(
+                text = resolveString {
+                    filterConfiguration.run {
+                        when {
+                            showNew && showDue && showDone -> deckDetails.filterAllLabel
+                            !(showNew || showDue || showDone) -> deckDetails.filterNoneLabel
+                            else -> {
+                                val appliedFilters = mutableListOf<String>()
+                                if (showNew) appliedFilters.add(reviewStateNew)
+                                if (showDue) appliedFilters.add(reviewStateDue)
+                                if (showDone) appliedFilters.add(reviewStateDone)
+                                appliedFilters.joinToString()
+                            }
+                        }
+                    }
+                }
+            )
+        },
+        trailingIcon = { Icon(Icons.Default.FilterAlt, null) }
+    )
+}
+
+@Composable
+fun DeckDetailsConfigurationRow(
+    configuration: DeckDetailsConfiguration.VocabDeckConfiguration,
+    onConfigurationUpdate: (DeckDetailsConfiguration.VocabDeckConfiguration) -> Unit,
+) {
+
+    var showFilterOptionDialog by remember { mutableStateOf(false) }
+    if (showFilterOptionDialog) {
+        DeckDetailsFilterDialog(
+            filter = configuration.filterConfiguration,
+            onDismissRequest = { showFilterOptionDialog = false },
+            onApplyConfiguration = {
+                showFilterOptionDialog = false
+                onConfigurationUpdate(configuration.copy(filterConfiguration = it))
+            }
+        )
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxWidth()
+            .wrapContentWidth()
+            .width(400.dp)
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+    ) {
+
+        FilterChip(
+            selected = true,
+            onClick = {
+                val practiceTypes = VocabPracticeType.values()
+                val newPracticeTypeOrdinal =
+                    (configuration.practiceType.ordinal + 1) % practiceTypes.size
+                val newPracticeType = practiceTypes[newPracticeTypeOrdinal]
+                onConfigurationUpdate(configuration.copy(practiceType = newPracticeType))
+            },
+            modifier = Modifier.wrapContentSize(Alignment.CenterStart),
+            label = { Text(resolveString(configuration.practiceType.titleResolver)) },
+        )
+
+        SrsFilterChip(
+            filterConfiguration = configuration.filterConfiguration,
+            onClick = { showFilterOptionDialog = true }
+        )
+
+    }
+
 }
 
 

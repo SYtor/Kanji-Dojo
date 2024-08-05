@@ -66,53 +66,52 @@ class DeckDetailsViewModel(
     }
 
     override fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.Practice {
-        val characters = group.items.map { it.character }
-
         val deckId = configuration.deckId
         val loadedState = state.value as ScreenState.Loaded
 
-        return when (val configuration = loadedState.configuration.value) {
-            is DeckDetailsConfiguration.LetterDeckConfiguration -> {
-                when (configuration.practiceType) {
-                    PracticeType.Writing -> MainDestination.Practice.Writing(
-                        deckId = deckId,
-                        characterList = characters
-                    )
+        val configuration = loadedState.configuration.value
+        configuration as DeckDetailsConfiguration.LetterDeckConfiguration
 
-                    PracticeType.Reading -> MainDestination.Practice.Reading(
-                        deckId = deckId,
-                        characterList = characters
-                    )
-                }
-            }
+        val characters = group.items.map { it.character }
 
-            is DeckDetailsConfiguration.VocabDeckConfiguration -> TODO()
+        return when (configuration.practiceType) {
+            PracticeType.Writing -> MainDestination.Practice.Writing(
+                deckId = deckId,
+                characterList = characters
+            )
+
+            PracticeType.Reading -> MainDestination.Practice.Reading(
+                deckId = deckId,
+                characterList = characters
+            )
         }
     }
 
     override fun getMultiselectPracticeConfiguration(): MainDestination {
         val loadedState = state.value as ScreenState.Loaded
-        val characters: List<String> = when (
-            val currentState = loadedState.visibleDataState.value
-        ) {
-            is DeckDetailsVisibleData.Items -> currentState.items.asSequence()
-                .filter { it.selected.value }
-                .map { it.data.character }
-                .toList()
-
-            is DeckDetailsVisibleData.Groups -> currentState.items.asSequence()
-                .filter { it.selected.value }
-                .flatMap { it.items }
-                .map { it.character }
-                .toList()
-
-            is DeckDetailsVisibleData.Vocab -> TODO()
-        }
+        val currentVisibleData = loadedState.visibleDataState.value
 
         val deckId = this.configuration.deckId
         return when (val configuration = loadedState.configuration.value) {
 
             is DeckDetailsConfiguration.LetterDeckConfiguration -> {
+
+                val characters: List<String> = when (currentVisibleData) {
+                    is DeckDetailsVisibleData.Items -> currentVisibleData.items.asSequence()
+                        .filter { it.selected.value }
+                        .map { it.data.character }
+                        .toList()
+
+                    is DeckDetailsVisibleData.Groups -> currentVisibleData.items.asSequence()
+                        .filter { it.selected.value }
+                        .flatMap { it.items }
+                        .map { it.character }
+                        .toList()
+
+                    else -> error("Wrong visible data type")
+
+                }
+
                 when (configuration.practiceType) {
                     PracticeType.Writing -> MainDestination.Practice.Writing(
                         deckId = deckId,
@@ -126,7 +125,15 @@ class DeckDetailsViewModel(
                 }
             }
 
-            is DeckDetailsConfiguration.VocabDeckConfiguration -> TODO()
+            is DeckDetailsConfiguration.VocabDeckConfiguration -> {
+                currentVisibleData as DeckDetailsVisibleData.Vocab
+                MainDestination.VocabPractice(
+                    wordIds = currentVisibleData.items.asSequence()
+                        .filter { it.selected.value }
+                        .map { it.word.id }
+                        .toList()
+                )
+            }
         }
     }
 
