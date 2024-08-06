@@ -9,6 +9,7 @@ import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.daily_limit.DailyLimitScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreen
@@ -223,6 +224,16 @@ interface MainDestination {
 
     }
 
+    @Serializable
+    object DailyLimit : MainDestination {
+
+        @Composable
+        override fun Draw(state: MainNavigationState) {
+            DailyLimitScreen(state)
+        }
+
+    }
+
 }
 
 sealed interface MainDestinationConfiguration<T : MainDestination> {
@@ -274,6 +285,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.About.configuration(),
     MainDestination.Credits.configuration(),
     MainDestination.Sponsor.configuration(),
+    MainDestination.DailyLimit.configuration(),
     MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),

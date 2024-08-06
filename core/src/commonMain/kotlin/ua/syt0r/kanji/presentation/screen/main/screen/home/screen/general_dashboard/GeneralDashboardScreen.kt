@@ -15,7 +15,9 @@ fun GeneralDashboardScreen(
 
     GeneralDashboardScreenUI(
         state = viewModel.state.collectAsState(),
-        navigateToDailyLimitConfiguration = {},
+        navigateToDailyLimitConfiguration = {
+            mainNavigationState.navigate(MainDestination.DailyLimit)
+        },
         navigateToCreateLetterDeck = {
             val destination = MainDestination.DeckPicker(DeckPickerScreenConfiguration.Letters)
             mainNavigationState.navigate(destination)
