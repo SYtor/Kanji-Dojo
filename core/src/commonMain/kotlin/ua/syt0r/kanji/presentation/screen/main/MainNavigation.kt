@@ -9,15 +9,16 @@ import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.DeckPickerScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.LetterDeckPickerScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
@@ -77,11 +78,14 @@ interface MainDestination {
     }
 
     @Serializable
-    object LetterDeckPicker : MainDestination {
+    data class DeckPicker(
+        val configuration: DeckPickerScreenConfiguration
+    ) : MainDestination {
 
         @Composable
         override fun Draw(state: MainNavigationState) {
-            LetterDeckPickerScreen(
+            DeckPickerScreen(
+                configuration = configuration,
                 mainNavigationState = state
             )
         }
@@ -270,7 +274,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.About.configuration(),
     MainDestination.Credits.configuration(),
     MainDestination.Sponsor.configuration(),
-    MainDestination.LetterDeckPicker.configuration(),
+    MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),
     MainDestination.Feedback::class.configuration(),

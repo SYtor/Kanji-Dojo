@@ -6,7 +6,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration.VocabDeck
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 
 @Composable
 fun VocabDashboardScreen(
@@ -19,14 +19,12 @@ fun VocabDashboardScreen(
         mergeDecks = { viewModel.mergeDecks(it) },
         sortDecks = { viewModel.sortDecks(it) },
         createDeck = {
-            mainNavigationState.navigate(
-                MainDestination.DeckEdit(VocabDeck.CreateNew)
-            )
+            val destination = MainDestination.DeckPicker(DeckPickerScreenConfiguration.Vocab)
+            mainNavigationState.navigate(destination)
         },
         navigateToDeckDetails = {
-            mainNavigationState.navigate(
-                MainDestination.DeckDetails(DeckDetailsScreenConfiguration.VocabDeck(it.id))
-            )
+            val configuration = DeckDetailsScreenConfiguration.VocabDeck(it.id)
+            mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
         },
         startQuickPractice = { item, studyType, words ->
             mainNavigationState.navigate(MainDestination.VocabPractice(words))

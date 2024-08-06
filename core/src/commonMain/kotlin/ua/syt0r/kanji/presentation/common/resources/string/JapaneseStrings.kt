@@ -47,7 +47,7 @@ object JapaneseStrings : Strings {
     override val feedback: FeedbackStrings = JapaneseFeedbackStrings
     override val sponsor: SponsorStrings = JapaneseSponsorStrings
 
-    override val letterDeckPicker: LetterDeckPickerStrings = JapaneseLetterDeckPickerStrings
+    override val deckPicker: DeckPickerStrings = JapaneseDeckPickerStrings
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
     override val deckDetails: DeckDetailsStrings = JapaneseDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
@@ -273,7 +273,7 @@ object JapaneseFeedbackStrings : FeedbackStrings by EnglishFeedbackStrings {
 
 object JapaneseSponsorStrings : SponsorStrings by EnglishSponsorStrings
 
-object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
+object JapaneseDeckPickerStrings : DeckPickerStrings {
 
     override val title: String = "選択"
 
@@ -336,7 +336,7 @@ object JapaneseLetterDeckPickerStrings : LetterDeckPickerStrings {
     override val gradeItemNames: String = "人名用漢字(一)"
     override val gradeItemNamesVariants: String = "人名用漢字(二)（常用漢字の異体字）"
 
-    override val wanikaniTitle: String = EnglishLetterDeckPickerStrings.wanikaniTitle
+    override val wanikaniTitle: String = EnglishDeckPickerStrings.wanikaniTitle
     override val wanikaniDescription = { urlColor: Color ->
         buildAnnotatedString {
             append("Tofuguが運営するWaniKaniに準拠したレベル別の漢字の一覧です。")

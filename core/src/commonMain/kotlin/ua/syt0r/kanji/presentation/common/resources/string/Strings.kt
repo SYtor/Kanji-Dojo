@@ -13,10 +13,10 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 
-typealias StringResolveScope <T> = Strings.() -> T
+typealias StringResolveScope <T> = @Composable Strings.() -> T
 
 @Composable
-fun <T> resolveString(resolveScope: Strings.() -> T): T {
+fun <T> resolveString(resolveScope: StringResolveScope<T>): T {
     return LocalStrings.current.resolveScope()
 }
 
@@ -62,7 +62,7 @@ interface Strings {
     val feedback: FeedbackStrings
     val sponsor: SponsorStrings
 
-    val letterDeckPicker: LetterDeckPickerStrings
+    val deckPicker: DeckPickerStrings
     val deckDetails: DeckDetailsStrings
     val deckEdit: DeckEditStrings
 
@@ -286,7 +286,7 @@ interface BackupStrings {
     val completeMessage: String
 }
 
-interface LetterDeckPickerStrings {
+interface DeckPickerStrings {
 
     val title: String
 

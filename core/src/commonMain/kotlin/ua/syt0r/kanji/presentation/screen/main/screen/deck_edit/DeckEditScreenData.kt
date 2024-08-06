@@ -1,16 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
-import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
 

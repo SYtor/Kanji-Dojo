@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
 
 @Composable
@@ -41,7 +42,10 @@ fun LettersDashboardScreen(
             }
             mainNavigationState.navigate(destination)
         },
-        navigateToDeckPicker = { mainNavigationState.navigate(MainDestination.LetterDeckPicker) }
+        navigateToDeckPicker = {
+            val destination = MainDestination.DeckPicker(DeckPickerScreenConfiguration.Letters)
+            mainNavigationState.navigate(destination)
+        }
     )
 
 }

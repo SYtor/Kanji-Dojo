@@ -47,7 +47,7 @@ object EnglishStrings : Strings {
     override val feedback: FeedbackStrings = EnglishFeedbackStrings
     override val sponsor: SponsorStrings = EnglishSponsorStrings
 
-    override val letterDeckPicker: LetterDeckPickerStrings = EnglishLetterDeckPickerStrings
+    override val deckPicker: DeckPickerStrings = EnglishDeckPickerStrings
     override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
     override val deckDetails: DeckDetailsStrings = EnglishDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
@@ -311,7 +311,7 @@ object EnglishSponsorStrings : SponsorStrings {
 
 }
 
-object EnglishLetterDeckPickerStrings : LetterDeckPickerStrings {
+object EnglishDeckPickerStrings : DeckPickerStrings {
 
     override val title: String = "Select Deck"
 

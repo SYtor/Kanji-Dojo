@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker
+package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -50,12 +50,11 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.detectUrlClick
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.LetterDeckPickerScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.letter_deck_picker.data.LetterDeckPickerCategory
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.DeckPickerScreenContract.ScreenState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LetterDeckPickerScreenUI(
+fun DeckPickerScreenUI(
     state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
     createEmpty: () -> Unit,
@@ -66,7 +65,7 @@ fun LetterDeckPickerScreenUI(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = resolveString { letterDeckPicker.title }) },
+                title = { Text(text = resolveString { deckPicker.title }) },
                 navigationIcon = {
                     IconButton(onClick = onUpButtonClick) {
                         Icon(
@@ -123,8 +122,9 @@ private fun LoadedState(
     onLinkClick: (String) -> Unit
 ) {
 
-    var expandedStates by rememberSaveable(stateSaver = jsonSaver()) {
-        mutableStateOf(mapOf<LetterDeckPickerCategory, Boolean>())
+    val categoryWithIndexMap = screenState.categories.mapIndexed { i, c -> i to c }
+    var categoryIndexToExpandedMap by rememberSaveable(stateSaver = jsonSaver()) {
+        mutableStateOf(mapOf<Int, Boolean>())
     }
 
     LazyColumn(
@@ -137,7 +137,7 @@ private fun LoadedState(
         item {
             ClickableRow(onClick = createEmpty) {
                 Text(
-                    text = resolveString { letterDeckPicker.customDeckButton },
+                    text = resolveString { deckPicker.customDeckButton },
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -150,29 +150,31 @@ private fun LoadedState(
 
         item { HorizontalDivider(Modifier.padding(horizontal = 8.dp)) }
 
-        screenState.categories.forEachIndexed { index, category ->
+        categoryWithIndexMap.forEach { (index, category) ->
 
-            val isExpanded = expandedStates[category] == true
+            val isExpanded = categoryIndexToExpandedMap[index] == true
+
+            val toggleCategoryExpanded = {
+                categoryIndexToExpandedMap = categoryIndexToExpandedMap.plus(
+                    index to !isExpanded
+                )
+            }
 
             item(
-                key = category.toListKey() + "header"
+                key = "$index header"
             ) {
 
-                val onHeaderClick = {
-                    expandedStates = expandedStates.plus(category to !isExpanded)
-                }
-
                 ClickableRow(
-                    onClick = onHeaderClick,
+                    onClick = toggleCategoryExpanded,
                     modifier = Modifier.animateItemPlacement()
                 ) {
                     Text(
-                        text = resolveString(category.titleResolver),
+                        text = resolveString(category.title),
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleLarge
                     )
 
-                    IconButton(onClick = onHeaderClick) {
+                    IconButton(onClick = toggleCategoryExpanded) {
                         val icon = if (isExpanded) {
                             Icons.Default.KeyboardArrowUp
                         } else {
@@ -188,9 +190,9 @@ private fun LoadedState(
             if (isExpanded) {
 
                 item(
-                    key = category.toListKey() + "description"
+                    key = "$index description"
                 ) {
-                    val description = resolveString(category.descriptionResolver)
+                    val description = resolveString(category.description)
                     ClickableText(
                         text = description,
                         onClick = { position -> description.detectUrlClick(position, onLinkClick) },
@@ -220,7 +222,7 @@ private fun LoadedState(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = it.previewCharacter.toString(), fontSize = 30.sp)
+                                Text(text = it.previewText, fontSize = 30.sp)
                             }
                         }
 
@@ -237,7 +239,7 @@ private fun LoadedState(
             val isLast = index == screenState.categories.size - 1
             if (!isLast) {
                 item(
-                    key = category.toListKey() + "divider"
+                    key = "$index divider"
                 ) {
                     HorizontalDivider(
                         modifier = Modifier.animateItemPlacement().padding(horizontal = 8.dp)
@@ -248,10 +250,6 @@ private fun LoadedState(
         }
 
     }
-}
-
-private fun LetterDeckPickerCategory.toListKey(): String {
-    return this::class.simpleName!!
 }
 
 @Composable
