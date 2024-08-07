@@ -2,10 +2,8 @@ package ua.syt0r.kanji.core.srs
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
@@ -17,21 +15,20 @@ import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.Practice
 import ua.syt0r.kanji.core.user_data.preferences.PracticeType
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import kotlin.math.max
 import kotlin.math.min
 
 interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
-    suspend fun notifyPreferencesChange()
     suspend fun getUpdatedDecksData(): LetterSrsDecksData
     suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo
     suspend fun getStatus(letter: String, practiceType: PracticeType): CharacterSrsData
 }
 
 class DefaultLetterSrsManager(
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val dailyLimitManager: DailyLimitManager,
     private val practiceRepository: LetterPracticeRepository,
     private val studyProgressCache: CharacterStudyProgressCache,
     private val getDeckSrsProgressUseCase: GetLetterDeckSrsProgressUseCase,
@@ -40,8 +37,6 @@ class DefaultLetterSrsManager(
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
 ) : LetterSrsManager {
 
-    private val preferencesChange = Channel<Unit>()
-
     private val _dataChangeFlow = MutableSharedFlow<Unit>()
     override val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
 
@@ -49,7 +44,7 @@ class DefaultLetterSrsManager(
         val dataChangeFlowWithCacheClearing = mergeSharedFlows(
             coroutineScope,
             practiceRepository.changesFlow.onEach { studyProgressCache.clear() },
-            preferencesChange.consumeAsFlow()
+            dailyLimitManager.changesFlow,
         )
 
         dataChangeFlowWithCacheClearing
@@ -57,36 +52,26 @@ class DefaultLetterSrsManager(
             .launchIn(coroutineScope)
     }
 
-    override suspend fun notifyPreferencesChange() {
-        preferencesChange.send(Unit)
-    }
-
     override suspend fun getUpdatedDecksData(): LetterSrsDecksData {
-        val dailyLimitConfiguration = DailyLimitConfiguration(
-            enabled = userPreferencesRepository.dailyLimitEnabled.get(),
-            newLimit = userPreferencesRepository.dailyLearnLimit.get(),
-            dueLimit = userPreferencesRepository.dailyReviewLimit.get()
-        )
-
+        val dailyLimitConfiguration = dailyLimitManager.getConfiguration()
         val currentDate = getSrsDate()
-        val decksInfo = practiceRepository.getAllPractices()
-            .map { getDeckSrsProgressUseCase(it.id, currentDate) }
+
+        val decks = practiceRepository.getAllPractices()
+        val dailyProgress = getDailyProgress(currentDate, decks, dailyLimitConfiguration)
+
+        val decksInfo = decks.map { getDeckSrsProgressUseCase(it.id, currentDate) }
 
         return LetterSrsDecksData(
             decks = decksInfo,
             dailyLimitConfiguration = dailyLimitConfiguration,
-            dailyProgress = getDailyProgress(
-                date = currentDate,
-                dailyLimitConfiguration = dailyLimitConfiguration,
-                decksInfo = decksInfo
-            )
+            dailyProgress = dailyProgress
         )
     }
 
     override suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo {
         return getDeckSrsProgressUseCase(
             deckId = deckId,
-            date = getSrsDate()
+            srsDate = getSrsDate()
         )
     }
 
@@ -99,41 +84,69 @@ class DefaultLetterSrsManager(
 
     private suspend fun getDailyProgress(
         date: LocalDate,
-        dailyLimitConfiguration: DailyLimitConfiguration,
-        decksInfo: List<LetterSrsDeckInfo>,
-    ): LetterDailyProgress {
+        decks: List<Practice>,
+        dailyLimitConfiguration: DailyLimitConfiguration
+    ): DailyProgress {
 
-        val characterProgresses = studyProgressCache.get().asSequence().flatMap { it.value }
+        val studyProgressList = studyProgressCache.get()
+        val letterToStudyProgressList = decks
+            .flatMap { practiceRepository.getKanjiForPractice(it.id) }
+            .distinct()
+            .map { it to studyProgressList[it] }
 
-        val charactersUpdatedToday = characterProgresses
+        val letterPracticeTypesCount = 2
+
+        val totalNew = letterToStudyProgressList.sumOf { (_, progressList) ->
+            if (progressList == null) letterPracticeTypesCount
+            else letterPracticeTypesCount - progressList.size
+        }
+
+        val totalDue = studyProgressList
+            .flatMap { it.value }
+            .count {
+                val srsData = getLetterSrsStatusUseCase(it.character, it.practiceType, date)
+                srsData.status == SrsItemStatus.Review
+            }
+
+        val progressListUpdatedToday = studyProgressList.asSequence()
+            .flatMap { it.value }
             .filter { getSrsDate(it.lastReviewTime) == date }
             .toList()
 
-        val newReviewedToday = charactersUpdatedToday.filter {
+        val newReviewedToday = progressListUpdatedToday.filter {
             practiceRepository.getFirstReviewTime(it.character, it.practiceType)
                 ?.let { getSrsDate(it) } == date
         }
 
-        val reviewedToday = charactersUpdatedToday.size - newReviewedToday.size
+        val dueReviewedToday = progressListUpdatedToday.size - newReviewedToday.size
 
-        val totalNew = decksInfo.totalNew()
-        val totalReview = decksInfo.totalReview()
+        val newLeft: Int
+        val dueLeft: Int
 
-        val leftToStudy = max(
-            a = 0,
-            b = min(dailyLimitConfiguration.newLimit - newReviewedToday.size, totalNew)
-        )
+        when (dailyLimitConfiguration.enabled) {
+            true -> {
+                newLeft = max(
+                    a = 0,
+                    b = min(dailyLimitConfiguration.newLimit - newReviewedToday.size, totalNew)
+                )
 
-        val leftToReview = max(
-            a = 0,
-            b = min(dailyLimitConfiguration.dueLimit - reviewedToday, totalReview)
-        )
+                dueLeft = max(
+                    a = 0,
+                    b = min(dailyLimitConfiguration.dueLimit - dueReviewedToday, totalDue)
+                )
+            }
 
-        return LetterDailyProgress(
+            false -> {
+                newLeft = totalNew
+                dueLeft = totalDue
+            }
+        }
+
+        return DailyProgress(
             newReviewed = newReviewedToday.size,
-            dueReviewed = reviewedToday,
-            newLeft = leftToStudy,
-            dueLeft = leftToReview
+            dueReviewed = dueReviewedToday,
+            newLeft = newLeft,
+            dueLeft = dueLeft
         )
     }
 
@@ -141,17 +154,6 @@ class DefaultLetterSrsManager(
         instant: Instant = timeUtils.now(),
     ): LocalDate {
         return instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-    }
-
-    private fun List<LetterSrsDeckInfo>.totalNew(): Int {
-        return flatMap { it.writingDetails.new }.distinct().size +
-                flatMap { it.readingDetails.new }.distinct().size
-    }
-
-
-    private fun List<LetterSrsDeckInfo>.totalReview(): Int {
-        return flatMap { it.writingDetails.due }.distinct().size +
-                flatMap { it.readingDetails.due }.distinct().size
     }
 
 }

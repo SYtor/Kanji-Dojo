@@ -13,8 +13,6 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
-import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
@@ -34,7 +32,6 @@ class LettersDashboardViewModel(
     private val sortDecksUseCase: SortDeckDashboardItemsUseCase,
     private val updateSortUseCase: LettersDashboardScreenContract.UpdateSortUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val notifySrsPreferencesChangedUseCase: NotifySrsPreferencesChangedUseCase,
     private val mergeDecksUseCase: LettersDashboardScreenContract.MergeDecksUseCase,
     private val analyticsManager: AnalyticsManager
 ) : LettersDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
@@ -75,20 +72,6 @@ class LettersDashboardViewModel(
             .debounce(1.seconds)
             .onEach { updateSortUseCase.update(it) }
             .launchIn(viewModelScope)
-    }
-
-    override fun updateDailyLimit(configuration: DailyLimitConfiguration) {
-        viewModelScope.launch {
-            userPreferencesRepository.dailyLimitEnabled.set(configuration.enabled)
-            userPreferencesRepository.dailyLearnLimit.set(configuration.newLimit)
-            userPreferencesRepository.dailyReviewLimit.set(configuration.dueLimit)
-            notifySrsPreferencesChangedUseCase()
-            analyticsManager.sendEvent("daily_goal_update") {
-                put("enabled", configuration.enabled)
-                put("learn_limit", configuration.newLimit)
-                put("review_limit", configuration.dueLimit)
-            }
-        }
     }
 
     override fun mergeDecks(data: DecksMergeRequestData) {

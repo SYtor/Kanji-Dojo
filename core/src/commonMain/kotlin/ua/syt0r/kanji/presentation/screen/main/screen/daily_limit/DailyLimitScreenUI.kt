@@ -6,14 +6,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,7 +25,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -30,22 +35,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.common.getBottomLineShape
+import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
@@ -59,13 +71,13 @@ fun DailyLimitScreenUI(
     navigateBack: () -> Unit,
 ) {
 
+    val strings = resolveString { dailyLimit }
+
     ScreenLayout(
         state = state,
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = resolveString { "Daily Limit" })
-                },
+                title = { Text(text = strings.title) },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
@@ -74,94 +86,87 @@ fun DailyLimitScreenUI(
             )
         },
         loadingState = { FancyLoading(Modifier.fillMaxSize().wrapContentSize()) },
-        loadedState = {
+        loadedState = { screenState ->
 
-            val strings = resolveString { dailyGoalDialog }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                    .clickable { screenState.enabled.run { value = !value } }
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+            ) {
+                Text(strings.enabledLabel, Modifier.weight(1f))
+                Switch(
+                    checked = screenState.enabled.value,
+                    onCheckedChange = { screenState.enabled.value = it }
+                )
+            }
+
+            val newInput = rememberSaveable {
+                mutableStateOf(screenState.newLimit.value.toString())
+            }
+
+            val dueInput = rememberSaveable {
+                mutableStateOf(screenState.dueLimit.value.toString())
+            }
+
+            LaunchedEffect(Unit) {
+                snapshotFlow { newInput.value }
+                    .filter { it.isValidLimitNumber() }
+                    .onEach { screenState.newLimit.value = it.toInt() }
+                    .launchIn(this)
+
+                snapshotFlow { dueInput.value }
+                    .filter { it.isValidLimitNumber() }
+                    .onEach { screenState.dueLimit.value = it.toInt() }
+                    .launchIn(this)
+            }
 
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-                    .padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.shapes.medium
+                    )
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
                 Text(
-                    text = strings.title,
+                    text = resolveString { "Letters" },
                     style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(horizontal = 10.dp).padding(top = 10.dp)
+                    fontWeight = FontWeight.Bold
                 )
-
-                Text(
-                    text = strings.message,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 10.dp)
-                )
-
-                val configuration = it.configuration
-
-                val enabledValue = remember {
-                    mutableStateOf(configuration.enabled)
-                }
-                val learnValue = remember {
-                    mutableStateOf(configuration.newLimit.toString())
-                }
-                val reviewValue = remember {
-                    mutableStateOf(configuration.dueLimit.toString())
-                }
-
-                Column(
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            MaterialTheme.shapes.medium
-                        )
-                        .padding(bottom = 20.dp, top = 10.dp, start = 20.dp, end = 20.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(strings.enabledLabel, Modifier.weight(1f))
-                        Switch(
-                            checked = enabledValue.value,
-                            onCheckedChange = { enabledValue.value = it }
-                        )
-                    }
-                    Spacer(Modifier.height(6.dp))
-                    InputRow(Icons.Default.LocalLibrary, strings.studyLabel, learnValue)
-                    Spacer(Modifier.height(20.dp))
-                    InputRow(Icons.Default.Cached, strings.reviewLabel, reviewValue)
-                }
-
-                Text(
-                    text = strings.noteMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 10.dp)
-                )
-
-                Row(
-                    modifier = Modifier.align(Alignment.End).padding(horizontal = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-
-                    TextButton(
-                        onClick = navigateBack
-                    ) {
-                        Text(text = strings.cancelButton)
-                    }
-
-                    TextButton(
-                        onClick = {
-                            val updatedConfig = DailyLimitConfiguration(
-                                enabled = enabledValue.value,
-                                newLimit = learnValue.value.toInt(),
-                                dueLimit = reviewValue.value.toInt()
-                            )
-                            saveChanges()
-                        },
-                        enabled = !learnValue.value.isInputInvalid() &&
-                                !reviewValue.value.isInputInvalid()
-                    ) {
-                        Text(text = strings.applyButton)
-                    }
-                }
+                InputRow(Icons.Default.LocalLibrary, strings.newLabel, newInput)
+                InputRow(Icons.Default.Cached, strings.dueLabel, dueInput)
             }
+
+            Text(
+                text = strings.noteMessage,
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Text(
+                text = resolveString { "Vocab" },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = resolveString { "// Under development" },
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+
+        },
+        loadedStateFab = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    val valid = true
+                    if (valid) saveChanges()
+                },
+                text = { Text(text = strings.button) },
+                icon = { Icon(Icons.Default.Save, null) }
+            )
         },
         savingState = {
             Text("Saving", Modifier.fillMaxSize().wrapContentSize())
@@ -178,7 +183,8 @@ private fun ScreenLayout(
     state: State<ScreenState>,
     topBar: @Composable () -> Unit,
     loadingState: @Composable () -> Unit,
-    loadedState: @Composable (ScreenState.Loaded) -> Unit,
+    loadedState: @Composable ColumnScope.(ScreenState.Loaded) -> Unit,
+    loadedStateFab: @Composable () -> Unit,
     savingState: @Composable () -> Unit,
     doneState: @Composable () -> Unit,
 ) {
@@ -189,12 +195,42 @@ private fun ScreenLayout(
 
         AnimatedContent(
             targetState = state.value,
-            transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() }
+            transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() },
+            modifier = Modifier.padding(it)
         ) {
 
             when (it) {
                 ScreenState.Loading -> loadingState()
-                is ScreenState.Loaded -> loadedState(it)
+                is ScreenState.Loaded -> {
+
+                    Box {
+
+                        val extraListSpacerState = rememberExtraListSpacerState()
+
+                        Column(
+                            modifier = Modifier.fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .wrapContentWidth()
+                                .onGloballyPositioned { extraListSpacerState.updateList(it) }
+                                .widthIn(max = 400.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            loadedState(it)
+                            extraListSpacerState.ExtraSpacer()
+                        }
+
+                        Box(
+                            Modifier.align(Alignment.BottomEnd)
+                                .padding(20.dp)
+                                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
+                        ) {
+                            loadedStateFab()
+                        }
+
+                    }
+
+                }
+
                 ScreenState.Saving -> savingState()
                 ScreenState.Done -> doneState()
             }
@@ -236,7 +272,7 @@ private fun InputRow(icon: ImageVector, label: String, input: MutableState<Strin
             modifier = Modifier.weight(2f)
                 .border(
                     width = 2.dp,
-                    color = if (input.value.isInputInvalid()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
+                    color = if (input.value.isValidLimitNumber()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
                     shape = getBottomLineShape(2.dp)
                 )
                 .padding(4.dp)
@@ -245,6 +281,6 @@ private fun InputRow(icon: ImageVector, label: String, input: MutableState<Strin
     }
 }
 
-private fun String.isInputInvalid(): Boolean {
+private fun String.isValidLimitNumber(): Boolean {
     return toIntOrNull().let { it == null || it < 0 }
 }

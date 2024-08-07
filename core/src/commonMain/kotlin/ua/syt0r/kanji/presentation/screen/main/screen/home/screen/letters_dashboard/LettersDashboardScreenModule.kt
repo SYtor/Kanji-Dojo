@@ -33,7 +33,6 @@ val lettersDashboardScreenModule = module {
             sortDecksUseCase = get(),
             mergeDecksUseCase = get(),
             updateSortUseCase = get(),
-            notifySrsPreferencesChangedUseCase = get(),
             userPreferencesRepository = get(),
             analyticsManager = get()
         )

@@ -33,7 +33,7 @@ object JapaneseStrings : Strings {
     override val home: HomeStrings = JapaneseHomeStrings
     override val lettersDashboard = JapaneseLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
-    override val dailyGoalDialog = JapaneseDailyGoalDialogStrings
+    override val dailyLimit = JapaneseDailyLimitStrings
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
@@ -148,15 +148,14 @@ object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDash
     override val practiceTypeDialogApplyButton: String = "適用"
 }
 
-object JapaneseDailyGoalDialogStrings : DailyGoalDialogStrings {
+object JapaneseDailyLimitStrings : DailyLimitStrings {
     override val title: String = "毎日の目標"
     override val message: String = "クイック練習と通知に影響します"
     override val enabledLabel: String = "有効"
-    override val studyLabel: String = "新しい文字"
-    override val reviewLabel: String = "復習"
+    override val newLabel: String = "新しい文字"
+    override val dueLabel: String = "復習"
     override val noteMessage: String = "注意: 文字の書きと読みは別に数えます"
-    override val applyButton: String = "適用"
-    override val cancelButton: String = "キャンセル"
+    override val button: String = "保存"
 }
 
 private fun formatDuration(duration: Duration): String = when {

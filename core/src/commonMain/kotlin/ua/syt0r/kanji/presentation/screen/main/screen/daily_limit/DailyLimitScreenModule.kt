@@ -8,6 +8,7 @@ val dailyLimitScreenModule = module {
     multiplatformViewModel<DailyLimitScreenContract.ViewModel> {
         DailyLimitScreenViewModel(
             viewModelScope = it.component1(),
+            dailyLimitManager = get(),
             analyticsManager = get()
         )
     }

@@ -9,17 +9,21 @@ import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetSrsStatusUseCase
-import ua.syt0r.kanji.core.srs.use_case.DefaultNotifySrsPreferencesChangedUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
-import ua.syt0r.kanji.core.srs.use_case.NotifySrsPreferencesChangedUseCase
 
 fun Module.applySrsDefinitions() {
 
+    single<DailyLimitManager> {
+        DefaultDailyLimitManager(
+            userPreferencesRepository = get()
+        )
+    }
+
     single<LetterSrsManager> {
         DefaultLetterSrsManager(
-            userPreferencesRepository = get(),
+            dailyLimitManager = get(),
             practiceRepository = get(),
             studyProgressCache = get(),
             getDeckSrsProgressUseCase = get(),
@@ -32,10 +36,6 @@ fun Module.applySrsDefinitions() {
         DefaultCharacterStudyProgressCache(
             letterPracticeRepository = get()
         )
-    }
-
-    factory<NotifySrsPreferencesChangedUseCase> {
-        DefaultNotifySrsPreferencesChangedUseCase(manager = get())
     }
 
     factory<GetLetterDeckSrsProgressUseCase> {

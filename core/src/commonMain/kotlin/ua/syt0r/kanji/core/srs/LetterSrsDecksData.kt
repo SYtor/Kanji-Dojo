@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
 data class LetterSrsDecksData(
     val decks: List<LetterSrsDeckInfo>,
     val dailyLimitConfiguration: DailyLimitConfiguration,
-    val dailyProgress: LetterDailyProgress
+    val dailyProgress: DailyProgress
 )
 
 data class LetterSrsDeckInfo(
@@ -18,13 +18,7 @@ data class LetterSrsDeckInfo(
     val readingDetails: LetterDeckSrsProgress
 )
 
-data class DailyLimitConfiguration(
-    val enabled: Boolean,
-    val newLimit: Int,
-    val dueLimit: Int
-)
-
-data class LetterDailyProgress(
+data class DailyProgress(
     val newReviewed: Int,
     val dueReviewed: Int,
     val newLeft: Int,

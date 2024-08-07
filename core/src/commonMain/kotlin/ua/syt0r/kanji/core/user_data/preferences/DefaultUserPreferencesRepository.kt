@@ -24,8 +24,8 @@ class DefaultUserPreferencesRepository(
         private const val isSortDescendingKey = "is_desc"
         private const val themeKey = "theme"
         private const val dailyLimitEnabledKey = "daily_limit_enabled"
-        private const val dailyLearnLimitKey = "daily_learn_limit"
-        private const val dailyReviewLimitKey = "daily_review_limit"
+        private const val dailyNewLimitKey = "daily_learn_limit"
+        private const val dailyDueLimitKey = "daily_review_limit"
         private const val reminderEnabledKey = "reminder_enabled"
         private const val reminderTimeKey = "reminder_time"
         private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
@@ -113,16 +113,16 @@ class DefaultUserPreferencesRepository(
         )
     }
 
-    override val dailyLearnLimit: SuspendedProperty<Int> = registerProperty {
+    override val dailyNewLimit: SuspendedProperty<Int> = registerProperty {
         createIntProperty(
-            key = dailyLearnLimitKey,
+            key = dailyNewLimitKey,
             initialValueProvider = { 4 }
         )
     }
 
-    override val dailyReviewLimit: SuspendedProperty<Int> = registerProperty {
+    override val dailyDueLimit: SuspendedProperty<Int> = registerProperty {
         createIntProperty(
-            key = dailyReviewLimitKey,
+            key = dailyDueLimitKey,
             initialValueProvider = { 60 }
         )
     }

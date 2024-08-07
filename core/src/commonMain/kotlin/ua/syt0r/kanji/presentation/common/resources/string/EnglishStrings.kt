@@ -34,7 +34,7 @@ object EnglishStrings : Strings {
     override val home: HomeStrings = EnglishHomeStrings
     override val lettersDashboard = EnglishLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = EnglishVocabDashboardStrings
-    override val dailyGoalDialog: DailyGoalDialogStrings = EnglishDailyGoalDialogStrings
+    override val dailyLimit: DailyLimitStrings = EnglishDailyLimitStrings
     override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
@@ -123,7 +123,7 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
     override val itemQuickPracticeReview: (Int) -> String = { "Review ($it)" }
     override val itemGraphProgressTitle: String = "Completion"
 
-    override val dailyIndicatorPrefix: String = "Daily limit: "
+    override val dailyIndicatorPrefix: String = "Today: "
     override val dailyIndicatorCompleted: String = "Completed"
     override val dailyIndicatorDisabled: String = "Disabled"
     override val dailyIndicatorNew: (Int) -> String = { "$it new" }
@@ -159,17 +159,16 @@ object EnglishVocabDashboardStrings : VocabDashboardStrings {
     override val deckTitleTransport: String = "Transport"
 }
 
-object EnglishDailyGoalDialogStrings : DailyGoalDialogStrings {
+object EnglishDailyLimitStrings : DailyLimitStrings {
     override val title: String = "Daily Limit"
     override val message: String =
         "Enable to limit count of characters for quick practice and reminder notification appearance"
     override val enabledLabel: String = "Enabled"
-    override val studyLabel: String = "Study"
-    override val reviewLabel: String = "Review"
+    override val newLabel: String = "New"
+    override val dueLabel: String = "Due"
     override val noteMessage: String =
         "Note: Writing and reading reviews are counted separately towards the limit"
-    override val applyButton: String = "Apply"
-    override val cancelButton: String = "Cancel"
+    override val button: String = "Save"
 }
 
 private val months = listOf(

@@ -48,7 +48,7 @@ interface Strings {
     val home: HomeStrings
     val lettersDashboard: LettersDashboardStrings
     val vocabDashboard: VocabDashboardStrings
-    val dailyGoalDialog: DailyGoalDialogStrings
+    val dailyLimit: DailyLimitStrings
 
     val stats: StatsStrings
     val search: SearchStrings
@@ -192,15 +192,14 @@ interface LettersDashboardStrings {
 
 }
 
-interface DailyGoalDialogStrings {
+interface DailyLimitStrings {
     val title: String
     val message: String
     val enabledLabel: String
-    val studyLabel: String
-    val reviewLabel: String
+    val newLabel: String
+    val dueLabel: String
     val noteMessage: String
-    val applyButton: String
-    val cancelButton: String
+    val button: String
 }
 
 interface StatsStrings {

@@ -68,7 +68,7 @@ private fun ScreenPreview(
                 navigateToDeckPicker = {},
                 navigateToDeckDetails = {},
                 startQuickPractice = { _, _, _ -> },
-                updateDailyLimit = {},
+                navigateToDailyLimit = {},
                 mergeDecks = { },
                 sortDecks = { },
             )

@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.daily_limit
 
+import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 
 interface DailyLimitScreenContract {
 
@@ -16,7 +16,9 @@ interface DailyLimitScreenContract {
         object Loading : ScreenState
 
         data class Loaded(
-            val configuration: DailyLimitConfiguration,
+            val enabled: MutableState<Boolean>,
+            val newLimit: MutableState<Int>,
+            val dueLimit: MutableState<Int>
         ) : ScreenState
 
         object Saving : ScreenState
