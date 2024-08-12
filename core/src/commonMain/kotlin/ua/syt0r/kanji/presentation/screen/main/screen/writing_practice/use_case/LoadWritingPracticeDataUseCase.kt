@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.srs.LetterSrsManager
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewData
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingCharacterReviewHistory
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeHintMode
@@ -26,7 +26,7 @@ class LoadWritingPracticeDataUseCase(
             .map { character ->
                 val shouldStudy: Boolean = when (configuration.hintMode) {
                     WritingPracticeHintMode.OnlyNew -> {
-                        letterSrsManager.getStatus(character, PracticeType.Writing).status ==
+                        letterSrsManager.getStatus(character, PreferencesLetterPracticeType.Writing).status ==
                                 SrsItemStatus.New
                     }
 

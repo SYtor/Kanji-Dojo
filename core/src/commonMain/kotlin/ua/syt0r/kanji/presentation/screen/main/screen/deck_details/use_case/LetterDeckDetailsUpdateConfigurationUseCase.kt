@@ -21,11 +21,11 @@ class DefaultUpdateDeckDetailsConfigurationUseCase(
 
     override suspend fun invoke(configuration: DeckDetailsConfiguration.LetterDeckConfiguration) {
         repository.apply {
-            practiceType.set(configuration.practiceType.correspondingRepoType)
+            practiceType.set(configuration.practiceType.preferencesType)
             filterNew.set(configuration.filterConfiguration.showNew)
             filterDue.set(configuration.filterConfiguration.showDue)
             filterDone.set(configuration.filterConfiguration.showDone)
-            sortOption.set(configuration.sortOption.correspondingRepoType)
+            sortOption.set(configuration.sortOption.preferencesType)
             isSortDescending.set(configuration.isDescending)
             practicePreviewLayout.set(configuration.layout.correspondingRepoType)
             kanaGroupsEnabled.set(configuration.kanaGroups)

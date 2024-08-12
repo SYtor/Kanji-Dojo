@@ -7,7 +7,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.preferences.SupportedTheme
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 
 class AndroidThemeManager(
     userPreferencesRepository: UserPreferencesRepository
@@ -19,7 +19,7 @@ class AndroidThemeManager(
         coroutineScope.launch { invalidate() }
     }
 
-    override suspend fun changeTheme(theme: SupportedTheme) {
+    override suspend fun changeTheme(theme: PreferencesTheme) {
         super.changeTheme(theme)
         applyThemeToActivity()
     }
@@ -28,11 +28,11 @@ class AndroidThemeManager(
         AppCompatDelegate.setDefaultNightMode(currentTheme.value.toUIMode())
     }
 
-    private fun SupportedTheme.toUIMode(): Int {
+    private fun PreferencesTheme.toUIMode(): Int {
         return when (this) {
-            SupportedTheme.System -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            SupportedTheme.Light -> AppCompatDelegate.MODE_NIGHT_NO
-            SupportedTheme.Dark -> AppCompatDelegate.MODE_NIGHT_YES
+            PreferencesTheme.System -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            PreferencesTheme.Light -> AppCompatDelegate.MODE_NIGHT_NO
+            PreferencesTheme.Dark -> AppCompatDelegate.MODE_NIGHT_YES
         }
     }
 

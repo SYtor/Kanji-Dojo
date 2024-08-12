@@ -8,11 +8,11 @@ interface SuspendedPropertiesBackupManager {
 }
 
 class DefaultSuspendedPropertiesBackupManager(
-    private val registryList: List<SuspendedPropertyRegistry>
+    private val repositories: List<SuspendedPropertyRepository>
 ) : SuspendedPropertiesBackupManager {
 
     override suspend fun exportModifiedProperties(): JsonObject {
-        return registryList.flatMap { it.properties }
+        return repositories.flatMap { it.backupProperties }
             .filter { it.isModified() }
             .associate { it.key to it.backup() }
             .let { JsonObject(it) }
@@ -20,7 +20,7 @@ class DefaultSuspendedPropertiesBackupManager(
 
     override suspend fun importProperties(jsonObject: JsonObject) {
         val importedPropertiesMap = jsonObject.entries.associate { it.key to it.value }
-        registryList.flatMap { it.properties }.forEach { property ->
+        repositories.flatMap { it.backupProperties }.forEach { property ->
             val value = importedPropertiesMap[property.key]
             if (value != null) property.restore(value)
         }

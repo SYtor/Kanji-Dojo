@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import ua.syt0r.kanji.core.userdata.db.Character_progress
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import ua.syt0r.kanji.core.userdata.db.Reading_review
@@ -106,7 +106,7 @@ class SqlDelightLetterPracticeRepository(
         practiceTime: Instant,
         reviewResultList: List<CharacterWritingReviewResult>,
     ) = runTransaction(notifyDataChange = true) {
-        val mode = practiceTypeToDBValue.getValue(PracticeType.Writing).toLong()
+        val mode = practiceTypeToDBValue.getValue(PreferencesLetterPracticeType.Writing).toLong()
         reviewResultList.forEach {
             val currentProgress = getCharacterProgress(it.character, mode).executeAsOneOrNull()
                 ?: Character_progress(
@@ -151,7 +151,7 @@ class SqlDelightLetterPracticeRepository(
         practiceTime: Instant,
         reviewResultList: List<CharacterReadingReviewResult>,
     ) = runTransaction(notifyDataChange = true) {
-        val mode = practiceTypeToDBValue.getValue(PracticeType.Reading).toLong()
+        val mode = practiceTypeToDBValue.getValue(PreferencesLetterPracticeType.Reading).toLong()
         reviewResultList.forEach {
             val currentProgress = getCharacterProgress(it.character, mode).executeAsOneOrNull()
                 ?: Character_progress(
@@ -193,29 +193,29 @@ class SqlDelightLetterPracticeRepository(
 
     override suspend fun getFirstReviewTime(
         character: String,
-        type: PracticeType,
+        type: PreferencesLetterPracticeType,
     ): Instant? = runTransaction {
         val timestamp = when (type) {
-            PracticeType.Writing -> getFirstWritingReview(character).executeAsOneOrNull()?.timestamp
-            PracticeType.Reading -> getFirstReadingReview(character).executeAsOneOrNull()?.timestamp
+            PreferencesLetterPracticeType.Writing -> getFirstWritingReview(character).executeAsOneOrNull()?.timestamp
+            PreferencesLetterPracticeType.Reading -> getFirstReadingReview(character).executeAsOneOrNull()?.timestamp
         }
         timestamp?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     override suspend fun getLastReviewTime(
         practiceId: Long,
-        type: PracticeType,
+        type: PreferencesLetterPracticeType,
     ): Instant? = runTransaction {
         val timestamp = when (type) {
-            PracticeType.Writing -> getLastWritingReview(practiceId).executeAsOneOrNull()?.timestamp
-            PracticeType.Reading -> getLastReadingReview(practiceId).executeAsOneOrNull()?.timestamp
+            PreferencesLetterPracticeType.Writing -> getLastWritingReview(practiceId).executeAsOneOrNull()?.timestamp
+            PreferencesLetterPracticeType.Reading -> getLastReadingReview(practiceId).executeAsOneOrNull()?.timestamp
         }
         timestamp?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     override suspend fun getStudyProgress(
         character: String,
-        type: PracticeType,
+        type: PreferencesLetterPracticeType,
     ): CharacterStudyProgress? = runTransaction {
         getCharacterProgress(
             character = character,
@@ -314,8 +314,8 @@ class SqlDelightLetterPracticeRepository(
     }
 
     private val practiceTypeToDBValue = mapOf(
-        PracticeType.Writing to 0L,
-        PracticeType.Reading to 1L
+        PreferencesLetterPracticeType.Writing to 0L,
+        PreferencesLetterPracticeType.Reading to 1L
     )
 
 }

@@ -38,7 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
-import ua.syt0r.kanji.core.user_data.preferences.SupportedTheme
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
@@ -148,7 +148,7 @@ fun SettingsThemeToggle() {
             ) {
 
                 Column {
-                    SupportedTheme.values().forEach {
+                    PreferencesTheme.values().forEach {
                         PopupContentItem(
                             onClick = { coroutineScope.launch { themeManager.changeTheme(it) } }
                         ) {
@@ -202,10 +202,10 @@ private fun SettingsTextButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SupportedTheme.resolveDisplayText(): String = resolveString {
+private fun PreferencesTheme.resolveDisplayText(): String = resolveString {
     when (this@resolveDisplayText) {
-        SupportedTheme.System -> settings.themeSystem
-        SupportedTheme.Light -> settings.themeLight
-        SupportedTheme.Dark -> settings.themeDark
+        PreferencesTheme.System -> settings.themeSystem
+        PreferencesTheme.Light -> settings.themeLight
+        PreferencesTheme.Dark -> settings.themeDark
     }
 }

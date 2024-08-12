@@ -16,7 +16,7 @@ import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.Practice
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,7 +24,7 @@ interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
     suspend fun getUpdatedDecksData(): LetterSrsDecksData
     suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo
-    suspend fun getStatus(letter: String, practiceType: PracticeType): CharacterSrsData
+    suspend fun getStatus(letter: String, practiceType: PreferencesLetterPracticeType): CharacterSrsData
 }
 
 class DefaultLetterSrsManager(
@@ -77,7 +77,7 @@ class DefaultLetterSrsManager(
 
     override suspend fun getStatus(
         letter: String,
-        practiceType: PracticeType,
+        practiceType: PreferencesLetterPracticeType,
     ): CharacterSrsData {
         return getLetterSrsStatusUseCase(letter, practiceType, getSrsDate())
     }

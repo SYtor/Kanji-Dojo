@@ -1,17 +1,21 @@
 package ua.syt0r.kanji.core.user_data.preferences
 
 import androidx.compose.ui.text.intl.Locale
-import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 
-class DefaultPracticeUserPreferencesRepository(
-    provider: SuspendedPropertyProvider,
+class DefaultPracticeUserPreferencesRepository private constructor(
+    suspendedPropertyRepository: SuspendedPropertyRepository,
     private val isSystemLanguageJapanese: Boolean = Locale.current.language == "ja"
 ) : PracticeUserPreferencesRepository,
-    SuspendedPropertyRegistry by DefaultSuspendedPropertyRegistry(provider) {
+    SuspendedPropertyRepository by suspendedPropertyRepository {
+
+    constructor(provider: SuspendedPropertyProvider) : this(
+        suspendedPropertyRepository = DefaultSuspendedPropertyRepository(provider)
+    )
 
     override val noTranslationLayout: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
@@ -48,10 +52,10 @@ class DefaultPracticeUserPreferencesRepository(
         )
     }
 
-    override val writingInputMethod: SuspendedProperty<WritingInputMethod> = registerProperty {
+    override val writingInputMethod: SuspendedProperty<PreferencesLetterPracticeWritingInputMode> = registerProperty {
         createEnumProperty(
             key = "writing_input_method",
-            initialValueProvider = { WritingInputMethod.Stroke }
+            initialValueProvider = { PreferencesLetterPracticeWritingInputMode.Stroke }
         )
     }
 
@@ -90,10 +94,10 @@ class DefaultPracticeUserPreferencesRepository(
             )
         }
 
-    override val vocabReadingPriority: SuspendedProperty<VocabReadingPriority> = registerProperty {
+    override val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority> = registerProperty {
         createEnumProperty(
             key = "vocab_reading_priority",
-            initialValueProvider = { VocabReadingPriority.Default }
+            initialValueProvider = { PreferencesVocabReadingPriority.Default }
         )
     }
 

@@ -6,9 +6,9 @@ import kotlinx.serialization.json.booleanOrNull
 
 /***
  * Component for repositories with following features:
- * - multiplatform provider - allows to support only one repository
+ * - multiplatform provider - need to maintain only one repository
  * - suspend invocations - allows to avoid getters and setters since Kotlin properties can't be suspended
- * - flexible backup functionality
+ * - exposes json values for backup support
  */
 interface SuspendedProperty<T> {
 

@@ -6,7 +6,7 @@ import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
-import ua.syt0r.kanji.core.user_data.preferences.WritingInputMethod
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeWritingInputMode
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
@@ -46,20 +46,20 @@ enum class WritingPracticeHintMode(
 
 enum class WritingPracticeInputMode(
     override val titleResolver: StringResolveScope<String>,
-    val inputMethod: WritingInputMethod
+    val repoType: PreferencesLetterPracticeWritingInputMode
 ) : DisplayableEnum {
     Stroke(
         titleResolver = { writingPractice.inputModeStroke },
-        inputMethod = WritingInputMethod.Stroke
+        repoType = PreferencesLetterPracticeWritingInputMode.Stroke
     ),
     Character(
         titleResolver = { writingPractice.inputModeCharacter },
-        inputMethod = WritingInputMethod.Character
+        repoType = PreferencesLetterPracticeWritingInputMode.Character
     )
 }
 
-fun WritingInputMethod.toInputMode(): WritingPracticeInputMode = WritingPracticeInputMode.values()
-    .first { it.inputMethod == this }
+fun PreferencesLetterPracticeWritingInputMode.toScreenType(): WritingPracticeInputMode = WritingPracticeInputMode.values()
+    .first { it.repoType == this }
 
 enum class ReviewUserAction {
     StudyNext,

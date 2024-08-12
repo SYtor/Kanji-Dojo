@@ -21,9 +21,9 @@ import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.srs.applySrsDefinitions
 import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertiesBackupManager
-import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -68,15 +68,15 @@ val coreModule = module {
         )
     }
 
-    single<SuspendedPropertyRegistry> {
-        DefaultSuspendedPropertyRegistry(
+    single<SuspendedPropertyRepository> {
+        DefaultSuspendedPropertyRepository(
             provider = get()
         )
     }
 
     factory<SuspendedPropertiesBackupManager> {
         DefaultSuspendedPropertiesBackupManager(
-            registryList = getAll<SuspendedPropertyRegistry>()
+            repositories = getAll<SuspendedPropertyRepository>()
         )
     }
 
@@ -84,13 +84,13 @@ val coreModule = module {
         DefaultPracticeUserPreferencesRepository(
             provider = get()
         )
-    } bind SuspendedPropertyRegistry::class
+    } bind SuspendedPropertyRepository::class
 
     single<UserPreferencesRepository> {
         DefaultUserPreferencesRepository(
             provider = get()
         )
-    } bind SuspendedPropertyRegistry::class
+    } bind SuspendedPropertyRepository::class
 
     factory<BackupManager> {
         DefaultBackupManager(

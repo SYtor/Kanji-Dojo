@@ -2,7 +2,7 @@ package ua.syt0r.kanji.core.user_data.practice
 
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import kotlin.math.roundToLong
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -38,9 +38,9 @@ interface LetterPracticeRepository {
         reviewResultList: List<CharacterReadingReviewResult>,
     )
 
-    suspend fun getFirstReviewTime(character: String, type: PracticeType): Instant?
-    suspend fun getLastReviewTime(practiceId: Long, type: PracticeType): Instant?
-    suspend fun getStudyProgress(character: String, type: PracticeType): CharacterStudyProgress?
+    suspend fun getFirstReviewTime(character: String, type: PreferencesLetterPracticeType): Instant?
+    suspend fun getLastReviewTime(practiceId: Long, type: PreferencesLetterPracticeType): Instant?
+    suspend fun getStudyProgress(character: String, type: PreferencesLetterPracticeType): CharacterStudyProgress?
     suspend fun getStudyProgresses(): List<CharacterStudyProgress>
 
     suspend fun getReviews(start: Instant, end: Instant): Map<CharacterReviewResult, Instant>
@@ -58,7 +58,7 @@ data class Practice(
 
 data class CharacterStudyProgress(
     val character: String,
-    val practiceType: PracticeType,
+    val practiceType: PreferencesLetterPracticeType,
     val lastReviewTime: Instant,
     val repeats: Int,
     val lapses: Int,

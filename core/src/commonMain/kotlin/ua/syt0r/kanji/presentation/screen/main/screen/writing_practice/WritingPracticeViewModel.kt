@@ -72,7 +72,7 @@ class WritingPracticeViewModel(
                 leftHandedMode = userPreferencesRepository.leftHandMode.get(),
                 kanaRomaji = userPreferencesRepository
                     .writingRomajiInsteadOfKanaWords.get(),
-                inputMode = userPreferencesRepository.writingInputMethod.get().toInputMode(),
+                inputMode = userPreferencesRepository.writingInputMethod.get().toScreenType(),
                 altStrokeEvaluatorEnabled = userPreferencesRepository.altStrokeEvaluator.get(),
             )
         }
@@ -88,7 +88,7 @@ class WritingPracticeViewModel(
                 noTranslationLayout.set(configuration.noTranslationsLayout)
                 leftHandMode.set(configuration.leftHandedMode)
                 writingRomajiInsteadOfKanaWords.set(configuration.useRomajiForKanaWords)
-                writingInputMethod.set(configuration.inputMode.inputMethod)
+                writingInputMethod.set(configuration.inputMode.repoType)
                 altStrokeEvaluator.set(configuration.altStrokeEvaluatorEnabled)
             }
 

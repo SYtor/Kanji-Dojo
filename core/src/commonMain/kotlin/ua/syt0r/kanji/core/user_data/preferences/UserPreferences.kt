@@ -2,25 +2,25 @@ package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 
-interface UserPreferencesRepository : SuspendedPropertyRegistry {
+interface UserPreferencesRepository : SuspendedPropertyRepository {
 
     val analyticsEnabled: SuspendedProperty<Boolean>
 
-    val practiceType: SuspendedProperty<PracticeType>
+    val practiceType: SuspendedProperty<PreferencesLetterPracticeType>
     val filterNew: SuspendedProperty<Boolean>
     val filterDue: SuspendedProperty<Boolean>
     val filterDone: SuspendedProperty<Boolean>
-    val sortOption: SuspendedProperty<SortOption>
+    val sortOption: SuspendedProperty<PreferencesLetterSortOption>
 
     val isSortDescending: SuspendedProperty<Boolean>
 
-    val practicePreviewLayout: SuspendedProperty<PracticePreviewLayout>
+    val practicePreviewLayout: SuspendedProperty<PreferencesDeckDetailsLetterLayout>
 
     val kanaGroupsEnabled: SuspendedProperty<Boolean>
 
-    val theme: SuspendedProperty<SupportedTheme>
+    val theme: SuspendedProperty<PreferencesTheme>
 
     val dailyLimitEnabled: SuspendedProperty<Boolean>
     val dailyNewLimit: SuspendedProperty<Int>
@@ -30,12 +30,13 @@ interface UserPreferencesRepository : SuspendedPropertyRegistry {
     val reminderTime: SuspendedProperty<LocalTime>
 
     val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String>
+    val tutorialSeen: SuspendedProperty<Boolean>
 
     val dashboardSortByTime: SuspendedProperty<Boolean>
 
 }
 
-interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
+interface PracticeUserPreferencesRepository : SuspendedPropertyRepository {
 
     val noTranslationLayout: SuspendedProperty<Boolean>
     val leftHandMode: SuspendedProperty<Boolean>
@@ -44,7 +45,7 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
     val highlightRadicals: SuspendedProperty<Boolean>
     val kanaAutoPlay: SuspendedProperty<Boolean>
 
-    val writingInputMethod: SuspendedProperty<WritingInputMethod>
+    val writingInputMethod: SuspendedProperty<PreferencesLetterPracticeWritingInputMode>
     val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean>
     val writingToleratedMistakes: SuspendedProperty<Int>
 
@@ -52,16 +53,16 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRegistry {
     val readingToleratedMistakes: SuspendedProperty<Int>
 
     val vocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
-    val vocabReadingPriority: SuspendedProperty<VocabReadingPriority>
+    val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority>
     val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>
     val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean>
 
 }
 
-enum class PracticeType { Writing, Reading }
-enum class SortOption { AddOrder, Frequency, Name }
-enum class PracticePreviewLayout { Character, Groups }
-enum class SupportedTheme { System, Light, Dark }
-enum class WritingInputMethod { Stroke, Character }
+enum class PreferencesLetterPracticeType { Writing, Reading }
+enum class PreferencesLetterSortOption { AddOrder, Frequency, Name }
+enum class PreferencesDeckDetailsLetterLayout { Character, Groups }
+enum class PreferencesTheme { System, Light, Dark }
+enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }
 enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
-enum class VocabReadingPriority { Default, Kanji, Kana }
+enum class PreferencesVocabReadingPriority { Default, Kanji, Kana }

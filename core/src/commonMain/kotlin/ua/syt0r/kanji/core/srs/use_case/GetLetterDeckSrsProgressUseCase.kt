@@ -5,7 +5,7 @@ import ua.syt0r.kanji.core.srs.LetterDeckSrsProgress
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 
 interface GetLetterDeckSrsProgressUseCase {
 
@@ -35,12 +35,12 @@ class DefaultGetLetterDeckSrsProgressUseCase(
             characters = characters,
             writingDetails = getProgressForPracticeType(
                 characters = characters,
-                practiceType = PracticeType.Writing,
+                practiceType = PreferencesLetterPracticeType.Writing,
                 date = srsDate
             ),
             readingDetails = getProgressForPracticeType(
                 characters = characters,
-                practiceType = PracticeType.Reading,
+                practiceType = PreferencesLetterPracticeType.Reading,
                 date = srsDate
             )
         )
@@ -48,7 +48,7 @@ class DefaultGetLetterDeckSrsProgressUseCase(
 
     private suspend fun getProgressForPracticeType(
         characters: List<String>,
-        practiceType: PracticeType,
+        practiceType: PreferencesLetterPracticeType,
         date: LocalDate,
     ): LetterDeckSrsProgress {
         val charactersSrsData = characters.map { getLetterSrsStatusUseCase(it, practiceType, date) }

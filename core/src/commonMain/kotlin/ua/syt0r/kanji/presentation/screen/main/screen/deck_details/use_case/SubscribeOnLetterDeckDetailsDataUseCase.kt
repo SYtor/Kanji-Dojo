@@ -14,7 +14,7 @@ import ua.syt0r.kanji.core.srs.CharacterSrsData
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
@@ -82,7 +82,7 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
                 frequency = appDataRepository.getData(character)?.frequency,
                 writingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
-                        .getFirstReviewTime(character, PracticeType.Writing)
+                        .getFirstReviewTime(character, PreferencesLetterPracticeType.Writing)
                         ?.toLocalDateTime(timeZone),
                     lastReviewDate = writingData.studyProgress?.lastReviewTime
                         ?.toLocalDateTime(timeZone),
@@ -93,7 +93,7 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
                 ),
                 readingSummary = PracticeItemSummary(
                     firstReviewDate = practiceRepository
-                        .getFirstReviewTime(character, PracticeType.Reading)
+                        .getFirstReviewTime(character, PreferencesLetterPracticeType.Reading)
                         ?.toLocalDateTime(timeZone),
                     lastReviewDate = readingData.studyProgress?.lastReviewTime
                         ?.toLocalDateTime(timeZone),

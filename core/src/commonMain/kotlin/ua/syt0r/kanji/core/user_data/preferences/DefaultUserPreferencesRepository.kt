@@ -1,156 +1,153 @@
 package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.datetime.LocalTime
-import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRegistry
+import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 import ua.syt0r.kanji.core.suspended_property.createLocalTimeProperty
 
-class DefaultUserPreferencesRepository(
-    private val provider: SuspendedPropertyProvider
+class DefaultUserPreferencesRepository private constructor(
+    suspendedPropertyRepository: SuspendedPropertyRepository
 ) : UserPreferencesRepository,
-    SuspendedPropertyRegistry by DefaultSuspendedPropertyRegistry(provider) {
+    SuspendedPropertyRepository by suspendedPropertyRepository {
 
-    companion object {
+    constructor(provider: SuspendedPropertyProvider) : this(
+        suspendedPropertyRepository = DefaultSuspendedPropertyRepository(provider)
+    )
 
-        private const val analyticsEnabledKey = "analytics_enabled"
-        private const val practiceTypeKey = "practice_type"
-        private const val filterNewKey = "filter_new"
-        private const val filterDueKey = "filter_due"
-        private const val filterDoneKey = "filter_done"
-        private const val sortOptionKey = "sort_option"
-        private const val isSortDescendingKey = "is_desc"
-        private const val themeKey = "theme"
-        private const val dailyLimitEnabledKey = "daily_limit_enabled"
-        private const val dailyNewLimitKey = "daily_learn_limit"
-        private const val dailyDueLimitKey = "daily_review_limit"
-        private const val reminderEnabledKey = "reminder_enabled"
-        private const val reminderTimeKey = "reminder_time"
-        private const val lastVersionWhenChangesDialogShownKey = "last_changes_dialog_version_shown"
-        private const val practicePreviewLayoutKey = "practice_preview_layout2"
-        private const val kanaGroupsEnabledKey = "kana_groups_enabled"
-        private const val dashboardSortByTimeKey = "dashboard_sort_by_time"
-
-    }
-
-    override val analyticsEnabled: SuspendedProperty<Boolean> = provider.run {
+    override val analyticsEnabled: SuspendedProperty<Boolean> = registerProperty(
+        enableBackup = false
+    ) {
         createBooleanProperty(
-            key = analyticsEnabledKey,
+            key = "analytics_enabled",
             initialValueProvider = { true }
         )
     }
 
-    override val practiceType: SuspendedProperty<PracticeType> = registerProperty {
+    override val practiceType: SuspendedProperty<PreferencesLetterPracticeType> = registerProperty {
         createEnumProperty(
-            key = practiceTypeKey,
-            initialValueProvider = { PracticeType.Writing }
+            key = "practice_type",
+            initialValueProvider = { PreferencesLetterPracticeType.Writing }
         )
     }
 
     override val filterNew: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = filterNewKey,
+            key = "filter_new",
             initialValueProvider = { true }
         )
     }
 
     override val filterDue: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = filterDueKey,
+            key = "filter_due",
             initialValueProvider = { true }
         )
     }
 
     override val filterDone: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = filterDoneKey,
+            key = "filter_done",
             initialValueProvider = { true }
         )
     }
 
-    override val sortOption: SuspendedProperty<SortOption> = registerProperty {
+    override val sortOption: SuspendedProperty<PreferencesLetterSortOption> = registerProperty {
         createEnumProperty(
-            key = sortOptionKey,
-            initialValueProvider = { SortOption.AddOrder }
+            key = "sort_option",
+            initialValueProvider = { PreferencesLetterSortOption.AddOrder }
         )
     }
 
     override val isSortDescending: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = isSortDescendingKey,
+            key = "is_desc",
             initialValueProvider = { false }
         )
     }
 
-    override val practicePreviewLayout: SuspendedProperty<PracticePreviewLayout> =
+    override val practicePreviewLayout: SuspendedProperty<PreferencesDeckDetailsLetterLayout> =
         registerProperty {
             createEnumProperty(
-                key = practicePreviewLayoutKey,
-                initialValueProvider = { PracticePreviewLayout.Groups }
+                key = "practice_preview_layout2",
+                initialValueProvider = { PreferencesDeckDetailsLetterLayout.Groups }
             )
         }
 
     override val kanaGroupsEnabled: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = kanaGroupsEnabledKey,
+            key = "kana_groups_enabled",
             initialValueProvider = { true }
         )
     }
 
-    override val theme: SuspendedProperty<SupportedTheme> = registerProperty {
+    override val theme: SuspendedProperty<PreferencesTheme> = registerProperty {
         createEnumProperty(
-            key = themeKey,
-            initialValueProvider = { SupportedTheme.System }
+            key = "theme",
+            initialValueProvider = { PreferencesTheme.System }
         )
     }
 
     override val dailyLimitEnabled: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = dailyLimitEnabledKey,
+            key = "daily_limit_enabled",
             initialValueProvider = { false }
         )
     }
 
     override val dailyNewLimit: SuspendedProperty<Int> = registerProperty {
         createIntProperty(
-            key = dailyNewLimitKey,
+            key = "daily_learn_limit",
             initialValueProvider = { 4 }
         )
     }
 
     override val dailyDueLimit: SuspendedProperty<Int> = registerProperty {
         createIntProperty(
-            key = dailyDueLimitKey,
+            key = "daily_review_limit",
             initialValueProvider = { 60 }
         )
     }
 
-    override val reminderEnabled: SuspendedProperty<Boolean> = provider.run {
+    override val reminderEnabled: SuspendedProperty<Boolean> = registerProperty(
+        enableBackup = false
+    ) {
         createBooleanProperty(
-            key = reminderEnabledKey,
+            key = "reminder_enabled",
             initialValueProvider = { false }
         )
     }
 
-    override val reminderTime: SuspendedProperty<LocalTime> = provider.run {
+    override val reminderTime: SuspendedProperty<LocalTime> = registerProperty(
+        enableBackup = false
+    ) {
         createLocalTimeProperty(
-            key = reminderTimeKey,
+            key = "reminder_time",
             initialValueProvider = { LocalTime(hour = 9, minute = 0) }
         )
     }
 
-    override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> = provider.run {
+    override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> = registerProperty(
+        enableBackup = false
+    ) {
         createStringProperty(
-            key = lastVersionWhenChangesDialogShownKey,
+            key = "last_changes_dialog_version_shown",
             initialValueProvider = { "" }
+        )
+    }
+
+    override val tutorialSeen: SuspendedProperty<Boolean> = registerProperty {
+        createBooleanProperty(
+            key = "tutorial_seen",
+            initialValueProvider = { false }
         )
     }
 
     override val dashboardSortByTime: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
-            key = dashboardSortByTimeKey,
+            key = "dashboard_sort_by_time",
             initialValueProvider = { false }
         )
     }

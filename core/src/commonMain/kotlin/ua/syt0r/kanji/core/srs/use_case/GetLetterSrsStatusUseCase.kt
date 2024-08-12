@@ -6,13 +6,13 @@ import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.srs.CharacterSrsData
 import ua.syt0r.kanji.core.srs.CharacterStudyProgressCache
 import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
-import ua.syt0r.kanji.core.user_data.preferences.PracticeType
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 
 interface GetLetterSrsStatusUseCase {
 
     suspend operator fun invoke(
         letter: String,
-        practiceType: PracticeType,
+        practiceType: PreferencesLetterPracticeType,
         date: LocalDate,
     ): CharacterSrsData
 
@@ -25,7 +25,7 @@ class DefaultGetLetterSrsStatusUseCase(
 
     override suspend fun invoke(
         letter: String,
-        practiceType: PracticeType,
+        practiceType: PreferencesLetterPracticeType,
         date: LocalDate,
     ): CharacterSrsData {
         val studyProgress: CharacterStudyProgress? = characterStudyProgressCache.get(letter)

@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
-import ua.syt0r.kanji.core.user_data.preferences.VocabReadingPriority
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
@@ -55,25 +55,25 @@ private val vocabPracticeTypeToSrsPracticeTypeMapping = mapOf(
 
 enum class VocabPracticeReadingPriority(
     override val titleResolver: StringResolveScope<String>,
-    val repoType: VocabReadingPriority
+    val repoType: PreferencesVocabReadingPriority
 ) : DisplayableEnum {
 
     Default(
         titleResolver = { vocabPractice.readingPriorityConfigurationDefault },
-        repoType = VocabReadingPriority.Default
+        repoType = PreferencesVocabReadingPriority.Default
     ),
     Kanji(
         titleResolver = { vocabPractice.readingPriorityConfigurationKanji },
-        repoType = VocabReadingPriority.Kanji
+        repoType = PreferencesVocabReadingPriority.Kanji
     ),
     Kana(
         titleResolver = { vocabPractice.readingPriorityConfigurationKana },
-        repoType = VocabReadingPriority.Kana
+        repoType = PreferencesVocabReadingPriority.Kana
     );
 
 }
 
-fun VocabReadingPriority.toScreenType(): VocabPracticeReadingPriority {
+fun PreferencesVocabReadingPriority.toScreenType(): VocabPracticeReadingPriority {
     return VocabPracticeReadingPriority.values().first { it.repoType == this }
 }
 
