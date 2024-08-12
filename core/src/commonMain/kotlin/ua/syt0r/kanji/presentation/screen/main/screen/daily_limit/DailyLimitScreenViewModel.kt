@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.daily_limit
 
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,10 +23,16 @@ class DailyLimitScreenViewModel(
     init {
         viewModelScope.launch {
             val configuration = dailyLimitManager.getConfiguration()
+
+            val newLimit = mutableStateOf(configuration.newLimit.toString())
+            val dueLimit = mutableStateOf(configuration.dueLimit.toString())
+
             _state.value = ScreenState.Loaded(
                 enabled = mutableStateOf(configuration.enabled),
-                newLimit = mutableStateOf(configuration.newLimit),
-                dueLimit = mutableStateOf(configuration.dueLimit)
+                newLimitInput = newLimit,
+                newLimitValidated = derivedStateOf { newLimit.value.asValidLimitNumber() },
+                dueLimitInput = dueLimit,
+                dueLimitValidated = derivedStateOf { dueLimit.value.asValidLimitNumber() }
             )
         }
     }
@@ -38,8 +45,8 @@ class DailyLimitScreenViewModel(
                 configuration = loadedState.run {
                     DailyLimitConfiguration(
                         enabled = enabled.value,
-                        newLimit = newLimit.value,
-                        dueLimit = dueLimit.value
+                        newLimit = newLimitValidated.value!!,
+                        dueLimit = dueLimitValidated.value!!
                     )
                 }
             )

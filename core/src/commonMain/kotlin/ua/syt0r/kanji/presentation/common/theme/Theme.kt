@@ -192,11 +192,15 @@ fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorSche
 
 fun snapSizeTransform(): SizeTransform = SizeTransform() { _, _ -> snap() }
 
+fun snapToBiggerSizeTransform(
+    snapToSmallerContainerDelay: Int = AnimationConstants.DefaultDurationMillis
+): SizeTransform = SizeTransform { initial, target ->
+    if (target.width > initial.width || target.height > initial.height) snap()
+    else snap(snapToSmallerContainerDelay)
+}
+
 fun <S> snapToBiggerContainerCrossfadeTransitionSpec(
     snapToSmallerContainerDelay: Int = AnimationConstants.DefaultDurationMillis
 ): AnimatedContentTransitionScope<S>.() -> ContentTransform = {
-    fadeIn() togetherWith fadeOut() using SizeTransform { initial, target ->
-        if (target.width > initial.width || target.height > initial.height) snap()
-        else snap(snapToSmallerContainerDelay)
-    }
+    fadeIn() togetherWith fadeOut() using snapToBiggerSizeTransform(snapToSmallerContainerDelay)
 }
