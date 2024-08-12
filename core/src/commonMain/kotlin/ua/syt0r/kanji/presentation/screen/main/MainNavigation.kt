@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.serialization.Serializable
@@ -27,6 +28,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPr
 import kotlin.reflect.KClass
 
 interface MainNavigationState {
+    val currentDestination: State<MainDestination?>
     fun navigateBack()
     fun popUpToHome()
     fun navigate(destination: MainDestination)
@@ -40,15 +42,19 @@ expect fun MainNavigation(state: MainNavigationState)
 
 interface MainDestination {
 
+    val analyticsName: String?
+
     @Composable
-    fun Draw(state: MainNavigationState)
+    fun Content(state: MainNavigationState)
 
 
     @Serializable
     object Home : MainDestination {
 
+        override val analyticsName: String? = null
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             HomeScreen(
                 mainNavigationState = rememberUpdatedState(state)
             )
@@ -59,8 +65,10 @@ interface MainDestination {
     @Serializable
     object About : MainDestination {
 
+        override val analyticsName: String = "about"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             AboutScreen(
                 mainNavigationState = state
             )
@@ -71,8 +79,10 @@ interface MainDestination {
     @Serializable
     object Credits : MainDestination {
 
+        override val analyticsName: String = "credits"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             CreditsScreen(state)
         }
 
@@ -83,8 +93,10 @@ interface MainDestination {
         val configuration: DeckPickerScreenConfiguration
     ) : MainDestination {
 
+        override val analyticsName: String = "deck_picker"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             DeckPickerScreen(
                 configuration = configuration,
                 mainNavigationState = state
@@ -98,8 +110,10 @@ interface MainDestination {
         val configuration: DeckEditScreenConfiguration
     ) : MainDestination {
 
+        override val analyticsName: String = "deck_edit"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             DeckEditScreen(
                 configuration = configuration,
                 mainNavigationState = state
@@ -112,8 +126,11 @@ interface MainDestination {
     data class DeckDetails(
         val configuration: DeckDetailsScreenConfiguration
     ) : MainDestination {
+
+        override val analyticsName: String = "deck_details"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             DeckDetailsScreen(
                 configuration = configuration,
                 mainNavigationState = state
@@ -130,8 +147,10 @@ interface MainDestination {
             val characterList: List<String>
         ) : Practice {
 
+            override val analyticsName: String = "writing_practice"
+
             @Composable
-            override fun Draw(state: MainNavigationState) {
+            override fun Content(state: MainNavigationState) {
                 WritingPracticeScreen(
                     mainNavigationState = state,
                     configuration = this
@@ -146,8 +165,10 @@ interface MainDestination {
             val characterList: List<String>
         ) : Practice {
 
+            override val analyticsName: String = "reading_practice"
+
             @Composable
-            override fun Draw(state: MainNavigationState) {
+            override fun Content(state: MainNavigationState) {
                 ReadingPracticeScreen(
                     navigationState = state,
                     configuration = this
@@ -163,8 +184,10 @@ interface MainDestination {
         val wordIds: List<Long>
     ) : MainDestination {
 
+        override val analyticsName: String = "vocab_practice"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             VocabPracticeScreen(
                 wordIds = wordIds,
                 mainNavigationState = state
@@ -178,8 +201,10 @@ interface MainDestination {
         val character: String
     ) : MainDestination {
 
+        override val analyticsName: String = "kanji_info"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             KanjiInfoScreen(
                 kanji = character,
                 mainNavigationState = state
@@ -191,8 +216,10 @@ interface MainDestination {
     @Serializable
     object Backup : MainDestination {
 
+        override val analyticsName: String = "backup"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             BackupScreen(state)
         }
 
@@ -203,8 +230,10 @@ interface MainDestination {
         val topic: FeedbackTopic
     ) : MainDestination {
 
+        override val analyticsName: String = "feedback"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             FeedbackScreen(
                 feedbackTopic = topic,
                 mainNavigationState = state
@@ -216,8 +245,10 @@ interface MainDestination {
     @Serializable
     object Sponsor : MainDestination {
 
+        override val analyticsName: String = "sponsor"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             val content = remember { getKoin().get<SponsorScreenContract.Content>() }
             content(state)
         }
@@ -227,8 +258,10 @@ interface MainDestination {
     @Serializable
     object DailyLimit : MainDestination {
 
+        override val analyticsName: String = "daily_limit"
+
         @Composable
-        override fun Draw(state: MainNavigationState) {
+        override fun Content(state: MainNavigationState) {
             DailyLimitScreen(state)
         }
 

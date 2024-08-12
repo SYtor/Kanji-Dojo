@@ -86,8 +86,4 @@ class LettersDashboardViewModel(
         viewModelScope.launch { sortRequestsChannel.send(data) }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("practice_dashboard")
-    }
-
 }

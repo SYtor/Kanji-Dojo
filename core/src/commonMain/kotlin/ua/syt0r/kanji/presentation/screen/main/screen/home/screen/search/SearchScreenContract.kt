@@ -26,8 +26,6 @@ interface SearchScreenContract {
         fun loadRadicalsData()
         fun radicalsSearch(radicals: Set<String>)
 
-        fun reportScreenShown()
-
     }
 
     data class ScreenState(

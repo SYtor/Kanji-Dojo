@@ -19,7 +19,6 @@ object GooglePlaySettingsScreenContent : SettingsScreenContract.Content {
 
         LaunchedEffect(Unit) {
             viewModel.refresh()
-            viewModel.reportScreenShown()
         }
 
         GooglePlaySettingsScreenUI(

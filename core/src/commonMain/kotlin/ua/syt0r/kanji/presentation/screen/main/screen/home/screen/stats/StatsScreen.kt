@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 
@@ -9,10 +8,6 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 fun StatsScreen(
     viewModel: StatsScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
-
-    LaunchedEffect(Unit) {
-        viewModel.reportScreenShown()
-    }
 
     StatsScreenUI(state = viewModel.state.collectAsState())
 

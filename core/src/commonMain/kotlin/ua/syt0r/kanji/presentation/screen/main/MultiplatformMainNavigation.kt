@@ -11,7 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 
 
 interface MultiplatformMainNavigationState : MainNavigationState {
-    val currentDestination: State<MainDestination>
+    override val currentDestination: State<MainDestination>
     val stateHolder: SaveableStateHolder
 }
 
@@ -25,7 +25,7 @@ fun MultiplatformMainNavigation(
         targetState = state.currentDestination.value
     ) { destination ->
         state.stateHolder.SaveableStateProvider(destination.toString()) {
-            destination.Draw(state)
+            destination.Content(state)
         }
     }
 

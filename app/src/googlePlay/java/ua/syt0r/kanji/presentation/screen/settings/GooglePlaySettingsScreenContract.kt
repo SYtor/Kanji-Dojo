@@ -10,7 +10,6 @@ interface GooglePlaySettingsScreenContract {
         val state: State<ScreenState>
 
         fun refresh()
-        fun reportScreenShown()
 
         fun updateReminder(configuration: ReminderNotificationConfiguration)
         fun updateAnalyticsEnabled(enabled: Boolean)

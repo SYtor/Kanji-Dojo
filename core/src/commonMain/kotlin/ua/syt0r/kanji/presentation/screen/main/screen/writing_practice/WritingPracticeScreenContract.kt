@@ -42,7 +42,7 @@ interface WritingPracticeScreenContract {
         fun toggleAutoPlay()
         fun speakKana(reading: KanaReading)
 
-        fun reportScreenShown(configuration: MainDestination.Practice.Writing)
+        fun reportPracticeSize(configuration: MainDestination.Practice.Writing)
 
     }
 

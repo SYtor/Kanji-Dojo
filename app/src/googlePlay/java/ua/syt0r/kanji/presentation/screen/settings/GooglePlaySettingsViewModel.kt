@@ -30,10 +30,6 @@ class GooglePlaySettingsViewModel(
         }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("settings")
-    }
-
     override fun updateReminder(configuration: ReminderNotificationConfiguration) {
         val currentState = state.value as ScreenState.Loaded
         viewModelScope.launch {

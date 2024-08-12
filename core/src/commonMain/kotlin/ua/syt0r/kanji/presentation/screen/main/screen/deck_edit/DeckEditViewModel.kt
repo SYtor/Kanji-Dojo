@@ -153,10 +153,6 @@ class DeckEditViewModel(
         }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("practice_create")
-    }
-
     private fun reportInvalidImportCharacter(characters: List<String>) {
         characters.forEach {
             analyticsManager.sendEvent("import_unknown_character") {

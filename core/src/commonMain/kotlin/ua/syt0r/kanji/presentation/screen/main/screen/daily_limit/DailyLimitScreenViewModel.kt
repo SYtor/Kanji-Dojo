@@ -47,8 +47,6 @@ class DailyLimitScreenViewModel(
         }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("daily_limit")
-    }
+    private fun String.asValidLimitNumber(): Int? = toIntOrNull()?.takeIf { it >= 0 }
 
 }

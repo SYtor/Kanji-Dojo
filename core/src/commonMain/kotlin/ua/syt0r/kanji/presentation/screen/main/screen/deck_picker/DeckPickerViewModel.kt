@@ -8,9 +8,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 
 
-class DeckPickerViewModel(
-    private val analyticsManager: AnalyticsManager
-) : DeckPickerScreenContract.ViewModel {
+class DeckPickerViewModel : DeckPickerScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val state: StateFlow<ScreenState> = _state
@@ -25,11 +23,6 @@ class DeckPickerViewModel(
             DeckPickerScreenConfiguration.Letters -> ScreenState.Loaded(DeckPickerLetterCategories)
             DeckPickerScreenConfiguration.Vocab -> TODO()
         }
-    }
-
-
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("import")
     }
 
 }

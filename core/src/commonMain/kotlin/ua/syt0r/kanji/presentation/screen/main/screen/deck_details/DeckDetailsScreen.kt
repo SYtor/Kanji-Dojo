@@ -19,7 +19,6 @@ fun DeckDetailsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadData(configuration)
-        viewModel.reportScreenShown()
     }
 
     DeckDetailsScreenUI(

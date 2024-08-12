@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.backup
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -11,10 +10,6 @@ fun BackupScreen(
     mainNavigationState: MainNavigationState,
     viewModel: BackupContract.ViewModel = getMultiplatformViewModel()
 ) {
-
-    LaunchedEffect(Unit) {
-        viewModel.reportScreenShown()
-    }
 
     BackupScreenUI(
         state = viewModel.state.collectAsState(),

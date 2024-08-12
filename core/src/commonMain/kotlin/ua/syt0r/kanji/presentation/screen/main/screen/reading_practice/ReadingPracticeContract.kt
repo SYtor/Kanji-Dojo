@@ -38,8 +38,6 @@ interface ReadingPracticeContract {
 
         fun savePractice(result: PracticeSavingResult)
 
-        fun reportScreenShown(configuration: MainDestination.Practice.Reading)
-
     }
 
     sealed interface ScreenState {

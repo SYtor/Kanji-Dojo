@@ -1,10 +1,21 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import androidx.compose.runtime.mutableStateOf
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
@@ -70,10 +81,6 @@ class SearchViewModel(
 
     override fun radicalsSearch(radicals: Set<String>) {
         radicalsSearchQueriesChannel.trySend(radicals)
-    }
-
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("search")
     }
 
     private fun handleSearchQueries() = viewModelScope.launch {

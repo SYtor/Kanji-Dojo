@@ -20,7 +20,6 @@ fun DeckPickerScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadData(configuration)
-        viewModel.reportScreenShown()
     }
 
     val urlHandler = rememberUrlHandler()

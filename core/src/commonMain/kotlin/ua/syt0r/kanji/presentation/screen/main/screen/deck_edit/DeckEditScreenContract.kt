@@ -15,7 +15,6 @@ interface DeckEditScreenContract {
         fun toggleRemoval(item: DeckEditListItem)
         fun saveDeck()
         fun deleteDeck()
-        fun reportScreenShown()
     }
 
     sealed interface ScreenState {

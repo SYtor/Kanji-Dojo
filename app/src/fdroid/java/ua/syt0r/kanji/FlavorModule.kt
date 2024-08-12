@@ -17,7 +17,6 @@ val flavorModule = module {
         FdroidSettingsViewModel(
             viewModelScope = it.component1(),
             userPreferencesRepository = get(),
-            analyticsManager = get(),
             reminderScheduler = get()
         )
     }

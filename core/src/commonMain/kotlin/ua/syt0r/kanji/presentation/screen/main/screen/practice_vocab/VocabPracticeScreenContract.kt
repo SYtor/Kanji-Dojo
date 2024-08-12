@@ -25,7 +25,6 @@ interface VocabPracticeScreenContract {
         fun next(srsCard: SrsCard)
         fun finishPractice()
 
-        fun reportScreenShown()
     }
 
     sealed interface ScreenState {

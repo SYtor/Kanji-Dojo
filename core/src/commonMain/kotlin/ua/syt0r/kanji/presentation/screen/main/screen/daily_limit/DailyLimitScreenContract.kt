@@ -8,7 +8,6 @@ interface DailyLimitScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
         fun saveChanges()
-        fun reportScreenShown()
     }
 
     sealed interface ScreenState {

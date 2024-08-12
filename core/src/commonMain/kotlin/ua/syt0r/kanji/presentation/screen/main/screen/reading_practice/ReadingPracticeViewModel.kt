@@ -164,10 +164,6 @@ class ReadingPracticeViewModel(
         }
     }
 
-    override fun reportScreenShown(configuration: MainDestination.Practice.Reading) {
-        analyticsManager.setScreen("reading_practice")
-    }
-
     private suspend fun ReadingCharacterReviewData.applyToState() {
         if (!details.isCompleted) {
             state.value = ScreenState.Loading

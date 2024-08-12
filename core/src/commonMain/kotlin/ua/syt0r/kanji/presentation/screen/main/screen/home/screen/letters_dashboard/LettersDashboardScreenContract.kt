@@ -18,8 +18,6 @@ interface LettersDashboardScreenContract {
         fun mergeDecks(data: DecksMergeRequestData)
         fun sortDecks(data: DecksSortRequestData)
 
-        fun reportScreenShown()
-
     }
 
     sealed class ScreenState {

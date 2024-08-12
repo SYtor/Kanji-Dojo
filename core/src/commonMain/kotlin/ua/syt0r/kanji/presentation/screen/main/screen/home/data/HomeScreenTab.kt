@@ -22,17 +22,20 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScr
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreen
 
 enum class HomeScreenTab(
+    val analyticsName: String,
     val iconContent: @Composable () -> Unit,
     val titleResolver: StringResolveScope<String>,
     val content: @Composable (MainNavigationState) -> Unit
 ) {
 
-    Home(
+    GeneralDashboard(
+        analyticsName = "general_dashboard",
         iconContent = { Icon(ExtraIcons.HomeOutline, null) },
         titleResolver = { "Home" },
         content = { GeneralDashboardScreen(it) }
     ),
     LettersDashboard(
+        analyticsName = "letters_dashboard",
         iconContent = {
             Text(
                 text = "字",
@@ -44,6 +47,7 @@ enum class HomeScreenTab(
         content = { LettersDashboardScreen(mainNavigationState = it) }
     ),
     VocabDashboard(
+        analyticsName = "vocab_dashboard",
         iconContent = {
             Text(
                 text = "語",
@@ -55,16 +59,19 @@ enum class HomeScreenTab(
         content = { VocabDashboardScreen(mainNavigationState = it) }
     ),
     Stats(
+        analyticsName = "stats",
         iconContent = { Icon(Icons.Default.QueryStats, null) },
         titleResolver = { home.statsTabLabel },
         content = { StatsScreen() }
     ),
     Search(
+        analyticsName = "search",
         iconContent = { Icon(Icons.Default.Search, null) },
         titleResolver = { home.searchTabLabel },
         content = { SearchScreen(mainNavigationState = it) }
     ),
     Settings(
+        analyticsName = "settings",
         iconContent = { Icon(Icons.Outlined.Settings, null) },
         titleResolver = { home.settingsTabLabel },
         content = {
@@ -74,7 +81,7 @@ enum class HomeScreenTab(
     );
 
     companion object {
-        val Default = Home
+        val Default = GeneralDashboard
         val VisibleTabs: List<HomeScreenTab> = HomeScreenTab.values().toList()
     }
 

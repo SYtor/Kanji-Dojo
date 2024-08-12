@@ -19,7 +19,6 @@ object DefaultReadingPracticeScreenContent : ReadingPracticeContract.Content {
 
         LaunchedEffect(Unit) {
             viewModel.initialize(configuration)
-            viewModel.reportScreenShown(configuration)
         }
 
         ReadingPracticeScreenUI(

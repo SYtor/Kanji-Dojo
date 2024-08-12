@@ -85,8 +85,4 @@ class BackupViewModel(
         }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("backup")
-    }
-
 }

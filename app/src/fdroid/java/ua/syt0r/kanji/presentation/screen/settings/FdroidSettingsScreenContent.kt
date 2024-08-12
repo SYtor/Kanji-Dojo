@@ -19,7 +19,6 @@ object FdroidSettingsScreenContent : SettingsScreenContract.Content {
 
         LaunchedEffect(Unit) {
             viewModel.refresh()
-            viewModel.reportScreenShown()
         }
 
         FdroidSettingsScreenUI(

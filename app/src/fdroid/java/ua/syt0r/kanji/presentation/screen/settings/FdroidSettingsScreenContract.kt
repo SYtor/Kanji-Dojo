@@ -10,8 +10,6 @@ interface FdroidSettingsScreenContract {
         val state: State<ScreenState>
 
         fun refresh()
-        fun reportScreenShown()
-
         fun updateReminder(configuration: ReminderNotificationConfiguration)
 
     }

@@ -6,7 +6,7 @@ import ua.syt0r.kanji.presentation.multiplatformViewModel
 val deckPickerScreenModule = module {
 
     multiplatformViewModel<DeckPickerScreenContract.ViewModel> {
-        DeckPickerViewModel(analyticsManager = get())
+        DeckPickerViewModel()
     }
 
 }

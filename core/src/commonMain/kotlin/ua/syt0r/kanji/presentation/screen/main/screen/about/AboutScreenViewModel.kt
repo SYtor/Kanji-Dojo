@@ -6,10 +6,6 @@ class AboutScreenViewModel(
     private val analyticsManager: AnalyticsManager
 ) : AboutScreenContract.ViewModel {
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("about")
-    }
-
     override fun reportUrlClick(url: String) {
         analyticsManager.sendEvent("about_url_click") { put("url", url) }
     }

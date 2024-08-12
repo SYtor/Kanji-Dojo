@@ -3,7 +3,6 @@ package ua.syt0r.kanji.presentation.screen.settings
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
 import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
@@ -12,7 +11,6 @@ import ua.syt0r.kanji.presentation.screen.settings.FdroidSettingsScreenContract.
 class FdroidSettingsViewModel(
     private val viewModelScope: CoroutineScope,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val analyticsManager: AnalyticsManager,
     private val reminderScheduler: ReminderNotificationContract.Scheduler
 ) : FdroidSettingsScreenContract.ViewModel {
 
@@ -27,10 +25,6 @@ class FdroidSettingsViewModel(
                 )
             )
         }
-    }
-
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("settings")
     }
 
     override fun updateReminder(configuration: ReminderNotificationConfiguration) {

@@ -4,8 +4,6 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.RefreshableData
@@ -37,11 +35,6 @@ class GeneralDashboardViewModel(
                         .also { it.handleUpdates() }
                 }
             }
-            .launchIn(viewModelScope)
-
-        lifecycleState.filter { it == LifecycleState.Visible }
-            .distinctUntilChanged()
-            .onEach { analyticsManager.setScreen("general_dashboard") }
             .launchIn(viewModelScope)
 
     }

@@ -16,7 +16,6 @@ fun DeckEditScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initialize(configuration)
-        viewModel.reportScreenShown()
     }
 
     DeckEditScreenUI(

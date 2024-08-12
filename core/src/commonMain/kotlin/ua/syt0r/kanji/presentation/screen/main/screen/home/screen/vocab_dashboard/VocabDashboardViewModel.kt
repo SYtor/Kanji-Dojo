@@ -8,8 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -51,12 +49,6 @@ class VocabDashboardViewModel(
         MutableStateFlow(LifecycleState.Hidden)
 
     init {
-
-        lifecycleState
-            .filter { it == LifecycleState.Visible }
-            .distinctUntilChanged()
-            .onEach { reportScreenShown() }
-            .launchIn(viewModelScope)
 
         subscribeOnDashboardVocabDecksUseCase(lifecycleState)
             .onEach { data ->
@@ -101,10 +93,6 @@ class VocabDashboardViewModel(
     override fun sortDecks(data: DecksSortRequestData) {
         _screenState.value = ScreenState.Loading
         viewModelScope.launch { sortRequestsChannel.send(data) }
-    }
-
-    private fun reportScreenShown() {
-        analyticsManager.setScreen("vocab_dashboard")
     }
 
 }

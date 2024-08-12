@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
@@ -51,6 +53,9 @@ private class AndroidMainNavigationState(
     private val clazzToConfiguration = configurations.associateBy { it.clazz }
     private val routeToConfiguration = configurations.associateBy { getRoute(it.clazz) }
 
+    private val _currentDestination = mutableStateOf<MainDestination?>(null)
+    override val currentDestination: State<MainDestination?> = _currentDestination
+
     val defaultDestination = MainDestination.Home
 
     override fun navigateBack() {
@@ -94,8 +99,9 @@ private class AndroidMainNavigationState(
             },
             content = {
                 val destination = getDestination(it)
+                _currentDestination.value = destination
                 Box(modifier = Modifier.fillMaxSize()) {
-                    destination.Draw(this@AndroidMainNavigationState)
+                    destination.Content(this@AndroidMainNavigationState)
                 }
             }
         )

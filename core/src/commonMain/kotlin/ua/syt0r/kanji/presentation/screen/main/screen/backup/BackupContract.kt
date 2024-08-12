@@ -14,8 +14,6 @@ interface BackupContract {
         fun readBackupInfo(file: PlatformFile)
         fun restoreFromBackup()
 
-        fun reportScreenShown()
-
     }
 
     sealed interface ScreenState {

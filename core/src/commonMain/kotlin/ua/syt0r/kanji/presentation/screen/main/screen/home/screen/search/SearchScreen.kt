@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -14,10 +13,6 @@ fun SearchScreen(
     mainNavigationState: MainNavigationState,
     viewModel: SearchScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
-
-    LaunchedEffect(Unit) {
-        viewModel.reportScreenShown()
-    }
 
     SearchScreenUI(
         state = viewModel.state,

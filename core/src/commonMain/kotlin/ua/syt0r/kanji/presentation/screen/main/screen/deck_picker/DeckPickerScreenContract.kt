@@ -9,7 +9,6 @@ interface DeckPickerScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
         fun loadData(configuration: DeckPickerScreenConfiguration)
-        fun reportScreenShown()
     }
 
     sealed class ScreenState {

@@ -21,8 +21,6 @@ interface DeckDetailsScreenContract {
         fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.Practice
         fun getMultiselectPracticeConfiguration(): MainDestination
 
-        fun reportScreenShown()
-
     }
 
     sealed interface ScreenState {

@@ -18,7 +18,6 @@ fun VocabPracticeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initialize(wordIds)
-        viewModel.reportScreenShown()
     }
 
     VocabPracticeScreenUI(

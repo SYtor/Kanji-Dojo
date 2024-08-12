@@ -45,11 +45,8 @@ class KanjiInfoViewModel(
         wordChannel.trySend(currentState.words.value.items.size)
     }
 
-    override fun reportScreenShown(character: String) {
-        analyticsManager.setScreen("kanji_info")
-        analyticsManager.sendEvent("kanji_info_open") {
-            put("character", character)
-        }
+    override fun reportCharacter(character: String) {
+        analyticsManager.sendEvent("kanji_info_open") { put("character", character) }
     }
 
     private fun handleLoadMoreWordsRequests() = viewModelScope.launch {

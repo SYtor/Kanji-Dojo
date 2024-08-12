@@ -37,8 +37,4 @@ class StatsViewModel(
             .launchIn(viewModelScope)
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("stats")
-    }
-
 }

@@ -19,7 +19,7 @@ object DefaultWritingPracticeScreenContent : WritingPracticeScreenContract.Conte
 
         LaunchedEffect(Unit) {
             viewModel.init(configuration)
-            viewModel.reportScreenShown(configuration)
+            viewModel.reportPracticeSize(configuration)
         }
 
         WritingPracticeScreenUI(

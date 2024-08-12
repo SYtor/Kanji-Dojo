@@ -192,8 +192,7 @@ class WritingPracticeViewModel(
         viewModelScope.launch { kanaTtsManager.speak(reading) }
     }
 
-    override fun reportScreenShown(configuration: MainDestination.Practice.Writing) {
-        analyticsManager.setScreen("writing_practice")
+    override fun reportPracticeSize(configuration: MainDestination.Practice.Writing) {
         analyticsManager.sendEvent("writing_practice_configuration") {
             put("list_size", configuration.characterList.size)
         }

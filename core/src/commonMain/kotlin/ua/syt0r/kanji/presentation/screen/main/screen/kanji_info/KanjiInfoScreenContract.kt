@@ -20,7 +20,7 @@ interface KanjiInfoScreenContract {
         val state: State<ScreenState>
         fun loadCharacterInfo(character: String)
         fun loadMoreWords()
-        fun reportScreenShown(character: String)
+        fun reportCharacter(character: String)
     }
 
     sealed class ScreenState {

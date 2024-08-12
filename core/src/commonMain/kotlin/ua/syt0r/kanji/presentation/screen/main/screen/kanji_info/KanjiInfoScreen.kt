@@ -19,7 +19,7 @@ fun KanjiInfoScreen(
 
     LaunchedEffect(Unit) {
         viewModel.loadCharacterInfo(kanji)
-        viewModel.reportScreenShown(kanji)
+        viewModel.reportCharacter(kanji)
     }
 
     val clipboardManager = LocalClipboardManager.current

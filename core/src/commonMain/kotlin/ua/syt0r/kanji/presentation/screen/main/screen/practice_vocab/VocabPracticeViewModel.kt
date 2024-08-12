@@ -116,10 +116,6 @@ class VocabPracticeViewModel(
         practiceQueue.finishPractice()
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("expression_practice")
-    }
-
     private fun applyToScreenState(queueState: VocabReviewQueueState) {
         when (queueState) {
             VocabReviewQueueState.Loading -> {

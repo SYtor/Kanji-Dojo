@@ -137,10 +137,6 @@ class DeckDetailsViewModel(
         }
     }
 
-    override fun reportScreenShown() {
-        analyticsManager.setScreen("practice_preview")
-    }
-
     private suspend fun RefreshableData<out DeckDetailsData>.applyToState() {
         when (this) {
             is RefreshableData.Loading -> {
