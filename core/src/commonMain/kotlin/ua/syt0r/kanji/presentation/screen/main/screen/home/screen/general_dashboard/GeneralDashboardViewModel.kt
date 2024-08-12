@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
@@ -16,6 +18,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashbo
 class GeneralDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     private val subscribeOnScreenDataUseCase: SubscribeOnGeneralDashboardScreenDataUseCase,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val analyticsManager: AnalyticsManager
 ) : GeneralDashboardScreenContract.ViewModel,
     LifecycleAwareViewModel {
@@ -40,24 +43,25 @@ class GeneralDashboardViewModel(
     }
 
     private fun ScreenState.Loaded.handleUpdates() {
-        //todo save changes to repository
-
         snapshotFlow { showAppVersionChangeHint.value }
-            .onEach { }
+            .onEach {
+                userPreferencesRepository.lastAppVersionWhenChangesDialogShown
+                    .set(BuildKonfig.versionName)
+            }
             .launchIn(viewModelScope)
 
         snapshotFlow { showTutorialHint.value }
-            .onEach { }
+            .onEach { userPreferencesRepository.tutorialSeen.set(true) }
             .launchIn(viewModelScope)
 
         if (letterDecksData is LetterDecksData.Data)
             snapshotFlow { letterDecksData.studyType.value }
-                .onEach { }
+                .onEach { userPreferencesRepository.generalDashboardLetterPracticeType.set(it.repoType) }
                 .launchIn(viewModelScope)
 
         if (vocabDecksInfo is VocabDecksData.Data)
             snapshotFlow { vocabDecksInfo.studyType.value }
-                .onEach { }
+                .onEach { userPreferencesRepository.generalDashboardVocabPracticeType.set(it.preferencesType) }
                 .launchIn(viewModelScope)
 
     }

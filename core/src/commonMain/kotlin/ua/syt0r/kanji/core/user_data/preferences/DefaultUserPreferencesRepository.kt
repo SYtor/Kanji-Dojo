@@ -145,6 +145,22 @@ class DefaultUserPreferencesRepository private constructor(
         )
     }
 
+    override val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType> =
+        registerProperty {
+            createEnumProperty(
+                key = "home_letter_practice_type",
+                initialValueProvider = { PreferencesLetterPracticeType.Writing }
+            )
+        }
+
+    override val generalDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType> =
+        registerProperty {
+            createEnumProperty(
+                key = "home_vocab_practice_type",
+                initialValueProvider = { PreferencesVocabPracticeType.Writing }
+            )
+        }
+
     override val dashboardSortByTime: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "dashboard_sort_by_time",

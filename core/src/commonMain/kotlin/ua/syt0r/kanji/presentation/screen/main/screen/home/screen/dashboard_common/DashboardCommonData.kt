@@ -1,19 +1,34 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common
 
 import androidx.compose.runtime.MutableState
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import kotlin.time.Duration
 
 
 interface DeckStudyType : DisplayableEnum
 
 enum class LetterDeckStudyType(
-    override val titleResolver: StringResolveScope<String>
+    override val titleResolver: StringResolveScope<String>,
+    val repoType: PreferencesLetterPracticeType
 ) : DeckStudyType {
-    Writing(titleResolver = { lettersDashboard.itemWritingTitle }),
-    Reading(titleResolver = { lettersDashboard.itemReadingTitle })
+
+    Writing(
+        titleResolver = { lettersDashboard.itemWritingTitle },
+        repoType = PreferencesLetterPracticeType.Writing
+    ),
+    Reading(
+        titleResolver = { lettersDashboard.itemReadingTitle },
+        repoType = PreferencesLetterPracticeType.Reading
+    );
+
+    companion object {
+        fun from(practiceType: PreferencesLetterPracticeType): LetterDeckStudyType {
+            return LetterDeckStudyType.values().first { it.repoType == practiceType }
+        }
+    }
+
 }
 
 data class DeckStudyProgress<T>(

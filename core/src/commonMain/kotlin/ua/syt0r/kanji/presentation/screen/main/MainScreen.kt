@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.java.KoinJavaComponent.getKoin
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
-import ua.syt0r.kanji.presentation.screen.VersionChangeDialog
 
 @Composable
 fun MainScreen() {
@@ -29,8 +28,5 @@ fun MainScreen() {
     }
 
     val viewModel = getMultiplatformViewModel<MainContract.ViewModel>()
-    if (viewModel.shouldShowVersionChangeDialog.value) {
-        VersionChangeDialog { viewModel.markVersionChangeDialogShown() }
-    }
 
 }

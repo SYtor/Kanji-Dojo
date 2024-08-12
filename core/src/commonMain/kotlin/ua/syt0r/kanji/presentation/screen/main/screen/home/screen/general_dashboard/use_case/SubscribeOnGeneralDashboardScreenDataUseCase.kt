@@ -6,11 +6,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.srs.VocabSrsManager
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
@@ -31,7 +33,8 @@ interface SubscribeOnGeneralDashboardScreenDataUseCase {
 
 class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
     private val letterSrsManager: LetterSrsManager,
-    private val vocabSrsManager: VocabSrsManager
+    private val vocabSrsManager: VocabSrsManager,
+    private val preferencesRepository: UserPreferencesRepository,
 ) : SubscribeOnGeneralDashboardScreenDataUseCase {
 
     override fun invoke(
@@ -49,8 +52,12 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
 
     private suspend fun getLoadedState(): ScreenState.Loaded = withContext(Dispatchers.IO) {
         ScreenState.Loaded(
-            showAppVersionChangeHint = mutableStateOf(true),
-            showTutorialHint = mutableStateOf(true),
+            showAppVersionChangeHint = mutableStateOf(
+                value = BuildKonfig.versionName != preferencesRepository.lastAppVersionWhenChangesDialogShown.get()
+            ),
+            showTutorialHint = mutableStateOf(
+                value = !preferencesRepository.tutorialSeen.get()
+            ),
             letterDecksData = getLetterDecksData(),
             vocabDecksInfo = getVocabDecksData()
         )
@@ -60,8 +67,9 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
         val data = letterSrsManager.getUpdatedDecksData()
         if (data.decks.isEmpty()) return LetterDecksData.NoDecks
 
+        val practiceType = preferencesRepository.generalDashboardLetterPracticeType.get()
         return LetterDecksData.Data(
-            studyType = mutableStateOf(LetterDeckStudyType.Writing),
+            studyType = mutableStateOf(LetterDeckStudyType.from(practiceType)),
             studyProgressMap = listOf(
                 LetterDeckStudyType.Writing,
                 LetterDeckStudyType.Reading
@@ -94,13 +102,14 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
         val data = vocabSrsManager.getUpdatedDecksData()
         if (data.decks.isEmpty()) return VocabDecksData.NoDecks
 
+        val practiceType = preferencesRepository.generalDashboardVocabPracticeType.get()
         return VocabDecksData.Data(
-            studyType = mutableStateOf(VocabPracticeType.Flashcard),
+            studyType = mutableStateOf(VocabPracticeType.from(practiceType)),
             studyProgressMap = VocabPracticeType.values().associateWith { studyType ->
                 val due = mutableSetOf<Long>()
 
                 data.decks
-                    .map { it.summaries.getValue(VocabPracticeType.Writing) }
+                    .map { it.summaries.getValue(studyType) }
                     .forEach { due.addAll(it.due) }
 
                 VocabDecksStudyProgress(

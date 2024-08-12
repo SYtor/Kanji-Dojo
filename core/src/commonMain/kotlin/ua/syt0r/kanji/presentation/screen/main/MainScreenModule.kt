@@ -8,8 +8,7 @@ val mainScreenModule = module {
 
     multiplatformViewModel<MainContract.ViewModel> {
         MainViewModel(
-            viewModelScope = it.component1(),
-            preferencesRepository = get()
+            viewModelScope = it.component1()
         )
     }
 

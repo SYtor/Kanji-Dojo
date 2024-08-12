@@ -31,6 +31,8 @@ interface UserPreferencesRepository : SuspendedPropertyRepository {
 
     val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String>
     val tutorialSeen: SuspendedProperty<Boolean>
+    val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType>
+    val generalDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
 
     val dashboardSortByTime: SuspendedProperty<Boolean>
 

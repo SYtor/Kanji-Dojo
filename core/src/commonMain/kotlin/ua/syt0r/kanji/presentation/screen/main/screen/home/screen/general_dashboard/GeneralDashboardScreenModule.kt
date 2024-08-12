@@ -10,7 +10,8 @@ val generalDashboardScreenModule = module {
     factory<SubscribeOnGeneralDashboardScreenDataUseCase> {
         DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
             letterSrsManager = get(),
-            vocabSrsManager = get()
+            vocabSrsManager = get(),
+            preferencesRepository = get()
         )
     }
 
@@ -18,6 +19,7 @@ val generalDashboardScreenModule = module {
         GeneralDashboardViewModel(
             viewModelScope = it.component1(),
             subscribeOnScreenDataUseCase = get(),
+            userPreferencesRepository = get(),
             analyticsManager = get()
         )
     }
