@@ -126,7 +126,7 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val dailyIndicatorCompleted: String = "完了"
     override val dailyIndicatorDisabled: String = "無効"
     override val dailyIndicatorNew: (Int) -> String = { "$it 学習" }
-    override val dailyIndicatorReview: (Int) -> String = { "$it 復習" }
+    override val dailyIndicatorDue: (Int) -> String = { "$it 復習" }
 }
 
 object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings {

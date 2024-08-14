@@ -26,9 +26,12 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Details
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,7 +144,8 @@ fun RowScope.DeckDashboardListItemHeader(
 @Composable
 fun <T> DeckDashboardListItemDetails(
     studyProgress: DeckStudyProgress<T>,
-    extraIndicatorContent: @Composable ColumnScope.() -> Unit,
+    indicatorColumnTopContent: @Composable ColumnScope.() -> Unit,
+    indicatorsRowContentAlignment: Alignment.Vertical,
     navigateToPractice: (List<T>) -> Unit
 ) {
 
@@ -153,15 +157,15 @@ fun <T> DeckDashboardListItemDetails(
         val strings = resolveString { lettersDashboard }
 
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.Bottom
+            modifier = Modifier.height(IntrinsicSize.Min).padding(end = 6.dp),
+            verticalAlignment = indicatorsRowContentAlignment
         ) {
 
             Column(
-                modifier = Modifier.weight(1f).fillMaxSize()
+                modifier = Modifier.weight(1f)
             ) {
 
-                extraIndicatorContent()
+                indicatorColumnTopContent()
 
                 IndicatorTextRow(
                     color = MaterialTheme.colorScheme.outline,
@@ -194,7 +198,8 @@ fun <T> DeckDashboardListItemDetails(
             }
 
             Box(
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.padding(vertical = 8.dp)
+                    .size(120.dp)
             ) {
 
                 PieIndicator(
@@ -234,12 +239,14 @@ fun <T> DeckDashboardListItemDetails(
 
         Text(
             text = strings.itemQuickPracticeTitle,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(horizontal = 6.dp)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+                .padding(horizontal = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             QuickPracticeButton(
@@ -275,7 +282,7 @@ private fun <T> ColumnScope.IndicatorTextRow(
             .fillMaxWidth(fraction = 0.8f)
             .clip(MaterialTheme.shapes.medium)
             .clickable(enabled = items.isNotEmpty(), onClick = { onClick(items) })
-            .padding(horizontal = 10.dp)
+            .padding(start = 10.dp, end = 4.dp)
     ) {
 
         Box(
@@ -389,6 +396,7 @@ private fun RowScope.QuickPracticeButton(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
+        shape = MaterialTheme.shapes.medium,
         enabled = enabled
     ) {
         Text(text)

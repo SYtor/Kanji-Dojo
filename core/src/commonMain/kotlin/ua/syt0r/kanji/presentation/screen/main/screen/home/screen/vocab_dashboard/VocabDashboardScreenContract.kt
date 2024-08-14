@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard
 
-import androidx.compose.runtime.State
+import androidx.compose.runtime.MutableState
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
@@ -24,7 +24,7 @@ interface VocabDashboardScreenContract {
 
         data class Loaded(
             val listState: DeckDashboardListState,
-            val srsPracticeType: State<VocabPracticeType>,
+            val srsPracticeType: MutableState<VocabPracticeType>,
         ) : ScreenState
 
     }

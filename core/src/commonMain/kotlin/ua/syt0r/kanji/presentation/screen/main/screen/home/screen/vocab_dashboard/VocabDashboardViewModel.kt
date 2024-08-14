@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboa
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,8 +58,18 @@ class VocabDashboardViewModel(
                         ScreenState.Loading
 
                     is RefreshableData.Loaded -> {
-                        if (::srsPracticeType.isInitialized.not())
-                            srsPracticeType = mutableStateOf(VocabPracticeType.Flashcard)
+                        if (::srsPracticeType.isInitialized.not()) {
+                            val practiceType = VocabPracticeType
+                                .from(preferencesRepository.vocabDashboardVocabPracticeType.get())
+                            val practiceTypeState = mutableStateOf(practiceType)
+                            snapshotFlow { practiceTypeState.value }
+                                .onEach {
+                                    preferencesRepository.vocabDashboardVocabPracticeType
+                                        .set(it.preferencesType)
+                                }
+                                .launchIn(viewModelScope)
+                            srsPracticeType = practiceTypeState
+                        }
 
                         val screenData = data.value
                         val sortByTimeEnabled = preferencesRepository.dashboardSortByTime.get()

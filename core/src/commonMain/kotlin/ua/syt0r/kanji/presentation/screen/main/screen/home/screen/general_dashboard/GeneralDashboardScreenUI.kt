@@ -391,7 +391,7 @@ private fun <T : DeckStudyType> StudyTypeSelector(
     ) {
 
         Text(
-            text = resolveString { "Study Mode" },
+            text = resolveString { "Practice Mode" },
             modifier = Modifier.alignByBaseline(),
         )
 
@@ -419,7 +419,8 @@ private fun <T : DeckStudyType> StudyTypeSelector(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 availableStudyTypes.forEach {
                     PopupContentItem(

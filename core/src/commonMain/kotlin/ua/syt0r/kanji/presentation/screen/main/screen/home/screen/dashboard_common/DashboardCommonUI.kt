@@ -106,7 +106,7 @@ fun DeckDashboardListState.addMergeItems(
     item {
 
         Column(
-            modifier = Modifier,
+            modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             val strings = resolveString { lettersDashboard }
@@ -130,7 +130,7 @@ fun DeckDashboardListState.addMergeItems(
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -164,10 +164,11 @@ fun DeckDashboardListState.addMergeItems(
         val onClick = { selected = selected.run { if (isSelected) minus(it.id) else plus(it.id) } }
         Row(
             modifier = Modifier
+                .padding(horizontal = 20.dp)
                 .clip(MaterialTheme.shapes.large)
                 .clickable(onClick = onClick)
                 .fillMaxWidth()
-                .padding(start = 10.dp),
+                .padding(start = 16.dp, end = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -198,7 +199,9 @@ fun DeckDashboardListState.addSortItems(
             text = resolveString { lettersDashboard.sortTitle },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.fillMaxWidth().wrapContentSize()
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 36.dp)
+                .wrapContentSize()
         )
     }
 
@@ -207,9 +210,11 @@ fun DeckDashboardListState.addSortItems(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.clip(MaterialTheme.shapes.large)
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+                .clip(MaterialTheme.shapes.large)
                 .clickable(onClick = toggleSwitchValue)
-                .padding(horizontal = 10.dp)
+                .padding(start = 16.dp, end = 8.dp)
         ) {
             Text(
                 text = resolveString { lettersDashboard.sortByTimeTitle },
@@ -235,7 +240,7 @@ fun DeckDashboardListState.addSortItems(
                 .animateItemPlacement()
                 .clip(MaterialTheme.shapes.large)
                 .fillMaxWidth()
-                .padding(start = 10.dp),
+                .padding(start = 36.dp, end = 18.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

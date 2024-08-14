@@ -4,26 +4,26 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardEmptyState
@@ -41,6 +41,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addSortItems
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomBarUI
 
 
 @Composable
@@ -112,14 +113,12 @@ fun VocabDashboardScreenUI(
 
         }
 
-        FloatingActionButton(
-            onClick = createDeck,
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .padding(20.dp)
+        VocabDashboardBottomBarUI(
+            state = screenState,
+            navigateToDeckPicker = createDeck,
+            modifier = Modifier.align(Alignment.BottomCenter)
                 .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-        ) {
-            Icon(Icons.Default.Add, null)
-        }
+        )
 
     }
 
@@ -170,19 +169,18 @@ private fun VocabDeckItem(
                 elapsedSinceLastReview = item.elapsedSinceLastReview,
                 onDetailsClick = navigateToDetails
             ) {
-
-                Column(
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-
-                }
-
+                if (studyProgress.value.quickReview.isNotEmpty())
+                    Box(
+                        modifier = Modifier.clip(CircleShape).size(6.dp)
+                            .background(MaterialTheme.extraColorScheme.due)
+                    )
             }
         },
         details = {
             DeckDashboardListItemDetails(
                 studyProgress = studyProgress.value,
-                extraIndicatorContent = {},
+                indicatorColumnTopContent = {},
+                indicatorsRowContentAlignment = Alignment.CenterVertically,
                 navigateToPractice = { navigateToPractice(item, studyType.value, it) }
             )
         }

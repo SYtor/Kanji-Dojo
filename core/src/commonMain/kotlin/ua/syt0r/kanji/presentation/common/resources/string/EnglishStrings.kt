@@ -105,11 +105,11 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
     override val sortByTimeTitle: String = "Sort by last review time"
 
     override val itemTimeMessage: (Duration?) -> String = {
-        "Reviewed: " + when {
+        "Last review: " + when {
             it == null -> "Never"
-            it.inWholeDays == 1L -> "${it.inWholeDays} day ago"
+            it.inWholeDays == 1L -> "1 day ago"
             it.inWholeDays > 0 -> "${it.inWholeDays} days ago"
-            else -> "Less than a day ago"
+            else -> "< 1 day ago"
         }
     }
     override val itemWritingTitle: String = "Writing"
@@ -118,16 +118,16 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
     override val itemDone: String = "Done"
     override val itemReview: String = "Due"
     override val itemNew: String = "New"
-    override val itemQuickPracticeTitle: String = "Quick practice"
-    override val itemQuickPracticeLearn: (Int) -> String = { "Learn new ($it)" }
-    override val itemQuickPracticeReview: (Int) -> String = { "Review ($it)" }
+    override val itemQuickPracticeTitle: String = "Daily practice"
+    override val itemQuickPracticeLearn: (Int) -> String = { "New ($it)" }
+    override val itemQuickPracticeReview: (Int) -> String = { "Due ($it)" }
     override val itemGraphProgressTitle: String = "Completion"
 
     override val dailyIndicatorPrefix: String = "Today: "
-    override val dailyIndicatorCompleted: String = "Completed"
-    override val dailyIndicatorDisabled: String = "Disabled"
+    override val dailyIndicatorCompleted: String = "Done"
+    override val dailyIndicatorDisabled: String = "No limit set"
     override val dailyIndicatorNew: (Int) -> String = { "$it new" }
-    override val dailyIndicatorReview: (Int) -> String = { "$it review" }
+    override val dailyIndicatorDue: (Int) -> String = { "$it due" }
 }
 
 object EnglishVocabDashboardStrings : VocabDashboardStrings {

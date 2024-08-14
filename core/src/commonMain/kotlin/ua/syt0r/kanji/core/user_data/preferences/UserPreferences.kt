@@ -34,6 +34,8 @@ interface UserPreferencesRepository : SuspendedPropertyRepository {
     val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType>
     val generalDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
 
+    val vocabDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
+
     val dashboardSortByTime: SuspendedProperty<Boolean>
 
 }

@@ -157,7 +157,15 @@ class DefaultUserPreferencesRepository private constructor(
         registerProperty {
             createEnumProperty(
                 key = "home_vocab_practice_type",
-                initialValueProvider = { PreferencesVocabPracticeType.Writing }
+                initialValueProvider = { PreferencesVocabPracticeType.Flashcard }
+            )
+        }
+
+    override val vocabDashboardVocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType> =
+        registerProperty {
+            createEnumProperty(
+                key = "vocab_dashboard_practice_type",
+                initialValueProvider = { PreferencesVocabPracticeType.Flashcard }
             )
         }
 

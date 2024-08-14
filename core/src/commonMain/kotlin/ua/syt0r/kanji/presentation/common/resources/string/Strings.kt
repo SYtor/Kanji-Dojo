@@ -188,7 +188,7 @@ interface LettersDashboardStrings {
     val dailyIndicatorCompleted: String
     val dailyIndicatorDisabled: String
     val dailyIndicatorNew: (Int) -> String
-    val dailyIndicatorReview: (Int) -> String
+    val dailyIndicatorDue: (Int) -> String
 
 }
 

@@ -218,7 +218,8 @@ private fun LetterDeckItem(
         details = {
             DeckDashboardListItemDetails(
                 studyProgress = studyProgress.value,
-                extraIndicatorContent = { PracticeTypeSwitch(studyType) },
+                indicatorColumnTopContent = { PracticeTypeSwitch(studyType) },
+                indicatorsRowContentAlignment = Alignment.Bottom,
                 navigateToPractice = { navigateToPractice(item, studyType.value, it) }
             )
         }

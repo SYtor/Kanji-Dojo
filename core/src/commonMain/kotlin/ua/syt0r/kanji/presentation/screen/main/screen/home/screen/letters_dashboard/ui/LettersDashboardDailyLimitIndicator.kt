@@ -1,10 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
@@ -42,9 +44,10 @@ fun LettersDashboardDailyLimitIndicator(
     ) {
         Row(
             modifier = Modifier.padding(bottom = 8.dp)
-                .clip(ButtonDefaults.textShape)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface.copy(0.9f))
                 .clickable(onClick = onIndicatorClick)
-                .padding(ButtonDefaults.TextButtonWithIconContentPadding),
+                .padding(ButtonDefaults.TextButtonContentPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -57,8 +60,6 @@ fun LettersDashboardDailyLimitIndicator(
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Light
             )
-
-            Icon(Icons.Outlined.Settings, null)
 
         }
 
@@ -101,7 +102,7 @@ private fun getIndicatorMessage(
                 append(" • ")
             }
             withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
-                append(strings.dailyIndicatorReview(data.progress.review))
+                append(strings.dailyIndicatorDue(data.progress.review))
             }
         }
 
@@ -119,7 +120,7 @@ private fun getIndicatorMessage(
                 append(strings.dailyIndicatorPrefix)
             }
             withStyle(SpanStyle(MaterialTheme.colorScheme.primary)) {
-                append(strings.dailyIndicatorReview(data.progress.count))
+                append(strings.dailyIndicatorDue(data.progress.count))
             }
         }
 
