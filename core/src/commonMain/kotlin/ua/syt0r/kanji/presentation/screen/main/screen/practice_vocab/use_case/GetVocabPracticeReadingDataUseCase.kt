@@ -3,11 +3,11 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
 
 interface GetVocabPracticeReadingDataUseCase {
     suspend operator fun invoke(
-        descriptor: VocabQueueItemDescriptor.ReadingPicker
+        descriptor: VocabPracticeQueueItemDescriptor.ReadingPicker
     ): VocabPracticeItemData.Reading
 }
 
@@ -17,7 +17,7 @@ class DefaultGetVocabPracticeReadingDataUseCase(
 ) : GetVocabPracticeReadingDataUseCase {
 
     override suspend fun invoke(
-        descriptor: VocabQueueItemDescriptor.ReadingPicker
+        descriptor: VocabPracticeQueueItemDescriptor.ReadingPicker
     ): VocabPracticeItemData.Reading {
         val word = appDataRepository.getWord(descriptor.wordId)
         val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)

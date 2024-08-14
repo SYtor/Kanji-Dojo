@@ -17,9 +17,9 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracti
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toScreenType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 
@@ -33,7 +33,7 @@ class VocabPracticeViewModel(
 
     private lateinit var words: List<Long>
 
-    private lateinit var _reviewState: MutableState<VocabReviewQueueState.Review>
+    private lateinit var _reviewState: MutableState<VocabPracticeQueueState.Review>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
 
     override val state: StateFlow<ScreenState>
@@ -87,7 +87,7 @@ class VocabPracticeViewModel(
                 state = configurationState
             )
 
-            practiceQueue.initialize(expressions = data)
+            practiceQueue.initialize(items = data)
 
             practiceQueue.state
                 .onEach { applyToScreenState(it) }
@@ -116,13 +116,13 @@ class VocabPracticeViewModel(
         practiceQueue.finishPractice()
     }
 
-    private fun applyToScreenState(queueState: VocabReviewQueueState) {
+    private fun applyToScreenState(queueState: VocabPracticeQueueState) {
         when (queueState) {
-            VocabReviewQueueState.Loading -> {
+            VocabPracticeQueueState.Loading -> {
                 _state.value = ScreenState.Loading
             }
 
-            is VocabReviewQueueState.Review -> {
+            is VocabPracticeQueueState.Review -> {
                 if (::_reviewState.isInitialized.not()) {
                     _reviewState = mutableStateOf(queueState)
                 } else {
@@ -136,7 +136,7 @@ class VocabPracticeViewModel(
                 }
             }
 
-            is VocabReviewQueueState.Summary -> {
+            is VocabPracticeQueueState.Summary -> {
                 _state.value = ScreenState.Summary(
                     practiceDuration = queueState.duration,
                     results = queueState.items
@@ -145,7 +145,7 @@ class VocabPracticeViewModel(
         }
     }
 
-    private fun VocabReviewQueueState.Review.toPracticeReviewState(): VocabPracticeReviewState {
+    private fun VocabPracticeQueueState.Review.toPracticeReviewState(): VocabPracticeReviewState {
         return VocabPracticeReviewState(
             progress = progress,
             reviewState = state.asImmutable,

@@ -68,16 +68,16 @@ import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterDecorations
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRow
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandablePracticeAnswerButtonsRow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 
 @Composable
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
-    answers: VocabPracticeSrsAnswers,
+    answers: PracticeAnswers,
     onNextClick: (SrsCard) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
@@ -269,7 +269,7 @@ private fun Input(
 
         }
 
-        ExpandableVocabPracticeAnswersRow(
+        ExpandablePracticeAnswerButtonsRow(
             state = answersState,
             onClick = onNextClick,
             modifier = Modifier.fillMaxWidth()

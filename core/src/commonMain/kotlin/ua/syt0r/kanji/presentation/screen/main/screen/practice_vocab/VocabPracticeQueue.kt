@@ -2,169 +2,60 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.debounceFirst
-import ua.syt0r.kanji.core.srs.SrsCard
-import ua.syt0r.kanji.core.srs.SrsCardKey
+import ua.syt0r.kanji.core.srs.SrsAnswer
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewQueueState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.BasePracticeQueue
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueue
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toSrsItemKey
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeFlashcardDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeReadingDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeWritingDataUseCase
-import kotlin.math.min
-import kotlin.time.Duration.Companion.days
 
+typealias VocabPracticeQueue = PracticeQueue<VocabPracticeQueueState, VocabPracticeQueueItemDescriptor>
 
-interface VocabPracticeQueue {
-    val state: StateFlow<VocabReviewQueueState>
-
-    suspend fun initialize(expressions: List<VocabQueueItemDescriptor>)
-    suspend fun completeCurrentReview(srsItem: SrsCard)
-    fun finishPractice()
-}
-
-data class VocabPracticeQueueItem(
-    val descriptor: VocabQueueItemDescriptor,
-    val srsCardKey: SrsCardKey,
-    val srsCard: SrsCard,
-    val repeats: Int,
-    val deferredState: Deferred<VocabPracticeItemData>
-)
+private typealias BaseVocabPracticeQueue =
+        BasePracticeQueue<VocabPracticeQueueState, VocabPracticeQueueItemDescriptor, VocabPracticeQueueItem, VocabSummaryItem>
 
 class DefaultVocabPracticeQueue(
     private val coroutineScope: CoroutineScope,
-    private val timeUtils: TimeUtils,
-    private val srsItemRepository: SrsItemRepository,
-    private val srsScheduler: SrsScheduler,
+    timeUtils: TimeUtils,
+    srsItemRepository: SrsItemRepository,
+    srsScheduler: SrsScheduler,
     private val getFlashcardReviewStateUseCase: GetVocabPracticeFlashcardDataUseCase,
     private val getReadingReviewStateUseCase: GetVocabPracticeReadingDataUseCase,
     private val getWritingReviewStateUseCase: GetVocabPracticeWritingDataUseCase,
     private val getSummaryItemUseCase: GetVocabPracticeSummaryItemUseCase
-) : VocabPracticeQueue {
+) : BaseVocabPracticeQueue(coroutineScope, timeUtils, srsItemRepository, srsScheduler),
+    VocabPracticeQueue {
 
-    private lateinit var queue: MutableList<VocabPracticeQueueItem>
-
-    private lateinit var practiceStartInstant: Instant
-    private val summaryItems = mutableMapOf<SrsCardKey, VocabSummaryItem>()
-
-    private val nextRequests = Channel<SrsCard>()
-
-    private val _state = MutableStateFlow<VocabReviewQueueState>(
-        value = VocabReviewQueueState.Loading
-    )
-
-    override val state: StateFlow<VocabReviewQueueState>
-        get() = _state
-
-    init {
-        nextRequests.consumeAsFlow()
-            .debounceFirst()
-            .onEach { handleAnswer(it) }
-            .launchIn(coroutineScope)
-    }
-
-    override suspend fun initialize(expressions: List<VocabQueueItemDescriptor>) {
-        practiceStartInstant = timeUtils.now()
-        queue = expressions.map { it.toQueueItem() }.toMutableList()
-        updateState()
-    }
-
-    override suspend fun completeCurrentReview(srsItem: SrsCard) {
-        nextRequests.send(srsItem)
-    }
-
-    override fun finishPractice() {
-        _state.value = VocabReviewQueueState.Summary(
-            duration = timeUtils.now() - practiceStartInstant,
-            items = summaryItems.values.toList()
-        )
-    }
-
-    private fun getProgress(): VocabQueueProgress {
-        return VocabQueueProgress(
-            pending = queue.count { it.repeats == 0 },
-            repeats = queue.count { it.repeats > 0 },
-            completed = summaryItems.filter { it.value.nextInterval >= 1.days }.size
-        )
-    }
-
-    private suspend fun handleAnswer(srsCard: SrsCard) {
-        val item = queue.removeFirstOrNull() ?: return
-        val updatedItem = item.copy(srsCard = srsCard, repeats = item.repeats + 1)
-
-        saveSummaryData(updatedItem)
-
-        if (srsCard.interval < 1.days) {
-            placeItemBackToQueue(updatedItem)
-        }
-
-        updateState()
-        srsItemRepository.update(item.srsCardKey, srsCard)
-    }
-
-    private suspend fun updateState() {
-        val item = queue.getOrNull(0)
-        if (item == null) {
-            finishPractice()
-        } else {
-            if (!item.deferredState.isCompleted) {
-                _state.value = VocabReviewQueueState.Loading
-            }
-            val time = timeUtils.now()
-            val srsAnswers = srsScheduler.answers(item.srsCard, time)
-            _state.value = VocabReviewQueueState.Review(
-                progress = getProgress(),
-                state = item.deferredState.await().toReviewState(coroutineScope),
-                answers = VocabPracticeSrsAnswers(
-                    again = srsAnswers.again,
-                    hard = srsAnswers.hard,
-                    good = srsAnswers.good,
-                    easy = srsAnswers.easy
-                )
-            )
-
-            queue.getOrNull(1)?.apply {
-                deferredState.start()
-            }
-        }
-    }
-
-    private suspend fun VocabQueueItemDescriptor.toQueueItem(): VocabPracticeQueueItem {
+    override suspend fun VocabPracticeQueueItemDescriptor.toQueueItem(): VocabPracticeQueueItem {
         val srsCardKey = practiceType.toSrsItemKey(wordId)
         return VocabPracticeQueueItem(
             descriptor = this,
             srsCardKey = srsCardKey,
             srsCard = srsItemRepository.get(srsCardKey) ?: srsScheduler.newCard(),
             repeats = 0,
-            deferredState = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
+            data = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
                 when (this@toQueueItem) {
-                    is VocabQueueItemDescriptor.Flashcard -> {
+                    is VocabPracticeQueueItemDescriptor.Flashcard -> {
                         getFlashcardReviewStateUseCase(this@toQueueItem)
                     }
 
-                    is VocabQueueItemDescriptor.ReadingPicker -> {
+                    is VocabPracticeQueueItemDescriptor.ReadingPicker -> {
                         getReadingReviewStateUseCase(this@toQueueItem)
                     }
 
-                    is VocabQueueItemDescriptor.Writing -> {
+                    is VocabPracticeQueueItemDescriptor.Writing -> {
                         getWritingReviewStateUseCase(this@toQueueItem)
                     }
                 }
@@ -172,30 +63,33 @@ class DefaultVocabPracticeQueue(
         )
     }
 
-    private fun placeItemBackToQueue(
-        updatedQueueItem: VocabPracticeQueueItem
-    ) {
-        val nextReviewTime = getExpectedReviewTime(updatedQueueItem.srsCard)
-        val insertPosition = queue.asSequence()
-            .map { getExpectedReviewTime(it.srsCard) }
-            .indexOfFirst { nextReviewTime < it }
-            .takeIf { it != -1 }
-            ?.let {
-                if (it == 0 && queue.size > 0) min(2, queue.size)
-                else min(it, 10)
-            }
-            ?: min(queue.size, 10)
-
-        queue.add(insertPosition, updatedQueueItem)
+    override fun createSummaryItem(queueItem: VocabPracticeQueueItem): VocabSummaryItem {
+        return getSummaryItemUseCase(queueItem)
     }
 
-    private fun getExpectedReviewTime(srsItem: SrsCard): Instant {
-        return (srsItem.lastReview ?: Instant.DISTANT_PAST) + srsItem.interval
+    override fun getLoadingState(): VocabPracticeQueueState = VocabPracticeQueueState.Loading
+
+    override suspend fun getReviewState(
+        item: VocabPracticeQueueItem,
+        answers: SrsAnswer
+    ): VocabPracticeQueueState {
+        return VocabPracticeQueueState.Review(
+            progress = getProgress(),
+            state = item.data.await().toReviewState(coroutineScope),
+            answers = PracticeAnswers(
+                again = answers.again,
+                hard = answers.hard,
+                good = answers.good,
+                easy = answers.easy
+            )
+        )
     }
 
-    private fun saveSummaryData(queueItem: VocabPracticeQueueItem) {
-        val summaryItem = getSummaryItemUseCase(queueItem)
-        summaryItems[queueItem.srsCardKey] = summaryItem
+    override fun getSummaryState(): VocabPracticeQueueState {
+        return VocabPracticeQueueState.Summary(
+            duration = timeUtils.now() - practiceStartInstant,
+            items = summaryItems.values.toList()
+        )
     }
 
 }

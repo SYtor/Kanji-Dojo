@@ -6,11 +6,11 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.CharacterWriterData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabQueueItemDescriptor
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
 
 interface GetVocabPracticeWritingDataUseCase {
     suspend operator fun invoke(
-        descriptor: VocabQueueItemDescriptor.Writing
+        descriptor: VocabPracticeQueueItemDescriptor.Writing
     ): VocabPracticeItemData.Writing
 }
 
@@ -20,7 +20,7 @@ class DefaultGetVocabPracticeWritingDataUseCase(
 ) : GetVocabPracticeWritingDataUseCase {
 
     override suspend fun invoke(
-        descriptor: VocabQueueItemDescriptor.Writing
+        descriptor: VocabPracticeQueueItemDescriptor.Writing
     ): VocabPracticeItemData.Writing {
         val word = appDataRepository.getWord(descriptor.wordId)
         val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)

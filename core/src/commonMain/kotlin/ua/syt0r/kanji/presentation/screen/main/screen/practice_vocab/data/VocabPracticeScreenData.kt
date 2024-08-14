@@ -4,7 +4,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
@@ -12,6 +11,9 @@ import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
 import kotlin.time.Duration
 
 enum class VocabPracticeType(
@@ -139,21 +141,15 @@ data class SelectedReadingAnswer(
     val isCorrect = selected == correct
 }
 
-data class VocabPracticeSrsAnswers(
-    val again: SrsCard,
-    val hard: SrsCard,
-    val good: SrsCard,
-    val easy: SrsCard
-)
 
 data class VocabPracticeReviewState(
-    val progress: VocabQueueProgress,
+    val progress: PracticeQueueProgress,
     val reviewState: VocabReviewState,
-    val answers: VocabPracticeSrsAnswers
+    val answers: PracticeAnswers
 )
 
 data class VocabSummaryItem(
     val word: JapaneseWord,
     val reading: FuriganaString,
-    val nextInterval: Duration
-)
+    override val nextInterval: Duration
+) : PracticeSummaryItem

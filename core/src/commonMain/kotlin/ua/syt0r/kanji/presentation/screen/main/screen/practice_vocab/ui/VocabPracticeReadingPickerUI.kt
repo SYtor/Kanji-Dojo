@@ -34,16 +34,16 @@ import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRow
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandablePracticeAnswerButtonsRow
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeSrsAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
 
 @Composable
 fun VocabPracticeReadingPickerUI(
     reviewState: VocabReviewState.Reading,
-    answers: VocabPracticeSrsAnswers,
+    answers: PracticeAnswers,
     onWordClick: (JapaneseWord) -> Unit,
     onAnswerSelected: (String) -> Unit,
     onNextClick: (SrsCard) -> Unit,
@@ -111,7 +111,7 @@ fun VocabPracticeReadingPickerUI(
 
         val updatedState = rememberUpdatedState(reviewState to answers)
 
-        ExpandableVocabPracticeAnswersRow(
+        ExpandablePracticeAnswerButtonsRow(
             state = remember {
                 derivedStateOf {
                     val (state, updatedAnswers) = updatedState.value

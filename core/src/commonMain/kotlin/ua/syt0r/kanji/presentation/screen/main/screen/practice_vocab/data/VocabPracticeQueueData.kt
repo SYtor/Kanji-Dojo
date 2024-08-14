@@ -4,21 +4,51 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.srs.SrsCard
+import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
 import kotlin.time.Duration
 
+sealed interface VocabPracticeQueueState {
 
-data class VocabQueueProgress(
-    val pending: Int,
-    val repeats: Int,
-    val completed: Int
-)
+    object Loading : VocabPracticeQueueState
 
-sealed interface VocabQueueItemDescriptor {
+    data class Review(
+        val state: MutableVocabReviewState,
+        val progress: PracticeQueueProgress,
+        val answers: PracticeAnswers
+    ) : VocabPracticeQueueState
+
+    data class Summary(
+        val duration: Duration,
+        val items: List<VocabSummaryItem>
+    ) : VocabPracticeQueueState
+
+}
+
+data class VocabPracticeQueueItem(
+    val descriptor: VocabPracticeQueueItemDescriptor,
+    override val srsCardKey: SrsCardKey,
+    override val srsCard: SrsCard,
+    override val repeats: Int,
+    override val data: Deferred<VocabPracticeItemData>,
+) : PracticeQueueItem {
+
+    override fun copyForRepeat(srsCard: SrsCard): VocabPracticeQueueItem {
+        return copy(srsCard = srsCard, repeats = repeats + 1)
+    }
+
+}
+
+sealed interface VocabPracticeQueueItemDescriptor {
 
     val wordId: Long
     val practiceType: VocabPracticeType
@@ -27,7 +57,7 @@ sealed interface VocabQueueItemDescriptor {
         override val wordId: Long,
         val priority: VocabPracticeReadingPriority,
         val translationInFont: Boolean
-    ) : VocabQueueItemDescriptor {
+    ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: VocabPracticeType = VocabPracticeType.Flashcard
     }
 
@@ -35,33 +65,16 @@ sealed interface VocabQueueItemDescriptor {
         override val wordId: Long,
         val priority: VocabPracticeReadingPriority,
         val showMeaning: Boolean
-    ) : VocabQueueItemDescriptor {
+    ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: VocabPracticeType = VocabPracticeType.ReadingPicker
     }
 
     data class Writing(
         override val wordId: Long,
         val priority: VocabPracticeReadingPriority
-    ) : VocabQueueItemDescriptor {
+    ) : VocabPracticeQueueItemDescriptor {
         override val practiceType: VocabPracticeType = VocabPracticeType.Writing
     }
-
-}
-
-sealed interface VocabReviewQueueState {
-
-    object Loading : VocabReviewQueueState
-
-    data class Review(
-        val state: MutableVocabReviewState,
-        val progress: VocabQueueProgress,
-        val answers: VocabPracticeSrsAnswers
-    ) : VocabReviewQueueState
-
-    data class Summary(
-        val duration: Duration,
-        val items: List<VocabSummaryItem>
-    ) : VocabReviewQueueState
 
 }
 
@@ -175,7 +188,7 @@ sealed interface MutableVocabReviewState {
         override val word: JapaneseWord,
         override val questionCharacter: String,
         val revealedReading: FuriganaString,
-        val hiddenReading: FuriganaString,
+        hiddenReading: FuriganaString,
         override val answers: List<String>,
         override val correctAnswer: String,
         override val showMeaning: Boolean,
@@ -186,8 +199,6 @@ sealed interface MutableVocabReviewState {
         override val summaryReading: FuriganaString = revealedReading
         override val displayReading = mutableStateOf<FuriganaString>(hiddenReading)
         override val selectedAnswer = mutableStateOf<SelectedReadingAnswer?>(null)
-
-        fun isCorrectAnswer(): Boolean? = selectedAnswer.value?.isCorrect
 
     }
 
