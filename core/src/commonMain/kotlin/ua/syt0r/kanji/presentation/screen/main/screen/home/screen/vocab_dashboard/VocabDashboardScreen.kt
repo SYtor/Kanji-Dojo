@@ -7,6 +7,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 
 @Composable
 fun VocabDashboardScreen(
@@ -26,8 +27,12 @@ fun VocabDashboardScreen(
             val configuration = DeckDetailsScreenConfiguration.VocabDeck(it.id)
             mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
         },
-        startQuickPractice = { item, studyType, words ->
-            mainNavigationState.navigate(MainDestination.VocabPractice(words))
+        startQuickPractice = { _, practiceType, words ->
+            val configuration = VocabPracticeScreenConfiguration(
+                words = words,
+                practiceType = practiceType
+            )
+            mainNavigationState.navigate(MainDestination.VocabPractice(configuration))
         }
     )
 

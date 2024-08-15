@@ -52,12 +52,13 @@ class DefaultPracticeUserPreferencesRepository private constructor(
         )
     }
 
-    override val writingInputMethod: SuspendedProperty<PreferencesLetterPracticeWritingInputMode> = registerProperty {
-        createEnumProperty(
-            key = "writing_input_method",
-            initialValueProvider = { PreferencesLetterPracticeWritingInputMode.Stroke }
-        )
-    }
+    override val writingInputMethod: SuspendedProperty<PreferencesLetterPracticeWritingInputMode> =
+        registerProperty {
+            createEnumProperty(
+                key = "writing_input_method",
+                initialValueProvider = { PreferencesLetterPracticeWritingInputMode.Stroke }
+            )
+        }
 
     override val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
@@ -86,20 +87,13 @@ class DefaultPracticeUserPreferencesRepository private constructor(
         )
     }
 
-    override val vocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType> =
+    override val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority> =
         registerProperty {
             createEnumProperty(
-                key = "vocab_practice_type",
-                initialValueProvider = { PreferencesVocabPracticeType.Flashcard }
+                key = "vocab_reading_priority",
+                initialValueProvider = { PreferencesVocabReadingPriority.Default }
             )
         }
-
-    override val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority> = registerProperty {
-        createEnumProperty(
-            key = "vocab_reading_priority",
-            initialValueProvider = { PreferencesVocabReadingPriority.Default }
-        )
-    }
 
     override val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(

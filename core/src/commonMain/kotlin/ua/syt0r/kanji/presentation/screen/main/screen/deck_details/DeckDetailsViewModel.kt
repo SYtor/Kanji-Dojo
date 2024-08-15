@@ -25,6 +25,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.GetD
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnVocabDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.UpdateDeckDetailsConfigurationUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 
 class DeckDetailsViewModel(
     private val viewModelScope: CoroutineScope,
@@ -127,12 +128,16 @@ class DeckDetailsViewModel(
 
             is DeckDetailsConfiguration.VocabDeckConfiguration -> {
                 currentVisibleData as DeckDetailsVisibleData.Vocab
-                MainDestination.VocabPractice(
-                    wordIds = currentVisibleData.items.asSequence()
+                val vocabPracticeScreenConfiguration = VocabPracticeScreenConfiguration(
+                    words = currentVisibleData.items.asSequence()
                         .filter { it.selected.value }
                         .map { it.word.id }
-                        .toList()
+                        .toList(),
+                    practiceType = loadedState.configuration.value
+                        .let { it as DeckDetailsConfiguration.VocabDeckConfiguration }
+                        .practiceType
                 )
+                MainDestination.VocabPractice(vocabPracticeScreenConfiguration)
             }
         }
     }

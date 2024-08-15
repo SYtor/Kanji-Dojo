@@ -199,14 +199,6 @@ private fun ScreenConfiguration(
             state = screenState.itemsSelectorState
         )
 
-        PracticeConfigurationEnumSelector(
-            title = resolveString { vocabPractice.practiceTypeConfigurationTitle },
-            subtitle = resolveString { vocabPractice.practiceTypeConfigurationMessage },
-            values = VocabPracticeType.values(),
-            selected = screenState.practiceType.value,
-            onSelected = { screenState.practiceType.value = it }
-        )
-
         var readingPriority by screenState.readingPriority
         PracticeConfigurationEnumSelector(
             title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
@@ -216,7 +208,7 @@ private fun ScreenConfiguration(
             onSelected = { readingPriority = it }
         )
 
-        when (screenState.practiceType.value) {
+        when (screenState.practiceType) {
             VocabPracticeType.Flashcard -> {
                 var translationInFront by screenState.flashcard.translationInFront
                 PracticeConfigurationOption(

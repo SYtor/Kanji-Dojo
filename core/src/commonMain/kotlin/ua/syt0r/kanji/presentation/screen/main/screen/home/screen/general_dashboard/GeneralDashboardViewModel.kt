@@ -60,7 +60,7 @@ class GeneralDashboardViewModel(
                 .launchIn(viewModelScope)
 
         if (vocabDecksInfo is VocabDecksData.Data)
-            snapshotFlow { vocabDecksInfo.studyType.value }
+            snapshotFlow { vocabDecksInfo.practiceType.value }
                 .onEach { userPreferencesRepository.generalDashboardVocabPracticeType.set(it.preferencesType) }
                 .launchIn(viewModelScope)
 

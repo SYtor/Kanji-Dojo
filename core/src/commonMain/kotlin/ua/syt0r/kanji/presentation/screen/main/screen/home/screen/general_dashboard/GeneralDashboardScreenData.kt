@@ -27,7 +27,7 @@ sealed interface VocabDecksData {
     object NoDecks : VocabDecksData
 
     data class Data(
-        val studyType: MutableState<VocabPracticeType>,
+        val practiceType: MutableState<VocabPracticeType>,
         val studyProgressMap: Map<VocabPracticeType, VocabDecksStudyProgress>
     ) : VocabDecksData
 

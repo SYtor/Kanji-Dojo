@@ -8,16 +8,17 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 
 @Composable
 fun VocabPracticeScreen(
-    wordIds: List<Long>,
+    configuration: VocabPracticeScreenConfiguration,
     mainNavigationState: MainNavigationState,
     viewModel: VocabPracticeScreenContract.ViewModel = getMultiplatformViewModel()
 ) {
 
     LaunchedEffect(Unit) {
-        viewModel.initialize(wordIds)
+        viewModel.initialize(configuration)
     }
 
     VocabPracticeScreenUI(

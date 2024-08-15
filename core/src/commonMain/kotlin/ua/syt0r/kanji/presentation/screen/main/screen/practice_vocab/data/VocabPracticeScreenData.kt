@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsCardKey
@@ -15,6 +16,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
 import kotlin.time.Duration
+
+@Serializable
+data class VocabPracticeScreenConfiguration(
+    val words: List<Long>,
+    val practiceType: VocabPracticeType
+)
 
 enum class VocabPracticeType(
     val preferencesType: PreferencesVocabPracticeType,

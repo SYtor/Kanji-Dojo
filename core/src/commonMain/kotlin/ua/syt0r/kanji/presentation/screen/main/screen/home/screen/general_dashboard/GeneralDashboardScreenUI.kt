@@ -71,6 +71,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 @Composable
@@ -219,17 +220,21 @@ fun GeneralDashboardScreenUI(
                         title = vocabDecksTitle,
                         studyTypeContent = {
                             StudyTypeSelector(
-                                selectedType = it.vocabDecksInfo.studyType,
+                                selectedType = it.vocabDecksInfo.practiceType,
                                 availableStudyTypes = VocabPracticeType.values().toList(),
                             )
                         },
                         buttonsContent = {
 
-                            val studyType = it.vocabDecksInfo.studyType.value
-                            val progress = it.vocabDecksInfo.studyProgressMap.getValue(studyType)
+                            val practiceType = it.vocabDecksInfo.practiceType.value
+                            val progress = it.vocabDecksInfo.studyProgressMap.getValue(practiceType)
 
                             val goToVocabPractice = { words: Set<Long> ->
-                                val destination = MainDestination.VocabPractice(words.toList())
+                                val configuration = VocabPracticeScreenConfiguration(
+                                    words = words.toList(),
+                                    practiceType = practiceType
+                                )
+                                val destination = MainDestination.VocabPractice(configuration)
                                 navigateToVocabPractice(destination)
                             }
 

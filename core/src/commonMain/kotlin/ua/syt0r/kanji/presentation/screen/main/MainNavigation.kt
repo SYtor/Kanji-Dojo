@@ -22,6 +22,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
@@ -181,7 +182,7 @@ interface MainDestination {
 
     @Serializable
     data class VocabPractice(
-        val wordIds: List<Long>
+        val configuration: VocabPracticeScreenConfiguration
     ) : MainDestination {
 
         override val analyticsName: String = "vocab_practice"
@@ -189,7 +190,7 @@ interface MainDestination {
         @Composable
         override fun Content(state: MainNavigationState) {
             VocabPracticeScreen(
-                wordIds = wordIds,
+                configuration = configuration,
                 mainNavigationState = state
             )
         }

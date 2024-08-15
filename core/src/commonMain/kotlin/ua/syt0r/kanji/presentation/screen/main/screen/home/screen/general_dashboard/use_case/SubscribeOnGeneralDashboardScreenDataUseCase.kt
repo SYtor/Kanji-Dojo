@@ -104,7 +104,7 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
 
         val practiceType = preferencesRepository.generalDashboardVocabPracticeType.get()
         return VocabDecksData.Data(
-            studyType = mutableStateOf(VocabPracticeType.from(practiceType)),
+            practiceType = mutableStateOf(VocabPracticeType.from(practiceType)),
             studyProgressMap = VocabPracticeType.values().associateWith { studyType ->
                 val due = mutableSetOf<Long>()
 

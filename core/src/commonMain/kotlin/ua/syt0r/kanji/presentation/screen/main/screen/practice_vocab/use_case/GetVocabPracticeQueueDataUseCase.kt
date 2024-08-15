@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 interface GetVocabPracticeQueueDataUseCase {
     suspend operator fun invoke(
@@ -19,7 +19,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
     ): List<VocabPracticeQueueItemDescriptor> {
         return words.asSequence()
             .map {
-                when (state.practiceType.value) {
+                when (state.practiceType) {
                     VocabPracticeType.Flashcard -> {
                         VocabPracticeQueueItemDescriptor.Flashcard(
                             wordId = it,

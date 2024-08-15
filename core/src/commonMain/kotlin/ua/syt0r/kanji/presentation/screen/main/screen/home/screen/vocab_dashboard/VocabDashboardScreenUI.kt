@@ -33,7 +33,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.VocabDeckDashboardItem
@@ -42,6 +41,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomBarUI
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 
 @Composable
@@ -50,7 +50,7 @@ fun VocabDashboardScreenUI(
     mergeDecks: (DecksMergeRequestData) -> Unit,
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (VocabDeckDashboardItem) -> Unit,
-    startQuickPractice: (VocabDeckDashboardItem, DeckStudyType, List<Long>) -> Unit,
+    startQuickPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit,
     createDeck: () -> Unit
 ) {
 
@@ -127,9 +127,9 @@ fun VocabDashboardScreenUI(
 
 private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
-    studyType: State<DeckStudyType>,
+    studyType: State<VocabPracticeType>,
     navigateToDetails: (VocabDeckDashboardItem) -> Unit,
-    navigateToPractice: (VocabDeckDashboardItem, DeckStudyType, List<Long>) -> Unit,
+    navigateToPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit,
 ) = scope.apply {
 
     items(
@@ -151,10 +151,10 @@ private fun DeckDashboardListState.addBrowseItems(
 
 @Composable
 private fun VocabDeckItem(
-    studyType: State<DeckStudyType>,
+    studyType: State<VocabPracticeType>,
     item: VocabDeckDashboardItem,
     navigateToDetails: () -> Unit,
-    navigateToPractice: (VocabDeckDashboardItem, DeckStudyType, List<Long>) -> Unit
+    navigateToPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit
 ) {
     val studyProgress = remember {
         derivedStateOf { item.studyProgress.getValue(studyType.value) }

@@ -56,7 +56,6 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRepository {
     val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
     val readingToleratedMistakes: SuspendedProperty<Int>
 
-    val vocabPracticeType: SuspendedProperty<PreferencesVocabPracticeType>
     val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority>
     val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>
     val vocabReadingPickerShowMeaning: SuspendedProperty<Boolean>

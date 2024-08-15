@@ -19,7 +19,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.Select
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toScreenType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeQueueDataUseCase
 
@@ -31,7 +31,7 @@ class VocabPracticeViewModel(
     private val analyticsManager: AnalyticsManager
 ) : VocabPracticeScreenContract.ViewModel {
 
-    private lateinit var words: List<Long>
+    private lateinit var configuration: VocabPracticeScreenConfiguration
 
     private lateinit var _reviewState: MutableState<VocabPracticeQueueState.Review>
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -39,18 +39,16 @@ class VocabPracticeViewModel(
     override val state: StateFlow<ScreenState>
         get() = _state
 
-    override fun initialize(words: List<Long>) {
-        if (this::words.isInitialized) return
-        this.words = words
+    override fun initialize(configuration: VocabPracticeScreenConfiguration) {
+        if (this::configuration.isInitialized) return
+        this.configuration = configuration
 
         viewModelScope.launch {
             _state.value = ScreenState.Configuration(
+                practiceType = configuration.practiceType,
                 itemsSelectorState = PracticeConfigurationItemsSelectorState(
-                    items = words,
+                    items = configuration.words,
                     shuffle = true
-                ),
-                practiceType = mutableStateOf(
-                    VocabPracticeType.from(userPreferencesRepository.vocabPracticeType.get())
                 ),
                 shuffle = mutableStateOf(true),
                 readingPriority = mutableStateOf(
@@ -76,7 +74,6 @@ class VocabPracticeViewModel(
 
         viewModelScope.launch {
             userPreferencesRepository.apply {
-                vocabPracticeType.set(configurationState.practiceType.value.preferencesType)
                 vocabReadingPriority.set(configurationState.readingPriority.value.repoType)
                 vocabReadingPickerShowMeaning.set(configurationState.readingPicker.showMeaning.value)
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)

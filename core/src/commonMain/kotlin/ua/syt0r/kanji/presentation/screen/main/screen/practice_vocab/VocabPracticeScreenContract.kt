@@ -8,6 +8,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import kotlin.time.Duration
@@ -17,7 +18,7 @@ interface VocabPracticeScreenContract {
     interface ViewModel {
         val state: StateFlow<ScreenState>
 
-        fun initialize(words: List<Long>)
+        fun initialize(configuration: VocabPracticeScreenConfiguration)
         fun configure()
 
         fun revealFlashcard()
@@ -32,8 +33,8 @@ interface VocabPracticeScreenContract {
         object Loading : ScreenState
 
         data class Configuration(
+            val practiceType: VocabPracticeType,
             val itemsSelectorState: PracticeConfigurationItemsSelectorState<Long>,
-            val practiceType: MutableState<VocabPracticeType>,
             val shuffle: MutableState<Boolean>,
             val readingPriority: MutableState<VocabPracticeReadingPriority>,
             val flashcard: VocabPracticeConfiguration.Flashcard,
