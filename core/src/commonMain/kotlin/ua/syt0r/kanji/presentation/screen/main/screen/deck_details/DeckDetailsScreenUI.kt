@@ -28,7 +28,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.LocalLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FilterChip
@@ -58,6 +60,8 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
@@ -70,7 +74,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDeta
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.FilterConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsBottomSheet
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsFilterDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsGroupsUI
@@ -79,7 +82,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetail
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsSortDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsVocabUI
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -407,14 +409,22 @@ fun DeckDetailsConfigurationRow(
             selected = true,
             onClick = {
                 val newPracticeType = when (configuration.practiceType) {
-                    PracticeType.Writing -> PracticeType.Reading
-                    PracticeType.Reading -> PracticeType.Writing
+                    ScreenLetterPracticeType.Writing -> ScreenLetterPracticeType.Reading
+                    ScreenLetterPracticeType.Reading -> ScreenLetterPracticeType.Writing
                 }
                 onConfigurationUpdate(configuration.copy(practiceType = newPracticeType))
             },
             modifier = Modifier.wrapContentSize(Alignment.CenterStart),
             label = { Text(resolveString(configuration.practiceType.titleResolver)) },
-            trailingIcon = { Icon(configuration.practiceType.imageVector, null) }
+            trailingIcon = {
+                Icon(
+                    imageVector = when (configuration.practiceType) {
+                        ScreenLetterPracticeType.Writing -> Icons.Default.Draw
+                        ScreenLetterPracticeType.Reading -> Icons.Default.LocalLibrary
+                    },
+                    contentDescription = null
+                )
+            }
         )
         if (kanaGroupsMode) {
             FilterChip(
@@ -513,7 +523,7 @@ fun DeckDetailsConfigurationRow(
         FilterChip(
             selected = true,
             onClick = {
-                val practiceTypes = VocabPracticeType.values()
+                val practiceTypes = ScreenVocabPracticeType.values()
                 val newPracticeTypeOrdinal =
                     (configuration.practiceType.ordinal + 1) % practiceTypes.size
                 val newPracticeType = practiceTypes[newPracticeTypeOrdinal]

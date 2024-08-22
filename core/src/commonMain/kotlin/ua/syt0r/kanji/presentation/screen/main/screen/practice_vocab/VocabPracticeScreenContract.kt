@@ -3,13 +3,13 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.srs.SrsCard
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReviewState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import kotlin.time.Duration
 
@@ -23,7 +23,7 @@ interface VocabPracticeScreenContract {
 
         fun revealFlashcard()
         fun submitReadingPickerAnswer(answer: String)
-        fun next(srsCard: SrsCard)
+        fun next(answer: PracticeAnswer)
         fun finishPractice()
 
     }
@@ -33,7 +33,7 @@ interface VocabPracticeScreenContract {
         object Loading : ScreenState
 
         data class Configuration(
-            val practiceType: VocabPracticeType,
+            val practiceType: ScreenVocabPracticeType,
             val itemsSelectorState: PracticeConfigurationItemsSelectorState<Long>,
             val shuffle: MutableState<Boolean>,
             val readingPriority: MutableState<VocabPracticeReadingPriority>,

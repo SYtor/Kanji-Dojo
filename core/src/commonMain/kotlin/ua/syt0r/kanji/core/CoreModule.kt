@@ -29,8 +29,10 @@ import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.FsrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightFsrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightLetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.SqlDelightReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.DefaultPracticeUserPreferencesRepository
@@ -64,6 +66,12 @@ val coreModule = module {
 
     single<FsrsItemRepository> {
         SqlDelightFsrsItemRepository(
+            userDataDatabaseManager = get()
+        )
+    }
+
+    single<ReviewHistoryRepository> {
+        SqlDelightReviewHistoryRepository(
             userDataDatabaseManager = get()
         )
     }

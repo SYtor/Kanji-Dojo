@@ -1,25 +1,25 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard
 
 import androidx.compose.runtime.MutableState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 sealed interface LetterDecksData {
 
     object NoDecks : LetterDecksData
 
     data class Data(
-        val studyType: MutableState<LetterDeckStudyType>,
-        val studyProgressMap: Map<LetterDeckStudyType, LetterDecksStudyProgress>
+        val practiceType: MutableState<ScreenLetterPracticeType>,
+        val studyProgressMap: Map<ScreenLetterPracticeType, LetterDecksStudyProgress>
     ) : LetterDecksData
 
 }
 
 data class LetterDecksStudyProgress(
-    val new: Set<String>,
-    val due: Set<String>,
+    val newToDeckIdMap: Map<String, Long>,
+    val dueToDeckIdMap: Map<String, Long>,
 ) {
-    val combined: Set<String> = new + due
+    val combined: Map<String, Long> = newToDeckIdMap + dueToDeckIdMap
 }
 
 sealed interface VocabDecksData {
@@ -27,12 +27,12 @@ sealed interface VocabDecksData {
     object NoDecks : VocabDecksData
 
     data class Data(
-        val practiceType: MutableState<VocabPracticeType>,
-        val studyProgressMap: Map<VocabPracticeType, VocabDecksStudyProgress>
+        val practiceType: MutableState<ScreenVocabPracticeType>,
+        val studyProgressMap: Map<ScreenVocabPracticeType, VocabDecksStudyProgress>
     ) : VocabDecksData
 
 }
 
 data class VocabDecksStudyProgress(
-    val due: Set<Long>,
+    val dueToDeckIdMap: Map<Long, Long>,
 )

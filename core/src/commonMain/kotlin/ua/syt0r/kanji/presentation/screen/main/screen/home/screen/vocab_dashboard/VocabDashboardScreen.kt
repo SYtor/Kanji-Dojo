@@ -24,12 +24,12 @@ fun VocabDashboardScreen(
             mainNavigationState.navigate(destination)
         },
         navigateToDeckDetails = {
-            val configuration = DeckDetailsScreenConfiguration.VocabDeck(it.id)
+            val configuration = DeckDetailsScreenConfiguration.VocabDeck(it.deckId)
             mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
         },
-        startQuickPractice = { _, practiceType, words ->
+        startQuickPractice = { item, practiceType, words ->
             val configuration = VocabPracticeScreenConfiguration(
-                words = words,
+                wordIdToDeckIdMap = words.associateWith { item.deckId },
                 practiceType = practiceType
             )
             mainNavigationState.navigate(MainDestination.VocabPractice(configuration))

@@ -5,11 +5,9 @@ import androidx.compose.runtime.State
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsCardKey
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabPracticeType
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
@@ -19,47 +17,8 @@ import kotlin.time.Duration
 
 @Serializable
 data class VocabPracticeScreenConfiguration(
-    val words: List<Long>,
-    val practiceType: VocabPracticeType
-)
-
-enum class VocabPracticeType(
-    val preferencesType: PreferencesVocabPracticeType,
-    override val titleResolver: StringResolveScope<String>
-) : DeckStudyType, DisplayableEnum {
-
-    Flashcard(
-        preferencesType = PreferencesVocabPracticeType.Flashcard,
-        titleResolver = { vocabPractice.practiceTypeFlashcard }
-    ),
-    ReadingPicker(
-        preferencesType = PreferencesVocabPracticeType.ReadingPicker,
-        titleResolver = { vocabPractice.practiceTypeReadingPicker }
-    ),
-    Writing(
-        preferencesType = PreferencesVocabPracticeType.Writing,
-        titleResolver = { vocabPractice.practiceTypeWriting }
-    );
-
-    companion object {
-        fun from(practiceType: PreferencesVocabPracticeType): VocabPracticeType {
-            return values().first { it.preferencesType == practiceType }
-        }
-    }
-
-}
-
-fun VocabPracticeType.toSrsItemKey(wordId: Long): SrsCardKey {
-    return SrsCardKey(
-        itemKey = wordId.toString(),
-        practiceType = vocabPracticeTypeToSrsPracticeTypeMapping.getValue(this)
-    )
-}
-
-private val vocabPracticeTypeToSrsPracticeTypeMapping = mapOf(
-    VocabPracticeType.Flashcard to "flashcard",
-    VocabPracticeType.ReadingPicker to "read_pick",
-    VocabPracticeType.Writing to "writing",
+    val wordIdToDeckIdMap: Map<Long, Long>,
+    val practiceType: ScreenVocabPracticeType
 )
 
 enum class VocabPracticeReadingPriority(

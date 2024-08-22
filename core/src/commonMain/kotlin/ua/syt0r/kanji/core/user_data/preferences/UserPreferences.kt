@@ -51,10 +51,8 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRepository {
 
     val writingInputMethod: SuspendedProperty<PreferencesLetterPracticeWritingInputMode>
     val writingRomajiInsteadOfKanaWords: SuspendedProperty<Boolean>
-    val writingToleratedMistakes: SuspendedProperty<Int>
 
     val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean>
-    val readingToleratedMistakes: SuspendedProperty<Int>
 
     val vocabReadingPriority: SuspendedProperty<PreferencesVocabReadingPriority>
     val vocabFlashcardMeaningInFront: SuspendedProperty<Boolean>

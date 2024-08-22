@@ -11,12 +11,10 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.practice.CharacterReviewResult
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryItem
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.presentation.LifecycleState
-import kotlin.math.min
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 interface SubscribeOnStatsDataUseCase {
@@ -35,7 +33,7 @@ data class StatsData(
 
 class DefaultSubscribeOnStatsDataUseCase(
     private val letterSrsManager: LetterSrsManager,
-    private val letterPracticeRepository: LetterPracticeRepository,
+    private val reviewHistoryRepository: ReviewHistoryRepository,
     private val timeUtils: TimeUtils
 ) : SubscribeOnStatsDataUseCase {
 
@@ -54,14 +52,13 @@ class DefaultSubscribeOnStatsDataUseCase(
         val today = timeUtils.getCurrentDate()
 
         val timeZone = TimeZone.currentSystemDefault()
-        val periodStart = LocalDate(today.year, 1, 1).atStartOfDayIn(timeZone)
-        val periodEnd = LocalDate(today.year + 1, 1, 1).atStartOfDayIn(timeZone)
+        val yearStart = LocalDate(today.year, 1, 1).atStartOfDayIn(timeZone)
+        val yearEnd = LocalDate(today.year + 1, 1, 1).atStartOfDayIn(timeZone)
 
-        val reviews = letterPracticeRepository.getReviews(periodStart, periodEnd)
-            .mapValues { (_, instant) -> instant.toLocalDateTime(timeZone).date }
-            .toList()
+        val yearlyReviewsToDateMap = reviewHistoryRepository.getReviews(yearStart, yearEnd)
+            .map { it to it.timestamp.toLocalDateTime(timeZone).date }
 
-        val dateToReviews: Map<LocalDate, List<CharacterReviewResult>> = reviews
+        val dateToReviews: Map<LocalDate, List<ReviewHistoryItem>> = yearlyReviewsToDateMap
             .groupBy { it.second }
             .toList()
             .associate { it.first to it.second.map { it.first } }
@@ -72,29 +69,23 @@ class DefaultSubscribeOnStatsDataUseCase(
             today = today,
             yearlyPractices = dateToReviews.mapValues { (_, practices) -> practices.size },
             todayReviews = todayReviews.size,
-            todayTimeSpent = todayReviews.map { it.reviewDuration }
+            todayTimeSpent = todayReviews.map { it.duration }
                 .fold(Duration.ZERO) { acc, duration ->
-                    acc.plus(
-                        min(
-                            a = duration.inWholeMilliseconds,
-                            b = SingleDurationLimit.inWholeMilliseconds
-                        ).milliseconds
-                    )
+                    acc.plus(duration.coerceAtMost(SingleReviewDurationLimit))
                 },
-            totalReviews = letterPracticeRepository
+            totalReviews = reviewHistoryRepository
                 .getTotalReviewsCount()
                 .toInt(),
-            totalTimeSpent = letterPracticeRepository
-                .getTotalPracticeTime(SingleDurationLimit.inWholeMilliseconds)
-                .milliseconds,
-            totalCharactersStudied = letterPracticeRepository
-                .getTotalUniqueReviewedCharactersCount()
+            totalTimeSpent = reviewHistoryRepository
+                .getTotalPracticeTime(SingleReviewDurationLimit.inWholeMilliseconds),
+            totalCharactersStudied = reviewHistoryRepository
+                .getTotalReviewsCount()
                 .toInt()
         )
     }
 
     companion object {
-        private val SingleDurationLimit = 1.minutes
+        private val SingleReviewDurationLimit = 1.minutes
     }
 
 }

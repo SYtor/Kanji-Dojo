@@ -9,12 +9,11 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.VocabSrsManager
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
@@ -28,7 +27,6 @@ interface SubscribeOnVocabDeckDetailsDataUseCase {
 class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
     private val vocabSrsManager: VocabSrsManager,
     private val appDataRepository: AppDataRepository,
-    private val practiceRepository: LetterPracticeRepository,
     private val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : SubscribeOnVocabDeckDetailsDataUseCase {
 
@@ -58,8 +56,9 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
                 DeckDetailsItemData.VocabData(
                     word = appDataRepository.getWord(wordId),
                     positionInPractice = index,
-                    srsStatus = VocabPracticeType.values().associateWith {
-                        deckInfo.summaries.getValue(it).wordsData.getValue(wordId).status
+                    srsStatus = ScreenVocabPracticeType.values().associateWith {
+                        deckInfo.summaries.getValue(it.dataType)
+                            .wordsData.getValue(wordId).status
                     }
                 )
             }

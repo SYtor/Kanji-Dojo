@@ -12,7 +12,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import kotlin.time.Duration
 
 object EnglishStrings : Strings {
@@ -534,7 +534,7 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
     override val savedAccuracyLabel: String = "Accuracy"
     override val savedRepeatCharactersLabel: String = "Characters to revisit"
     override val savedRetainedCharactersLabel: String = "Retained characters"
-    override val savedButton: String = "Finish"
+    override val summaryButton: String = "Finish"
 }
 
 object EnglishWritingPracticeStrings : WritingPracticeStrings {
@@ -559,7 +559,7 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
         "Adjusts position of input in landscape mode of writing practice screen"
 
     override val headerWordsMessage: (count: Int) -> String = {
-        "Expressions " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+        "Expressions " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
     override val studyFinishedButton: String = "Review"
     override val nextButton: String = "Good"

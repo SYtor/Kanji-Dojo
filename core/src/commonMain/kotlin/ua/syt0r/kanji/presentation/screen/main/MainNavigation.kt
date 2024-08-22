@@ -20,12 +20,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreen
 import kotlin.reflect.KClass
 
 interface MainNavigationState {
@@ -140,42 +141,21 @@ interface MainDestination {
     }
 
     @Serializable
-    sealed interface Practice : MainDestination {
+    data class LetterPractice(
+        val configuration: LetterPracticeScreenConfiguration
+    ) : MainDestination {
 
-        @Serializable
-        data class Writing(
-            val deckId: Long,
-            val characterList: List<String>
-        ) : Practice {
-
-            override val analyticsName: String = "writing_practice"
-
-            @Composable
-            override fun Content(state: MainNavigationState) {
-                WritingPracticeScreen(
-                    mainNavigationState = state,
-                    configuration = this
-                )
-            }
-
+        override val analyticsName: String = when (configuration.practiceType) {
+            ScreenLetterPracticeType.Writing -> "writing_practice"
+            ScreenLetterPracticeType.Reading -> "reading_practice"
         }
 
-        @Serializable
-        data class Reading(
-            val deckId: Long,
-            val characterList: List<String>
-        ) : Practice {
-
-            override val analyticsName: String = "reading_practice"
-
-            @Composable
-            override fun Content(state: MainNavigationState) {
-                ReadingPracticeScreen(
-                    navigationState = state,
-                    configuration = this
-                )
-            }
-
+        @Composable
+        override fun Content(state: MainNavigationState) {
+            LetterPracticeScreen(
+                mainNavigationState = state,
+                configuration = configuration
+            )
         }
 
     }
@@ -325,7 +305,6 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.DeckEdit::class.configuration(),
     MainDestination.Feedback::class.configuration(),
     MainDestination.KanjiInfo::class.configuration(),
-    MainDestination.Practice.Reading::class.configuration(),
-    MainDestination.Practice.Writing::class.configuration(),
+    MainDestination.LetterPractice::class.configuration(),
     MainDestination.VocabPractice::class.configuration(),
 )

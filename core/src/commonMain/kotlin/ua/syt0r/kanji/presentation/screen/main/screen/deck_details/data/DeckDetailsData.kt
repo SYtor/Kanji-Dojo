@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemStatus
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 
 @Serializable
@@ -74,7 +74,7 @@ sealed interface DeckDetailsItemData {
     data class VocabData(
         val word: JapaneseWord,
         val positionInPractice: Int,
-        val srsStatus: Map<VocabPracticeType, SrsItemStatus>
+        val srsStatus: Map<ScreenVocabPracticeType, SrsItemStatus>
     ) : DeckDetailsItemData
 
 }
@@ -120,7 +120,7 @@ sealed interface DeckDetailsListItem {
     data class Vocab(
         override val key: DeckDetailsListItemKey,
         val word: JapaneseWord,
-        val statusMap: Map<VocabPracticeType, SrsItemStatus>,
+        val statusMap: Map<ScreenVocabPracticeType, SrsItemStatus>,
         val initialSelectionState: Boolean
     ) : DeckDetailsListItem {
         override val selected: MutableState<Boolean> = mutableStateOf(initialSelectionState)

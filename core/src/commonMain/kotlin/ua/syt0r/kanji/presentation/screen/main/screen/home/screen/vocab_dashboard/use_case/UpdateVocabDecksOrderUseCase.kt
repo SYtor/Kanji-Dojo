@@ -18,7 +18,7 @@ class DefaultUpdateVocabDecksOrderUseCase(
         userPreferencesRepository.dashboardSortByTime.set(data.sortByTime)
         practiceRepository.updateDeckPositions(
             deckIdToPositionMap = data.reorderedList.reversed()
-                .mapIndexed { index, item -> item.id to index }
+                .mapIndexed { index, item -> item.deckId to index }
                 .toMap()
         )
     }

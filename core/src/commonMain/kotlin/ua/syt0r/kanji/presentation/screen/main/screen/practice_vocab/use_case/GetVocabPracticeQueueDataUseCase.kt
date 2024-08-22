@@ -2,11 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 interface GetVocabPracticeQueueDataUseCase {
     suspend operator fun invoke(
-        words: List<Long>,
+        configuration: VocabPracticeScreenConfiguration,
         state: ScreenState.Configuration
     ): List<VocabPracticeQueueItemDescriptor>
 }
@@ -14,31 +15,34 @@ interface GetVocabPracticeQueueDataUseCase {
 class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase {
 
     override suspend fun invoke(
-        words: List<Long>,
+        configuration: VocabPracticeScreenConfiguration,
         state: ScreenState.Configuration
     ): List<VocabPracticeQueueItemDescriptor> {
-        return words.asSequence()
-            .map {
+        return configuration.wordIdToDeckIdMap.asSequence()
+            .map { (wordId, deckId) ->
                 when (state.practiceType) {
-                    VocabPracticeType.Flashcard -> {
+                    ScreenVocabPracticeType.Flashcard -> {
                         VocabPracticeQueueItemDescriptor.Flashcard(
-                            wordId = it,
+                            wordId = wordId,
+                            deckId = deckId,
                             priority = state.readingPriority.value,
                             translationInFont = state.flashcard.translationInFront.value
                         )
                     }
 
-                    VocabPracticeType.ReadingPicker -> {
+                    ScreenVocabPracticeType.ReadingPicker -> {
                         VocabPracticeQueueItemDescriptor.ReadingPicker(
-                            wordId = it,
+                            wordId = wordId,
+                            deckId = deckId,
                             priority = state.readingPriority.value,
                             showMeaning = state.readingPicker.showMeaning.value
                         )
                     }
 
-                    VocabPracticeType.Writing -> {
+                    ScreenVocabPracticeType.Writing -> {
                         VocabPracticeQueueItemDescriptor.Writing(
-                            wordId = it,
+                            wordId = wordId,
+                            deckId = deckId,
                             priority = state.readingPriority.value
                         )
                     }

@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -70,6 +69,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterW
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandablePracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
@@ -78,7 +78,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabR
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
     answers: PracticeAnswers,
-    onNextClick: (SrsCard) -> Unit,
+    onNextClick: (PracticeAnswer) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
@@ -242,7 +242,7 @@ private fun Progress(
 private fun Input(
     state: State<VocabCharacterWritingData>,
     answersState: State<ExpandableVocabPracticeAnswersRowState>,
-    onNextClick: (SrsCard) -> Unit,
+    onNextClick: (PracticeAnswer) -> Unit,
     modifier: Modifier
 ) {
 

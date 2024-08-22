@@ -13,10 +13,11 @@ import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
+import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.practice.Deck
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.practice.Practice
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,15 +25,17 @@ interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
     suspend fun getUpdatedDecksData(): LetterSrsDecksData
     suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo
-    suspend fun getStatus(letter: String, practiceType: PreferencesLetterPracticeType): CharacterSrsData
+    suspend fun getStatus(letter: String, practiceType: LetterPracticeType): CharacterSrsData
 }
 
 class DefaultLetterSrsManager(
     private val dailyLimitManager: DailyLimitManager,
     private val practiceRepository: LetterPracticeRepository,
-    private val studyProgressCache: CharacterStudyProgressCache,
+    private val srsItemRepository: SrsItemRepository,
+    private val reviewHistoryRepository: ReviewHistoryRepository,
     private val getDeckSrsProgressUseCase: GetLetterDeckSrsProgressUseCase,
     private val getLetterSrsStatusUseCase: GetLetterSrsStatusUseCase,
+    private val getSrsStatusUseCase: GetSrsStatusUseCase,
     private val timeUtils: TimeUtils,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
 ) : LetterSrsManager {
@@ -40,11 +43,14 @@ class DefaultLetterSrsManager(
     private val _dataChangeFlow = MutableSharedFlow<Unit>()
     override val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
 
+    private val supportedLetterPracticeTypeValues = LetterPracticeType.srsPracticeTypeValues
+
     init {
         val dataChangeFlowWithCacheClearing = mergeSharedFlows(
             coroutineScope,
-            practiceRepository.changesFlow.onEach { studyProgressCache.clear() },
+            practiceRepository.changesFlow,
             dailyLimitManager.changesFlow,
+            srsItemRepository.updatesFlow
         )
 
         dataChangeFlowWithCacheClearing
@@ -56,7 +62,7 @@ class DefaultLetterSrsManager(
         val dailyLimitConfiguration = dailyLimitManager.getConfiguration()
         val currentDate = getSrsDate()
 
-        val decks = practiceRepository.getAllPractices()
+        val decks = practiceRepository.getDecks()
         val dailyProgress = getDailyProgress(currentDate, decks, dailyLimitConfiguration)
 
         val decksInfo = decks.map { getDeckSrsProgressUseCase(it.id, currentDate) }
@@ -77,48 +83,49 @@ class DefaultLetterSrsManager(
 
     override suspend fun getStatus(
         letter: String,
-        practiceType: PreferencesLetterPracticeType,
+        practiceType: LetterPracticeType,
     ): CharacterSrsData {
         return getLetterSrsStatusUseCase(letter, practiceType, getSrsDate())
     }
 
     private suspend fun getDailyProgress(
         date: LocalDate,
-        decks: List<Practice>,
+        decks: List<Deck>,
         dailyLimitConfiguration: DailyLimitConfiguration
     ): DailyProgress {
 
-        val studyProgressList = studyProgressCache.get()
-        val letterToStudyProgressList = decks
-            .flatMap { practiceRepository.getKanjiForPractice(it.id) }
+        val allSrsItems = decks
+            .flatMap { practiceRepository.getDeckCharacters(it.id) }
             .distinct()
-            .map { it to studyProgressList[it] }
 
-        val letterPracticeTypesCount = 2
+        val allSrsItemKeys = allSrsItems
+            .flatMap { letter -> supportedLetterPracticeTypeValues.map { SrsCardKey(letter, it) } }
+            .toSet()
 
-        val totalNew = letterToStudyProgressList.sumOf { (_, progressList) ->
-            if (progressList == null) letterPracticeTypesCount
-            else letterPracticeTypesCount - progressList.size
-        }
+        val reviewedSrsItemsMap = srsItemRepository.getAll()
+            .filter { it.key.practiceType in supportedLetterPracticeTypeValues }
 
-        val totalDue = studyProgressList
-            .flatMap { it.value }
-            .count {
-                val srsData = getLetterSrsStatusUseCase(it.character, it.practiceType, date)
-                srsData.status == SrsItemStatus.Review
+        val totalNew = allSrsItemKeys.minus(reviewedSrsItemsMap.keys).size
+
+        val totalDue = reviewedSrsItemsMap
+            .filter {
+                getSrsStatusUseCase(it.value.lastReview!! + it.value.interval) == SrsItemStatus.Review
             }
+            .size
 
-        val progressListUpdatedToday = studyProgressList.asSequence()
-            .flatMap { it.value }
-            .filter { getSrsDate(it.lastReviewTime) == date }
-            .toList()
+        val srsItemsReviewedToday = reviewedSrsItemsMap
+            .filter { getSrsDate(it.value.lastReview!!) == date }
 
-        val newReviewedToday = progressListUpdatedToday.filter {
-            practiceRepository.getFirstReviewTime(it.character, it.practiceType)
-                ?.let { getSrsDate(it) } == date
+        val newSrsItemsReviewedToday = srsItemsReviewedToday.filter { (srsCardKey, _) ->
+            val firstReviewTime = reviewHistoryRepository.getFirstReviewTime(
+                key = srsCardKey.itemKey,
+                practiceType = srsCardKey.practiceType
+            )!!
+            getSrsDate(firstReviewTime) == date
         }
 
-        val dueReviewedToday = progressListUpdatedToday.size - newReviewedToday.size
+        val newReviewedToday = newSrsItemsReviewedToday.size
+        val dueReviewedToday = srsItemsReviewedToday.keys.minus(newSrsItemsReviewedToday.keys).size
 
         val newLeft: Int
         val dueLeft: Int
@@ -127,7 +134,7 @@ class DefaultLetterSrsManager(
             true -> {
                 newLeft = max(
                     a = 0,
-                    b = min(dailyLimitConfiguration.newLimit - newReviewedToday.size, totalNew)
+                    b = min(dailyLimitConfiguration.newLimit - newReviewedToday, totalNew)
                 )
 
                 dueLeft = max(
@@ -143,7 +150,7 @@ class DefaultLetterSrsManager(
         }
 
         return DailyProgress(
-            newReviewed = newReviewedToday.size,
+            newReviewed = newReviewedToday,
             dueReviewed = dueReviewedToday,
             newLeft = newLeft,
             dueLeft = dueLeft

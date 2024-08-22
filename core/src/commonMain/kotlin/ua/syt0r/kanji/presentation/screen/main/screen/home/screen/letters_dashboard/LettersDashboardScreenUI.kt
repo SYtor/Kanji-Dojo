@@ -48,11 +48,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
+import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addMergeItems
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addSortItems
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
@@ -65,7 +65,7 @@ fun LettersDashboardScreenUI(
     mergeDecks: (DecksMergeRequestData) -> Unit,
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (LetterDeckDashboardItem) -> Unit,
-    startQuickPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit,
+    startQuickPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
     navigateToDailyLimit: () -> Unit,
     navigateToDeckPicker: () -> Unit
 ) {
@@ -148,12 +148,12 @@ private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
     dailyGoalEnabled: Boolean,
     navigateToDetails: (LetterDeckDashboardItem) -> Unit,
-    navigateToPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit,
+    navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
 ) = scope.apply {
 
     items(
         items = items,
-        key = { DeckDashboardListMode.Browsing::class.simpleName to it.id }
+        key = { DeckDashboardListMode.Browsing::class.simpleName to it.deckId }
     ) {
 
         LetterDeckItem(
@@ -172,19 +172,19 @@ private fun LetterDeckItem(
     item: LetterDeckDashboardItem,
     dailyGoalEnabled: Boolean,
     navigateToDetails: () -> Unit,
-    navigateToPractice: (LetterDeckDashboardItem, DeckStudyType, List<String>) -> Unit
+    navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit
 ) {
 
-    val studyType: MutableState<DeckStudyType> = remember {
-        mutableStateOf(LetterDeckStudyType.Writing)
+    val practiceType: MutableState<ScreenPracticeType> = remember {
+        mutableStateOf(ScreenLetterPracticeType.Writing)
     }
 
     val studyProgress = remember {
-        derivedStateOf { item.studyProgress.getValue(studyType.value) }
+        derivedStateOf { item.studyProgress.getValue(practiceType.value) }
     }
 
     DeckDashboardListItemContainer(
-        itemKey = item.id,
+        itemKey = item.deckId,
         header = {
 
             DeckDashboardListItemHeader(
@@ -196,7 +196,7 @@ private fun LetterDeckItem(
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    val writingProgress = item.studyProgress.getValue(LetterDeckStudyType.Writing)
+                    val writingProgress = item.studyProgress.getValue(ScreenLetterPracticeType.Writing)
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.Draw,
                         dailyGoalEnabled = dailyGoalEnabled,
@@ -204,7 +204,7 @@ private fun LetterDeckItem(
                         review = writingProgress.quickReview.size
                     )
 
-                    val readingProgress = item.studyProgress.getValue(LetterDeckStudyType.Reading)
+                    val readingProgress = item.studyProgress.getValue(ScreenLetterPracticeType.Reading)
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.LocalLibrary,
                         dailyGoalEnabled = dailyGoalEnabled,
@@ -218,9 +218,11 @@ private fun LetterDeckItem(
         details = {
             DeckDashboardListItemDetails(
                 studyProgress = studyProgress.value,
-                indicatorColumnTopContent = { PracticeTypeSwitch(studyType) },
+                indicatorColumnTopContent = { PracticeTypeSwitch(practiceType) },
                 indicatorsRowContentAlignment = Alignment.Bottom,
-                navigateToPractice = { navigateToPractice(item, studyType.value, it) }
+                navigateToPractice = {
+                    navigateToPractice(item, practiceType.value as ScreenLetterPracticeType, it)
+                }
             )
         }
     )
@@ -261,21 +263,21 @@ private fun DeckPendingReviewsCountIndicator(
 
 @Composable
 private fun ColumnScope.PracticeTypeSwitch(
-    studyType: MutableState<DeckStudyType>
+    practiceType: MutableState<ScreenPracticeType>
 ) {
 
     val switchEnabled: Boolean
     val icon: ImageVector
     val title: String
 
-    when (studyType.value) {
-        LetterDeckStudyType.Writing -> {
+    when (practiceType.value) {
+        ScreenLetterPracticeType.Writing -> {
             switchEnabled = false
             icon = Icons.Default.Draw
             title = resolveString { lettersDashboard.itemWritingTitle }
         }
 
-        LetterDeckStudyType.Reading -> {
+        ScreenLetterPracticeType.Reading -> {
             switchEnabled = true
             icon = Icons.Default.LocalLibrary
             title = resolveString { lettersDashboard.itemReadingTitle }
@@ -292,8 +294,8 @@ private fun ColumnScope.PracticeTypeSwitch(
         Switch(
             checked = switchEnabled,
             onCheckedChange = {
-                if (it) studyType.value = LetterDeckStudyType.Reading
-                else studyType.value = LetterDeckStudyType.Writing
+                if (it) practiceType.value = ScreenLetterPracticeType.Reading
+                else practiceType.value = ScreenLetterPracticeType.Writing
             },
             thumbContent = {
                 Icon(

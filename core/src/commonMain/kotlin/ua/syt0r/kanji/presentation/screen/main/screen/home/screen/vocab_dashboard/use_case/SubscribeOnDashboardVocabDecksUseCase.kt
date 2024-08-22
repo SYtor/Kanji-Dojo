@@ -9,6 +9,7 @@ import ua.syt0r.kanji.core.srs.VocabDeckSrsProgress
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.VocabDeckDashboardItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.VocabDeckStudyProgress
 
@@ -44,14 +45,17 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
         return VocabDashboardScreenData(
             decks = decks.map {
                 VocabDeckDashboardItem(
-                    id = it.id,
+                    deckId = it.id,
                     title = it.title,
                     position = it.position,
                     elapsedSinceLastReview = it.summaries
                         .flatMap { it.value.wordsData.mapNotNull { it.value.lastReviewTime } }
                         .maxOrNull()
                         ?.let { now.minus(it) },
-                    studyProgress = it.summaries.mapValues { it.value.toStudyProgress() },
+                    studyProgress = it.summaries.toList()
+                        .associate { (practiceType, srsProgress) ->
+                            ScreenVocabPracticeType.from(practiceType) to srsProgress.toStudyProgress()
+                        }
                 )
             }
         )

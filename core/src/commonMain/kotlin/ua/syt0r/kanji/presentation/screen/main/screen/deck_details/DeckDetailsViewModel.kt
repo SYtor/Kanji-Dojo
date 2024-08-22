@@ -19,12 +19,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDeta
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsGetConfigurationUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.GetDeckDetailsVisibleDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnVocabDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.UpdateDeckDetailsConfigurationUseCase
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 
 class DeckDetailsViewModel(
@@ -66,7 +67,7 @@ class DeckDetailsViewModel(
 
     }
 
-    override fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.Practice {
+    override fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.LetterPractice {
         val deckId = configuration.deckId
         val loadedState = state.value as ScreenState.Loaded
 
@@ -74,18 +75,15 @@ class DeckDetailsViewModel(
         configuration as DeckDetailsConfiguration.LetterDeckConfiguration
 
         val characters = group.items.map { it.character }
-
-        return when (configuration.practiceType) {
-            PracticeType.Writing -> MainDestination.Practice.Writing(
-                deckId = deckId,
-                characterList = characters
+        return MainDestination.LetterPractice(
+            configuration = LetterPracticeScreenConfiguration(
+                characterToDeckIdMap = characters.associateWith { deckId },
+                practiceType = when (configuration.practiceType) {
+                    ScreenLetterPracticeType.Writing -> ScreenLetterPracticeType.Writing
+                    ScreenLetterPracticeType.Reading -> ScreenLetterPracticeType.Reading
+                }
             )
-
-            PracticeType.Reading -> MainDestination.Practice.Reading(
-                deckId = deckId,
-                characterList = characters
-            )
-        }
+        )
     }
 
     override fun getMultiselectPracticeConfiguration(): MainDestination {
@@ -113,26 +111,24 @@ class DeckDetailsViewModel(
 
                 }
 
-                when (configuration.practiceType) {
-                    PracticeType.Writing -> MainDestination.Practice.Writing(
-                        deckId = deckId,
-                        characterList = characters
+                MainDestination.LetterPractice(
+                    configuration = LetterPracticeScreenConfiguration(
+                        characterToDeckIdMap = characters.associateWith { deckId },
+                        practiceType = when (configuration.practiceType) {
+                            ScreenLetterPracticeType.Writing -> ScreenLetterPracticeType.Writing
+                            ScreenLetterPracticeType.Reading -> ScreenLetterPracticeType.Reading
+                        }
                     )
-
-                    PracticeType.Reading -> MainDestination.Practice.Reading(
-                        deckId = deckId,
-                        characterList = characters
-                    )
-                }
+                )
             }
 
             is DeckDetailsConfiguration.VocabDeckConfiguration -> {
                 currentVisibleData as DeckDetailsVisibleData.Vocab
                 val vocabPracticeScreenConfiguration = VocabPracticeScreenConfiguration(
-                    words = currentVisibleData.items.asSequence()
+                    wordIdToDeckIdMap = currentVisibleData.items.asSequence()
                         .filter { it.selected.value }
                         .map { it.word.id }
-                        .toList(),
+                        .associateWith { 0 },
                     practiceType = loadedState.configuration.value
                         .let { it as DeckDetailsConfiguration.VocabDeckConfiguration }
                         .practiceType

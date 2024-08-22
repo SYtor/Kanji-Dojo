@@ -6,7 +6,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 
 @Composable
 fun LettersDashboardScreen(
@@ -19,21 +19,16 @@ fun LettersDashboardScreen(
         mergeDecks = { viewModel.mergeDecks(it) },
         sortDecks = { viewModel.sortDecks(it) },
         navigateToDeckDetails = {
-            val configuration = DeckDetailsScreenConfiguration.LetterDeck(it.id)
+            val configuration = DeckDetailsScreenConfiguration.LetterDeck(it.deckId)
             mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
         },
-        startQuickPractice = { item, studyType, letters ->
-            val destination: MainDestination.Practice = when (studyType) {
-                LetterDeckStudyType.Writing -> {
-                    MainDestination.Practice.Writing(item.id, letters)
-                }
-
-                LetterDeckStudyType.Reading -> {
-                    MainDestination.Practice.Reading(item.id, letters)
-                }
-
-                else -> throw IllegalStateException()
-            }
+        startQuickPractice = { item, practiceType, letters ->
+            val destination: MainDestination.LetterPractice = MainDestination.LetterPractice(
+                configuration = LetterPracticeScreenConfiguration(
+                    letters.associateWith { item.deckId },
+                    practiceType = practiceType
+                )
+            )
             mainNavigationState.navigate(destination)
         },
         navigateToDailyLimit = {

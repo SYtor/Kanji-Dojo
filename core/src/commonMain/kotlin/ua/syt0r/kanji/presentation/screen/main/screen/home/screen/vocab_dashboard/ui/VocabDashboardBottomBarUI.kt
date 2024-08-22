@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardBottomBarLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -82,7 +82,7 @@ fun VocabDashboardBottomBarUI(
                                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                             ) {
 
-                                VocabPracticeType.values().forEach {
+                                ScreenVocabPracticeType.values().forEach {
                                     DropdownMenuItem(
                                         text = { Text(resolveString(it.titleResolver)) },
                                         onClick = {

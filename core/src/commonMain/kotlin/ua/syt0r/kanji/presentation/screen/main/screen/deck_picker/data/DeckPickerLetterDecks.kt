@@ -2,19 +2,18 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data
 
 import androidx.compose.material3.MaterialTheme
 import ua.syt0r.kanji.core.japanese.CharacterClassification
-import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 
 
 private val HiraganaImportItem = DeckPickerDeck(
     previewText = "あ",
-    title = { resolveString { deckPicker.hiragana } },
+    title = { deckPicker.hiragana },
     classification = CharacterClassification.Kana.Hiragana
 )
 
 private val KatakanaImportItem = DeckPickerDeck(
     previewText = "ア",
-    title = { resolveString { deckPicker.katakana } },
+    title = { deckPicker.katakana },
     classification = CharacterClassification.Kana.Katakana
 )
 
@@ -33,7 +32,7 @@ private val JlptImportItems: List<DeckPickerDeck> = CharacterClassification.JLPT
     .map { (jlpt, previewChar) ->
         DeckPickerDeck(
             previewText = previewChar,
-            title = { resolveString { deckPicker.jlptItem(jlpt.level) } },
+            title = { deckPicker.jlptItem(jlpt.level) },
             classification = jlpt
         )
     }
@@ -53,7 +52,7 @@ private val GradeImportItems: List<DeckPickerDeck> = CharacterClassification.Gra
     .map { (grade, char) ->
         DeckPickerDeck(
             previewText = char.toString(),
-            title = { resolveString { deckPicker.getGradeItem(grade.number) } },
+            title = { deckPicker.getGradeItem(grade.number) },
             classification = grade
         )
     }
@@ -75,7 +74,7 @@ private val WanikaniImportItems: List<DeckPickerDeck> = CharacterClassification.
     .map { (classification, char) ->
         DeckPickerDeck(
             previewText = char.toString(),
-            title = { resolveString { deckPicker.wanikaniItem(classification.level) } },
+            title = { deckPicker.wanikaniItem(classification.level) },
             classification = classification
         )
     }

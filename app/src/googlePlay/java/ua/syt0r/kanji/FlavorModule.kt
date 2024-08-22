@@ -13,12 +13,10 @@ import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.core.review.PlayServicesReviewManager
 import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
 import ua.syt0r.kanji.presentation.multiplatformViewModel
-import ua.syt0r.kanji.presentation.screen.main.GooglePlayReadingPracticeScreenContent
-import ua.syt0r.kanji.presentation.screen.main.GooglePlayWritingPracticeScreenContent
+import ua.syt0r.kanji.presentation.screen.main.GooglePlayLetterPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.reading_practice.ReadingPracticeContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContent
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsViewModel
@@ -38,7 +36,7 @@ val flavorModule = module {
 
     factory<AppReviewContract.ReviewEligibilityUseCase> {
         ReviewEligibilityUseCase(
-            practiceRepository = get()
+            reviewHistoryRepository = get()
         )
     }
 
@@ -50,9 +48,7 @@ val flavorModule = module {
         )
     }
 
-    single<WritingPracticeScreenContract.Content> { GooglePlayWritingPracticeScreenContent }
-
-    single<ReadingPracticeContract.Content> { GooglePlayReadingPracticeScreenContent }
+    single<LetterPracticeScreenContract.Content> { GooglePlayLetterPracticeScreenContent }
 
     single<SettingsScreenContract.Content> { GooglePlaySettingsScreenContent }
 

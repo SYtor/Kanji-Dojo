@@ -9,7 +9,7 @@ class MergeLettersDecksUseCase(
 ) : LettersDashboardScreenContract.MergeDecksUseCase {
 
     override suspend operator fun invoke(data: DecksMergeRequestData) {
-        repository.createPracticeAndMerge(data.title, data.deckIds)
+        repository.createDeckAndMerge(data.title, data.deckIds)
     }
 
 }

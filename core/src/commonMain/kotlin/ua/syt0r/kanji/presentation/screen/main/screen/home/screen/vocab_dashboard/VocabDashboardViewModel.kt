@@ -26,7 +26,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.MergeVocabDecksUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.SubscribeOnDashboardVocabDecksUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.use_case.UpdateVocabDecksOrderUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import kotlin.time.Duration.Companion.seconds
 
 class VocabDashboardViewModel(
@@ -39,7 +39,7 @@ class VocabDashboardViewModel(
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 
-    private lateinit var srsPracticeType: MutableState<VocabPracticeType>
+    private lateinit var srsPracticeType: MutableState<ScreenVocabPracticeType>
 
     private val sortRequestsChannel = Channel<DecksSortRequestData>()
 
@@ -59,7 +59,7 @@ class VocabDashboardViewModel(
 
                     is RefreshableData.Loaded -> {
                         if (::srsPracticeType.isInitialized.not()) {
-                            val practiceType = VocabPracticeType
+                            val practiceType = ScreenVocabPracticeType
                                 .from(preferencesRepository.vocabDashboardVocabPracticeType.get())
                             val practiceTypeState = mutableStateOf(practiceType)
                             snapshotFlow { practiceTypeState.value }

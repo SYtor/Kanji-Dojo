@@ -25,16 +25,12 @@ fun Module.applySrsDefinitions() {
         DefaultLetterSrsManager(
             dailyLimitManager = get(),
             practiceRepository = get(),
-            studyProgressCache = get(),
-            getDeckSrsProgressUseCase = get(),
+            srsItemRepository = get(),
+            reviewHistoryRepository = get(),
+            getSrsStatusUseCase = get(),
             getLetterSrsStatusUseCase = get(),
+            getDeckSrsProgressUseCase = get(),
             timeUtils = get()
-        )
-    }
-
-    single<CharacterStudyProgressCache> {
-        DefaultCharacterStudyProgressCache(
-            letterPracticeRepository = get()
         )
     }
 
@@ -51,7 +47,7 @@ fun Module.applySrsDefinitions() {
 
     factory<GetLetterSrsStatusUseCase> {
         DefaultGetLetterSrsStatusUseCase(
-            characterStudyProgressCache = get(),
+            srsItemRepository = get(),
             getSrsStatusUseCase = get()
         )
     }

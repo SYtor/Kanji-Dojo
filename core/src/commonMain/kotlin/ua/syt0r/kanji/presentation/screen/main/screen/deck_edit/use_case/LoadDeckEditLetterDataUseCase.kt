@@ -59,8 +59,8 @@ class DefaultLoadDeckEditLetterDataUseCase(
             }
 
             is DeckEditScreenConfiguration.LetterDeck.Edit -> {
-                val deck = repository.getPracticeInfo(configuration.letterDeckId)
-                val characters = repository.getKanjiForPractice(configuration.letterDeckId)
+                val deck = repository.getDeck(configuration.letterDeckId)
+                val characters = repository.getDeckCharacters(configuration.letterDeckId)
                 DeckEditLetterData(
                     title = deck.name,
                     characters = characters

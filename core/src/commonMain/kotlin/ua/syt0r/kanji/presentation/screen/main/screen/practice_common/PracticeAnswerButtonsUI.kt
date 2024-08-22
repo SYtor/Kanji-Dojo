@@ -42,23 +42,27 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.srs.SrsCard
+import ua.syt0r.kanji.core.srs.SrsAnswer
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import kotlin.time.Duration
 
 data class PracticeAnswers(
-    val again: SrsCard,
-    val hard: SrsCard,
-    val good: SrsCard,
-    val easy: SrsCard
+    val again: PracticeAnswer,
+    val hard: PracticeAnswer,
+    val good: PracticeAnswer,
+    val easy: PracticeAnswer
+)
+
+data class PracticeAnswer(
+    val srsAnswer: SrsAnswer
 )
 
 @Composable
 fun PracticeAnswerButtonsRow(
     answers: PracticeAnswers,
-    onClick: (SrsCard) -> Unit,
+    onClick: (PracticeAnswer) -> Unit,
     enableKeyboardControls: Boolean = true,
     modifier: Modifier = Modifier,
     contentModifier: Modifier = Modifier,
@@ -118,7 +122,7 @@ fun PracticeAnswerButtonsRow(
     ) {
         SrsAnswerButton(
             label = resolveString { vocabPractice.againButton },
-            interval = answers.again.interval,
+            interval = answers.again.srsAnswer.card.interval,
             onClick = { onClick(answers.again) },
             color = MaterialTheme.colorScheme.error,
             outerModifier = buttonThemeModifier,
@@ -126,21 +130,21 @@ fun PracticeAnswerButtonsRow(
         )
         SrsAnswerButton(
             label = resolveString { vocabPractice.hardButton },
-            interval = answers.hard.interval,
+            interval = answers.hard.srsAnswer.card.interval,
             onClick = { onClick(answers.hard) },
             color = MaterialTheme.extraColorScheme.due,
             outerModifier = buttonThemeModifier
         )
         SrsAnswerButton(
             label = resolveString { vocabPractice.goodButton },
-            interval = answers.good.interval,
+            interval = answers.good.srsAnswer.card.interval,
             onClick = { onClick(answers.good) },
             color = MaterialTheme.extraColorScheme.success,
             outerModifier = buttonThemeModifier
         )
         SrsAnswerButton(
             label = resolveString { vocabPractice.easyButton },
-            interval = answers.easy.interval,
+            interval = answers.easy.srsAnswer.card.interval,
             onClick = { onClick(answers.easy) },
             color = MaterialTheme.extraColorScheme.new,
             outerModifier = buttonThemeModifier,
@@ -158,7 +162,7 @@ data class ExpandableVocabPracticeAnswersRowState(
 @Composable
 fun ExpandablePracticeAnswerButtonsRow(
     state: State<ExpandableVocabPracticeAnswersRowState>,
-    onClick: (SrsCard) -> Unit,
+    onClick: (PracticeAnswer) -> Unit,
     modifier: Modifier = Modifier,
 ) {
 

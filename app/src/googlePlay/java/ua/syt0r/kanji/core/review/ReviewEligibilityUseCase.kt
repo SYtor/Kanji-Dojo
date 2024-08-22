@@ -1,9 +1,9 @@
 package ua.syt0r.kanji.core.review
 
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 
 class ReviewEligibilityUseCase(
-    private val practiceRepository: LetterPracticeRepository
+    private val reviewHistoryRepository: ReviewHistoryRepository
 ) : AppReviewContract.ReviewEligibilityUseCase {
 
     companion object {
@@ -11,7 +11,7 @@ class ReviewEligibilityUseCase(
     }
 
     override suspend fun checkIsEligible(): Boolean {
-        return practiceRepository.getTotalReviewsCount() >= RequiredCharacterReviewsCount
+        return reviewHistoryRepository.getTotalReviewsCount() >= RequiredCharacterReviewsCount
     }
 
 }

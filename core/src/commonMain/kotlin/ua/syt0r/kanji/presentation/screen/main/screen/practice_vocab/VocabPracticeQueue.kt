@@ -4,18 +4,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import ua.syt0r.kanji.core.srs.SrsAnswer
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryItem
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.BasePracticeQueue
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueue
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toSrsItemKey
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeFlashcardDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeReadingDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.GetVocabPracticeSummaryItemUseCase
@@ -34,16 +35,18 @@ class DefaultVocabPracticeQueue(
     private val getFlashcardReviewStateUseCase: GetVocabPracticeFlashcardDataUseCase,
     private val getReadingReviewStateUseCase: GetVocabPracticeReadingDataUseCase,
     private val getWritingReviewStateUseCase: GetVocabPracticeWritingDataUseCase,
-    private val getSummaryItemUseCase: GetVocabPracticeSummaryItemUseCase
+    private val getSummaryItemUseCase: GetVocabPracticeSummaryItemUseCase,
+    private val reviewHistoryRepository: ReviewHistoryRepository
 ) : BaseVocabPracticeQueue(coroutineScope, timeUtils, srsItemRepository, srsScheduler),
     VocabPracticeQueue {
 
     override suspend fun VocabPracticeQueueItemDescriptor.toQueueItem(): VocabPracticeQueueItem {
-        val srsCardKey = practiceType.toSrsItemKey(wordId)
+        val srsCardKey = practiceType.dataType.toSrsKey(wordId)
         return VocabPracticeQueueItem(
             descriptor = this,
             srsCardKey = srsCardKey,
             srsCard = srsItemRepository.get(srsCardKey) ?: srsScheduler.newCard(),
+            deckId = deckId,
             repeats = 0,
             data = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
                 when (this@toQueueItem) {
@@ -63,6 +66,23 @@ class DefaultVocabPracticeQueue(
         )
     }
 
+    override suspend fun saveReviewHistory(
+        queueItem: VocabPracticeQueueItem,
+        answer: PracticeAnswer
+    ) {
+        val instant = timeUtils.now()
+        val reviewHistoryItem = ReviewHistoryItem(
+            key = queueItem.srsCardKey.itemKey,
+            practiceType = queueItem.srsCardKey.practiceType,
+            timestamp = instant,
+            duration = instant - currentReviewStartInstant,
+            grade = answer.srsAnswer.grade,
+            mistakes = 0,
+            deckId = queueItem.deckId
+        )
+        reviewHistoryRepository.addReview(reviewHistoryItem)
+    }
+
     override fun createSummaryItem(queueItem: VocabPracticeQueueItem): VocabSummaryItem {
         return getSummaryItemUseCase(queueItem)
     }
@@ -71,17 +91,12 @@ class DefaultVocabPracticeQueue(
 
     override suspend fun getReviewState(
         item: VocabPracticeQueueItem,
-        answers: SrsAnswer
+        answers: PracticeAnswers
     ): VocabPracticeQueueState {
         return VocabPracticeQueueState.Review(
             progress = getProgress(),
             state = item.data.await().toReviewState(coroutineScope),
-            answers = PracticeAnswers(
-                again = answers.again,
-                hard = answers.hard,
-                good = answers.good,
-                easy = answers.easy
-            )
+            answers = answers
         )
     }
 

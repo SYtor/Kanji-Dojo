@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
@@ -41,7 +42,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.ui.VocabDashboardBottomBarUI
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 
 @Composable
@@ -50,7 +50,7 @@ fun VocabDashboardScreenUI(
     mergeDecks: (DecksMergeRequestData) -> Unit,
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (VocabDeckDashboardItem) -> Unit,
-    startQuickPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit,
+    startQuickPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit,
     createDeck: () -> Unit
 ) {
 
@@ -86,7 +86,7 @@ fun VocabDashboardScreenUI(
                                 is DeckDashboardListMode.Browsing -> {
                                     screenState.listState.addBrowseItems(
                                         scope = this,
-                                        studyType = screenState.srsPracticeType,
+                                        practiceType = screenState.srsPracticeType,
                                         navigateToDetails = navigateToDeckDetails,
                                         navigateToPractice = startQuickPractice
                                     )
@@ -127,18 +127,18 @@ fun VocabDashboardScreenUI(
 
 private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
-    studyType: State<VocabPracticeType>,
+    practiceType: State<ScreenVocabPracticeType>,
     navigateToDetails: (VocabDeckDashboardItem) -> Unit,
-    navigateToPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit,
+    navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit,
 ) = scope.apply {
 
     items(
         items = items,
-        key = { DeckDashboardListMode.Browsing::class.simpleName to it.id }
+        key = { DeckDashboardListMode.Browsing::class.simpleName to it.deckId }
     ) {
 
         VocabDeckItem(
-            studyType = studyType,
+            practiceType = practiceType,
             item = it as VocabDeckDashboardItem,
             navigateToDetails = { navigateToDetails(it) },
             navigateToPractice = navigateToPractice,
@@ -151,17 +151,17 @@ private fun DeckDashboardListState.addBrowseItems(
 
 @Composable
 private fun VocabDeckItem(
-    studyType: State<VocabPracticeType>,
+    practiceType: State<ScreenVocabPracticeType>,
     item: VocabDeckDashboardItem,
     navigateToDetails: () -> Unit,
-    navigateToPractice: (VocabDeckDashboardItem, VocabPracticeType, List<Long>) -> Unit
+    navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit
 ) {
     val studyProgress = remember {
-        derivedStateOf { item.studyProgress.getValue(studyType.value) }
+        derivedStateOf { item.studyProgress.getValue(practiceType.value) }
     }
 
     DeckDashboardListItemContainer(
-        itemKey = item.id,
+        itemKey = item.deckId,
         header = {
 
             DeckDashboardListItemHeader(
@@ -181,7 +181,7 @@ private fun VocabDeckItem(
                 studyProgress = studyProgress.value,
                 indicatorColumnTopContent = {},
                 indicatorsRowContentAlignment = Alignment.CenterVertically,
-                navigateToPractice = { navigateToPractice(item, studyType.value, it) }
+                navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
             )
         }
     )

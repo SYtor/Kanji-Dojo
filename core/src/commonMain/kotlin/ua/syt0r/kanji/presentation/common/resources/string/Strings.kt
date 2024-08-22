@@ -456,7 +456,7 @@ interface CommonPracticeStrings {
     val savedAccuracyLabel: String
     val savedRepeatCharactersLabel: String
     val savedRetainedCharactersLabel: String
-    val savedButton: String
+    val summaryButton: String
 }
 
 interface WritingPracticeStrings {

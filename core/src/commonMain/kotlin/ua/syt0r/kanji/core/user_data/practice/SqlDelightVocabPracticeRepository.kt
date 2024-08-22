@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import ua.syt0r.kanji.core.mergeSharedFlows
+import ua.syt0r.kanji.core.srs.VocabPracticeType
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 
@@ -45,9 +46,12 @@ class SqlDelightVocabPracticeRepository(
     ) = databaseManager.runModifyingTransaction {
         insertVocabDeck(title = title)
         val deckId = getLastInsertRowId().executeAsOne()
-
         migrateVocabDeckEntries(deckId, deckIdToMerge)
-
+        migrateDeckForReviewHistory(
+            deckId = deckId,
+            deckIdToMigrate = deckIdToMerge,
+            practiceTypes = VocabPracticeType.srsPracticeTypeValues
+        )
         deckIdToMerge.forEach { deleteVocabDeck(it) }
     }
 

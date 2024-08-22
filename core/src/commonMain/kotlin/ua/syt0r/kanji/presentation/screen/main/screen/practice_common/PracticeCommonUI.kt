@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,16 +12,13 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,19 +26,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
@@ -61,64 +52,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.core.user_data.practice.CharacterReviewOutcome
+import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
-import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import kotlin.time.Duration
-
-@Composable
-fun PracticeLeaveConfirmationDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmClick: () -> Unit
-) {
-
-    val strings = resolveString { commonPractice }
-
-    MultiplatformDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(
-                text = resolveString { strings.leaveDialogTitle },
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
-        content = {
-            Text(
-                text = resolveString { strings.leaveDialogMessage },
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        buttons = {
-            TextButton(onClick = onConfirmClick) {
-                Text(text = resolveString { strings.leaveDialogButton })
-            }
-        }
-    )
-}
 
 sealed interface PracticeToolbarState {
 
@@ -259,26 +216,26 @@ fun PracticeConfigurationContainer(
 }
 
 class PracticeConfigurationItemsSelectorState<T>(
-    val items: List<T>,
+    val itemToDeckIdMap: List<Pair<T, Long>>,
     shuffle: Boolean
 ) {
 
-    val selectedCountState = mutableStateOf(items.size)
+    val selectedCountState = mutableStateOf(itemToDeckIdMap.size)
 
     val shuffleEnabled = mutableStateOf(shuffle)
-    val sortedList = mutableStateOf(if (shuffle) items.shuffled() else items)
+    val sortedList = mutableStateOf(if (shuffle) itemToDeckIdMap.shuffled() else itemToDeckIdMap)
 
-    val result: List<T>
+    val result: List<Pair<T, Long>>
         get() = sortedList.value.take(selectedCountState.value)
 
 }
 
 @Composable
 fun <T> rememberPracticeConfigurationItemsSelectorState(
-    characters: List<T>,
+    itemToDeckIdMap: List<Pair<T, Long>>,
     shuffle: Boolean
 ): PracticeConfigurationItemsSelectorState<T> {
-    return remember { PracticeConfigurationItemsSelectorState<T>(characters, shuffle) }
+    return remember { PracticeConfigurationItemsSelectorState<T>(itemToDeckIdMap, shuffle) }
 }
 
 
@@ -287,7 +244,7 @@ fun <T> PracticeConfigurationItemsSelector(
     state: PracticeConfigurationItemsSelectorState<T>
 ) {
 
-    val range = 1..state.items.size
+    val range = 1..state.itemToDeckIdMap.size
 
     var shuffle by state.shuffleEnabled
     var resultList by state.sortedList
@@ -334,12 +291,12 @@ fun <T> PracticeConfigurationItemsSelector(
                 selectedCharactersCount = it.toInt()
                 selectedCharactersCountText = it.toInt().toString()
             },
-            steps = state.items.size,
+            steps = state.itemToDeckIdMap.size,
             valueRange = 1f..range.last.toFloat(),
             modifier = Modifier.weight(1f)
         )
 
-        Text(text = state.items.size.toString())
+        Text(text = state.itemToDeckIdMap.size.toString())
 
     }
 
@@ -349,8 +306,8 @@ fun <T> PracticeConfigurationItemsSelector(
         checked = shuffle,
         onChange = {
             shuffle = it
-            resultList = if (it) state.items.shuffled()
-            else state.items
+            resultList = if (it) state.itemToDeckIdMap.shuffled()
+            else state.itemToDeckIdMap
         }
     )
 
@@ -533,279 +490,40 @@ fun <T> PracticeConfigurationEnumSelector(
 
 }
 
-data class PracticeCharacterReviewResult(
-    val character: String,
-    val mistakes: Int
-)
-
-data class PracticeSavingResult(
-    val toleratedMistakesCount: Int,
-    val outcomes: Map<String, CharacterReviewOutcome>
-)
-
-private val MistakesRange = 0..10
-
 @Composable
-fun PracticeSavingState(
-    defaultToleratedMistakesCount: Int,
-    reviewResults: List<PracticeCharacterReviewResult>,
-    onSaveClick: (PracticeSavingResult) -> Unit,
+fun PracticeSummaryContainer(
+    onFinishClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
 ) {
 
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .padding(horizontal = 20.dp)
+    AutopaddedScrollableColumn(
+        modifier = Modifier.fillMaxWidth()
+            .wrapContentWidth()
+            .widthIn(max = 400.dp)
+            .padding(horizontal = 20.dp),
+        bottomOverlayContent = {
+
+            Button(
+                onClick = onFinishClick,
+                colors = ButtonDefaults.neutralButtonColors(),
+                modifier = Modifier.fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface.copy(0.4f))
+                    .padding(vertical = 20.dp)
+            ) {
+                Text(text = resolveString { commonPractice.summaryButton })
+            }
+
+        }
     ) {
 
-        val extraListSpacerState = rememberExtraListSpacerState()
-
-        val toleratedMistakesCount = remember { mutableStateOf(defaultToleratedMistakesCount) }
-
-        val outcomes = remember(toleratedMistakesCount.value) {
-            val limit = toleratedMistakesCount.value
-            val outcomes = reviewResults.map { (character, mistakeCount) ->
-                character to if (mistakeCount > limit) CharacterReviewOutcome.Fail else CharacterReviewOutcome.Success
-            }
-            outcomes.toMutableStateMap()
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(80.dp),
-            modifier = Modifier.fillMaxSize()
-                .wrapContentWidth()
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-                .onGloballyPositioned { extraListSpacerState.updateList(it) },
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            item(
-                span = { GridItemSpan(maxLineSpan) }
-            ) {
-
-                Column {
-
-                    var editSectionExpanded by remember { mutableStateOf(false) }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = resolveString { commonPractice.savingPreselectTitle },
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = { editSectionExpanded = !editSectionExpanded }) {
-                            Icon(Icons.Outlined.Settings, null)
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        visible = editSectionExpanded
-                    ) {
-                        Column {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(MistakesRange.first.toString())
-                                Slider(
-                                    value = toleratedMistakesCount.value.toFloat(),
-                                    onValueChange = { toleratedMistakesCount.value = it.toInt() },
-                                    valueRange = MistakesRange.first.toFloat()..MistakesRange.last.toFloat(),
-                                    steps = MistakesRange.count(),
-                                    modifier = Modifier.padding(horizontal = 8.dp).weight(1f)
-                                )
-                                Text(MistakesRange.last.toString())
-                            }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.Info, contentDescription = null)
-                                Text(
-                                    text = resolveString {
-                                        commonPractice.savingPreselectCount(toleratedMistakesCount.value)
-                                    },
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
-                        }
-                    }
-
-                }
-
-            }
-
-            items(reviewResults) {
-                val isSelected = outcomes[it.character] == CharacterReviewOutcome.Fail
-                SavingStateItem(
-                    character = it.character,
-                    mistakes = it.mistakes,
-                    isSelected = isSelected,
-                    onClick = {
-                        outcomes[it.character] =
-                            if (isSelected) CharacterReviewOutcome.Success
-                            else CharacterReviewOutcome.Fail
-                    },
-                    modifier = Modifier
-                )
-            }
-
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                extraListSpacerState.ExtraSpacer()
-            }
-
-        }
-
-        ExtendedFloatingActionButton(
-            onClick = {
-                val result = PracticeSavingResult(toleratedMistakesCount.value, outcomes)
-                onSaveClick(result)
-            },
-            text = { Text(text = resolveString { commonPractice.savingButton }) },
-            icon = { Icon(Icons.Default.Save, null) },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 20.dp)
-                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-        )
+        content()
 
     }
 
 }
 
 @Composable
-private fun SavingStateItem(
-    character: String,
-    mistakes: Int,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-
-    Column(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        val textColor = when (isSelected) {
-            false -> MaterialTheme.colorScheme.onSurface
-            true -> MaterialTheme.colorScheme.primary
-        }
-
-        Text(
-            text = character,
-            fontSize = 35.sp,
-            maxLines = 1,
-            textAlign = TextAlign.Center,
-            color = textColor,
-            modifier = Modifier
-        )
-
-        Text(
-            text = resolveString { commonPractice.savingMistakesMessage(mistakes) },
-            color = textColor,
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
-
-    }
-
-}
-
-private val gridItemSize = 60.dp
-
-@Composable
-fun PracticeSavedState(
-    charactersReviewed: Int,
-    practiceDuration: Duration,
-    accuracy: Float,
-    failedCharacters: List<String>,
-    goodCharacters: List<String>,
-    onFinishClick: () -> Unit
-) {
-
-    val strings = resolveString { commonPractice }
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .padding(horizontal = 20.dp)
-    ) {
-
-        val extraListSpacerState = rememberExtraListSpacerState()
-
-        LazyVerticalGrid(
-            modifier = Modifier.fillMaxSize()
-                .wrapContentWidth()
-                .widthIn(max = 400.dp)
-                .fillMaxWidth()
-                .onGloballyPositioned { extraListSpacerState.updateList(it) },
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
-            columns = GridCells.FixedSize(gridItemSize)
-        ) {
-
-            item(
-                span = { GridItemSpan(maxLineSpan) }
-            ) {
-
-                Column {
-                    PracticeSavedStateInfoLabel(
-                        title = strings.savedReviewedCountLabel,
-                        data = charactersReviewed.toString()
-                    )
-
-                    PracticeSavedStateInfoLabel(
-                        title = strings.savedTimeSpentLabel,
-                        data = strings.savedTimeSpentValue(practiceDuration)
-                    )
-
-                    PracticeSavedStateInfoLabel(
-                        title = strings.savedAccuracyLabel,
-                        data = "%.2f%%".format(accuracy)
-                    )
-
-                    PracticeSavedStateInfoLabel(
-                        title = strings.savedRepeatCharactersLabel,
-                        data = failedCharacters.size.toString()
-                    )
-                }
-
-            }
-
-            items(failedCharacters) { SavedStateCharacter(it) }
-
-            item(
-                span = { GridItemSpan(maxLineSpan) }
-            ) {
-                PracticeSavedStateInfoLabel(
-                    title = strings.savedRetainedCharactersLabel,
-                    data = goodCharacters.size.toString()
-                )
-            }
-
-            items(goodCharacters) { SavedStateCharacter(it) }
-
-            item(
-                span = { GridItemSpan(maxLineSpan) }
-            ) {
-                extraListSpacerState.ExtraSpacer()
-            }
-
-        }
-
-        ExtendedFloatingActionButton(
-            onClick = onFinishClick,
-            text = { Text(text = strings.savedButton) },
-            icon = { Icon(Icons.Default.Check, null) },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 20.dp)
-                .onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-        )
-
-    }
-
-}
-
-@Composable
-fun PracticeSavedStateInfoLabel(title: String, data: String) {
+fun PracticeSummaryInfoLabel(title: String, data: String) {
     // Fixes text with bigger size getting clipped at the top
     val textStyle = LocalTextStyle.current.copy(lineHeight = TextUnit.Unspecified)
 
@@ -836,18 +554,36 @@ fun PracticeSavedStateInfoLabel(title: String, data: String) {
     )
 }
 
+
 @Composable
-private fun SavedStateCharacter(character: String) {
-    Text(
-        text = character,
-        fontSize = 30.textDp,
-        modifier = Modifier
-            .size(gridItemSize)
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .wrapContentSize(unbounded = true)
-    )
+fun PracticeSummaryItem(
+    header: @Composable ColumnScope.() -> Unit,
+    nextInterval: Duration
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(IntrinsicSize.Min)
+    ) {
+
+        header()
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = resolveString { vocabPractice.summaryNextReviewLabel },
+                modifier = Modifier.weight(1f).alignByBaseline()
+            )
+            Text(
+                text = resolveString { vocabPractice.formattedSrsInterval(nextInterval) },
+                modifier = Modifier.alignByBaseline()
+            )
+        }
+
+    }
 }
+
 
 @Composable
 fun KanaVoiceAutoPlayToggle(
@@ -897,4 +633,38 @@ fun KanaVoiceAutoPlayToggle(
         }
     }
 
+}
+
+
+@Composable
+fun PracticeEarlyFinishDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmClick: () -> Unit
+) {
+
+    val strings = resolveString { vocabPractice }
+
+    MultiplatformDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = strings.earlyFinishDialogTitle,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        content = {
+            Text(
+                text = strings.earlyFinishDialogMessage,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        buttons = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = strings.earlyFinishDialogCancelButton)
+            }
+            TextButton(onClick = onConfirmClick) {
+                Text(text = strings.earlyFinishDialogAcceptButton)
+            }
+        }
+    )
 }

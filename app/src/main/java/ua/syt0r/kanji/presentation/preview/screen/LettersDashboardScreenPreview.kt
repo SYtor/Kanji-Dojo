@@ -42,7 +42,7 @@ private fun getLoadedState(itemsCount: Int) = ScreenState.Loaded(
     listState = DeckDashboardListState(
         items = (0 until itemsCount).map {
             LetterDeckDashboardItem(
-                id = Random.nextLong(),
+                deckId = Random.nextLong(),
                 title = "Grade $it",
                 position = 1,
                 elapsedSinceLastReview = 1.days,

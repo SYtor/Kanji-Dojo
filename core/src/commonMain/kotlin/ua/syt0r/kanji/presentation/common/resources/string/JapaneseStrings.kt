@@ -11,7 +11,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import ua.syt0r.kanji.presentation.common.withClickableUrl
-import ua.syt0r.kanji.presentation.screen.main.screen.writing_practice.WritingPracticeScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import kotlin.time.Duration
 
 object JapaneseStrings : Strings {
@@ -496,7 +496,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
     override val savedAccuracyLabel: String = "正解率"
     override val savedRepeatCharactersLabel: String = "復習する文字"
     override val savedRetainedCharactersLabel: String = "覚えた文字"
-    override val savedButton: String = "終了"
+    override val summaryButton: String = "終了"
 }
 
 object JapaneseWritingPracticeStrings : WritingPracticeStrings {
@@ -518,7 +518,7 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
     override val leftHandedModeMessage: String = "書く練習で横画面の場合、書く場所を左に移す"
 
     override val headerWordsMessage: (count: Int) -> String = {
-        "単語  " + if (it > WritingPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
+        "単語  " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
     override val studyFinishedButton: String = "復習"
     override val nextButton: String = "正解"

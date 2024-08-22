@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
@@ -53,7 +54,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCh
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.toColor
 
 private sealed interface SheetContentState {
@@ -63,7 +63,7 @@ private sealed interface SheetContentState {
     object NothingSelected : SheetContentState
 
     data class Loaded(
-        val practiceType: PracticeType,
+        val practiceType: ScreenLetterPracticeType,
         val group: DeckDetailsListItem.Group,
     ) : SheetContentState
 
@@ -137,7 +137,7 @@ fun DeckDetailsBottomSheet(
 
 @Composable
 private fun PracticeGroupDetails(
-    practiceType: PracticeType,
+    practiceType: ScreenLetterPracticeType,
     group: DeckDetailsListItem.Group,
     onCharacterClick: (String) -> Unit = {},
     onStartClick: () -> Unit = {},
@@ -237,8 +237,8 @@ private fun PracticeGroupDetails(
             items(group.items) {
 
                 val reviewState = when (practiceType) {
-                    PracticeType.Writing -> it.writingSummary.srsItemStatus
-                    PracticeType.Reading -> it.readingSummary.srsItemStatus
+                    ScreenLetterPracticeType.Writing -> it.writingSummary.srsItemStatus
+                    ScreenLetterPracticeType.Reading -> it.readingSummary.srsItemStatus
                 }
 
                 DeckDetailsCharacterBox(

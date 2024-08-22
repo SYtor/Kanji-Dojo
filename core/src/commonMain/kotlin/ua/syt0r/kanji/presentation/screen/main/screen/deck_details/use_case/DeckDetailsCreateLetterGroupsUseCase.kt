@@ -2,18 +2,18 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
 import ua.syt0r.kanji.core.japanese.hiraganaToKatakana
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItemKey
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeGroupSummary
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
 
 interface DeckDetailsCreateLetterGroupsUseCase {
 
     operator fun invoke(
         items: List<DeckDetailsItemData.LetterData>,
         visibleItems: List<DeckDetailsItemData>,
-        type: PracticeType,
+        type: ScreenLetterPracticeType,
         probeKanaGroups: Boolean,
         previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
     ): LetterGroupsCreationResult
@@ -65,7 +65,7 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
     override fun invoke(
         items: List<DeckDetailsItemData.LetterData>,
         visibleItems: List<DeckDetailsItemData>,
-        type: PracticeType,
+        type: ScreenLetterPracticeType,
         probeKanaGroups: Boolean,
         previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
     ): LetterGroupsCreationResult {
@@ -124,13 +124,13 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
     private fun createGroup(
         index: Int,
         groupItems: List<DeckDetailsItemData.LetterData>,
-        practiceType: PracticeType,
+        practiceType: ScreenLetterPracticeType,
         previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
     ): DeckDetailsListItem.Group {
 
         val itemReviewStates = when (practiceType) {
-            PracticeType.Writing -> groupItems.map { it.writingSummary.srsItemStatus }
-            PracticeType.Reading -> groupItems.map { it.readingSummary.srsItemStatus }
+            ScreenLetterPracticeType.Writing -> groupItems.map { it.writingSummary.srsItemStatus }
+            ScreenLetterPracticeType.Reading -> groupItems.map { it.readingSummary.srsItemStatus }
         }
 
         val groupReviewState = when {
@@ -140,7 +140,7 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
         }
 
         val summary = when (practiceType) {
-            PracticeType.Writing -> PracticeGroupSummary(
+            ScreenLetterPracticeType.Writing -> PracticeGroupSummary(
                 firstReviewDate = groupItems
                     .mapNotNull { it.writingSummary.firstReviewDate }
                     .minOrNull(),
@@ -150,7 +150,7 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
                 state = groupReviewState
             )
 
-            PracticeType.Reading -> PracticeGroupSummary(
+            ScreenLetterPracticeType.Reading -> PracticeGroupSummary(
                 firstReviewDate = groupItems
                     .mapNotNull { it.readingSummary.firstReviewDate }
                     .minOrNull(),

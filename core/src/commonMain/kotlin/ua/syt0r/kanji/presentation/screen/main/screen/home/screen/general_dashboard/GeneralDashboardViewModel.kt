@@ -55,8 +55,8 @@ class GeneralDashboardViewModel(
             .launchIn(viewModelScope)
 
         if (letterDecksData is LetterDecksData.Data)
-            snapshotFlow { letterDecksData.studyType.value }
-                .onEach { userPreferencesRepository.generalDashboardLetterPracticeType.set(it.repoType) }
+            snapshotFlow { letterDecksData.practiceType.value }
+                .onEach { userPreferencesRepository.generalDashboardLetterPracticeType.set(it.preferencesType) }
                 .launchIn(viewModelScope)
 
         if (vocabDecksInfo is VocabDecksData.Data)

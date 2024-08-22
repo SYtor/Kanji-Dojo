@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.debounceFirst
-import ua.syt0r.kanji.core.srs.SrsAnswer
+import ua.syt0r.kanji.core.srs.SrsAnswers
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.srs.SrsItemRepository
@@ -26,19 +26,20 @@ interface PracticeQueue<State, Descriptor> {
     val state: StateFlow<State>
 
     suspend fun initialize(items: List<Descriptor>)
-    suspend fun completeCurrentReview(srsItem: SrsCard)
-    fun finishPractice()
+    suspend fun submitAnswer(answer: PracticeAnswer)
+    fun immediateFinish()
 
 }
 
-interface PracticeQueueItem {
+interface PracticeQueueItem<T : PracticeQueueItem<T>> {
 
     val srsCardKey: SrsCardKey
     val srsCard: SrsCard
+    val deckId: Long
     val repeats: Int
     val data: Deferred<Any>
 
-    fun copyForRepeat(srsCard: SrsCard): PracticeQueueItem
+    fun copyForRepeat(srsCard: SrsCard): T
 
 }
 
@@ -57,21 +58,25 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     protected val timeUtils: TimeUtils,
     protected val srsItemRepository: SrsItemRepository,
     protected val srsScheduler: SrsScheduler,
-) : PracticeQueue<State, Descriptor> where QueueItem : PracticeQueueItem, SummaryItem : PracticeSummaryItem {
+) : PracticeQueue<State, Descriptor>
+        where QueueItem : PracticeQueueItem<QueueItem>,
+              SummaryItem : PracticeSummaryItem {
 
     protected open lateinit var queue: MutableList<QueueItem>
 
     protected lateinit var practiceStartInstant: Instant
+    protected lateinit var currentReviewStartInstant: Instant
+
     protected val summaryItems = mutableMapOf<SrsCardKey, SummaryItem>()
 
-    private val nextRequests = Channel<SrsCard>()
+    private val submittedAnswersChannel = Channel<PracticeAnswer>()
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(value = this.getLoadingState())
     override val state: StateFlow<State>
         get() = _state
 
     init {
-        nextRequests.consumeAsFlow()
+        submittedAnswersChannel.consumeAsFlow()
             .debounceFirst()
             .onEach { handleAnswer(it) }
             .launchIn(coroutineScope)
@@ -79,9 +84,10 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
 
     protected abstract suspend fun Descriptor.toQueueItem(): QueueItem
     protected abstract fun createSummaryItem(queueItem: QueueItem): SummaryItem
+    protected abstract suspend fun saveReviewHistory(queueItem: QueueItem, answer: PracticeAnswer)
 
     protected abstract fun getLoadingState(): State
-    protected abstract suspend fun getReviewState(item: QueueItem, answers: SrsAnswer): State
+    protected abstract suspend fun getReviewState(item: QueueItem, answers: PracticeAnswers): State
     protected abstract fun getSummaryState(): State
 
     override suspend fun initialize(items: List<Descriptor>) {
@@ -90,11 +96,11 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
         updateState()
     }
 
-    override suspend fun completeCurrentReview(srsItem: SrsCard) {
-        nextRequests.send(srsItem)
+    override suspend fun submitAnswer(answer: PracticeAnswer) {
+        submittedAnswersChannel.send(answer)
     }
 
-    override fun finishPractice() {
+    override fun immediateFinish() {
         _state.value = getSummaryState()
     }
 
@@ -106,31 +112,46 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
         )
     }
 
-    private suspend fun handleAnswer(srsCard: SrsCard) {
+    private fun getAnswers(answers: SrsAnswers): PracticeAnswers {
+        return PracticeAnswers(
+            again = PracticeAnswer(answers.again),
+            hard = PracticeAnswer(answers.hard),
+            good = PracticeAnswer(answers.good),
+            easy = PracticeAnswer(answers.easy)
+        )
+    }
+
+    private suspend fun handleAnswer(answer: PracticeAnswer) {
         val item = queue.removeFirstOrNull() ?: return
-        val updatedItem = item.copyForRepeat(srsCard = srsCard) as QueueItem
+        val updatedItem = item.copyForRepeat(srsCard = answer.srsAnswer.card)
 
         saveSummaryData(updatedItem)
 
-        if (srsCard.interval < 1.days) {
+        if (answer.srsAnswer.card.interval < 1.days) {
             placeItemBackToQueue(updatedItem)
         }
 
         updateState()
-        srsItemRepository.update(item.srsCardKey, srsCard)
+
+        saveReviewHistory(item, answer)
+        srsItemRepository.update(item.srsCardKey, answer.srsAnswer.card)
     }
 
     private suspend fun updateState() {
         val item = queue.getOrNull(0)
         if (item == null) {
-            finishPractice()
+            immediateFinish()
         } else {
             if (!item.data.isCompleted) {
                 _state.value = getLoadingState()
             }
             val time = timeUtils.now()
             val srsAnswers = srsScheduler.answers(item.srsCard, time)
-            _state.value = getReviewState(item, srsAnswers)
+
+            item.data.await()
+            currentReviewStartInstant = timeUtils.now()
+
+            _state.value = getReviewState(item, getAnswers(srsAnswers))
 
             queue.getOrNull(1)?.apply {
                 data.start()

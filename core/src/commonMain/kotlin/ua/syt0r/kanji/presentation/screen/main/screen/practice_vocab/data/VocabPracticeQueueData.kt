@@ -10,6 +10,7 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
@@ -38,9 +39,10 @@ data class VocabPracticeQueueItem(
     val descriptor: VocabPracticeQueueItemDescriptor,
     override val srsCardKey: SrsCardKey,
     override val srsCard: SrsCard,
+    override val deckId: Long,
     override val repeats: Int,
     override val data: Deferred<VocabPracticeItemData>,
-) : PracticeQueueItem {
+) : PracticeQueueItem<VocabPracticeQueueItem> {
 
     override fun copyForRepeat(srsCard: SrsCard): VocabPracticeQueueItem {
         return copy(srsCard = srsCard, repeats = repeats + 1)
@@ -51,29 +53,33 @@ data class VocabPracticeQueueItem(
 sealed interface VocabPracticeQueueItemDescriptor {
 
     val wordId: Long
-    val practiceType: VocabPracticeType
+    val practiceType: ScreenVocabPracticeType
+    val deckId: Long
 
     data class Flashcard(
         override val wordId: Long,
+        override val deckId: Long,
         val priority: VocabPracticeReadingPriority,
         val translationInFont: Boolean
     ) : VocabPracticeQueueItemDescriptor {
-        override val practiceType: VocabPracticeType = VocabPracticeType.Flashcard
+        override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.Flashcard
     }
 
     data class ReadingPicker(
         override val wordId: Long,
+        override val deckId: Long,
         val priority: VocabPracticeReadingPriority,
         val showMeaning: Boolean
     ) : VocabPracticeQueueItemDescriptor {
-        override val practiceType: VocabPracticeType = VocabPracticeType.ReadingPicker
+        override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.ReadingPicker
     }
 
     data class Writing(
         override val wordId: Long,
+        override val deckId: Long,
         val priority: VocabPracticeReadingPriority
     ) : VocabPracticeQueueItemDescriptor {
-        override val practiceType: VocabPracticeType = VocabPracticeType.Writing
+        override val practiceType: ScreenVocabPracticeType = ScreenVocabPracticeType.Writing
     }
 
 }

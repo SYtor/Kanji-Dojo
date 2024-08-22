@@ -10,8 +10,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.toSrsItemKey
 
 interface VocabSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
@@ -102,7 +100,7 @@ class DefaultVocabSrsManager(
         val due = mutableListOf<Long>()
         val new = mutableListOf<Long>()
         items.forEach { wordId ->
-            val key = practiceType.toSrsItemKey(wordId)
+            val key = practiceType.toSrsKey(wordId)
             val srsCard = srsCards[key]
             val status = srsCard?.let { it.lastReview?.plus(it.interval) }
                 ?.let { getSrsStatusUseCase(it) }

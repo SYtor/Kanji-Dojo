@@ -37,7 +37,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardNoDecksButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardReviewButton
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.SrsAnswerButton
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.SrsAnswerButton
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.time.Duration.Companion.days
@@ -190,7 +190,7 @@ fun TutorialDialog(
             ) {
                 Text(
                     """
-                    • To start using tha app create a deck from the Home screen or Letters and Vocab screens 
+                    • To start using tha app create a deck. Decks are used to organize the data you are learning and consist of either letters or words
                     """.trimIndent(),
                     textAlign = TextAlign.Justify
                 )
@@ -202,8 +202,8 @@ fun TutorialDialog(
 
                 Text(
                     """
-                    • Decks consist of letters or words and are used to track your study progress
                     • You can create your own decks or select from several pre-made ones based on your skill level
+                    • Once any deck is created you can start doing reviews
                     """.trimIndent(),
                     textAlign = TextAlign.Justify
                 )

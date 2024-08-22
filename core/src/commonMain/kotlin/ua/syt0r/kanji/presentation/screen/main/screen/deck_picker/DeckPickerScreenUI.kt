@@ -209,7 +209,7 @@ private fun LoadedState(
                     items = category.items,
                     key = { it.classification.toString() }
                 ) {
-                    val title = it.title()
+                    val title = resolveString(it.title)
                     ClickableRow(
                         onClick = { onItemClick(it.classification, title) },
                         modifier = Modifier.animateItemPlacement()

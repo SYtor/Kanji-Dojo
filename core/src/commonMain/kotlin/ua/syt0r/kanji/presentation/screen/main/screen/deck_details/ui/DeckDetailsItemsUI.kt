@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
@@ -33,7 +34,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCo
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.PracticeType
+
 
 @Composable
 fun DeckDetailsItemsUI(
@@ -127,8 +128,8 @@ private fun LetterListItem(
     ) {
 
         val summary = when (configuration.practiceType) {
-            PracticeType.Writing -> item.data.writingSummary
-            PracticeType.Reading -> item.data.readingSummary
+            ScreenLetterPracticeType.Writing -> item.data.writingSummary
+            ScreenLetterPracticeType.Reading -> item.data.readingSummary
         }
 
         DeckDetailsCharacterBox(

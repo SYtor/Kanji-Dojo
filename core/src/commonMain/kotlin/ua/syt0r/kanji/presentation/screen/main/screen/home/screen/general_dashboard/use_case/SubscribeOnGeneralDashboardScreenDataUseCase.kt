@@ -10,17 +10,18 @@ import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.refreshableDataFlow
+import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 import ua.syt0r.kanji.presentation.LifecycleState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.LetterDecksData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.LetterDecksStudyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.VocabDecksData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.VocabDecksStudyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 interface SubscribeOnGeneralDashboardScreenDataUseCase {
 
@@ -67,32 +68,31 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
         val data = letterSrsManager.getUpdatedDecksData()
         if (data.decks.isEmpty()) return LetterDecksData.NoDecks
 
-        val practiceType = preferencesRepository.generalDashboardLetterPracticeType.get()
         return LetterDecksData.Data(
-            studyType = mutableStateOf(LetterDeckStudyType.from(practiceType)),
-            studyProgressMap = listOf(
-                LetterDeckStudyType.Writing,
-                LetterDeckStudyType.Reading
-            ).associateWith { studyType ->
-
-                val new = mutableSetOf<String>()
-                val due = mutableSetOf<String>()
+            practiceType = mutableStateOf(
+                value = ScreenLetterPracticeType.from(
+                    preferencesRepository.generalDashboardLetterPracticeType.get()
+                )
+            ),
+            studyProgressMap = LetterPracticeType.values().associate { practiceType ->
+                val new = mutableMapOf<String, Long>()
+                val due = mutableMapOf<String, Long>()
 
                 data.decks
                     .map {
-                        when (studyType) {
-                            LetterDeckStudyType.Reading -> it.readingDetails
-                            LetterDeckStudyType.Writing -> it.writingDetails
+                        it.id to when (practiceType) {
+                            LetterPracticeType.Writing -> it.writingDetails
+                            LetterPracticeType.Reading -> it.readingDetails
                         }
                     }
-                    .forEach {
-                        new.addAll(it.new)
-                        due.addAll(it.due)
+                    .forEach { (deckId, srsProgress) ->
+                        new.putAll(srsProgress.new.associateWith { deckId })
+                        due.putAll(srsProgress.due.associateWith { deckId })
                     }
 
-                LetterDecksStudyProgress(
-                    new = new.take(data.dailyProgress.newLeft).toSet(),
-                    due = due.take(data.dailyProgress.dueLeft).toSet()
+                ScreenLetterPracticeType.from(practiceType) to LetterDecksStudyProgress(
+                    newToDeckIdMap = new.toList().take(data.dailyProgress.newLeft).toMap(),
+                    dueToDeckIdMap = due.toList().take(data.dailyProgress.dueLeft).toMap()
                 )
             }
         )
@@ -102,18 +102,23 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
         val data = vocabSrsManager.getUpdatedDecksData()
         if (data.decks.isEmpty()) return VocabDecksData.NoDecks
 
-        val practiceType = preferencesRepository.generalDashboardVocabPracticeType.get()
+        val preferencesPracticeType = ScreenVocabPracticeType.from(
+            preferencesRepository.generalDashboardVocabPracticeType.get()
+        )
+
         return VocabDecksData.Data(
-            practiceType = mutableStateOf(VocabPracticeType.from(practiceType)),
-            studyProgressMap = VocabPracticeType.values().associateWith { studyType ->
-                val due = mutableSetOf<Long>()
+            practiceType = mutableStateOf(preferencesPracticeType),
+            studyProgressMap = ScreenVocabPracticeType.values().associateWith { practiceType ->
+                val due = mutableMapOf<Long, Long>()
 
                 data.decks
-                    .map { it.summaries.getValue(studyType) }
-                    .forEach { due.addAll(it.due) }
+                    .map { it.id to it.summaries.getValue(practiceType.dataType) }
+                    .forEach { (deckId, srsProgress) ->
+                        due.putAll(srsProgress.due.associateWith { deckId })
+                    }
 
                 VocabDecksStudyProgress(
-                    due = due
+                    dueToDeckIdMap = due
                 )
             }
         )

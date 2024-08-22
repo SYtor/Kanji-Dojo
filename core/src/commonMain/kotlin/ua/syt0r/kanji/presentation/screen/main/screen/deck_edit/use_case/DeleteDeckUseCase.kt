@@ -16,7 +16,7 @@ class DefaultDeleteDeckUseCase(
     override suspend fun invoke(configuration: DeckEditScreenConfiguration) {
         when (configuration) {
             is DeckEditScreenConfiguration.LetterDeck.Edit -> {
-                letterPracticeRepository.deletePractice(configuration.letterDeckId)
+                letterPracticeRepository.deleteDeck(configuration.letterDeckId)
             }
 
             is DeckEditScreenConfiguration.VocabDeck.Edit -> {

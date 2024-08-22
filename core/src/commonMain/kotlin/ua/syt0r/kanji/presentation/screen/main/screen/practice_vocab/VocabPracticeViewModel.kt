@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.MutableVocabReviewState
@@ -47,7 +47,7 @@ class VocabPracticeViewModel(
             _state.value = ScreenState.Configuration(
                 practiceType = configuration.practiceType,
                 itemsSelectorState = PracticeConfigurationItemsSelectorState(
-                    items = configuration.words,
+                    itemToDeckIdMap = configuration.wordIdToDeckIdMap.toList(),
                     shuffle = true
                 ),
                 shuffle = mutableStateOf(true),
@@ -80,7 +80,7 @@ class VocabPracticeViewModel(
             }
 
             val data = getQueueDataUseCase(
-                words = configurationState.itemsSelectorState.result,
+                configuration = configuration,
                 state = configurationState
             )
 
@@ -105,12 +105,12 @@ class VocabPracticeViewModel(
         }
     }
 
-    override fun next(srsCard: SrsCard) {
-        viewModelScope.launch { practiceQueue.completeCurrentReview(srsCard) }
+    override fun next(answer: PracticeAnswer) {
+        viewModelScope.launch { practiceQueue.submitAnswer(answer) }
     }
 
     override fun finishPractice() {
-        practiceQueue.finishPractice()
+        practiceQueue.immediateFinish()
     }
 
     private fun applyToScreenState(queueState: VocabPracticeQueueState) {

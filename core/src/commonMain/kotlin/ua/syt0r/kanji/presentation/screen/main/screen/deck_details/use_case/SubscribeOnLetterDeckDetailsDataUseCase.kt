@@ -13,8 +13,8 @@ import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.CharacterSrsData
 import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
 import ua.syt0r.kanji.core.srs.LetterSrsManager
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
+import ua.syt0r.kanji.core.srs.SrsPracticeType
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
@@ -33,7 +33,7 @@ interface SubscribeOnDeckDetailsDataUseCase {
 class DefaultSubscribeOnDeckDetailsDataUseCase(
     private val letterSrsManager: LetterSrsManager,
     private val appDataRepository: AppDataRepository,
-    private val practiceRepository: LetterPracticeRepository,
+    private val reviewHistoryRepository: ReviewHistoryRepository,
     private val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : SubscribeOnDeckDetailsDataUseCase {
 
@@ -81,8 +81,8 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
                 positionInPractice = index,
                 frequency = appDataRepository.getData(character)?.frequency,
                 writingSummary = PracticeItemSummary(
-                    firstReviewDate = practiceRepository
-                        .getFirstReviewTime(character, PreferencesLetterPracticeType.Writing)
+                    firstReviewDate = reviewHistoryRepository
+                        .getFirstReviewTime(character, SrsPracticeType.LetterWriting.value)
                         ?.toLocalDateTime(timeZone),
                     lastReviewDate = writingData.studyProgress?.lastReviewTime
                         ?.toLocalDateTime(timeZone),
@@ -92,8 +92,8 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
                     srsItemStatus = writingData.status
                 ),
                 readingSummary = PracticeItemSummary(
-                    firstReviewDate = practiceRepository
-                        .getFirstReviewTime(character, PreferencesLetterPracticeType.Reading)
+                    firstReviewDate = reviewHistoryRepository
+                        .getFirstReviewTime(character, SrsPracticeType.LetterReading.value)
                         ?.toLocalDateTime(timeZone),
                     lastReviewDate = readingData.studyProgress?.lastReviewTime
                         ?.toLocalDateTime(timeZone),

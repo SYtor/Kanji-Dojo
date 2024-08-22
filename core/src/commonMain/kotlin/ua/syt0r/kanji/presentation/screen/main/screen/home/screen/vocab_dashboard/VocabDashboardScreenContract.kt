@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 interface VocabDashboardScreenContract {
 
@@ -24,7 +24,7 @@ interface VocabDashboardScreenContract {
 
         data class Loaded(
             val listState: DeckDashboardListState,
-            val srsPracticeType: MutableState<VocabPracticeType>,
+            val srsPracticeType: MutableState<ScreenVocabPracticeType>,
         ) : ScreenState
 
     }

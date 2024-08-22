@@ -2,10 +2,10 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.DeckPickerScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerLetterCategories
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerVocabCategories
 
 
 class DeckPickerViewModel : DeckPickerScreenContract.ViewModel {
@@ -21,7 +21,7 @@ class DeckPickerViewModel : DeckPickerScreenContract.ViewModel {
         this.configuration = configuration
         _state.value = when (configuration) {
             DeckPickerScreenConfiguration.Letters -> ScreenState.Loaded(DeckPickerLetterCategories)
-            DeckPickerScreenConfiguration.Vocab -> TODO()
+            DeckPickerScreenConfiguration.Vocab -> ScreenState.Loaded(DeckPickerVocabCategories)
         }
     }
 

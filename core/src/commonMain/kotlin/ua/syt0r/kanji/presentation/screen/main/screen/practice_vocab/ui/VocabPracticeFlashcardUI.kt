@@ -40,12 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
@@ -55,7 +55,7 @@ fun VocabPracticeFlashcardUI(
     reviewState: VocabReviewState.Flashcard,
     answers: PracticeAnswers,
     onRevealAnswerClick: () -> Unit,
-    onNextClick: (SrsCard) -> Unit,
+    onNextClick: (PracticeAnswer) -> Unit,
     onWordClick: (JapaneseWord) -> Unit
 ) {
 

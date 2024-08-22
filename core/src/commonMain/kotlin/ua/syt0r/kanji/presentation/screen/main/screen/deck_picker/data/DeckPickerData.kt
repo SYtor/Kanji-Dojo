@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.japanese.CharacterClassification
@@ -26,6 +25,6 @@ data class DeckPickerCategory(
 
 data class DeckPickerDeck(
     val previewText: String,
-    val title: @Composable () -> String,
+    val title: StringResolveScope<String>,
     val classification: CharacterClassification
 )

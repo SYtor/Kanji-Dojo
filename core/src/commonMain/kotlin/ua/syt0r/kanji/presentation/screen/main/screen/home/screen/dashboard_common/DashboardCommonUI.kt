@@ -158,10 +158,10 @@ fun DeckDashboardListState.addMergeItems(
 
     items(
         items = items,
-        key = { listModeKey to it.id }
+        key = { listModeKey to it.deckId }
     ) {
-        val isSelected = selected.contains(it.id)
-        val onClick = { selected = selected.run { if (isSelected) minus(it.id) else plus(it.id) } }
+        val isSelected = selected.contains(it.deckId)
+        val onClick = { selected = selected.run { if (isSelected) minus(it.deckId) else plus(it.deckId) } }
         Row(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -233,7 +233,7 @@ fun DeckDashboardListState.addSortItems(
 
     itemsIndexed(
         items = reorderedList,
-        key = { _, item -> listModeKey to item.id }
+        key = { _, item -> listModeKey to item.deckId }
     ) { index, item ->
         Row(
             modifier = Modifier

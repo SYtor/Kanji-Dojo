@@ -31,7 +31,7 @@ class DefaultSaveDeckUseCase(
         when (configuration) {
             is DeckEditScreenConfiguration.LetterDeck.CreateNew,
             is DeckEditScreenConfiguration.LetterDeck.CreateDerived -> {
-                letterPracticeRepository.createPractice(
+                letterPracticeRepository.createDeck(
                     title = title,
                     characters = list.filter<LetterDeckEditListItem>(DeckEditItemAction.Add)
                         .map { it.character },
@@ -39,7 +39,7 @@ class DefaultSaveDeckUseCase(
             }
 
             is DeckEditScreenConfiguration.LetterDeck.Edit -> {
-                letterPracticeRepository.updatePractice(
+                letterPracticeRepository.updateDeck(
                     id = configuration.letterDeckId,
                     title = title,
                     charactersToAdd = list.filter<LetterDeckEditListItem>(DeckEditItemAction.Add)

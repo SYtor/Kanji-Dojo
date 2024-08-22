@@ -18,7 +18,7 @@ interface DeckDetailsScreenContract {
 
         fun loadData(configuration: DeckDetailsScreenConfiguration)
 
-        fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.Practice
+        fun getPracticeConfiguration(group: DeckDetailsListItem.Group): MainDestination.LetterPractice
         fun getMultiselectPracticeConfiguration(): MainDestination
 
     }

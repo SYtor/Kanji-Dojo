@@ -28,7 +28,7 @@ fun MergeConfirmationDialog(
         content = {
             val title = listMode.title.value
             val decksIdList = listMode.selected.value.toList()
-            val mergedDeckTitles = decks.filter { decksIdList.contains(it.id) }.map { it.title }
+            val mergedDeckTitles = decks.filter { decksIdList.contains(it.deckId) }.map { it.title }
             Text(
                 text = strings.mergeDialogMessage(title, mergedDeckTitles),
                 maxLines = 3,

@@ -6,31 +6,17 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -41,30 +27,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.srs.SrsCard
-import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
-import ua.syt0r.kanji.presentation.common.MultiplatformDialog
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeEarlyFinishDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgressCounter
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSavedStateInfoLabel
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryInfoLabel
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
@@ -75,7 +59,7 @@ fun VocabPracticeScreenUI(
     onConfigured: () -> Unit,
     onFlashcardAnswerRevealClick: () -> Unit,
     onReadingPickerAnswerSelected: (String) -> Unit,
-    onNext: (SrsCard) -> Unit,
+    onNext: (PracticeAnswer) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit,
     finishPractice: () -> Unit
@@ -209,7 +193,7 @@ private fun ScreenConfiguration(
         )
 
         when (screenState.practiceType) {
-            VocabPracticeType.Flashcard -> {
+            ScreenVocabPracticeType.Flashcard -> {
                 var translationInFront by screenState.flashcard.translationInFront
                 PracticeConfigurationOption(
                     title = resolveString { vocabPractice.translationInFrontConfigurationTitle },
@@ -219,7 +203,7 @@ private fun ScreenConfiguration(
                 )
             }
 
-            VocabPracticeType.ReadingPicker -> {
+            ScreenVocabPracticeType.ReadingPicker -> {
                 var showMeaning by screenState.readingPicker.showMeaning
                 PracticeConfigurationOption(
                     title = resolveString { vocabPractice.readingMeaningConfigurationTitle },
@@ -229,7 +213,7 @@ private fun ScreenConfiguration(
                 )
             }
 
-            VocabPracticeType.Writing -> {
+            ScreenVocabPracticeType.Writing -> {
 
             }
         }
@@ -243,7 +227,7 @@ private fun ScreenReview(
     screenState: ScreenState.Review,
     onFlashcardAnswerRevealClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
-    onNextClick: (SrsCard) -> Unit,
+    onNextClick: (PracticeAnswer) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -302,112 +286,38 @@ private fun ScreenSummary(
     onFinishClick: () -> Unit
 ) {
 
-    AutopaddedScrollableColumn(
-        modifier = Modifier.fillMaxWidth()
-            .wrapContentWidth()
-            .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp),
-        bottomOverlayContent = {
-
-            Button(
-                onClick = onFinishClick,
-                colors = ButtonDefaults.neutralButtonColors(),
-                modifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(0.4f))
-                    .padding(vertical = 20.dp)
-            ) {
-                Text(text = resolveString { commonPractice.savedButton })
-            }
-
-        }
+    PracticeSummaryContainer(
+        onFinishClick = onFinishClick
     ) {
 
-        PracticeSavedStateInfoLabel(
+        PracticeSummaryInfoLabel(
             title = resolveString { commonPractice.savedTimeSpentLabel },
             data = resolveString {
                 commonPractice.savedTimeSpentValue(screenState.practiceDuration)
             }
         )
 
-        PracticeSavedStateInfoLabel(
+        PracticeSummaryInfoLabel(
             title = resolveString { vocabPractice.summaryItemsCountTitle },
             data = resolveString { screenState.results.size.toString() }
         )
 
         screenState.results.forEachIndexed { index, item ->
-            SummaryItem(index, item)
+            PracticeSummaryItem(
+                header = {
+                    FuriganaText(
+                        furiganaString = buildFuriganaString {
+                            append("${index + 1}. ")
+                            append(item.reading)
+                        },
+                        modifier = Modifier
+                    )
+                },
+                nextInterval = item.nextInterval
+            )
             if (index != screenState.results.size - 1) HorizontalDivider()
         }
 
     }
 
 }
-
-@Composable
-private fun SummaryItem(
-    index: Int,
-    item: VocabSummaryItem
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(IntrinsicSize.Min)
-    ) {
-
-        FuriganaText(
-            furiganaString = buildFuriganaString {
-                append("${index + 1}. ")
-                append(item.reading)
-            },
-            modifier = Modifier
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = resolveString { vocabPractice.summaryNextReviewLabel },
-                modifier = Modifier.weight(1f).alignByBaseline()
-            )
-            Text(
-                text = resolveString { vocabPractice.formattedSrsInterval(item.nextInterval) },
-                modifier = Modifier.alignByBaseline()
-            )
-        }
-
-    }
-}
-
-@Composable
-private fun PracticeEarlyFinishDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmClick: () -> Unit
-) {
-
-    val strings = resolveString { vocabPractice }
-
-    MultiplatformDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(
-                text = strings.earlyFinishDialogTitle,
-                style = MaterialTheme.typography.headlineSmall
-            )
-        },
-        content = {
-            Text(
-                text = strings.earlyFinishDialogMessage,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        buttons = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = strings.earlyFinishDialogCancelButton)
-            }
-            TextButton(onClick = onConfirmClick) {
-                Text(text = strings.earlyFinishDialogAcceptButton)
-            }
-        }
-    )
-}
-

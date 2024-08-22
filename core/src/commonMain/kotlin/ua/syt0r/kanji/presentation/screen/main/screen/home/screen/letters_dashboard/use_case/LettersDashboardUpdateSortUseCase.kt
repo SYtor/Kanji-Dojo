@@ -12,9 +12,9 @@ class LettersDashboardUpdateSortUseCase(
 
     override suspend fun update(data: DecksSortRequestData) {
         userPreferencesRepository.dashboardSortByTime.set(data.sortByTime)
-        practiceRepository.updatePracticePositions(
-            practiceIdToPositionMap = data.reorderedList.reversed()
-                .mapIndexed { index, item -> item.id to index }
+        practiceRepository.updateDeckPositions(
+            deckIdToPositionMap = data.reorderedList.reversed()
+                .mapIndexed { index, item -> item.deckId to index }
                 .toMap()
         )
     }

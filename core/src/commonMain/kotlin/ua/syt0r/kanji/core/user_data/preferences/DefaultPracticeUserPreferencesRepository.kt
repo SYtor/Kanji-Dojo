@@ -66,24 +66,11 @@ class DefaultPracticeUserPreferencesRepository private constructor(
             initialValueProvider = { true }
         )
     }
-    override val writingToleratedMistakes: SuspendedProperty<Int> = registerProperty {
-        createIntProperty(
-            key = "writing_tolerated_mistakes",
-            initialValueProvider = { 2 }
-        )
-    }
 
     override val readingRomajiFuriganaForKanaWords: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "reading_kana_words_romaji",
             initialValueProvider = { true }
-        )
-    }
-
-    override val readingToleratedMistakes: SuspendedProperty<Int> = registerProperty {
-        createIntProperty(
-            key = "reading_tolerated_mistakes",
-            initialValueProvider = { 0 }
         )
     }
 

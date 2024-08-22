@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.BuildKonfig
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.screen.VersionChangeDialog
+import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

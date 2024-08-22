@@ -53,7 +53,7 @@ class LettersDashboardLoadDataUseCase(
                         leftToReview = srsDecksData.dailyProgress.dueLeft
                     )
                     LetterDeckDashboardItem(
-                        id = deckInfo.id,
+                        deckId = deckInfo.id,
                         title = deckInfo.title,
                         position = deckInfo.position,
                         elapsedSinceLastReview = deckInfo.getLastReviewTime()?.let { time - it },

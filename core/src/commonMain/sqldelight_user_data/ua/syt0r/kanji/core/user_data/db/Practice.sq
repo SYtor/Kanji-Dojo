@@ -1,52 +1,64 @@
-PRAGMA user_version = 8;
+PRAGMA user_version = 9;
 
-CREATE TABLE IF NOT EXISTS practice (
+getLastInsertRowId:
+SELECT last_insert_rowid();
+
+------- LETTER DECKS -------
+
+CREATE TABLE IF NOT EXISTS letter_deck (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     name TEXT NOT NULL,
     position INTEGER NOT NULL DEFAULT 0 -- bigger values are at the top of the list
 );
 
-CREATE TABLE IF NOT EXISTS practice_entry (
+CREATE TABLE IF NOT EXISTS letter_deck_entry (
     character TEXT NOT NULL,
-    practice_id INTEGER NOT NULL,
-    PRIMARY KEY(character, practice_id),
-    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
+    deck_id INTEGER NOT NULL,
+    PRIMARY KEY(character, deck_id),
+    FOREIGN KEY(deck_id) REFERENCES letter_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS character_progress (
-    character TEXT NOT NULL,
-    mode INTEGER NOT NULL, -- 0 - writing, 1 - reading
-    last_review_time INTEGER,
-    repeats INTEGER NOT NULL DEFAULT 0, -- successful review strike
-    lapses INTEGER NOT NULL DEFAULT 0, -- times repeats were reseted due to mistake during practice
-    PRIMARY KEY(character, mode)
-);
+insertLetterDeck:
+INSERT INTO letter_deck(name, position)
+SELECT ?, IFNULL(MAX(position) + 1, 0) FROM letter_deck;
 
--- ATTENTION!!! Never use "*" when selecting data from writing_review and reading_review tables,
--- actual column indices might differ in prod due to wrong order in migration, use only named columns
+deleteLetterDeck {
+    DELETE FROM letter_deck WHERE id=:id;
+    DELETE FROM letter_deck_entry WHERE deck_id=:id;
+}
 
-CREATE TABLE IF NOT EXISTS writing_review (
-    character TEXT NOT NULL,
-    practice_id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL,
-    mistakes INTEGER NOT NULL,
-    is_study INTEGER NOT NULL, -- 1 - study, 0 - review
-    outcome INTEGER NOT NULL, -- 1 - success, 0 - fail
-    duration INTEGER NOT NULL,
-    PRIMARY KEY(character, practice_id, timestamp, mistakes),
-    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
-);
+deleteLetterDecks {
+    DELETE FROM letter_deck WHERE id IN :deckIds;
+    DELETE FROM letter_deck_entry WHERE deck_id IN :deckIds;
+}
 
-CREATE TABLE IF NOT EXISTS reading_review (
-    character TEXT NOT NULL,
-    practice_id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL,
-    mistakes INTEGER NOT NULL,
-    outcome INTEGER NOT NULL, -- 1 - success, 0 - fail
-    duration INTEGER NOT NULL,
-    PRIMARY KEY(character, practice_id, timestamp, mistakes),
-    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
-);
+updateLetterDeckTitle:
+UPDATE letter_deck SET name=? WHERE id=?;
+
+updateLetterDeckPosition:
+UPDATE letter_deck SET position=? WHERE id=?;
+
+getAllLetterDecks:
+SELECT * FROM letter_deck;
+
+getLetterDeck:
+SELECT * FROM letter_deck WHERE id=?;
+
+insertOrIgnoreLetterDeckEntry:
+INSERT OR IGNORE INTO letter_deck_entry (character,deck_id) VALUES (?,?);
+
+deleteLetterDeckEntry:
+DELETE FROM letter_deck_entry WHERE deck_id=? AND character=?;
+
+migrateLetterDeckEntries:
+UPDATE OR REPLACE letter_deck_entry
+SET deck_id = :deckId
+WHERE deck_id IN :deckIdToMigrate;
+
+getEntriesForLetterDeck:
+SELECT * FROM letter_deck_entry WHERE deck_id=?;
+
+------- VOCAB DECKS -------
 
 CREATE TABLE IF NOT EXISTS vocab_deck (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -60,163 +72,6 @@ CREATE TABLE IF NOT EXISTS vocab_deck_entry (
     PRIMARY KEY(word_id, deck_id),
     FOREIGN KEY(deck_id) REFERENCES vocab_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
-
-CREATE TABLE IF NOT EXISTS fsrs_card (
-    key TEXT NOT NULL,
-    practice_type TEXT NOT NULL,
-    status INTEGER NOT NULL,
-    stability REAL NOT NULL,
-    difficulty REAL NOT NULL,
-    lapses INTEGER NOT NULL,
-    repeats INTEGER NOT NULL,
-    last_review INTEGER NOT NULL,
-    interval INTEGER NOT NULL,
-    PRIMARY KEY(key, practice_type)
-);
-
-upsertFsrsCard:
-INSERT OR REPLACE INTO fsrs_card
-VALUES ?;
-
-getFsrsCards:
-SELECT * FROM fsrs_card;
-
-getLastInsertRowId:
-SELECT last_insert_rowid();
-
-insertPractice:
-INSERT INTO practice(name, position)
-SELECT ?, IFNULL(MAX(position) + 1, 0) FROM practice;
-
-deletePractice {
-    DELETE FROM practice WHERE id=:id;
-    DELETE FROM practice_entry WHERE practice_id=:id;
-}
-
-deletePractices {
-    DELETE FROM practice WHERE id IN :practiceIds;
-    DELETE FROM practice_entry WHERE practice_id IN :practiceIds;
-}
-
-updatePracticeTitle:
-UPDATE practice SET name=? WHERE id=?;
-
-updatePracticePosition:
-UPDATE practice SET position=? WHERE id=?;
-
-getAllPractices:
-SELECT * FROM practice;
-
-getPractice:
-SELECT * FROM practice WHERE id=?;
-
-insertOrIgnorePracticeEntry:
-INSERT OR IGNORE INTO practice_entry (character,practice_id) VALUES (?,?);
-
-deletePracticeEntry:
-DELETE FROM practice_entry WHERE practice_id=? AND character=?;
-
-migratePracticeEntries:
-UPDATE OR REPLACE practice_entry
-SET practice_id = :practiceId
-WHERE practice_id IN :practiceIdToMigrate;
-
-getPracticeEntriesForPractice:
-SELECT * FROM practice_entry WHERE practice_id=?;
-
-getCharacterProgress:
-SELECT * FROM character_progress WHERE character=? AND mode=?;
-
-upsertCharacterProgress:
-INSERT OR REPLACE INTO character_progress(character, mode, last_review_time, repeats, lapses)
-VALUES (?,?,?,?,?);
-
-getCharacterProgresse:
-SELECT * FROM character_progress WHERE character = ? AND mode = ?;
-
-getCharacterProgresses:
-SELECT *
-FROM character_progress;
-
-upsertWritingReview:
-INSERT OR REPLACE INTO writing_review(character, practice_id, timestamp, mistakes, is_study, outcome, duration)
-VALUES (?,?,?,?,?,?,?);
-
-upsertReadingReview:
-INSERT OR REPLACE INTO reading_review(character, practice_id, timestamp, mistakes, outcome, duration)
-VALUES (?, ?, ?, ?, ?, ?);
-
-getWritingReviews:
-SELECT character, practice_id, timestamp, mistakes, is_study, outcome, duration
-FROM writing_review
-WHERE timestamp > :start AND timestamp < :end;
-
-migrateWritingReviewsHistory:
-UPDATE OR REPLACE writing_review
-SET practice_id = :practiceId
-WHERE practice_id IN :practiceIdToMigrate;
-
-getReadingReviews:
-SELECT character, practice_id, timestamp, mistakes, outcome, duration
-FROM reading_review
-WHERE timestamp > :start AND timestamp < :end;
-
-getCharacterProgressReviewedInRange:
-SELECT *
-FROM  character_progress
-WHERE last_review_time > :startTime AND last_review_time < :endTime;
-
-getFirstWritingReview:
-SELECT character, practice_id, timestamp, mistakes, is_study, outcome, duration
-FROM writing_review
-WHERE character = :character
-ORDER BY timestamp
-LIMIT 1;
-
-getFirstReadingReview:
-SELECT character, practice_id, timestamp, mistakes, outcome, duration
-FROM reading_review
-WHERE character = :character
-ORDER BY timestamp
-LIMIT 1;
-
-getLastWritingReview:
-SELECT character, practice_id, timestamp, mistakes, is_study, outcome, duration
-FROM writing_review
-WHERE practice_id = :practiceId
-ORDER BY timestamp DESC
-LIMIT 1;
-
-getLastReadingReview:
-SELECT character, practice_id, timestamp, mistakes, outcome, duration
-FROM reading_review
-WHERE practice_id = :practiceId
-ORDER BY timestamp DESC
-LIMIT 1;
-
-migrateReadingReviewsHistory:
-UPDATE OR REPLACE reading_review
-SET practice_id = :practiceId
-WHERE practice_id IN :practiceIdToMigrate;
-
-getTotalWritingReviewsCount:
-SELECT COUNT(*)
-FROM writing_review;
-
-getTotalWritingReviewsDuration:
-SELECT SUM(CASE WHEN duration > :reviewDurationLimit THEN :reviewDurationLimit ELSE duration END)
-FROM writing_review;
-
-getTotalReadingReviewsCount:
-SELECT COUNT(*)
-FROM reading_review;
-
-getTotalReadingReviewsDuration:
-SELECT SUM(CASE WHEN duration > :reviewDurationLimit THEN :reviewDurationLimit ELSE duration END)
-FROM reading_review;
-
-getTotalUniqueReviewedCharactersCount:
-SELECT COUNT(DISTINCT character) FROM character_progress;
 
 insertVocabDeck:
 INSERT INTO vocab_deck(title, position)
@@ -246,4 +101,80 @@ getVocabDecks:
 SELECT * FROM vocab_deck;
 
 getVocabDeckEntries:
-SELECT * FROM vocab_deck_entry WHERE deck_id = :practiceId;
+SELECT * FROM vocab_deck_entry WHERE deck_id = :deckId;
+
+------- SRS DECKS -------
+
+CREATE TABLE IF NOT EXISTS fsrs_card (
+    key TEXT NOT NULL,
+    practice_type INTEGER NOT NULL,
+    status INTEGER NOT NULL,
+    stability REAL NOT NULL,
+    difficulty REAL NOT NULL,
+    lapses INTEGER NOT NULL,
+    repeats INTEGER NOT NULL,
+    last_review INTEGER NOT NULL,
+    interval INTEGER NOT NULL,
+    PRIMARY KEY(key, practice_type)
+);
+
+upsertFsrsCard:
+INSERT OR REPLACE INTO fsrs_card
+VALUES ?;
+
+getFsrsCards:
+SELECT * FROM fsrs_card;
+
+------- REVIEW HISTORY -------
+
+CREATE TABLE IF NOT EXISTS review_history(
+    key TEXT NOT NULL,
+    practice_type INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    duration INTEGER NOT NULL,
+    grade INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    deck_id INTEGER NOT NULL,
+    PRIMARY KEY(key, practice_type, timestamp)
+);
+
+upsertReview:
+INSERT OR REPLACE INTO review_history(key, practice_type, timestamp, duration, grade, mistakes, deck_id)
+VALUES (?,?,?,?,?,?,?);
+
+getReviewHistory:
+SELECT key, practice_type, timestamp, duration, grade, mistakes, deck_id
+FROM review_history
+WHERE timestamp > :start AND timestamp < :end;
+
+migrateDeckForReviewHistory:
+UPDATE OR REPLACE review_history
+SET deck_id = :deckId
+WHERE deck_id IN :deckIdToMigrate AND practice_type IN :practiceTypes;
+
+getFirstReview:
+SELECT key, practice_type, timestamp, duration, grade, mistakes, deck_id
+FROM review_history
+WHERE key = :itemKey AND practice_type = :practiceType
+ORDER BY timestamp
+LIMIT 1;
+
+getLastReview:
+SELECT key, practice_type, timestamp, duration, grade, mistakes, deck_id
+FROM review_history
+WHERE key = :itemKey AND practice_type = :practiceType
+ORDER BY timestamp DESC
+LIMIT 1;
+
+getTotalReviewsCount:
+SELECT COUNT(*)
+FROM review_history;
+
+getTotalReviewsCountForPracticeTypes:
+SELECT COUNT(*)
+FROM review_history
+WHERE practice_type IN :practiceTypes;
+
+getTotalReviewsDuration:
+SELECT SUM(CASE WHEN duration > :reviewDurationLimit THEN :reviewDurationLimit ELSE duration END)
+FROM review_history;

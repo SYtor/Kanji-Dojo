@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralTextButtonColors
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -36,6 +35,7 @@ import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandablePracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.ExpandableVocabPracticeAnswersRowState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
@@ -46,7 +46,7 @@ fun VocabPracticeReadingPickerUI(
     answers: PracticeAnswers,
     onWordClick: (JapaneseWord) -> Unit,
     onAnswerSelected: (String) -> Unit,
-    onNextClick: (SrsCard) -> Unit,
+    onNextClick: (PracticeAnswer) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 

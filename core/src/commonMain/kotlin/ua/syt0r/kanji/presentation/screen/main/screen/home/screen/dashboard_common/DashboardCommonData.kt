@@ -1,35 +1,10 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common
 
 import androidx.compose.runtime.MutableState
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
-import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import kotlin.time.Duration
 
-
-interface DeckStudyType : DisplayableEnum
-
-enum class LetterDeckStudyType(
-    override val titleResolver: StringResolveScope<String>,
-    val repoType: PreferencesLetterPracticeType
-) : DeckStudyType {
-
-    Writing(
-        titleResolver = { lettersDashboard.itemWritingTitle },
-        repoType = PreferencesLetterPracticeType.Writing
-    ),
-    Reading(
-        titleResolver = { lettersDashboard.itemReadingTitle },
-        repoType = PreferencesLetterPracticeType.Reading
-    );
-
-    companion object {
-        fun from(practiceType: PreferencesLetterPracticeType): LetterDeckStudyType {
-            return LetterDeckStudyType.values().first { it.repoType == practiceType }
-        }
-    }
-
-}
 
 data class DeckStudyProgress<T>(
     val all: List<T>,
@@ -51,15 +26,15 @@ typealias LetterDeckStudyProgress = DeckStudyProgress<String>
 typealias VocabDeckStudyProgress = DeckStudyProgress<Long>
 
 interface DeckDashboardItem {
-    val id: Long
+    val deckId: Long
     val title: String
     val position: Int
     val elapsedSinceLastReview: Duration?
-    val studyProgress: Map<DeckStudyType, DeckStudyProgress<out Any>>
+    val studyProgress: Map<ScreenPracticeType, DeckStudyProgress<out Any>>
 }
 
 data class LetterDeckDashboardItem(
-    override val id: Long,
+    override val deckId: Long,
     override val title: String,
     override val position: Int,
     override val elapsedSinceLastReview: Duration?,
@@ -67,22 +42,20 @@ data class LetterDeckDashboardItem(
     val readingProgress: LetterDeckStudyProgress
 ) : DeckDashboardItem {
 
-    override val studyProgress: Map<DeckStudyType, LetterDeckStudyProgress> = mapOf(
-        LetterDeckStudyType.Writing to writingProgress,
-        LetterDeckStudyType.Reading to readingProgress
+    override val studyProgress: Map<ScreenPracticeType, LetterDeckStudyProgress> = mapOf(
+        ScreenLetterPracticeType.Writing to writingProgress,
+        ScreenLetterPracticeType.Reading to readingProgress
     )
 
 }
 
 data class VocabDeckDashboardItem(
-    override val id: Long,
+    override val deckId: Long,
     override val title: String,
     override val position: Int,
     override val elapsedSinceLastReview: Duration?,
-    override val studyProgress: Map<DeckStudyType, VocabDeckStudyProgress>,
-) : DeckDashboardItem {
-
-}
+    override val studyProgress: Map<ScreenPracticeType, VocabDeckStudyProgress>,
+) : DeckDashboardItem
 
 data class DeckDashboardListState(
     val items: List<DeckDashboardItem>,

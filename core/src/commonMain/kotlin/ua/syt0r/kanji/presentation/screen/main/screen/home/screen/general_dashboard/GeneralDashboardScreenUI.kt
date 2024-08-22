@@ -58,6 +58,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
@@ -65,14 +68,12 @@ import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
-import ua.syt0r.kanji.presentation.screen.VersionChangeDialog
+import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckStudyType
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
 
 @Composable
 fun GeneralDashboardScreenUI(
@@ -80,7 +81,7 @@ fun GeneralDashboardScreenUI(
     navigateToDailyLimitConfiguration: () -> Unit,
     navigateToCreateLetterDeck: () -> Unit,
     navigateToCreateVocabDeck: () -> Unit,
-    navigateToLetterPractice: (MainDestination.Practice) -> Unit,
+    navigateToLetterPractice: (MainDestination.LetterPractice) -> Unit,
     navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit
 ) {
 
@@ -149,40 +150,38 @@ fun GeneralDashboardScreenUI(
                 is LetterDecksData.Data -> {
                     DashboardItemLayout(
                         title = letterDecksTitle,
-                        studyTypeContent = {
-                            StudyTypeSelector(
-                                selectedType = it.letterDecksData.studyType,
-                                availableStudyTypes = LetterDeckStudyType.values().toList(),
+                        practiceTypeContent = {
+                            PracticeTypeSelector(
+                                selectedType = it.letterDecksData.practiceType,
+                                availablePracticeTypes = ScreenLetterPracticeType.values().toList(),
                             )
                         },
                         buttonsContent = {
 
-                            val studyType = it.letterDecksData.studyType.value
-                            val progress = it.letterDecksData.studyProgressMap.getValue(studyType)
+                            val practiceType = it.letterDecksData.practiceType.value
+                            val progress =
+                                it.letterDecksData.studyProgressMap.getValue(practiceType)
 
-                            val goToLetterPractice = { characters: Set<String> ->
-                                val destination = when (studyType) {
-                                    LetterDeckStudyType.Writing -> {
-                                        MainDestination.Practice.Writing(-1, characters.toList())
-                                    }
-
-                                    LetterDeckStudyType.Reading -> {
-                                        MainDestination.Practice.Reading(-1, characters.toList())
-                                    }
-                                }
+                            val goToLetterPractice = { characterToDeckIdMap: Map<String, Long> ->
+                                val destination = MainDestination.LetterPractice(
+                                    configuration = LetterPracticeScreenConfiguration(
+                                        characterToDeckIdMap = characterToDeckIdMap,
+                                        practiceType = practiceType
+                                    )
+                                )
                                 navigateToLetterPractice(destination)
                             }
 
                             GeneralDashboardReviewButton(
-                                onClick = { goToLetterPractice(progress.new) },
-                                count = progress.new.size,
+                                onClick = { goToLetterPractice(progress.newToDeckIdMap) },
+                                count = progress.newToDeckIdMap.size,
                                 text = "New",
                                 modifier = Modifier.weight(1f)
                             )
 
                             GeneralDashboardReviewButton(
-                                onClick = { goToLetterPractice(progress.due) },
-                                count = progress.due.size,
+                                onClick = { goToLetterPractice(progress.dueToDeckIdMap) },
+                                count = progress.dueToDeckIdMap.size,
                                 text = "Due",
                                 modifier = Modifier.weight(1f)
                             )
@@ -218,10 +217,10 @@ fun GeneralDashboardScreenUI(
 
                     DashboardItemLayout(
                         title = vocabDecksTitle,
-                        studyTypeContent = {
-                            StudyTypeSelector(
+                        practiceTypeContent = {
+                            PracticeTypeSelector(
                                 selectedType = it.vocabDecksInfo.practiceType,
-                                availableStudyTypes = VocabPracticeType.values().toList(),
+                                availablePracticeTypes = ScreenVocabPracticeType.values().toList(),
                             )
                         },
                         buttonsContent = {
@@ -229,9 +228,9 @@ fun GeneralDashboardScreenUI(
                             val practiceType = it.vocabDecksInfo.practiceType.value
                             val progress = it.vocabDecksInfo.studyProgressMap.getValue(practiceType)
 
-                            val goToVocabPractice = { words: Set<Long> ->
+                            val goToVocabPractice = { wordToDeckIdMap: Map<Long, Long> ->
                                 val configuration = VocabPracticeScreenConfiguration(
-                                    words = words.toList(),
+                                    wordIdToDeckIdMap = wordToDeckIdMap,
                                     practiceType = practiceType
                                 )
                                 val destination = MainDestination.VocabPractice(configuration)
@@ -239,8 +238,8 @@ fun GeneralDashboardScreenUI(
                             }
 
                             GeneralDashboardReviewButton(
-                                onClick = { goToVocabPractice(progress.due) },
-                                count = progress.due.size,
+                                onClick = { goToVocabPractice(progress.dueToDeckIdMap) },
+                                count = progress.dueToDeckIdMap.size,
                                 text = "Due",
                                 modifier = Modifier.weight(1f)
                             )
@@ -346,7 +345,7 @@ private fun HeaderButton(
 @Composable
 private fun DashboardItemLayout(
     title: String,
-    studyTypeContent: (@Composable () -> Unit)? = null,
+    practiceTypeContent: (@Composable () -> Unit)? = null,
     buttonsContent: @Composable RowScope.() -> Unit
 ) {
 
@@ -367,7 +366,7 @@ private fun DashboardItemLayout(
             )
         }
 
-        if (studyTypeContent != null) studyTypeContent.invoke()
+        if (practiceTypeContent != null) practiceTypeContent.invoke()
         else Spacer(Modifier.height(8.dp))
 
         Row(
@@ -385,9 +384,9 @@ private fun DashboardItemLayout(
 }
 
 @Composable
-private fun <T : DeckStudyType> StudyTypeSelector(
+private fun <T : ScreenPracticeType> PracticeTypeSelector(
     selectedType: MutableState<T>,
-    availableStudyTypes: List<T>,
+    availablePracticeTypes: List<T>,
 ) {
 
     Row(
@@ -427,7 +426,7 @@ private fun <T : DeckStudyType> StudyTypeSelector(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                availableStudyTypes.forEach {
+                availablePracticeTypes.forEach {
                     PopupContentItem(
                         onClick = {
                             selectedType.value = it

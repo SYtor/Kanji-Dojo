@@ -5,6 +5,7 @@ import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsApplyFilterUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsApplySortUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsCreateLetterGroupsUseCase
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsGetConfigurationUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultDeckDetailsApplyFilterUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultDeckDetailsApplySortUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultDeckDetailsCreateLetterGroupsUseCase
@@ -13,7 +14,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.Defa
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultSubscribeOnDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultSubscribeOnVocabDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DefaultUpdateDeckDetailsConfigurationUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.DeckDetailsGetConfigurationUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.GetDeckDetailsVisibleDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnVocabDeckDetailsDataUseCase
@@ -37,15 +37,14 @@ val deckDetailsScreenModule = module {
         DefaultSubscribeOnDeckDetailsDataUseCase(
             letterSrsManager = get(),
             appDataRepository = get(),
-            practiceRepository = get()
+            reviewHistoryRepository = get()
         )
     }
 
     factory<SubscribeOnVocabDeckDetailsDataUseCase> {
         DefaultSubscribeOnVocabDeckDetailsDataUseCase(
             vocabSrsManager = get(),
-            appDataRepository = get(),
-            practiceRepository = get()
+            appDataRepository = get()
         )
     }
 

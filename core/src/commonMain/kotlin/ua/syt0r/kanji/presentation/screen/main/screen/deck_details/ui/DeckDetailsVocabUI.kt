@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,7 +43,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsSc
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 @Composable
 fun DeckDetailsVocabUI(
@@ -131,7 +129,7 @@ fun DeckDetailsVocabUI(
 private fun WordItem(
     listIndex: Int,
     vocab: DeckDetailsListItem.Vocab,
-    practiceType: VocabPracticeType,
+    practiceType: ScreenVocabPracticeType,
     selectionMode: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

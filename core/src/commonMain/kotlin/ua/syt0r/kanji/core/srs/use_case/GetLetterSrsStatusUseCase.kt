@@ -4,46 +4,50 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.srs.CharacterSrsData
-import ua.syt0r.kanji.core.srs.CharacterStudyProgressCache
+import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.user_data.practice.CharacterStudyProgress
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeType
 
 interface GetLetterSrsStatusUseCase {
 
     suspend operator fun invoke(
         letter: String,
-        practiceType: PreferencesLetterPracticeType,
+        practiceType: LetterPracticeType,
         date: LocalDate,
     ): CharacterSrsData
 
 }
 
 class DefaultGetLetterSrsStatusUseCase(
-    private val characterStudyProgressCache: CharacterStudyProgressCache,
+    private val srsItemRepository: SrsItemRepository,
     private val getSrsStatusUseCase: GetSrsStatusUseCase
 ) : GetLetterSrsStatusUseCase {
 
     override suspend fun invoke(
         letter: String,
-        practiceType: PreferencesLetterPracticeType,
+        practiceType: LetterPracticeType,
         date: LocalDate,
     ): CharacterSrsData {
-        val studyProgress: CharacterStudyProgress? = characterStudyProgressCache.get(letter)
-            .find { it.practiceType == practiceType }
-        val expectedReviewDate = studyProgress?.getExpectedReviewTime(DEFAULT_SRS_INTERVAL)
+        val srsCard = srsItemRepository.get(practiceType.toSrsKey(letter))
+        val expectedReviewDate = srsCard?.lastReview?.plus(srsCard.interval)
         val status = getSrsStatusUseCase(expectedReviewDate)
+
         return CharacterSrsData(
             character = letter,
             status = status,
             expectedReviewDate = expectedReviewDate
                 ?.toLocalDateTime(TimeZone.currentSystemDefault())
                 ?.date,
-            studyProgress = studyProgress
+            studyProgress = srsCard?.lastReview?.let {
+                CharacterStudyProgress(
+                    character = letter,
+                    practiceType = practiceType,
+                    lastReviewTime = srsCard.lastReview,
+                    repeats = srsCard.fsrsCard.repeats,
+                    lapses = srsCard.fsrsCard.lapses
+                )
+            }
         )
-    }
-
-    companion object {
-        private const val DEFAULT_SRS_INTERVAL = 1.1f
     }
 
 }
