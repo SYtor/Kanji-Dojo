@@ -11,8 +11,8 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesLetterPracticeWritingInputMode
-import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
@@ -37,8 +37,8 @@ sealed interface LetterPracticeConfiguration {
     ) : LetterPracticeConfiguration
 
     data class Reading(
-        val characters: List<String>,
-        val kanaRomaji: Boolean
+        val selectorState: PracticeConfigurationItemsSelectorState<String>,
+        val useRomajiForKanaWords: MutableState<Boolean>
     ) : LetterPracticeConfiguration
 
 }
@@ -63,9 +63,12 @@ sealed interface LetterPracticeLayoutConfiguration {
 
 sealed interface LetterPracticeReviewState {
 
+    val layout: LetterPracticeLayoutConfiguration
+    val itemData: LetterPracticeItemData
+
     data class Writing(
-        val layout: LetterPracticeLayoutConfiguration.WritingLayoutConfiguration,
-        val itemData: LetterPracticeItemData,
+        override val layout: LetterPracticeLayoutConfiguration.WritingLayoutConfiguration,
+        override val itemData: LetterPracticeItemData.WritingData,
         val answers: PracticeAnswers,
         val studyWriterState: CharacterWriterState?,
         val reviewWriterState: CharacterWriterState
@@ -77,7 +80,10 @@ sealed interface LetterPracticeReviewState {
     }
 
     data class Reading(
-        val itemData: LetterPracticeItemData
+        override val layout: LetterPracticeLayoutConfiguration.ReadingLayoutConfiguration,
+        override val itemData: LetterPracticeItemData.ReadingData,
+        val answers: PracticeAnswers,
+        val revealed: MutableState<Boolean> = mutableStateOf(false)
     ) : LetterPracticeReviewState
 
 }
@@ -129,9 +135,11 @@ interface LetterPracticeItemData {
         val variants: String?
     }
 
-    interface WritingData : LetterPracticeItemData {
+    sealed interface WritingData : LetterPracticeItemData {
         val strokes: List<Path>
     }
+
+    sealed interface ReadingData : LetterPracticeItemData
 
     val character: String
     val words: List<JapaneseWord>
@@ -144,7 +152,7 @@ interface LetterPracticeItemData {
         override val encodedWords: List<JapaneseWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
-    ) : LetterPracticeItemData, KanaData, WritingData
+    ) : WritingData, KanaData
 
     data class KanaReadingData(
         override val character: String,
@@ -152,7 +160,7 @@ interface LetterPracticeItemData {
         override val encodedWords: List<JapaneseWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
-    ) : LetterPracticeItemData, KanaData
+    ) : ReadingData, KanaData
 
     data class KanjiWritingData(
         override val character: String,
@@ -164,7 +172,7 @@ interface LetterPracticeItemData {
         override val kun: List<String>,
         override val meanings: List<String>,
         override val variants: String?
-    ) : LetterPracticeItemData, KanjiData, WritingData
+    ) : WritingData, KanjiData
 
     data class KanjiReadingData(
         override val character: String,
@@ -175,6 +183,6 @@ interface LetterPracticeItemData {
         override val kun: List<String>,
         override val meanings: List<String>,
         override val variants: String?
-    ) : LetterPracticeItemData, KanjiData
+    ) : ReadingData, KanjiData
 
 }

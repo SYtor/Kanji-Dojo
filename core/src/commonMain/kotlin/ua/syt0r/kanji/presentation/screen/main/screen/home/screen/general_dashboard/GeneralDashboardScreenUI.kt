@@ -159,8 +159,8 @@ fun GeneralDashboardScreenUI(
                         buttonsContent = {
 
                             val practiceType = it.letterDecksData.practiceType.value
-                            val progress =
-                                it.letterDecksData.studyProgressMap.getValue(practiceType)
+                            val progress = it.letterDecksData.studyProgressMap
+                                .getValue(practiceType)
 
                             val goToLetterPractice = { characterToDeckIdMap: Map<String, Long> ->
                                 val destination = MainDestination.LetterPractice(

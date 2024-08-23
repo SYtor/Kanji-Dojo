@@ -1,15 +1,28 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,13 +33,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersPreview
@@ -147,6 +164,7 @@ private fun ScreenLayout(
             transitionSpec = {
                 fadeIn(tween(600)) togetherWith fadeOut(tween(600))
             },
+            contentKey = { it is ScreenState.Review },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -263,9 +281,26 @@ private fun ConfiguringState(
                 )
             }
 
-            is LetterPracticeConfiguration.Reading -> TODO()
-        }
+            is LetterPracticeConfiguration.Reading -> {
 
+                PracticeConfigurationItemsSelector(
+                    state = configuration.selectorState
+                )
+
+                PracticeConfigurationCharactersPreview(
+                    characters = configuration.selectorState.sortedList.value.map { it.first },
+                    selectedCharactersCount = configuration.selectorState.selectedCountState
+                )
+
+                PracticeConfigurationOption(
+                    title = resolveString { readingPractice.kanaRomajiTitle },
+                    subtitle = resolveString { readingPractice.kanaRomajiMessage },
+                    checked = configuration.useRomajiForKanaWords.value,
+                    onChange = { configuration.useRomajiForKanaWords.value = it }
+                )
+
+            }
+        }
 
     }
 
@@ -288,7 +323,12 @@ private fun ReviewState(
             onWordClick = onWordClick
         )
 
-        is LetterPracticeReviewState.Reading -> TODO()
+        is LetterPracticeReviewState.Reading -> LetterPracticeReadingUI(
+            reviewState = reviewState,
+            onNextClick = onNextClick,
+            speakKana = speakKana,
+            onWordClick = onWordClick
+        )
     }
 
 }
@@ -334,5 +374,79 @@ private fun SummaryState(
 
     }
 
+}
 
+@Composable
+fun KanjiVariantsRow(
+    variants: String,
+    modifier: Modifier = Modifier
+) {
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        Text(text = resolveString { writingPractice.variantsTitle })
+
+        val showVariants = remember { mutableStateOf(false) }
+
+        val overlayAlpha = animateFloatAsState(targetValue = if (showVariants.value) 0f else 1f)
+
+        val overlayColor = MaterialTheme.colorScheme.surfaceVariant
+            .copy(alpha = overlayAlpha.value)
+        val hintTextColor = MaterialTheme.colorScheme.onSurface
+            .copy(alpha = overlayAlpha.value)
+        val variantsTextColor = MaterialTheme.colorScheme.onSurface
+            .copy(alpha = 1f - overlayAlpha.value)
+
+        Box(
+            modifier = Modifier.clip(MaterialTheme.shapes.small)
+                .clickable { showVariants.value = !showVariants.value }
+                .background(overlayColor)
+                .padding(vertical = 4.dp, horizontal = 8.dp)
+        ) {
+            Text(
+                text = resolveString { writingPractice.variantsHint },
+                color = hintTextColor,
+                maxLines = 1
+            )
+            Text(
+                text = variants,
+                color = variantsTextColor
+            )
+        }
+
+    }
+
+}
+
+@Composable
+fun LetterPracticeWordRow(
+    index: Int,
+    word: JapaneseWord,
+    onWordClick: (JapaneseWord) -> Unit,
+    addWordToDeckClick: (JapaneseWord) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 50.dp)
+            .padding(horizontal = 12.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { onWordClick(word) }
+            .padding(vertical = 4.dp, horizontal = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FuriganaText(
+            furiganaString = word.orderedPreview(index),
+            textStyle = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = { addWordToDeckClick(word) }) {
+            Icon(Icons.Default.AddCircleOutline, null)
+        }
+    }
 }

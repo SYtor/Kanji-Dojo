@@ -55,6 +55,15 @@ sealed interface LetterPracticeQueueItemDescriptor {
         override val practiceType = LetterPracticeType.Writing
     }
 
+    data class Reading(
+        override val character: String,
+        override val deckId: Long,
+        override val romajiReading: Boolean,
+        override val layoutConfiguration: LetterPracticeLayoutConfiguration.ReadingLayoutConfiguration
+    ) : LetterPracticeQueueItemDescriptor {
+        override val practiceType: LetterPracticeType = LetterPracticeType.Reading
+    }
+
 }
 
 data class LetterPracticeQueueItem(
@@ -85,6 +94,11 @@ sealed interface LetterPracticeSummaryItem : PracticeSummaryItem {
         override val nextInterval: Duration,
         val strokeCount: Int,
         val mistakes: Int
+    ) : LetterPracticeSummaryItem
+
+    data class Reading(
+        override val letter: String,
+        override val nextInterval: Duration
     ) : LetterPracticeSummaryItem
 
 }

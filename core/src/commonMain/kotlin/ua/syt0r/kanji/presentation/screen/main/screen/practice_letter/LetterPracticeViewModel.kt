@@ -4,7 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -74,14 +79,12 @@ class LetterPracticeViewModel(
                         }
 
                         is LetterPracticeQueueState.Review -> {
-                            _state.value = it.toScreenState()
-                            val layoutConfiguration = it.descriptor.layoutConfiguration
-                            if (layoutConfiguration.kanaAutoPlay.value &&
-                                it.data is LetterPracticeItemData.KanaData
-                            ) {
-                                delay(200)
-                                kanaTtsManager.speak(it.data.reading)
-                            }
+                            val reviewState = it.toScreenState()
+                            _state.value = reviewState
+
+                            reviewState.kanaAutoReadFlow()
+                                .onEach { speakKana(it) }
+                                .launchIn(viewModelScope)
                         }
 
                         is LetterPracticeQueueState.Summary -> {
@@ -144,6 +147,36 @@ class LetterPracticeViewModel(
             accuracy = accuracy,
             items = items
         )
+    }
+
+    private fun ScreenState.Review.kanaAutoReadFlow(): Flow<KanaReading> = callbackFlow {
+        when {
+            reviewState is LetterPracticeReviewState.Reading &&
+                    reviewState.itemData is LetterPracticeItemData.KanaReadingData -> {
+
+                snapshotFlow { reviewState.revealed.value }
+                    .filter { it && reviewState.layout.kanaAutoPlay.value }
+                    .take(1)
+                    .onEach { send(reviewState.itemData.reading) }
+                    .collect()
+
+            }
+
+            reviewState is LetterPracticeReviewState.Writing &&
+                    reviewState.itemData is LetterPracticeItemData.KanaWritingData -> {
+
+                // Plays when writer state is switched (study/review)
+                snapshotFlow { reviewState.writerState.value }
+                    .filter { reviewState.layout.kanaAutoPlay.value }
+                    .onEach {
+                        delay(200)
+                        send(reviewState.itemData.reading)
+                    }
+                    .collect()
+
+            }
+        }
+        awaitClose()
     }
 
 }

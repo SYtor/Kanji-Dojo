@@ -25,7 +25,7 @@ interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
     suspend fun getUpdatedDecksData(): LetterSrsDecksData
     suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo
-    suspend fun getStatus(letter: String, practiceType: LetterPracticeType): CharacterSrsData
+    suspend fun getLetterSrsData(letter: String, practiceType: LetterPracticeType): CharacterSrsData
 }
 
 class DefaultLetterSrsManager(
@@ -81,7 +81,7 @@ class DefaultLetterSrsManager(
         )
     }
 
-    override suspend fun getStatus(
+    override suspend fun getLetterSrsData(
         letter: String,
         practiceType: LetterPracticeType,
     ): CharacterSrsData {

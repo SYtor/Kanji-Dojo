@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.ui
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,7 +12,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -37,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -76,7 +73,7 @@ import kotlin.math.min
 private const val NoTranslationLayoutPreviewWordsLimit = 5
 
 data class WritingPracticeInfoSectionData(
-    val characterData: LetterPracticeItemData,
+    val characterData: LetterPracticeItemData.WritingData,
     val isStudyMode: Boolean,
     val revealCharacter: Boolean,
     val layoutConfiguration: LetterPracticeLayoutConfiguration.WritingLayoutConfiguration
@@ -151,17 +148,14 @@ fun WritingPracticeInfoSection(
         val scrollStateResetKey = data.run { characterData.character to isStudyMode }
         val scrollState = remember(scrollStateResetKey) { ScrollState(0) }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(scrollState)
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        val arrangement: Arrangement.Vertical
+        val characterDetailsContent: @Composable ColumnScope.() -> Unit
 
-            when (data.characterData) {
-                is LetterPracticeItemData.KanaWritingData -> {
-                    val kanaAutoPlay = data.layoutConfiguration.kanaAutoPlay
+        when (data.characterData) {
+            is LetterPracticeItemData.KanaWritingData -> {
+                val kanaAutoPlay = data.layoutConfiguration.kanaAutoPlay
+                arrangement = Arrangement.spacedBy(0.dp)
+                characterDetailsContent = {
                     KanaDetails(
                         details = data.characterData,
                         isStudyMode = data.isStudyMode,
@@ -170,9 +164,12 @@ fun WritingPracticeInfoSection(
                         speakKana = speakKana
                     )
                 }
+            }
 
-                is LetterPracticeItemData.KanjiWritingData -> {
-                    val highlightRadicals = data.layoutConfiguration.radicalsHighlight
+            is LetterPracticeItemData.KanjiWritingData -> {
+                val highlightRadicals = data.layoutConfiguration.radicalsHighlight
+                arrangement = Arrangement.spacedBy(8.dp)
+                characterDetailsContent = {
                     KanjiDetails(
                         details = data.characterData,
                         isStudyMode = data.isStudyMode,
@@ -184,6 +181,17 @@ fun WritingPracticeInfoSection(
                     )
                 }
             }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(20.dp),
+            verticalArrangement = arrangement
+        ) {
+
+            characterDetailsContent()
 
             val expressions = data.characterData
                 .run { if (data.isStudyMode || data.revealCharacter) words else encodedWords }
@@ -231,6 +239,13 @@ private fun ColumnScope.KanaDetails(
         )
     }
 
+    KanaVoiceAutoPlayToggle(
+        enabledState = autoPlay,
+        enabled = true,
+        onClick = toggleAutoPlay,
+        modifier = Modifier.align(Alignment.CenterHorizontally)
+    )
+
     TextButton(
         modifier = Modifier.align(Alignment.CenterHorizontally),
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
@@ -258,17 +273,12 @@ private fun ColumnScope.KanaDetails(
         Text(
             text = resolveString { commonPractice.additionalKanaReadingsNote(alternativeReadings) },
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.66f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
     }
 
-    KanaVoiceAutoPlayToggle(
-        enabledState = autoPlay,
-        enabled = true,
-        onClick = toggleAutoPlay,
-        modifier = Modifier.align(Alignment.CenterHorizontally)
-    )
+    Spacer(Modifier.height(8.dp))
 
 }
 
@@ -329,42 +339,7 @@ private fun ColumnScope.KanjiDetails(
 
     if (details.variants != null) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            Text(text = resolveString { writingPractice.variantsTitle })
-
-            val showVariants = remember { mutableStateOf(false) }
-
-            val overlayAlpha = animateFloatAsState(targetValue = if (showVariants.value) 0f else 1f)
-
-            val overlayColor = MaterialTheme.colorScheme.surfaceVariant
-                .copy(alpha = overlayAlpha.value)
-            val hintTextColor = MaterialTheme.colorScheme.onSurface
-                .copy(alpha = overlayAlpha.value)
-            val variantsTextColor = MaterialTheme.colorScheme.onSurface
-                .copy(alpha = 1f - overlayAlpha.value)
-
-            Box(
-                modifier = Modifier.clip(MaterialTheme.shapes.small)
-                    .clickable { showVariants.value = !showVariants.value }
-                    .background(overlayColor)
-                    .padding(vertical = 4.dp, horizontal = 8.dp)
-            ) {
-                Text(
-                    text = resolveString { writingPractice.variantsHint },
-                    color = hintTextColor,
-                    maxLines = 1
-                )
-                Text(
-                    text = details.variants,
-                    color = variantsTextColor
-                )
-            }
-
-        }
+        KanjiVariantsRow(details.variants)
 
         val unicodeHex = String.format("U+%04X", details.character.first().code)
         Text(text = resolveString { writingPractice.unicodeTitle(unicodeHex) })

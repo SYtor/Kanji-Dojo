@@ -33,6 +33,15 @@ class DefaultGetLetterPracticeQueueDataUseCase(
     override suspend fun invoke(
         configuration: LetterPracticeConfiguration
     ): List<LetterPracticeQueueItemDescriptor> {
+
+        val kanaAutoPlay = mutableStateOf(
+            value = userPreferencesRepository.kanaAutoPlay.get()
+        )
+
+        snapshotFlow { kanaAutoPlay.value }
+            .onEach { userPreferencesRepository.kanaAutoPlay.set(it) }
+            .launchIn(configurationUpdateScope)
+
         return when (configuration) {
             is LetterPracticeConfiguration.Writing -> {
 
@@ -44,53 +53,57 @@ class DefaultGetLetterPracticeQueueDataUseCase(
                     .onEach { userPreferencesRepository.highlightRadicals.set(it) }
                     .launchIn(configurationUpdateScope)
 
-                val kanaAutoPlay = mutableStateOf(
-                    value = userPreferencesRepository.kanaAutoPlay.get()
+                val layout = LetterPracticeLayoutConfiguration.WritingLayoutConfiguration(
+                    noTranslationsLayout = configuration.noTranslationsLayout.value,
+                    radicalsHighlight = radicalsHighlight,
+                    kanaAutoPlay = kanaAutoPlay,
+                    leftHandedMode = configuration.leftHandedMode.value
                 )
-
-                snapshotFlow { kanaAutoPlay.value }
-                    .onEach { userPreferencesRepository.kanaAutoPlay.set(it) }
-                    .launchIn(configurationUpdateScope)
-
-                val layoutConfiguration =
-                    LetterPracticeLayoutConfiguration.WritingLayoutConfiguration(
-                        noTranslationsLayout = configuration.noTranslationsLayout.value,
-                        radicalsHighlight = radicalsHighlight,
-                        kanaAutoPlay = kanaAutoPlay,
-                        leftHandedMode = configuration.leftHandedMode.value
-                    )
 
                 val evaluator = when (configuration.altStrokeEvaluatorEnabled.value) {
                     true -> AltKanjiStrokeEvaluator()
                     false -> DefaultKanjiStrokeEvaluator()
                 }
 
-                configuration.selectorState.result
-                    .map { (character, deckId) ->
-                        val shouldStudy: Boolean = when (configuration.hintMode.value) {
-                            WritingPracticeHintMode.OnlyNew -> {
-                                letterSrsManager.getStatus(
-                                    character,
-                                    LetterPracticeType.Writing
-                                ).status == SrsItemStatus.New
-                            }
-
-                            WritingPracticeHintMode.All -> true
-                            WritingPracticeHintMode.None -> false
+                configuration.selectorState.result.map { (character, deckId) ->
+                    val shouldStudy: Boolean = when (configuration.hintMode.value) {
+                        WritingPracticeHintMode.OnlyNew -> {
+                            val srsData = letterSrsManager
+                                .getLetterSrsData(character, LetterPracticeType.Writing)
+                            srsData.status == SrsItemStatus.New
                         }
-                        LetterPracticeQueueItemDescriptor.Writing(
-                            character = character,
-                            deckId = deckId,
-                            romajiReading = configuration.useRomajiForKanaWords.value,
-                            layoutConfiguration = layoutConfiguration,
-                            inputMode = configuration.inputMode.value,
-                            evaluator = evaluator,
-                            shouldStudy = shouldStudy
-                        )
+
+                        WritingPracticeHintMode.All -> true
+                        WritingPracticeHintMode.None -> false
                     }
+                    LetterPracticeQueueItemDescriptor.Writing(
+                        character = character,
+                        deckId = deckId,
+                        romajiReading = configuration.useRomajiForKanaWords.value,
+                        layoutConfiguration = layout,
+                        inputMode = configuration.inputMode.value,
+                        evaluator = evaluator,
+                        shouldStudy = shouldStudy
+                    )
+                }
             }
 
-            is LetterPracticeConfiguration.Reading -> TODO()
+            is LetterPracticeConfiguration.Reading -> {
+
+                val layout = LetterPracticeLayoutConfiguration.ReadingLayoutConfiguration(
+                    kanaAutoPlay = kanaAutoPlay
+                )
+
+                configuration.selectorState.result.map { (character, deckId) ->
+                    LetterPracticeQueueItemDescriptor.Reading(
+                        character = character,
+                        deckId = deckId,
+                        romajiReading = configuration.useRomajiForKanaWords.value,
+                        layoutConfiguration = layout
+                    )
+                }
+
+            }
         }
     }
 

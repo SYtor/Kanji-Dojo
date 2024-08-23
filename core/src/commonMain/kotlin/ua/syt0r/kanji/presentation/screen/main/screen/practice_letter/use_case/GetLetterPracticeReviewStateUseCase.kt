@@ -53,6 +53,14 @@ class DefaultGetLetterPracticeReviewStateUseCase(
                     )
                 )
             }
+
+            is LetterPracticeQueueItemDescriptor.Reading -> {
+                LetterPracticeReviewState.Reading(
+                    layout = descriptor.layoutConfiguration,
+                    itemData = queueState.data as LetterPracticeItemData.ReadingData,
+                    answers = queueState.answers
+                )
+            }
         }
     }
 }

@@ -65,6 +65,13 @@ class DefaultLetterPracticeQueue(
                 )
             }
 
+            is LetterPracticeItemData.ReadingData -> {
+                LetterPracticeSummaryItem.Reading(
+                    letter = queueItem.descriptor.character,
+                    nextInterval = queueItem.srsCard.interval
+                )
+            }
+
             else -> error("Unsupported")
         }
     }

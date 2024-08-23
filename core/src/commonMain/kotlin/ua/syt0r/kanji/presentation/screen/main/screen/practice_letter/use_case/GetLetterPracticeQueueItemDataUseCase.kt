@@ -62,6 +62,15 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                     encodedWords = encodedWords
                 )
             }
+
+            is LetterPracticeQueueItemDescriptor.Reading -> {
+                getReadingItemData(
+                    character = descriptor.character,
+                    isKana = isKana,
+                    words = words,
+                    encodedWords = encodedWords
+                )
+            }
         }
     }
 
@@ -94,6 +103,46 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                     radicals = appDataRepository.getRadicalsInCharacter(character),
                     words = words,
                     encodedWords = encodedWords,
+                    on = readings.filter { it.value == ReadingType.ON }
+                        .keys
+                        .toList(),
+                    kun = readings.filter { it.value == ReadingType.KUN }
+                        .keys
+                        .toList(),
+                    meanings = appDataRepository.getMeanings(character),
+                    variants = appDataRepository.getData(character)
+                        ?.variantFamily
+                        ?.replace(character, "")
+                )
+            }
+        }
+    }
+
+    private suspend fun getReadingItemData(
+        character: String,
+        isKana: Boolean,
+        words: List<JapaneseWord>,
+        encodedWords: List<JapaneseWord>
+    ): LetterPracticeItemData.ReadingData {
+        return when {
+            isKana -> {
+                val kanaInfo = getKanaInfo(character.first())
+                LetterPracticeItemData.KanaReadingData(
+                    character = character,
+                    words = words,
+                    encodedWords = encodedWords,
+                    kanaSystem = kanaInfo.classification,
+                    reading = kanaInfo.reading
+                )
+            }
+
+            else -> {
+                val readings = appDataRepository.getReadings(character)
+                LetterPracticeItemData.KanjiReadingData(
+                    character = character,
+                    words = words,
+                    encodedWords = encodedWords,
+                    radicals = appDataRepository.getRadicalsInCharacter(character),
                     on = readings.filter { it.value == ReadingType.ON }
                         .keys
                         .toList(),

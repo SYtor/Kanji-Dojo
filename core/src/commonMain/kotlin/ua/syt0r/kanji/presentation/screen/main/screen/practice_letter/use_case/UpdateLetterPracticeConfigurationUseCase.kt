@@ -23,7 +23,9 @@ class DefaultUpdateLetterPracticeConfigurationUseCase(
                 altStrokeEvaluator.set(configuration.altStrokeEvaluatorEnabled.value)
             }
 
-            is LetterPracticeConfiguration.Reading -> TODO()
+            is LetterPracticeConfiguration.Reading -> {
+                readingRomajiFuriganaForKanaWords.set(configuration.useRomajiForKanaWords.value)
+            }
         }
     }
 }

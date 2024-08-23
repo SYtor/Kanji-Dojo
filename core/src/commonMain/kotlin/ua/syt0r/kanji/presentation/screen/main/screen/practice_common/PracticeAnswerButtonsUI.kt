@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -186,6 +188,79 @@ fun ExpandablePracticeAnswerButtonsRow(
 
     }
 
+}
+
+@Composable
+fun FlashcardPracticeAnswerButtonsRow(
+    answers: PracticeAnswers,
+    showAnswer: State<Boolean>,
+    onRevealAnswerClick: () -> Unit,
+    onAnswerClick: (PracticeAnswer) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier.width(IntrinsicSize.Max)
+            .height(IntrinsicSize.Max)
+    ) {
+
+        val hiddenButton = @Composable { isVisible: Boolean ->
+            val focusRequester = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+            val themeModifier = when (LocalThemeManager.current.isDarkTheme) {
+                true -> Modifier.padding(4.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+
+                false -> Modifier.shadow(2.dp, MaterialTheme.shapes.medium)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surface)
+
+            }
+
+            Text(
+                text = resolveString { vocabPractice.flashcardRevealButton },
+                modifier = Modifier.fillMaxSize()
+                    .graphicsLayer { if (!isVisible) alpha = 0f }
+                    .padding(horizontal = 20.dp)
+                    .then(themeModifier)
+                    .focusable()
+                    .focusRequester(focusRequester)
+                    .onKeyEvent {
+                        if (it.type == KeyEventType.KeyUp && it.key == Key.Spacebar) {
+                            onRevealAnswerClick()
+                            true
+                        } else false
+                    }
+                    .clickable(onClick = onRevealAnswerClick)
+                    .wrapContentSize()
+            )
+        }
+
+        val revealedButton = @Composable { isVisible: Boolean ->
+            PracticeAnswerButtonsRow(
+                answers = answers,
+                onClick = { if (isVisible) onAnswerClick(it) },
+                modifier = Modifier.graphicsLayer { if (!isVisible) alpha = 0f },
+                contentModifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
+
+        // Laying out both for static button size
+        when (showAnswer.value) {
+            false -> {
+                revealedButton(false)
+                hiddenButton(true)
+            }
+
+            true -> {
+                hiddenButton(false)
+                revealedButton(true)
+            }
+        }
+
+    }
 }
 
 @Composable
