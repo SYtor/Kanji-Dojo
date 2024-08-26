@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.app_data
 
 import kotlinx.coroutines.Deferred
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.FuriganaDBEntity
@@ -60,6 +59,16 @@ class SqlDelightAppDataRepository(
                 readingData.reading to ReadingType.values()
                     .find { it.value == readingData.reading_type }!!
             }
+    }
+
+    override suspend fun getClassificationsForKanji(kanji: String): List<String> = runTransaction {
+        getClassificationsForKanji(kanji).executeAsList()
+    }
+
+    override suspend fun getKanjiForClassification(
+        classification: String
+    ): List<String> = runTransaction {
+        getKanjiWithClassification(classification).executeAsList()
     }
 
     override suspend fun getCharacterReadingsOfLength(
@@ -139,6 +148,16 @@ class SqlDelightAppDataRepository(
 
     override suspend fun getWord(id: Long): JapaneseWord = runTransaction {
         getWord(id)
+    }
+
+    override suspend fun getWordClassifications(id: Long): List<String> = runTransaction {
+        getClassificationsForExpression(id).executeAsList()
+    }
+
+    override suspend fun getWordsWithClassification(
+        classification: String
+    ): List<Long> = runTransaction {
+        getExpressionsWithClassification(classification).executeAsList()
     }
 
     override suspend fun getRadicals(): List<RadicalData> = runTransaction {

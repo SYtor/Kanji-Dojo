@@ -1,22 +1,23 @@
 package ua.syt0r.kanji.core.japanese
 
+import ua.syt0r.kanji.core.app_data.AppDataRepository
+
 interface CharacterClassifier {
-    fun get(character: String): List<CharacterClassification>
+    suspend fun get(character: String): List<CharacterClassification>
 }
 
-class DefaultCharacterClassifier : CharacterClassifier {
+class DefaultCharacterClassifier(
+    private val appDataRepository: AppDataRepository
+) : CharacterClassifier {
 
-    private val allClassifications = CharacterClassification.Kana.all +
-            CharacterClassification.JLPT.all +
-            CharacterClassification.Grade.all +
-            CharacterClassification.Wanikani.all
-
-    private val sets by lazy {
-        allClassifications.associateBy { it.characters.toSet() }
-    }
-
-    override fun get(character: String): List<CharacterClassification> {
-        return sets.filter { it.key.contains(character) }.values.toList()
+    override suspend fun get(character: String): List<CharacterClassification> {
+        val char = character.first()
+        return when {
+            char.isHiragana() -> listOf(CharacterClassification.Kana.Hiragana)
+            char.isKatakana() -> listOf(CharacterClassification.Kana.Katakana)
+            else -> appDataRepository.getClassificationsForKanji(character)
+                .map { CharacterClassification.DBDefined.fromDbValue(it) }
+        }
     }
 
 }

@@ -35,9 +35,18 @@ fun DeckPickerScreen(
             val destination = MainDestination.DeckEdit(deckEditConfiguration)
             mainNavigationState.navigate(destination)
         },
-        onItemSelected = { classification, title ->
+        onLetterDeckClick = { classification, title ->
             val destination = MainDestination.DeckEdit(
                 DeckEditScreenConfiguration.LetterDeck.CreateDerived(
+                    title = title,
+                    classification = classification
+                )
+            )
+            mainNavigationState.navigate(destination)
+        },
+        onVocabDeckClick = { classification, title ->
+            val destination = MainDestination.DeckEdit(
+                DeckEditScreenConfiguration.VocabDeck.CreateDerived(
                     title = title,
                     classification = classification
                 )

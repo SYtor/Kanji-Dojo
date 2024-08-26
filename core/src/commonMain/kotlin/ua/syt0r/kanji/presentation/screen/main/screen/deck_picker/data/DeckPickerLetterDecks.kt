@@ -5,13 +5,13 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 
 
-private val HiraganaImportItem = DeckPickerDeck(
+private val HiraganaImportItem = LetterDeckPickerDeck(
     previewText = "あ",
     title = { deckPicker.hiragana },
     classification = CharacterClassification.Kana.Hiragana
 )
 
-private val KatakanaImportItem = DeckPickerDeck(
+private val KatakanaImportItem = LetterDeckPickerDeck(
     previewText = "ア",
     title = { deckPicker.katakana },
     classification = CharacterClassification.Kana.Katakana
@@ -27,10 +27,10 @@ private val KanaDeckPickerCategory = DeckPickerCategory(
 )
 
 private val JlptPreviewKanjiList = listOf("一", "言", "合", "軍", "及")
-private val JlptImportItems: List<DeckPickerDeck> = CharacterClassification.JLPT.all
+private val JlptImportItems: List<LetterDeckPickerDeck> = CharacterClassification.JLPT.all
     .zip(JlptPreviewKanjiList)
     .map { (jlpt, previewChar) ->
-        DeckPickerDeck(
+        LetterDeckPickerDeck(
             previewText = previewChar,
             title = { deckPicker.jlptItem(jlpt.level) },
             classification = jlpt
@@ -47,10 +47,10 @@ private val JlptDeckPickerCategory = DeckPickerCategory(
 )
 
 private val GradePreviewKanji = "一万丁不久並丈丑乘".toList()
-private val GradeImportItems: List<DeckPickerDeck> = CharacterClassification.Grade.all
+private val GradeImportItems: List<LetterDeckPickerDeck> = CharacterClassification.Grade.all
     .zip(GradePreviewKanji)
     .map { (grade, char) ->
-        DeckPickerDeck(
+        LetterDeckPickerDeck(
             previewText = char.toString(),
             title = { deckPicker.getGradeItem(grade.number) },
             classification = grade
@@ -69,10 +69,10 @@ private val GradeDeckPickerCategory = DeckPickerCategory(
 private val WanikaniPreviewKanji =
     "上玉矢竹角全辺答受進功悪皆能紀浴是告得裕責援演庁慣接怒攻略更帯酸灰豆熊諾患伴控拉棄析襲刃頃墨幣遂概偶又祥諭庶累匠盲陪亜煩"
         .toList()
-private val WanikaniImportItems: List<DeckPickerDeck> = CharacterClassification.Wanikani.all
+private val WanikaniImportItems: List<LetterDeckPickerDeck> = CharacterClassification.Wanikani.all
     .zip(WanikaniPreviewKanji)
     .map { (classification, char) ->
-        DeckPickerDeck(
+        LetterDeckPickerDeck(
             previewText = char.toString(),
             title = { deckPicker.wanikaniItem(classification.level) },
             classification = classification

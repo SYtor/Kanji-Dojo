@@ -31,6 +31,22 @@ CREATE TABLE kanji_meaning(
     PRIMARY KEY (kanji, meaning, priority)
 );
 
+CREATE TABLE kanji_classification(
+    kanji    TEXT NOT NULL,
+    class    TEXT NOT NULL,
+    PRIMARY KEY (kanji, class)
+);
+
+getClassificationsForKanji:
+SELECT class
+FROM kanji_classification
+WHERE kanji = ?;
+
+getKanjiWithClassification:
+SELECT kanji
+FROM kanji_classification
+WHERE class = ?;
+
 CREATE TABLE kanji_radical(
     kanji         TEXT NOT NULL,
     radical       TEXT NOT NULL,
@@ -59,6 +75,22 @@ CREATE TABLE expression_meaning(
     priority        INTEGER    NOT NULL,
     PRIMARY KEY (expression_id, meaning, priority)
 );
+
+CREATE TABLE expression_classification(
+    expression_id   INTEGER    NOT NULL,
+    classification  TEXT       NOT NULL,
+    PRIMARY KEY (expression_id, classification)
+);
+
+getClassificationsForExpression:
+SELECT classification
+FROM expression_classification
+WHERE expression_id = ?;
+
+getExpressionsWithClassification:
+SELECT expression_id
+FROM expression_classification
+WHERE classification = ?;
 
 getStrokes:
 SELECT stroke_path FROM character_stroke WHERE character = ? ORDER BY stroke_number;

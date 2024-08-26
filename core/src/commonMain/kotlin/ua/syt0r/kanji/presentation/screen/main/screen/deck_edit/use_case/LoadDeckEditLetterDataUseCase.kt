@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.dakutenHiraganaReadings
 import ua.syt0r.kanji.core.japanese.hiraganaReadings
@@ -23,7 +24,8 @@ data class DeckEditLetterData(
 )
 
 class DefaultLoadDeckEditLetterDataUseCase(
-    private val repository: LetterPracticeRepository
+    private val letterPracticeRepository: LetterPracticeRepository,
+    private val appDataRepository: AppDataRepository
 ) : LoadDeckEditLetterDataUseCase {
 
     override suspend operator fun invoke(
@@ -49,7 +51,12 @@ class DefaultLoadDeckEditLetterDataUseCase(
                         }
                     }
 
-                    else -> classification.characters
+                    else -> {
+                        classification as CharacterClassification.DBDefined
+                        appDataRepository.getKanjiForClassification(
+                            classification = classification.dbValue
+                        )
+                    }
                 }
 
                 DeckEditLetterData(
@@ -59,8 +66,9 @@ class DefaultLoadDeckEditLetterDataUseCase(
             }
 
             is DeckEditScreenConfiguration.LetterDeck.Edit -> {
-                val deck = repository.getDeck(configuration.letterDeckId)
-                val characters = repository.getDeckCharacters(configuration.letterDeckId)
+                val deck = letterPracticeRepository.getDeck(configuration.letterDeckId)
+                val characters =
+                    letterPracticeRepository.getDeckCharacters(configuration.letterDeckId)
                 DeckEditLetterData(
                     title = deck.name,
                     characters = characters

@@ -35,9 +35,11 @@ class DefaultLoadDeckEditVocabDataUseCase(
             }
 
             is DeckEditScreenConfiguration.VocabDeck.CreateDerived -> {
+                val classificationValue = configuration.classification.dbValue
                 DeckEditVocabData(
                     title = configuration.title,
-                    words = configuration.words.map { appDataRepository.getWord(it) }
+                    words = appDataRepository.getWordsWithClassification(classificationValue)
+                        .map { appDataRepository.getWord(it) }
                 )
             }
 

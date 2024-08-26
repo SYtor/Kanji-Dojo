@@ -17,7 +17,8 @@ val deckEditScreenModule = module {
 
     factory<LoadDeckEditLetterDataUseCase> {
         DefaultLoadDeckEditLetterDataUseCase(
-            repository = get()
+            letterPracticeRepository = get(),
+            appDataRepository = get()
         )
     }
 

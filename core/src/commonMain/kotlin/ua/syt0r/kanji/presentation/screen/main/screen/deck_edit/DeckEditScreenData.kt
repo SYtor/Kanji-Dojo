@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.serialization.Serializable
+import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
@@ -44,7 +45,7 @@ sealed interface DeckEditScreenConfiguration {
         @Serializable
         data class CreateDerived(
             val title: String,
-            val words: List<Long>
+            val classification: WordClassification
         ) : VocabDeck
 
         @Serializable

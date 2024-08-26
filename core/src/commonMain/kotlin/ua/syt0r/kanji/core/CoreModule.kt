@@ -115,7 +115,7 @@ val coreModule = module {
         ThemeManager(userPreferencesRepository = get())
     }
 
-    single<CharacterClassifier> { DefaultCharacterClassifier() }
+    single<CharacterClassifier> { DefaultCharacterClassifier(appDataRepository = get()) }
 
     factory<RomajiConverter> { WanakanaRomajiConverter() }
 

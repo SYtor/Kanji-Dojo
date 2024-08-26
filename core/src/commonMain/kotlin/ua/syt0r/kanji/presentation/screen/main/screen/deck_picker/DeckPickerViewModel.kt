@@ -1,14 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.DeckPickerScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerLetterCategories
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerVocabCategories
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.use_case.GetDeckPickerCategoriesUseCase
 
 
-class DeckPickerViewModel : DeckPickerScreenContract.ViewModel {
+class DeckPickerViewModel(
+    private val viewModelScope: CoroutineScope,
+    private val getDeckPickerCategoriesUseCase: GetDeckPickerCategoriesUseCase
+) : DeckPickerScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val state: StateFlow<ScreenState> = _state
@@ -17,11 +21,12 @@ class DeckPickerViewModel : DeckPickerScreenContract.ViewModel {
 
     override fun loadData(configuration: DeckPickerScreenConfiguration) {
         if (::configuration.isInitialized) return
-
         this.configuration = configuration
-        _state.value = when (configuration) {
-            DeckPickerScreenConfiguration.Letters -> ScreenState.Loaded(DeckPickerLetterCategories)
-            DeckPickerScreenConfiguration.Vocab -> ScreenState.Loaded(DeckPickerVocabCategories)
+
+        viewModelScope.launch {
+            _state.value = ScreenState.Loaded(
+                categories = getDeckPickerCategoriesUseCase(configuration)
+            )
         }
     }
 
