@@ -88,7 +88,7 @@ fun WritingPracticeInputSection(
     ) {
 
         val transition = updateTransition(
-            targetState = state.value,
+            targetState = writerState.value,
             label = "Different Characters Transition"
         )
 
@@ -100,10 +100,10 @@ fun WritingPracticeInputSection(
                     initialContentExit = fadeOut()
                 )
             }
-        ) { data ->
+        ) { currentWriterState ->
 
             CharacterWriter(
-                state = writerState.value,
+                state = currentWriterState,
                 modifier = Modifier.fillMaxSize()
             )
 
