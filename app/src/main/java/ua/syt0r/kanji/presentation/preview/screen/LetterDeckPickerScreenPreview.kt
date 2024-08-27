@@ -29,7 +29,8 @@ private fun ScreenPreview(
             state = rememberUpdatedState(screenState),
             onUpButtonClick = {},
             createEmpty = {},
-            onItemSelected = { _, _ -> },
+            onLetterDeckClick = { _, _ -> },
+            onVocabDeckClick = { _, _ -> },
             onLinkClick = {}
         )
     }

@@ -78,12 +78,23 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabR
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
     answers: PracticeAnswers,
-    onNextClick: (PracticeAnswer) -> Unit,
+    answerSelected: (PracticeAnswer) -> Unit,
     onWordClick: (JapaneseWord) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
     AutoSwitchSelectedItemLaunchedEffect(reviewState)
+
+    val handleAnswer = { answer: PracticeAnswer ->
+        val updatedAnswer = answer.copy(
+            mistakes = reviewState.charactersData
+                .filterIsInstance<VocabCharacterWritingData.WithStrokes>()
+                .map { it.writerState.progress.value }
+                .filterIsInstance<CharacterWritingProgress.Completed>()
+                .sumOf { it.mistakes }
+        )
+        answerSelected(updatedAnswer)
+    }
 
     val revealAnswer = remember(reviewState) {
         derivedStateOf {
@@ -125,7 +136,7 @@ fun VocabPracticeWritingUI(
                         Input(
                             state = selectedReviewState,
                             answersState = answersRowState,
-                            onNextClick = onNextClick,
+                            answerSelected = handleAnswer,
                             modifier = Modifier.fillMaxWidth()
                                 .padding(20.dp)
                                 .wrapContentSize()
@@ -161,7 +172,7 @@ fun VocabPracticeWritingUI(
                     Input(
                         state = selectedReviewState,
                         answersState = answersRowState,
-                        onNextClick = onNextClick,
+                        answerSelected = handleAnswer,
                         modifier = Modifier.weight(1f)
                             .fillMaxHeight()
                             .padding(20.dp)
@@ -242,7 +253,7 @@ private fun Progress(
 private fun Input(
     state: State<VocabCharacterWritingData>,
     answersState: State<ExpandableVocabPracticeAnswersRowState>,
-    onNextClick: (PracticeAnswer) -> Unit,
+    answerSelected: (PracticeAnswer) -> Unit,
     modifier: Modifier
 ) {
 
@@ -271,7 +282,7 @@ private fun Input(
 
         ExpandablePracticeAnswerButtonsRow(
             state = answersState,
-            onClick = onNextClick,
+            onClick = answerSelected,
             modifier = Modifier.fillMaxWidth()
                 .height(IntrinsicSize.Max)
                 .align(Alignment.BottomCenter)

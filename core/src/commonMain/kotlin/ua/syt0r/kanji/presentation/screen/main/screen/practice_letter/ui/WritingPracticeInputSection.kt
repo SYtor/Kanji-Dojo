@@ -45,7 +45,10 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.Lette
 private sealed interface LetterWritingButtonsState {
     object Hidden : LetterWritingButtonsState
     object StudyButtons : LetterWritingButtonsState
-    data class DefaultButtons(val answers: PracticeAnswers) : LetterWritingButtonsState
+    data class DefaultButtons(
+        val answers: PracticeAnswers,
+        val mistakes: Int
+    ) : LetterWritingButtonsState
 }
 
 @Composable
@@ -59,7 +62,10 @@ private fun State<LetterPracticeReviewState.Writing>.toAnswerButtonsState(): Sta
             when {
                 progress is CharacterWritingProgress.Completed.Idle -> {
                     if (currentState.isStudyMode.value) LetterWritingButtonsState.StudyButtons
-                    else LetterWritingButtonsState.DefaultButtons(currentState.answers)
+                    else LetterWritingButtonsState.DefaultButtons(
+                        answers = currentState.answers,
+                        mistakes = progress.mistakes
+                    )
                 }
 
                 else -> LetterWritingButtonsState.Hidden
@@ -128,7 +134,7 @@ private fun BoxScope.AnswerButtons(
         },
         contentKey = { it !is LetterWritingButtonsState.Hidden },
         modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
-    ) {
+    ) { writingButtonsState ->
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -136,7 +142,7 @@ private fun BoxScope.AnswerButtons(
             horizontalArrangement = Arrangement.End
         ) {
 
-            when (it) {
+            when (writingButtonsState) {
                 LetterWritingButtonsState.Hidden -> {
 
                 }
@@ -154,8 +160,11 @@ private fun BoxScope.AnswerButtons(
 
                 is LetterWritingButtonsState.DefaultButtons -> {
                     PracticeAnswerButtonsRow(
-                        answers = it.answers,
-                        onClick = answerSelected,
+                        answers = writingButtonsState.answers,
+                        onClick = {
+                            val updatedAnswer = it.copy(mistakes = writingButtonsState.mistakes)
+                            answerSelected(updatedAnswer)
+                        },
                         contentModifier = Modifier.padding(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )

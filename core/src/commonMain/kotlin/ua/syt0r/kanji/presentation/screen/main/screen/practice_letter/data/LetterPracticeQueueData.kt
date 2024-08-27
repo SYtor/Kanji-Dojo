@@ -1,12 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.Deferred
 import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
@@ -23,9 +22,7 @@ sealed interface LetterPracticeQueueState {
         val data: LetterPracticeItemData,
         val currentItemRepeat: Int,
         val progress: PracticeQueueProgress,
-        val answers: PracticeAnswers,
-        val totalMistakes: MutableState<Int>,
-        val currentReviewMistakes: MutableState<Int>
+        val answers: PracticeAnswers
     ) : LetterPracticeQueueState
 
     data class Summary(
@@ -72,14 +69,16 @@ data class LetterPracticeQueueItem(
     override val srsCard: SrsCard,
     override val deckId: Long,
     override val repeats: Int,
-    override val data: Deferred<LetterPracticeItemData>,
-    val totalMistakes: MutableState<Int> // TODO better extra review data handling
+    override val totalMistakes: Int,
+    override val data: Deferred<LetterPracticeItemData>
 ) : PracticeQueueItem<LetterPracticeQueueItem> {
 
-    val currentReviewMistakes: MutableState<Int> = mutableStateOf(0)
-
-    override fun copyForRepeat(srsCard: SrsCard): LetterPracticeQueueItem {
-        return copy(srsCard = srsCard, repeats = repeats + 1)
+    override fun copyForRepeat(answer: PracticeAnswer): LetterPracticeQueueItem {
+        return copy(
+            srsCard = answer.srsAnswer.card,
+            repeats = repeats + 1,
+            totalMistakes = totalMistakes + answer.mistakes
+        )
     }
 
 }

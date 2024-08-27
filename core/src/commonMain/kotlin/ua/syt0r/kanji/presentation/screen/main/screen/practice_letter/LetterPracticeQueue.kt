@@ -1,11 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter
 
-import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -43,7 +43,7 @@ class DefaultLetterPracticeQueue(
             srsCard = srsItemRepository.get(srsCardKey) ?: srsScheduler.newCard(),
             deckId = deckId,
             repeats = 0,
-            totalMistakes = mutableStateOf(0),
+            totalMistakes = 0,
             data = coroutineScope.async(
                 context = Dispatchers.IO,
                 start = CoroutineStart.LAZY
@@ -61,7 +61,7 @@ class DefaultLetterPracticeQueue(
                     letter = queueItem.descriptor.character,
                     nextInterval = queueItem.srsCard.interval,
                     strokeCount = data.strokes.size,
-                    mistakes = queueItem.totalMistakes.value,
+                    mistakes = queueItem.totalMistakes,
                 )
             }
 
@@ -78,16 +78,17 @@ class DefaultLetterPracticeQueue(
 
     override suspend fun saveReviewHistory(
         queueItem: LetterPracticeQueueItem,
-        answer: PracticeAnswer
+        answer: PracticeAnswer,
+        reviewStart: Instant
     ) {
         val instant = timeUtils.now()
         val item = ReviewHistoryItem(
             key = queueItem.srsCardKey.itemKey,
             practiceType = queueItem.srsCardKey.practiceType,
             timestamp = instant,
-            duration = instant - currentReviewStartInstant,
+            duration = instant - reviewStart,
             grade = answer.srsAnswer.grade,
-            mistakes = queueItem.currentReviewMistakes.value,
+            mistakes = answer.mistakes,
             deckId = queueItem.deckId
         )
         reviewHistoryRepository.addReview(item)
@@ -106,9 +107,7 @@ class DefaultLetterPracticeQueue(
             data = item.data.await(),
             currentItemRepeat = item.repeats,
             progress = getProgress(),
-            answers = answers,
-            totalMistakes = item.totalMistakes,
-            currentReviewMistakes = item.currentReviewMistakes
+            answers = answers
         )
     }
 

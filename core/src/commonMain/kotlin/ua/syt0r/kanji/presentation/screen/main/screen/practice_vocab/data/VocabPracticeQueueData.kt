@@ -13,6 +13,7 @@ import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueueProgress
@@ -41,11 +42,16 @@ data class VocabPracticeQueueItem(
     override val srsCard: SrsCard,
     override val deckId: Long,
     override val repeats: Int,
+    override val totalMistakes: Int,
     override val data: Deferred<VocabPracticeItemData>,
 ) : PracticeQueueItem<VocabPracticeQueueItem> {
 
-    override fun copyForRepeat(srsCard: SrsCard): VocabPracticeQueueItem {
-        return copy(srsCard = srsCard, repeats = repeats + 1)
+    override fun copyForRepeat(answer: PracticeAnswer): VocabPracticeQueueItem {
+        return copy(
+            srsCard = answer.srsAnswer.card,
+            repeats = repeats + 1,
+            totalMistakes = totalMistakes + answer.mistakes
+        )
     }
 
 }

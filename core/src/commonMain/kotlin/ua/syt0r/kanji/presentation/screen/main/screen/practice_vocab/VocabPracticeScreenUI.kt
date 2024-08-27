@@ -269,7 +269,7 @@ private fun ScreenReview(
                 VocabPracticeWritingUI(
                     reviewState = currentState,
                     answers = reviewState.answers,
-                    onNextClick = onNextClick,
+                    answerSelected = onNextClick,
                     onWordClick = { alternativeWordsDialogWord = it },
                     onFeedbackClick = onFeedbackClick
                 )

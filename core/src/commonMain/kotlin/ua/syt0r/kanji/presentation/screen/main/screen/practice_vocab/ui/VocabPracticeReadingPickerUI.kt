@@ -121,7 +121,12 @@ fun VocabPracticeReadingPickerUI(
                     )
                 }
             },
-            onClick = onNextClick,
+            onClick = {
+                val updatedAnswer = it.copy(
+                    mistakes = if (selectedAnswer!!.isCorrect) 0 else 1
+                )
+                onNextClick(updatedAnswer)
+            },
             modifier = Modifier.width(IntrinsicSize.Max)
         )
     }

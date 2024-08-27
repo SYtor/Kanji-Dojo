@@ -37,9 +37,10 @@ interface PracticeQueueItem<T : PracticeQueueItem<T>> {
     val srsCard: SrsCard
     val deckId: Long
     val repeats: Int
+    val totalMistakes: Int
     val data: Deferred<Any>
 
-    fun copyForRepeat(srsCard: SrsCard): T
+    fun copyForRepeat(answer: PracticeAnswer): T
 
 }
 
@@ -65,7 +66,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     protected open lateinit var queue: MutableList<QueueItem>
 
     protected lateinit var practiceStartInstant: Instant
-    protected lateinit var currentReviewStartInstant: Instant
+    private lateinit var currentReviewStartInstant: Instant
 
     protected val summaryItems = mutableMapOf<SrsCardKey, SummaryItem>()
 
@@ -84,7 +85,11 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
 
     protected abstract suspend fun Descriptor.toQueueItem(): QueueItem
     protected abstract fun createSummaryItem(queueItem: QueueItem): SummaryItem
-    protected abstract suspend fun saveReviewHistory(queueItem: QueueItem, answer: PracticeAnswer)
+    protected abstract suspend fun saveReviewHistory(
+        queueItem: QueueItem,
+        answer: PracticeAnswer,
+        reviewStart: Instant
+    )
 
     protected abstract fun getLoadingState(): State
     protected abstract suspend fun getReviewState(item: QueueItem, answers: PracticeAnswers): State
@@ -123,7 +128,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
 
     private suspend fun handleAnswer(answer: PracticeAnswer) {
         val item = queue.removeFirstOrNull() ?: return
-        val updatedItem = item.copyForRepeat(srsCard = answer.srsAnswer.card)
+        val updatedItem = item.copyForRepeat(answer)
 
         saveSummaryData(updatedItem)
 
@@ -131,10 +136,12 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
             placeItemBackToQueue(updatedItem)
         }
 
+        val lastReviewStart = currentReviewStartInstant
+
         updateState()
 
-        saveReviewHistory(item, answer)
         srsItemRepository.update(item.srsCardKey, answer.srsAnswer.card)
+        saveReviewHistory(item, answer, lastReviewStart)
     }
 
     private suspend fun updateState() {

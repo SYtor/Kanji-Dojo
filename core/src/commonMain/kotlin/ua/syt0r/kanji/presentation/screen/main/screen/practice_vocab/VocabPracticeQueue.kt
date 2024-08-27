@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -48,6 +49,7 @@ class DefaultVocabPracticeQueue(
             srsCard = srsItemRepository.get(srsCardKey) ?: srsScheduler.newCard(),
             deckId = deckId,
             repeats = 0,
+            totalMistakes = 0,
             data = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
                 when (this@toQueueItem) {
                     is VocabPracticeQueueItemDescriptor.Flashcard -> {
@@ -68,16 +70,17 @@ class DefaultVocabPracticeQueue(
 
     override suspend fun saveReviewHistory(
         queueItem: VocabPracticeQueueItem,
-        answer: PracticeAnswer
+        answer: PracticeAnswer,
+        reviewStart: Instant
     ) {
         val instant = timeUtils.now()
         val reviewHistoryItem = ReviewHistoryItem(
             key = queueItem.srsCardKey.itemKey,
             practiceType = queueItem.srsCardKey.practiceType,
             timestamp = instant,
-            duration = instant - currentReviewStartInstant,
+            duration = instant - reviewStart,
             grade = answer.srsAnswer.grade,
-            mistakes = 0,
+            mistakes = answer.mistakes,
             deckId = queueItem.deckId
         )
         reviewHistoryRepository.addReview(reviewHistoryItem)

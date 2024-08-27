@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.take
@@ -18,7 +17,6 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.tts.KanaTtsManager
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeItemData
@@ -115,20 +113,9 @@ class LetterPracticeViewModel(
     }
 
     private fun LetterPracticeQueueState.Review.toScreenState(): ScreenState.Review {
-        val reviewState = getReviewStateUseCase(this)
-        if (reviewState is LetterPracticeReviewState.Writing) {
-            snapshotFlow { reviewState.reviewWriterState.progress.value }
-                .filterIsInstance<CharacterWritingProgress.Completed>()
-                .take(1)
-                .onEach {
-                    totalMistakes.value += it.mistakes
-                    currentReviewMistakes.value = it.mistakes
-                }
-                .launchIn(viewModelScope)
-        }
         return ScreenState.Review(
             practiceProgress = progress,
-            reviewState = reviewState
+            reviewState = getReviewStateUseCase(this)
         )
     }
 

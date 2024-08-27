@@ -58,7 +58,8 @@ data class PracticeAnswers(
 )
 
 data class PracticeAnswer(
-    val srsAnswer: SrsAnswer
+    val srsAnswer: SrsAnswer,
+    val mistakes: Int = 0
 )
 
 @Composable
