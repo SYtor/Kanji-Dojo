@@ -192,8 +192,15 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
 
         item {
             InfoCard(
-                title = statsData.totalCharactersStudied.toString(),
+                title = statsData.uniqueLettersStudied.toString(),
                 subtitle = strings.charactersStudiedTitle
+            )
+        }
+
+        item {
+            InfoCard(
+                title = statsData.uniqueWordsStudied.toString(),
+                subtitle = "Unique words studied"
             )
         }
 
@@ -361,7 +368,10 @@ private fun MonthCalendar(today: LocalDate, reviewDates: Map<LocalDate, Int>) {
             DayLabels.forEach {
                 Text(
                     text = it,
-                    modifier = Modifier.size(45.dp).wrapContentSize(),
+                    modifier = Modifier.weight(1f)
+                        .wrapContentWidth()
+                        .size(45.dp)
+                        .wrapContentSize(),
                     style = MaterialTheme.typography.titleMedium,
                     fontSize = 22.textDp
                 )
@@ -379,6 +389,8 @@ private fun MonthCalendar(today: LocalDate, reviewDates: Map<LocalDate, Int>) {
                     Text(
                         text = it.dayNumber.toString(),
                         modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth()
                             .drawBehind {
                                 if (it !is MonthCalendarItem.DayFromCurrentMonth) {
                                     return@drawBehind

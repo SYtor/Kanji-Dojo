@@ -23,7 +23,8 @@ private val fakeData = StatsScreenContract.ScreenState.Loaded(
         todayTimeSpent = 205.seconds,
         totalReviews = 200,
         totalTimeSpent = 60004.seconds,
-        totalCharactersStudied = Random.nextInt(0, 200)
+        uniqueLettersStudied = Random.nextInt(0, 200),
+        uniqueWordsStudied = Random.nextInt(0, 200),
     )
 )
 

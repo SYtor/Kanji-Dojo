@@ -11,7 +11,7 @@ interface ReviewHistoryRepository {
     suspend fun getReviews(start: Instant, end: Instant): List<ReviewHistoryItem>
     suspend fun getFirstReviewTime(key: String, practiceType: Long): Instant?
     suspend fun getTotalReviewsCount(): Long
-    suspend fun getTotalReviewsCount(practiceTypes: List<Long>): Long
+    suspend fun getUniqueReviewItemsCount(practiceTypes: List<Long>): Long
     suspend fun getTotalPracticeTime(singleReviewDurationLimit: Long): Duration
 }
 
@@ -68,10 +68,10 @@ class SqlDelightReviewHistoryRepository(
         getTotalReviewsCount().executeAsOne()
     }
 
-    override suspend fun getTotalReviewsCount(
+    override suspend fun getUniqueReviewItemsCount(
         practiceTypes: List<Long>
     ): Long = userDataDatabaseManager.runTransaction {
-        getTotalReviewsCountForPracticeTypes(practiceTypes).executeAsOne()
+        getUniqueReviewItemsCountForPracticeTypes(practiceTypes).executeAsOne()
     }
 
     override suspend fun getTotalPracticeTime(

@@ -9,7 +9,9 @@ import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
+import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.srs.LetterSrsManager
+import ua.syt0r.kanji.core.srs.VocabPracticeType
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryItem
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
@@ -28,7 +30,8 @@ data class StatsData(
     val todayTimeSpent: Duration,
     val totalReviews: Int,
     val totalTimeSpent: Duration,
-    val totalCharactersStudied: Int
+    val uniqueLettersStudied: Int,
+    val uniqueWordsStudied: Int
 )
 
 class DefaultSubscribeOnStatsDataUseCase(
@@ -78,8 +81,11 @@ class DefaultSubscribeOnStatsDataUseCase(
                 .toInt(),
             totalTimeSpent = reviewHistoryRepository
                 .getTotalPracticeTime(SingleReviewDurationLimit.inWholeMilliseconds),
-            totalCharactersStudied = reviewHistoryRepository
-                .getTotalReviewsCount()
+            uniqueLettersStudied = reviewHistoryRepository
+                .getUniqueReviewItemsCount(LetterPracticeType.srsPracticeTypeValues)
+                .toInt(),
+            uniqueWordsStudied = reviewHistoryRepository
+                .getUniqueReviewItemsCount(VocabPracticeType.srsPracticeTypeValues)
                 .toInt()
         )
     }
