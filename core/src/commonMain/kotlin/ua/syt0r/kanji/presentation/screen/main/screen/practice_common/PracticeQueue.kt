@@ -175,10 +175,10 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
             .indexOfFirst { nextReviewTime < it }
             .takeIf { it != -1 }
             ?.let {
-                if (it == 0 && queue.size > 0) min(2, queue.size)
-                else min(it, 10)
+                if (it == 0 && queue.size > 0) min(MIN_QUEUE_POSITION_SHIFT - 1, queue.size)
+                else min(it, MAX_QUEUE_POSITION_SHIFT - 1)
             }
-            ?: min(queue.size, 10)
+            ?: min(queue.size, MAX_QUEUE_POSITION_SHIFT - 1)
 
         queue.add(insertPosition, updatedQueueItem)
     }
@@ -190,6 +190,11 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     private fun saveSummaryData(queueItem: QueueItem) {
         val summaryItem = createSummaryItem(queueItem)
         summaryItems[queueItem.srsCardKey] = summaryItem
+    }
+
+    companion object {
+        private const val MIN_QUEUE_POSITION_SHIFT = 3
+        private const val MAX_QUEUE_POSITION_SHIFT = 10
     }
 
 }
