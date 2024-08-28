@@ -19,7 +19,6 @@ class SqlDelightVocabPracticeRepository(
     override val changesFlow: SharedFlow<Unit> = mergeSharedFlows(
         coroutineScope,
         _changesFlow,
-        databaseManager.databaseChangeFlow,
         srsItemRepository.updatesFlow
     )
 

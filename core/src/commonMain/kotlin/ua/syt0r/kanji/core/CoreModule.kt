@@ -3,6 +3,7 @@ package ua.syt0r.kanji.core
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
@@ -10,6 +11,9 @@ import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
 import ua.syt0r.kanji.core.backup.BackupManager
+import ua.syt0r.kanji.core.backup.BackupRestoreCompletionNotifier
+import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
+import ua.syt0r.kanji.core.backup.BackupRestoreObservable
 import ua.syt0r.kanji.core.backup.DefaultBackupManager
 import ua.syt0r.kanji.core.feedback.DefaultFeedbackManager
 import ua.syt0r.kanji.core.feedback.DefaultFeedbackUserDataProvider
@@ -53,7 +57,8 @@ val coreModule = module {
 
     single<LetterPracticeRepository> {
         SqlDelightLetterPracticeRepository(
-            databaseManager = get()
+            databaseManager = get(),
+            srsItemRepository = get()
         )
     }
 
@@ -66,7 +71,8 @@ val coreModule = module {
 
     single<FsrsItemRepository> {
         SqlDelightFsrsItemRepository(
-            userDataDatabaseManager = get()
+            userDataDatabaseManager = get(),
+            backupRestoreEventsProvider = get()
         )
     }
 
@@ -100,12 +106,19 @@ val coreModule = module {
         )
     } bind SuspendedPropertyRepository::class
 
+
+    single { BackupRestoreObservable() } binds arrayOf(
+        BackupRestoreCompletionNotifier::class,
+        BackupRestoreEventsProvider::class
+    )
+
     factory<BackupManager> {
         DefaultBackupManager(
             platformFileHandler = get(),
             userDataDatabaseManager = get(),
             suspendedPropertiesBackupManager = get(),
-            themeManager = get()
+            themeManager = get(),
+            restoreCompletionNotifier = get()
         )
     }
 

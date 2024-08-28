@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
+import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCard
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCardParams
@@ -25,6 +26,7 @@ interface FsrsItemRepository {
 
 class SqlDelightFsrsItemRepository(
     private val userDataDatabaseManager: UserDataDatabaseManager,
+    backupRestoreEventsProvider: BackupRestoreEventsProvider,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
 ) : FsrsItemRepository {
 
@@ -34,7 +36,7 @@ class SqlDelightFsrsItemRepository(
     private var inMemoryCache: MutableMap<SrsCardKey, FsrsCard>? = null
 
     init {
-        userDataDatabaseManager.databaseChangeFlow
+        backupRestoreEventsProvider.onRestoreEventsFlow
             .onEach {
                 inMemoryCache = null
                 _updatesFlow.emit(Unit)

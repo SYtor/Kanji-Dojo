@@ -21,7 +21,8 @@ class DefaultBackupManager(
     private val platformFileHandler: PlatformFileHandler,
     private val userDataDatabaseManager: UserDataDatabaseManager,
     private val suspendedPropertiesBackupManager: SuspendedPropertiesBackupManager,
-    private val themeManager: ThemeManager
+    private val themeManager: ThemeManager,
+    private val restoreCompletionNotifier: BackupRestoreCompletionNotifier
 ) : BackupManager {
 
     companion object {
@@ -79,6 +80,7 @@ class DefaultBackupManager(
         }
 
         themeManager.invalidate()
+        restoreCompletionNotifier.notify()
     }
 
     @OptIn(ExperimentalSerializationApi::class)

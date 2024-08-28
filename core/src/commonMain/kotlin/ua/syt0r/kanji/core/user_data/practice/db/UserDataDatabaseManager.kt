@@ -6,9 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -21,8 +19,6 @@ import java.io.File
 import java.io.InputStream
 
 interface UserDataDatabaseManager {
-
-    val databaseChangeFlow: SharedFlow<Unit>
 
     suspend fun <T> runTransaction(block: PracticeQueries.() -> T): T
 
@@ -52,12 +48,10 @@ abstract class BaseUserDataDatabaseManager(
         value = createDeferredDatabaseConnection()
     )
 
-    private val _databaseChangeFlow = MutableSharedFlow<Unit>()
-    override val databaseChangeFlow: SharedFlow<Unit> = _databaseChangeFlow
-
     protected fun getMigrationCallbacks(): Array<AfterVersion> = arrayOf(
         AfterVersion(3) { UserDataDatabaseMigrationAfter3.handleMigrations(it) },
-        AfterVersion(4) { UserDataDatabaseMigrationAfter4.handleMigrations(it) }
+        AfterVersion(4) { UserDataDatabaseMigrationAfter4.handleMigrations(it) },
+        AfterVersion(8) { UserDataDatabaseMigrationAfter8.handleMigrations(it) }
     )
 
     protected abstract suspend fun createDatabaseConnection(): DatabaseConnection
@@ -89,7 +83,6 @@ abstract class BaseUserDataDatabaseManager(
             databaseFile.delete()
             inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
         }
-        _databaseChangeFlow.emit(Unit)
     }
 
     private suspend fun closeCurrentConnection() = coroutineScope.launch {

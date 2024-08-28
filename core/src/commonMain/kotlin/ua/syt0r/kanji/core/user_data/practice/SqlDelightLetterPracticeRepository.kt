@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
@@ -11,6 +12,7 @@ import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 
 class SqlDelightLetterPracticeRepository(
     private val databaseManager: UserDataDatabaseManager,
+    srsItemRepository: FsrsItemRepository,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
 ) : LetterPracticeRepository {
 
@@ -18,7 +20,7 @@ class SqlDelightLetterPracticeRepository(
     override val changesFlow: SharedFlow<Unit> = mergeSharedFlows(
         coroutineScope,
         _changesFlow,
-        databaseManager.databaseChangeFlow
+        srsItemRepository.updatesFlow
     )
 
     private suspend fun <T> runTransaction(

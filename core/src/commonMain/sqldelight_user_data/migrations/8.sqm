@@ -1,53 +1,71 @@
 PRAGMA user_version = 9;
 
+ALTER TABLE practice RENAME TO letter_deck;
+
+CREATE TABLE IF NOT EXISTS letter_deck_entry (
+    character TEXT NOT NULL,
+    deck_id INTEGER NOT NULL,
+    PRIMARY KEY(character, deck_id),
+    FOREIGN KEY(deck_id) REFERENCES letter_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
+);
+
+INSERT INTO letter_deck_entry(character, deck_id)
+SELECT character, practice_id FROM practice_entry;
+
+DROP TABLE IF EXISTS practice_entry;
+
+-- character_progress migration uses review history instead
+DROP TABLE IF EXISTS character_progress;
+
+ALTER TABLE fsrs_card RENAME TO fsrs_card_tmp;
+
+CREATE TABLE IF NOT EXISTS fsrs_card (
+    key TEXT NOT NULL,
+    practice_type INTEGER NOT NULL,
+    status INTEGER NOT NULL,
+    stability REAL NOT NULL,
+    difficulty REAL NOT NULL,
+    lapses INTEGER NOT NULL,
+    repeats INTEGER NOT NULL,
+    last_review INTEGER NOT NULL,
+    interval INTEGER NOT NULL,
+    PRIMARY KEY(key, practice_type)
+);
+
+INSERT INTO fsrs_card(key, practice_type, status, stability, difficulty, lapses, repeats, last_review, interval)
+SELECT key, 10, status, stability, difficulty, lapses, repeats, last_review, interval
+FROM fsrs_card_tmp
+WHERE practice_type = 'flashcard';
+
+INSERT INTO fsrs_card(key, practice_type, status, stability, difficulty, lapses, repeats, last_review, interval)
+SELECT key, 11, status, stability, difficulty, lapses, repeats, last_review, interval
+FROM fsrs_card_tmp
+WHERE practice_type = 'read_pick';
+
+INSERT INTO fsrs_card(key, practice_type, status, stability, difficulty, lapses, repeats, last_review, interval)
+SELECT key, 12, status, stability, difficulty, lapses, repeats, last_review, interval
+FROM fsrs_card_tmp
+WHERE practice_type = 'writing';
+
+DROP TABLE IF EXISTS fsrs_card_tmp;
+
 CREATE TABLE IF NOT EXISTS review_history(
     key TEXT NOT NULL,
     practice_type INTEGER NOT NULL,
     timestamp INTEGER NOT NULL,
     duration INTEGER NOT NULL,
-    deck_id INTEGER,
+    grade INTEGER NOT NULL,
+    mistakes INTEGER NOT NULL,
+    deck_id INTEGER NOT NULL,
     PRIMARY KEY(key, practice_type, timestamp)
 );
 
-INSERT INTO review_history(key, practice_type, timestamp, duration, deck_id)
-SELECT character, 'char_write', timestamp, duration, practice_id FROM writing_review;
+INSERT INTO review_history(key, practice_type, timestamp, duration, grade, mistakes, deck_id)
+SELECT character, 0, timestamp, duration, CASE WHEN outcome = 1 THEN 3 ELSE 1 END, mistakes, practice_id FROM writing_review;
 
-INSERT INTO review_history(key, practice_type, timestamp, duration, deck_id)
-SELECT character, 'char_read', timestamp, duration, practice_id FROM reading_review;
+DROP TABLE IF EXISTS writing_review;
 
+INSERT INTO review_history(key, practice_type, timestamp, duration, grade, mistakes, deck_id)
+SELECT character, 1, timestamp, duration, CASE WHEN outcome = 1 THEN 3 ELSE 1 END, mistakes, practice_id FROM reading_review;
 
--- ATTENTION!!! Never use "*" when selecting data from writing_review and reading_review tables,
--- actual column indices might differ in prod due to wrong order in migration, use only named columns
-
--- TODO drop
-CREATE TABLE IF NOT EXISTS character_progress (
-    character TEXT NOT NULL,
-    mode INTEGER NOT NULL, -- 0 - writing, 1 - reading
-    last_review_time INTEGER,
-    repeats INTEGER NOT NULL DEFAULT 0, -- successful review strike
-    lapses INTEGER NOT NULL DEFAULT 0, -- times repeats were reseted due to mistake during practice
-    PRIMARY KEY(character, mode)
-);
-
-CREATE TABLE IF NOT EXISTS writing_review (
-    character TEXT NOT NULL,
-    practice_id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL,
-    mistakes INTEGER NOT NULL,
-    is_study INTEGER NOT NULL, -- 1 - study, 0 - review
-    outcome INTEGER NOT NULL, -- 1 - success, 0 - fail
-    duration INTEGER NOT NULL,
-    PRIMARY KEY(character, practice_id, timestamp, mistakes),
-    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS reading_review (
-    character TEXT NOT NULL,
-    practice_id INTEGER NOT NULL,
-    timestamp INTEGER NOT NULL,
-    mistakes INTEGER NOT NULL,
-    outcome INTEGER NOT NULL, -- 1 - success, 0 - fail
-    duration INTEGER NOT NULL,
-    PRIMARY KEY(character, practice_id, timestamp, mistakes),
-    FOREIGN KEY(practice_id) REFERENCES practice(id) ON UPDATE NO ACTION ON DELETE CASCADE
-);
+DROP TABLE IF EXISTS reading_review;
