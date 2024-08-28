@@ -188,17 +188,15 @@ private fun State<ScreenState>.toToolbarState(): State<PracticeToolbarState> {
     val state = remember {
         derivedStateOf {
             when (val currentState = value) {
-                ScreenState.Loading -> PracticeToolbarState.Loading
-                is ScreenState.Configuring -> PracticeToolbarState.Configuration
-                is ScreenState.Review -> currentState.practiceProgress.run {
-                    PracticeToolbarState.Review(
-                        pending = pending,
-                        repeat = repeats,
-                        completed = completed
-                    )
-                }
+                ScreenState.Loading,
+                is ScreenState.Summary -> PracticeToolbarState.Idle
 
-                is ScreenState.Summary -> PracticeToolbarState.Saved
+                is ScreenState.Configuring -> PracticeToolbarState.Configuration
+
+                is ScreenState.Review -> PracticeToolbarState.Review(
+                    practiceQueueProgress = currentState.practiceProgress
+                )
+
             }
         }
     }
@@ -213,8 +211,11 @@ private fun ConfiguringState(
 
     val strings = resolveString { writingPractice }
 
+    val practiceTypeTitle = resolveString(state.configuration.practiceType.titleResolver)
+
     PracticeConfigurationContainer(
-        onClick = onConfigurationCompleted
+        onClick = onConfigurationCompleted,
+        practiceTypeMessage = "Letter Practice・$practiceTypeTitle"
     ) {
 
         when (val configuration = state.configuration) {
@@ -363,7 +364,7 @@ private fun SummaryState(
             PracticeSummaryItem(
                 header = {
                     Text(
-                        text = "$index. ${item.letter}",
+                        text = "${index + 1}. ${item.letter}",
                         modifier = Modifier
                     )
                 },

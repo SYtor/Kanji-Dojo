@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -60,17 +60,18 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
+import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
@@ -79,17 +80,13 @@ import kotlin.time.Duration
 
 sealed interface PracticeToolbarState {
 
-    object Loading : PracticeToolbarState
+    object Idle : PracticeToolbarState
+
     object Configuration : PracticeToolbarState
 
     data class Review(
-        val pending: Int,
-        val repeat: Int,
-        val completed: Int
+        val practiceQueueProgress: PracticeQueueProgress
     ) : PracticeToolbarState
-
-    object Saving : PracticeToolbarState
-    object Saved : PracticeToolbarState
 
 }
 
@@ -97,37 +94,49 @@ sealed interface PracticeToolbarState {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PracticeToolbar(
-    state: State<PracticeToolbarState?>,
+    state: State<PracticeToolbarState>,
     onUpButtonClick: () -> Unit
 ) {
     TopAppBar(
-        title = {
-            when (val screenState = state.value) {
-                null, PracticeToolbarState.Loading -> {}
-                is PracticeToolbarState.Review -> {
-                    PracticeProgressCounter(
-                        pending = screenState.pending,
-                        repeat = screenState.repeat,
-                        completed = screenState.completed
-                    )
-                }
-
-                is PracticeToolbarState.Configuration -> {
-                    Text(text = resolveString { commonPractice.configurationTitle })
-                }
-
-                is PracticeToolbarState.Saving -> {
-                    Text(text = resolveString { commonPractice.savingTitle })
-                }
-
-                is PracticeToolbarState.Saved -> {
-                    Text(text = resolveString { commonPractice.savedTitle })
-                }
-            }
-        },
         navigationIcon = {
             IconButton(onClick = onUpButtonClick) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+            }
+        },
+        title = {
+            AnimatedContent(
+                targetState = state.value,
+                transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec()
+            ) {
+                when (it) {
+                    PracticeToolbarState.Configuration -> {
+                        Text(
+                            text = "Configuration"
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+        },
+        actions = {
+            AnimatedContent(
+                targetState = state.value,
+                transitionSpec = snapToBiggerContainerCrossfadeTransitionSpec(),
+                contentKey = { it is PracticeToolbarState.Review }
+            ) {
+                when (it) {
+                    is PracticeToolbarState.Review -> {
+                        val progress = it.practiceQueueProgress
+                        PracticeProgressCounter(
+                            pending = progress.pending,
+                            repeat = progress.repeats,
+                            completed = progress.completed
+                        )
+                    }
+
+                    else -> {}
+                }
             }
         }
     )
@@ -185,6 +194,7 @@ private fun ToolbarCountItem(count: Int, color: Color) {
 @Composable
 fun PracticeConfigurationContainer(
     onClick: () -> Unit,
+    practiceTypeMessage: String,
     content: @Composable ColumnScope.() -> Unit
 ) {
 
@@ -199,12 +209,23 @@ fun PracticeConfigurationContainer(
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
         ) {
+
+            Text(
+                text = practiceTypeMessage,
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+                    .padding(bottom = 8.dp)
+            )
+
             content()
+
         }
 
         Button(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium
         ) {
             Text(
                 text = resolveString { commonPractice.configurationCompleteButton }
@@ -496,27 +517,31 @@ fun PracticeSummaryContainer(
     content: @Composable ColumnScope.() -> Unit
 ) {
 
-    AutopaddedScrollableColumn(
-        modifier = Modifier.fillMaxWidth()
-            .wrapContentWidth()
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .wrapContentSize()
             .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp),
-        bottomOverlayContent = {
-
-            Button(
-                onClick = onFinishClick,
-                colors = ButtonDefaults.neutralButtonColors(),
-                modifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(0.4f))
-                    .padding(vertical = 20.dp)
-            ) {
-                Text(text = resolveString { commonPractice.summaryButton })
-            }
-
-        }
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp)
     ) {
 
-        content()
+        Column(
+            modifier = Modifier.weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            content()
+        }
+
+        Button(
+            onClick = onFinishClick,
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            colors = ButtonDefaults.neutralButtonColors()
+        ) {
+            Text(
+                text = resolveString { commonPractice.summaryButton }
+            )
+        }
 
     }
 

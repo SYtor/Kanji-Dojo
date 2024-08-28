@@ -1,23 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -42,10 +31,11 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelector
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeEarlyFinishDialog
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeProgressCounter
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
@@ -88,7 +78,12 @@ fun VocabPracticeScreenUI(
     MultiplatformBackHandler(onBack = tryNavigateBack)
 
     Scaffold(
-        topBar = { ScreenTopBar(navigateUp = tryNavigateBack, state = state) },
+        topBar = {
+            PracticeToolbar(
+                state = state.toPracticeToolbarState(),
+                onUpButtonClick = tryNavigateBack
+            )
+        },
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
 
@@ -134,41 +129,22 @@ fun VocabPracticeScreenUI(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenTopBar(
-    navigateUp: () -> Unit,
-    state: State<ScreenState>
-) {
-    TopAppBar(
-        title = { },
-        navigationIcon = {
-            IconButton(onClick = navigateUp) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-            }
-        },
-        actions = {
-            val progress = remember {
-                derivedStateOf {
-                    when (val practiceState = state.value) {
-                        is ScreenState.Review -> practiceState.state.value.progress
-                        else -> null
-                    }
-                }
-            }
+private fun State<ScreenState>.toPracticeToolbarState(): State<PracticeToolbarState> {
+    return remember {
+        derivedStateOf {
+            when (val currentValue = value) {
+                ScreenState.Loading,
+                is ScreenState.Summary -> PracticeToolbarState.Idle
 
-            AnimatedContent(
-                targetState = progress.value,
-                contentKey = { it == null },
-                transitionSpec = {
-                    fadeIn() togetherWith fadeOut() using SizeTransform { _, _ -> snap() }
-                }
-            ) {
-                if (it == null) return@AnimatedContent
-                PracticeProgressCounter(it.pending, it.repeats, it.completed)
+                is ScreenState.Configuration -> PracticeToolbarState.Configuration
+
+                is ScreenState.Review -> PracticeToolbarState.Review(
+                    practiceQueueProgress = currentValue.state.value.progress
+                )
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -177,7 +153,12 @@ private fun ScreenConfiguration(
     onConfigured: () -> Unit
 ) {
 
-    PracticeConfigurationContainer(onClick = onConfigured) {
+    val practiceTypeTitle = resolveString(screenState.practiceType.titleResolver)
+
+    PracticeConfigurationContainer(
+        onClick = onConfigured,
+        practiceTypeMessage = "Vocab Practice・$practiceTypeTitle"
+    ) {
 
         PracticeConfigurationItemsSelector(
             state = screenState.itemsSelectorState
