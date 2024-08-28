@@ -101,7 +101,7 @@ fun DeckDetailsGroupsUI(
 
             items(
                 items = visibleData.items,
-                key = { it.index }
+                key = { it.key.value }
             ) { group ->
 
                 WordItem(

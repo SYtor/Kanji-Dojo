@@ -88,7 +88,7 @@ fun DeckDetailsItemsUI(
 
             items(
                 items = visibleData.items,
-                key = { it.key },
+                key = { it.key.value },
             ) {
                 LetterListItem(
                     item = it,

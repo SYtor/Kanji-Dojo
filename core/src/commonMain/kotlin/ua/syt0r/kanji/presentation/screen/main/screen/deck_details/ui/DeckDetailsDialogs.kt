@@ -18,10 +18,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
-import androidx.compose.material.icons.filled.RemoveCircle
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -131,21 +130,12 @@ private fun FilterRow(data: FilterCheckboxRowData) {
             modifier = Modifier.weight(1f).alignByBaseline()
         )
 
-        val extraIconPadding = with(LocalDensity.current) { 5.dp.roundToPx() }
-
         Icon(
             imageVector = when (data.valueState.value) {
-                true -> Icons.Default.CheckCircle
-                false -> Icons.Default.RemoveCircle
+                true -> Icons.Default.Visibility
+                false -> Icons.Default.VisibilityOff
             },
-            contentDescription = null,
-            tint = when (data.valueState.value) {
-                true -> MaterialTheme.extraColorScheme.success
-                false -> MaterialTheme.colorScheme.primary
-            },
-            modifier = Modifier
-                .size(24.dp)
-                .alignBy { it.measuredHeight - extraIconPadding }
+            contentDescription = null
         )
 
     }

@@ -31,6 +31,7 @@ import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
@@ -43,7 +44,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsSc
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsVisibleData
-import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 @Composable
 fun DeckDetailsVocabUI(
@@ -97,7 +97,7 @@ fun DeckDetailsVocabUI(
 
             itemsIndexed(
                 items = visibleData.items,
-                key = { _, it -> it.key }
+                key = { _, it -> it.key.value }
             ) { index, vocab ->
 
                 WordItem(

@@ -90,7 +90,7 @@ data class PracticeItemSummary(
 
 
 data class DeckDetailsListItemKey(
-    val value: Any
+    val value: String
 )
 
 sealed interface DeckDetailsListItem {
