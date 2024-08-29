@@ -125,7 +125,8 @@ class Fsrs4(
     w: Array<Double> = WEIGHTS,
     private val decay: Double = DECAY,
     private val factor: Double = FACTOR,
-    private val requestRetention: Double = REQUEST_RETENTION
+    private val requestRetention: Double = REQUEST_RETENTION,
+    private val maxInterval: Duration = MAX_INTERVAL
 ) : Fsrs(w) {
 
     override fun retrievability(elapsedDuration: Duration, stability: Double): Double {
@@ -134,7 +135,8 @@ class Fsrs4(
     }
 
     override fun nextInterval(cardParams: FsrsCardParams.Existing): Duration {
-        return (9 * cardParams.stability * (1 / requestRetention - 1)).days
+        val interval = (9 * cardParams.stability * (1 / requestRetention - 1))
+        return if (interval.isNaN()) maxInterval else interval.days.coerceAtMost(maxInterval)
     }
 
     companion object {
@@ -160,6 +162,7 @@ class Fsrs4(
         const val DECAY = -1.0
         const val FACTOR = 1.0 / 9
         const val REQUEST_RETENTION = 0.9
+        val MAX_INTERVAL = 355.days
     }
 
 }
@@ -168,7 +171,8 @@ class Fsrs45(
     w: Array<Double> = WEIGHTS,
     private val decay: Double = DECAY,
     private val factor: Double = FACTOR,
-    private val requestRetention: Double = REQUEST_RETENTION
+    private val requestRetention: Double = REQUEST_RETENTION,
+    private val maxInterval: Duration = MAX_INTERVAL
 ) : Fsrs(w) {
 
     override fun retrievability(elapsedDuration: Duration, stability: Double): Double {
@@ -179,7 +183,7 @@ class Fsrs45(
     override fun nextInterval(cardParams: FsrsCardParams.Existing): Duration {
         val retrievability = requestRetention
         val interval = cardParams.stability / factor * (retrievability.pow(1 / decay) - 1)
-        return interval.days
+        return if (interval.isNaN()) maxInterval else interval.days.coerceAtMost(maxInterval)
     }
 
     companion object {
@@ -205,6 +209,7 @@ class Fsrs45(
         const val DECAY = -0.5
         const val FACTOR = 19.0 / 81.0
         const val REQUEST_RETENTION = 0.9
+        val MAX_INTERVAL = 355.days
     }
 
 }

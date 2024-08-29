@@ -46,9 +46,9 @@ object UserDataDatabaseMigrationAfter8 {
 
         val fsrsCards = items
             .groupBy { it.key to it.practiceType }
-            .map { (groupKey, items) ->
+            .map { (groupKey, groupItems) ->
                 val (key, practiceType) = groupKey
-                val srsCard = items.sortedBy { it.timestamp }
+                val srsCard = groupItems.sortedBy { it.timestamp }
                     .fold(srsScheduler.newCard()) { fsrsCard, historyItem ->
                         val answers = srsScheduler.schedule(fsrsCard, historyItem.timestamp)
                         when (historyItem.grade) {

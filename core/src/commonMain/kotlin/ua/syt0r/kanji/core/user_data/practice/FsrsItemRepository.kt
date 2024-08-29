@@ -86,8 +86,8 @@ class SqlDelightFsrsItemRepository(
 
     private fun Fsrs_card.convert(): FsrsCard = FsrsCard(
         params = FsrsCardParams.Existing(
-            difficulty = stability,
-            stability = difficulty,
+            difficulty = difficulty,
+            stability = stability,
             reviewTime = Instant.fromEpochMilliseconds(last_review)
         ),
         status = dbValueToSrcCardStatus.getValue(status.toInt()),
