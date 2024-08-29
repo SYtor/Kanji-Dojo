@@ -93,7 +93,7 @@ class DefaultUserPreferencesRepository private constructor(
     override val dailyLimitEnabled: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(
             key = "daily_limit_enabled",
-            initialValueProvider = { false }
+            initialValueProvider = { true }
         )
     }
 
