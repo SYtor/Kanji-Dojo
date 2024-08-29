@@ -79,12 +79,7 @@ class VocabPracticeViewModel(
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)
             }
 
-            val data = getQueueDataUseCase(
-                configuration = configuration,
-                state = configurationState
-            )
-
-            practiceQueue.initialize(items = data)
+            practiceQueue.initialize(items = getQueueDataUseCase(configurationState))
 
             practiceQueue.state
                 .onEach { applyToScreenState(it) }
