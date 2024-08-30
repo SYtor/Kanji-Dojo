@@ -42,6 +42,21 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.1.0", LocalDate(2024, 8, 30)) {
+                    append(
+                        """
+                        - Added new home screen with aggregated review data
+                        - Added tutorial
+                        - Replaced previous custom SRS algorithm for letter practice with FSRS 
+                        - Now letter practice is saving review results in the middle of practice
+                        - Added ability to merge and sort vocab decks
+                        - Added experimental JLPT vocab decks
+                        - Added vocab deck details screen with ability to filter and select individual words for practice
+                        - Added tracking for vocab reviews so now they accounted in stats too
+                        - Fixed issues with FSRS algorithm
+                        """.trimIndent()
+                    )
+                }
                 version("2.0.9", LocalDate(2024, 7, 26)) {
                     append(
                         """

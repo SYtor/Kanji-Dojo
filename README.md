@@ -3,7 +3,7 @@
   <img src="preview_assets//inkscape_icon.svg" height=120 style="border-radius: 20px;">
 
   # Kanji Dojo
-  ![Version Badge](https://img.shields.io/badge/version-v2.0.8-blue?style=for-the-badge&labelColor=ffffff&color=ff5555)
+  ![Version Badge](https://img.shields.io/badge/version-v2.1.0-blue?style=for-the-badge&labelColor=ffffff&color=ff5555)
 
 </div>
 
