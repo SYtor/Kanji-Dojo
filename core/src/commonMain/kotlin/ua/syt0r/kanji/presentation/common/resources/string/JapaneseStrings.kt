@@ -26,24 +26,22 @@ object JapaneseStrings : Strings {
 
     override val loading: String = "読み込み中"
 
-    override val letterPracticeTypeWriting: String = "書き"
-    override val letterPracticeTypeReading: String = "読み"
+    override val letterPracticeTypeWriting: String = "書く事"
+    override val letterPracticeTypeReading: String = "読む事"
     override val vocabPracticeTypeFlashcard: String = "フラッシュカード"
     override val vocabPracticeTypeReadingPicker: String = "読み取りピッカー"
-    override val vocabPracticeTypeWriting: String = "書く"
+    override val vocabPracticeTypeWriting: String = "書く事"
 
     override val reviewStateDone: String = "完了"
     override val reviewStateDue: String = "復習"
     override val reviewStateNew: String = "未習"
 
     override val home: HomeStrings = JapaneseHomeStrings
-    override val generalDashboard: GeneralDashboardStrings
-        get() = TODO("Not yet implemented")
+    override val generalDashboard: GeneralDashboardStrings = JapaneseGeneralDashboardStrings
     override val lettersDashboard = JapaneseLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
     override val dailyLimit = JapaneseDailyLimitStrings
-    override val tutorialDialog: TutorialDialogStrings
-        get() = TODO("Not yet implemented")
+    override val tutorialDialog: TutorialDialogStrings = JapaneseTutorialDialogStrings
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
@@ -73,10 +71,23 @@ object JapaneseStrings : Strings {
 
 }
 
+object JapaneseGeneralDashboardStrings : GeneralDashboardStrings {
+    override val buttonDailyLimit: String = "毎日の目標"
+    override val buttonVersionChange: String = "新機能"
+    override val buttonTutorial: String = "チュートリアル"
+    override val letterDecksTitle: String = "文字デッキ"
+    override val vocabDecksTitle: String = "単語デッキ"
+    override val buttonNoDecksTitle: String = "デッキなし"
+    override val buttonNoDecksMessage: String = "作成"
+    override val practiceTypeLabel: String = "練習タイプ"
+    override val buttonNew: String = "学習"
+    override val buttonDue: String = "復習"
+    override val buttonAll: String = "学習 & 復習"
+}
+
 object JapaneseHomeStrings : HomeStrings {
     override val screenTitle: String = JapaneseStrings.appName
-    override val generalDashboardTabLabel: String
-        get() = TODO("Not yet implemented")
+    override val generalDashboardTabLabel: String = "ホーム"
     override val lettersDashboardTabLabel: String = "文字"
     override val vocabDashboardTabLabel: String = "単語"
     override val statsTabLabel: String = "統計"
@@ -139,26 +150,69 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
 }
 
 object JapaneseVocabDashboardStrings : VocabDashboardStrings {
-    override val selectedPracticeTypeTemplate: (practiceType: String) -> String = { TODO() }
+    override val selectedPracticeTypeTemplate: (practiceType: String) -> String =
+        { "練習タイプ: $it" }
 }
 
 object JapaneseDailyLimitStrings : DailyLimitStrings {
     override val title: String = "毎日の目標"
-    override val message: String = "クイック練習と通知に影響します"
     override val enableSwitchTitle: String = "有効"
-    override val enableSwitchDescription: String
-        get() = TODO("Not yet implemented")
-    override val lettersSectionTitle: String
-        get() = TODO("Not yet implemented")
-    override val vocabSectionTitle: String
-        get() = TODO("Not yet implemented")
-    override val newLabel: String = "新しい文字"
-    override val dueLabel: String = "復習"
-    override val noteMessage: String = "注意: 文字の書きと読みは別に数えます"
+    override val enableSwitchDescription: String =
+        "アプリによって促される毎日の練習の数を制限するには有効にします"
+    override val lettersSectionTitle: String = "文字"
+    override val vocabSectionTitle: String = "単語"
+    override val newLabel: String = "新しい"
+    override val dueLabel: String = "期限"
+    override val noteMessage: String = "注意: 書く練習と読み練習は、制限に別々に加増されます"
     override val button: String = "保存"
-    override val changesSavedMessage: String
-        get() = TODO("Not yet implemented")
+    override val changesSavedMessage: String = "完了"
 }
+
+
+object JapaneseTutorialDialogStrings : TutorialDialogStrings {
+    override val title: String = "チュートリアル"
+
+    override val page1: String = """
+        • このアプリは、復習のタイミングを最適化するSRS（間隔反復システム）を使っています
+        • 復習を行うと、SRSがあなたの記憶力に応じて次の復習を予定します
+        • 簡単に思い出せたら、復習の間隔は長くなり、難しかったら短くなります
+    """.trimIndent()
+
+    override val page2Top: String = """
+        • あなたの記憶力を評価するために、復習後にいくつかの評価オプションが表示されます
+    """.trimIndent()
+
+    override val page2Bottom: String = """
+        • 自分の記憶力に最も合ったオプションを選んでください
+        • 自己評価することで、アプリがあなたに合ったペースで学習を調整できます
+    """.trimIndent()
+
+    override val page3Top: String = """
+        • 毎日、復習した項目のステータスが更新されます
+        • アプリは、新しい項目と復習の期限が過ぎた項目を復習させてくれます
+    """.trimIndent()
+
+    override val page3Bottom: String = """
+        • 負担を抑えるために、1日の制限を設定できます
+    """.trimIndent()
+
+    override val page4Top: String = """
+        • アプリを使い始めるには、デッキを作成してください
+        • デッキは、マスターしたい項目を整理するために使用します。アプリには文字デッキと単語デッキがあります
+    """.trimIndent()
+
+    override val page4Bottom: String = """
+        • 自分でデッキを作成するか、いくつかの事前に作られたデッキを選ぶことができます
+    """.trimIndent()
+
+    override val page5: String = """
+        • デッキが作成されたら、復習を始められます
+        • いくつかの練習モードがあるので、全部試してみてください
+        • 一貫性が大切です。毎日少しずつ練習することが進歩の鍵です。無理しないように、1日の制限を下げることも検討してください
+        • 日本語マスターへの道、がんばってください！\(^_^)/ 
+    """.trimIndent()
+}
+
 
 private fun formatDuration(duration: Duration): String = when {
     duration.inWholeHours > 0 -> "${duration.inWholeHours}時 ${duration.inWholeMinutes % 60}分"
@@ -179,9 +233,8 @@ object JapaneseStatsStrings : StatsStrings {
     override val timeSpentTitle: String = "練習時間"
     override val reviewsCountTitle: String = "練習回数"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
-    override val uniqueLettersReviewed: String = "学習した文字"
-    override val uniqueWordsReviewed: String
-        get() = TODO("Not yet implemented")
+    override val uniqueLettersReviewed: String = "練習した異なる文字の数"
+    override val uniqueWordsReviewed: String = "練習した異なる単語の数"
 }
 
 
@@ -349,40 +402,29 @@ object JapaneseDeckPickerStrings : DeckPickerStrings {
         }
     }
     override val wanikaniItem: (Int) -> String = { "WaniKani レベル$it" }
-    override val vocabDeckItemWordsCountLabel: (words: Int) -> String
-        get() = TODO("Not yet implemented")
-    override val vocabJlptTitle: String
-        get() = TODO("Not yet implemented")
-    override val vocabJlptDescription: AnnotatedString
-        get() = TODO("Not yet implemented")
-    override val vocabOtherTitle: String
-        get() = TODO("Not yet implemented")
-    override val vocabOtherDescription: AnnotatedString
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleTime: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleWeek: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleCommonVerbs: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleColors: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleRegularFood: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleJapaneseFood: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleGrammarTerms: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleAnimals: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleBody: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleCommonPlaces: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleCities: String
-        get() = TODO("Not yet implemented")
-    override val vocabDeckTitleTransport: String
-        get() = TODO("Not yet implemented")
+
+    override val vocabJlptTitle: String = "日本語能力試験 *実験的*"
+    override val vocabJlptDescription: AnnotatedString = """
+        日本語能力試験（JLPT）の単語デッキはN5からN1までのレベルに分かれています。N5が最も基本的で、N1が最も高度です。
+        * 実験的: デッキは不完全で、同じ読み方の無関係な単語が含まれている可能性があります
+    """.trimIndent().let { AnnotatedString(it) }
+    override val vocabOtherTitle: String = "その他"
+    override val vocabOtherDescription: AnnotatedString = "始めるための基本的なデッキ"
+        .let { AnnotatedString(it) }
+
+    override val vocabDeckItemWordsCountLabel: (words: Int) -> String = { "${it}語" }
+    override val vocabDeckTitleTime: String = "時間"
+    override val vocabDeckTitleWeek: String = "曜日"
+    override val vocabDeckTitleCommonVerbs: String = "よく使う動詞"
+    override val vocabDeckTitleColors: String = "色"
+    override val vocabDeckTitleRegularFood: String = "普段の食べ物"
+    override val vocabDeckTitleJapaneseFood: String = "日本の食べ物"
+    override val vocabDeckTitleGrammarTerms: String = "文法用語"
+    override val vocabDeckTitleAnimals: String = "動物"
+    override val vocabDeckTitleBody: String = "体"
+    override val vocabDeckTitleCommonPlaces: String = "よく行く場所"
+    override val vocabDeckTitleCities: String = "都市"
+    override val vocabDeckTitleTransport: String = "交通"
 
 }
 
@@ -544,6 +586,7 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
 }
 
 object JapaneseLetterPracticeStrings : LetterPracticeStrings {
+    override val configurationTitle: (practiceType: String) -> String = { "文字練習・$it" }
     override val hintStrokesTitle: String = "字画のヒント表示"
     override val hintStrokesMessage: String = "ヒントを表示する条件を設定する"
     override val hintStrokeNewOnlyMode: String = "新規のみ"
@@ -577,7 +620,7 @@ object JapaneseLetterPracticeStrings : LetterPracticeStrings {
 }
 
 object JapaneseVocabPracticeStrings : VocabPracticeStrings {
-    override val configurationTitle: (String) -> String = { TODO() }
+    override val configurationTitle: (String) -> String = { "単語練習・$it" }
     override val readingPriorityConfigurationTitle: String = "単語の読み方"
     override val readingPriorityConfigurationMessage: String =
         "単語に複数の読みがある場合、使用する読みを選択してください"

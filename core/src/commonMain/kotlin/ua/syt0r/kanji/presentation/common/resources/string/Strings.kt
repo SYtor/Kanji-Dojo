@@ -202,7 +202,6 @@ interface LettersDashboardStrings {
 
 interface DailyLimitStrings {
     val title: String
-    val message: String
     val enableSwitchTitle: String
     val enableSwitchDescription: String
     val lettersSectionTitle: String
@@ -487,6 +486,7 @@ interface CommonPracticeStrings {
 }
 
 interface LetterPracticeStrings {
+    val configurationTitle: (practiceType: String) -> String
     val hintStrokesTitle: String
     val hintStrokesMessage: String
     val hintStrokeNewOnlyMode: String

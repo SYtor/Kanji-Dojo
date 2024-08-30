@@ -356,7 +356,7 @@ private fun DashboardItemLayout(
         modifier = Modifier.fillMaxWidth()
             .wrapContentWidth()
             .widthIn(max = 400.dp)
-            .padding(bottom = 8.dp),
+            .padding(vertical = 8.dp),
     ) {
 
         Row(

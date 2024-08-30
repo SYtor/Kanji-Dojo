@@ -215,7 +215,7 @@ private fun ConfiguringState(
 
     PracticeConfigurationContainer(
         onClick = onConfigurationCompleted,
-        practiceTypeMessage = "Letter Practice・$practiceTypeTitle"
+        practiceTypeMessage = strings.configurationTitle(practiceTypeTitle)
     ) {
 
         when (val configuration = state.configuration) {

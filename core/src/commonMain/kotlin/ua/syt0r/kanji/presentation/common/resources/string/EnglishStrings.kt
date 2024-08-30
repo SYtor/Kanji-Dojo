@@ -159,11 +159,9 @@ object EnglishVocabDashboardStrings : VocabDashboardStrings {
 
 object EnglishDailyLimitStrings : DailyLimitStrings {
     override val title: String = "Daily Limit"
-    override val message: String =
-        "Enable to limit count of characters for quick practice and reminder notification appearance"
     override val enableSwitchTitle: String = "Enabled"
     override val enableSwitchDescription: String =
-        "Limit number of daily reviews prompted by the app"
+        "Enable to limit the number of daily reviews prompted by the app"
     override val lettersSectionTitle: String = "Letters"
     override val vocabSectionTitle: String = "Vocab"
     override val newLabel: String = "New"
@@ -602,6 +600,7 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
 }
 
 object EnglishLetterPracticeStrings : LetterPracticeStrings {
+    override val configurationTitle: (practiceType: String) -> String = { "Letter Practice・$it" }
     override val hintStrokesTitle: String = "Hint Strokes"
     override val hintStrokesMessage: String = "Controls when to show hint strokes for characters"
     override val hintStrokeNewOnlyMode: String = "New only"
