@@ -68,7 +68,7 @@ sealed interface CharacterClassification {
         val number: Int
     ) : CharacterClassification, DBDefined {
 
-        override val dbValue: String = "n$number"
+        override val dbValue: String = "g$number"
 
         companion object {
 
