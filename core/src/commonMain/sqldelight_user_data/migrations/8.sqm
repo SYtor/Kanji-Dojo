@@ -47,6 +47,10 @@ SELECT key, 12, status, stability, difficulty, lapses, repeats, last_review, int
 FROM fsrs_card_tmp
 WHERE practice_type = 'writing';
 
+UPDATE fsrs_card SET stability = 1 WHERE stability < 0;
+UPDATE fsrs_card SET difficulty = 1 WHERE difficulty < 1;
+UPDATE fsrs_card SET difficulty = 10 WHERE difficulty > 10;
+
 DROP TABLE IF EXISTS fsrs_card_tmp;
 
 CREATE TABLE IF NOT EXISTS review_history(
