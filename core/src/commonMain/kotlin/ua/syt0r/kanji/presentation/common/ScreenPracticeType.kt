@@ -18,12 +18,12 @@ enum class ScreenLetterPracticeType(
     Writing(
         dataType = LetterPracticeType.Writing,
         preferencesType = PreferencesLetterPracticeType.Writing,
-        titleResolver = { lettersDashboard.itemWritingTitle }
+        titleResolver = { letterPracticeTypeWriting }
     ),
     Reading(
         dataType = LetterPracticeType.Reading,
         preferencesType = PreferencesLetterPracticeType.Reading,
-        titleResolver = { lettersDashboard.itemReadingTitle }
+        titleResolver = { letterPracticeTypeReading }
     );
 
     companion object {
@@ -47,17 +47,17 @@ enum class ScreenVocabPracticeType(
     Flashcard(
         dataType = VocabPracticeType.Flashcard,
         preferencesType = PreferencesVocabPracticeType.Flashcard,
-        titleResolver = { vocabPractice.practiceTypeFlashcard }
+        titleResolver = { vocabPracticeTypeFlashcard }
     ),
     ReadingPicker(
         dataType = VocabPracticeType.ReadingPicker,
         preferencesType = PreferencesVocabPracticeType.ReadingPicker,
-        titleResolver = { vocabPractice.practiceTypeReadingPicker }
+        titleResolver = { vocabPracticeTypeReadingPicker }
     ),
     Writing(
         dataType = VocabPracticeType.Writing,
         preferencesType = PreferencesVocabPracticeType.Writing,
-        titleResolver = { vocabPractice.practiceTypeWriting }
+        titleResolver = { vocabPracticeTypeWriting }
     );
 
     companion object {

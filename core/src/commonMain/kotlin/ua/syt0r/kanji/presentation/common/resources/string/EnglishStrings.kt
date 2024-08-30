@@ -27,14 +27,23 @@ object EnglishStrings : Strings {
 
     override val loading: String = "Loading"
 
+    override val letterPracticeTypeWriting: String = "Writing"
+    override val letterPracticeTypeReading: String = "Reading"
+    override val vocabPracticeTypeFlashcard: String = "Flashcard"
+    override val vocabPracticeTypeReadingPicker: String = "Reading Picker"
+    override val vocabPracticeTypeWriting: String = "Writing"
+
     override val reviewStateDone: String = "Done"
     override val reviewStateDue: String = "Due"
     override val reviewStateNew: String = "New"
 
     override val home: HomeStrings = EnglishHomeStrings
+    override val generalDashboard: GeneralDashboardStrings = EnglishGeneralDashboardStrings
     override val lettersDashboard = EnglishLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = EnglishVocabDashboardStrings
     override val dailyLimit: DailyLimitStrings = EnglishDailyLimitStrings
+    override val tutorialDialog: TutorialDialogStrings = EnglishTutorialDialogStrings
+
     override val stats: StatsStrings = EnglishStatsStrings
     override val search: SearchStrings = EnglishSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = EnglishAlternativeDialogStrings
@@ -51,8 +60,7 @@ object EnglishStrings : Strings {
     override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
     override val deckDetails: DeckDetailsStrings = EnglishDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
-    override val writingPractice: WritingPracticeStrings = EnglishWritingPracticeStrings
-    override val readingPractice: ReadingPracticeStrings = EnglishReadingPracticeString
+    override val letterPractice: LetterPracticeStrings = EnglishLetterPracticeStrings
     override val vocabPractice: VocabPracticeStrings = EnglishVocabPracticeStrings
     override val kanjiInfo: KanjiInfoStrings = EnglishKanjiInfoStrings
 
@@ -66,11 +74,26 @@ object EnglishStrings : Strings {
 
 object EnglishHomeStrings : HomeStrings {
     override val screenTitle: String = "Kanji Dojo"
+    override val generalDashboardTabLabel: String = "Home"
     override val lettersDashboardTabLabel: String = "Letters"
     override val vocabDashboardTabLabel: String = "Vocab"
     override val statsTabLabel: String = "Stats"
     override val searchTabLabel: String = "Search"
     override val settingsTabLabel: String = "Settings"
+}
+
+object EnglishGeneralDashboardStrings : GeneralDashboardStrings {
+    override val buttonDailyLimit: String = "Daily Limit"
+    override val buttonVersionChange: String = "What's new"
+    override val buttonTutorial: String = "Tutorial"
+    override val letterDecksTitle: String = "Letter Decks"
+    override val vocabDecksTitle: String = "Vocab Decks"
+    override val buttonNoDecksTitle: String = "No decks"
+    override val buttonNoDecksMessage: String = "Create"
+    override val practiceTypeLabel: String = "Practice Type"
+    override val buttonNew: String = "New"
+    override val buttonDue: String = "Due"
+    override val buttonAll: String = "New & Due"
 }
 
 object EnglishLettersDashboardStrings : LettersDashboardStrings {
@@ -112,8 +135,6 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
             else -> "< 1 day ago"
         }
     }
-    override val itemWritingTitle: String = "Writing"
-    override val itemReadingTitle: String = "Reading"
     override val itemTotal: String = "Total"
     override val itemDone: String = "Done"
     override val itemReview: String = "Due"
@@ -131,44 +152,70 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
 }
 
 object EnglishVocabDashboardStrings : VocabDashboardStrings {
-    override val userDecksTitle: String = "User Decks"
-    override val userDecksEmptyMessage: String =
-        "No decks saved. Use default decks to review vocabulary or create your own decks"
-    override val defaultDecksTitle: String = "Default Decks"
-    override val reviewLabel: String = "Start Review:"
-    override val newWordsCounter: (Int) -> String = { "New: $it" }
-    override val dueWordsCounter: (Int) -> String = { "Due: $it" }
-    override val doneWordsCounter: (Int) -> String = { "Done: $it" }
-    override val totalWordsCounter: (Int) -> String = { "All: $it" }
-    override val practiceTypeDialogTitle: String = "SRS Practice Type"
-    override val practiceTypeDialogMessage: String =
-        "Select practice type used to display review statuses"
-    override val practiceTypeDialogCancelButton: String = "Cancel"
-    override val practiceTypeDialogApplyButton: String = "Apply"
-    override val deckTitleTime: String = "Time"
-    override val deckTitleWeek: String = "Week Days"
-    override val deckTitleCommonVerbs: String = "Common Verbs"
-    override val deckTitleColors: String = "Colors"
-    override val deckTitleRegularFood: String = "Regular Food"
-    override val deckTitleJapaneseFood: String = "Japanese Food"
-    override val deckTitleGrammarTerms: String = "Grammar Terms"
-    override val deckTitleAnimals: String = "Animals"
-    override val deckTitleBody: String = "Body"
-    override val deckTitleCommonPlaces: String = "Common Places"
-    override val deckTitleCities: String = "Cities"
-    override val deckTitleTransport: String = "Transport"
+    override val selectedPracticeTypeTemplate: (practiceType: String) -> String = {
+        "Practice Type: $it"
+    }
 }
 
 object EnglishDailyLimitStrings : DailyLimitStrings {
     override val title: String = "Daily Limit"
     override val message: String =
         "Enable to limit count of characters for quick practice and reminder notification appearance"
-    override val enabledLabel: String = "Enabled"
+    override val enableSwitchTitle: String = "Enabled"
+    override val enableSwitchDescription: String =
+        "Limit number of daily reviews prompted by the app"
+    override val lettersSectionTitle: String = "Letters"
+    override val vocabSectionTitle: String = "Vocab"
     override val newLabel: String = "New"
     override val dueLabel: String = "Due"
     override val noteMessage: String =
         "Note: Writing and reading reviews are counted separately towards the limit"
     override val button: String = "Save"
+    override val changesSavedMessage: String = "Done"
+}
+
+object EnglishTutorialDialogStrings : TutorialDialogStrings {
+    override val title: String = "Tutorial"
+
+    override val page1: String = """
+        • The app uses the Spaced Repetition System (SRS) - a highly effective learning method that optimizes the timing of reviews based on how well you remember information
+        • When you do a review the SRS schedules a follow-up review according to your recall ability
+        • If you recall an item easily, the interval between reviews increases. If you struggle, the interval is shortened
+    """.trimIndent()
+
+    override val page2Top: String = """
+        • To estimate your recall ability the app will offer you various rating options after review
+    """.trimIndent()
+
+    override val page2Bottom: String = """
+        • Choose the option that best matches your ability to recall the item you're reviewing
+        • Grading your own answers allows the app to adjust the learning pace according to individual memory capabilities
+    """.trimIndent()
+
+    override val page3Top: String = """
+        • Every day, the status of each reviewed item is updated
+        • The app will let you review several new items and due items that are past their scheduled review time
+    """.trimIndent()
+
+    override val page3Bottom: String = """
+        • You can set a daily limit to control your workload at a comfortable level
+    """.trimIndent()
+
+    override val page4Top: String = """
+        • To start using the app create a deck
+        • Decks are used to organize the items you want to master. There are letter and vocab decks in the app
+    """.trimIndent()
+
+    override val page4Bottom: String = """
+        • You can create your own decks from scratch or select from several pre-made ones
+    """.trimIndent()
+
+    override val page5: String = """
+        • Once any deck is created you can start doing reviews
+        • There are several practice modes available, check them all
+        • Stay consistent - regular practice is key to making steady progress. Don't hesitate to lower your daily limit to avoid burnout
+        • Good luck on your way to mastering Japanese! \(^_^)/
+    """.trimIndent()
 }
 
 private val months = listOf(
@@ -196,7 +243,8 @@ object EnglishStatsStrings : StatsStrings {
     override val timeSpentTitle: String = "Time spent"
     override val reviewsCountTitle: String = "Reviews"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
-    override val charactersStudiedTitle: String = "Characters studied"
+    override val uniqueLettersReviewed: String = "Unique letters reviewed"
+    override val uniqueWordsReviewed: String = "Unique words reviewed"
 }
 
 object EnglishSearchStrings : SearchStrings {
@@ -314,7 +362,7 @@ object EnglishDeckPickerStrings : DeckPickerStrings {
 
     override val title: String = "Select Deck"
 
-    override val customDeckButton: String = "Create Custom"
+    override val customDeckButton: String = "Create Empty"
     override val kanaTitle: String = "Kana"
 
     override val kanaDescription = { urlColor: Color ->
@@ -381,6 +429,30 @@ object EnglishDeckPickerStrings : DeckPickerStrings {
         }
     }
     override val wanikaniItem: (Int) -> String = { "WaniKani Level $it" }
+
+    override val vocabJlptTitle: String = "JLPT *Experimental*"
+    override val vocabJlptDescription: AnnotatedString = """
+        The JLPT (Japanese Language Proficiency Test) vocabulary decks are organized by levels, ranging from N5 to N1, with N5 being the most basic and N1 the most advanced.
+        * Experimental: Decks might be incomplete and contain irrelevant words with similar reading
+    """.trimIndent().let { AnnotatedString(it) }
+    override val vocabOtherTitle: String = "Other"
+    override val vocabOtherDescription: AnnotatedString = "Some basic decks to get started"
+        .let { AnnotatedString(it) }
+
+    override val vocabDeckItemWordsCountLabel: (words: Int) -> String = { "$it words" }
+
+    override val vocabDeckTitleTime: String = "Time"
+    override val vocabDeckTitleWeek: String = "Week Days"
+    override val vocabDeckTitleCommonVerbs: String = "Common Verbs"
+    override val vocabDeckTitleColors: String = "Colors"
+    override val vocabDeckTitleRegularFood: String = "Regular Food"
+    override val vocabDeckTitleJapaneseFood: String = "Japanese Food"
+    override val vocabDeckTitleGrammarTerms: String = "Grammar Terms"
+    override val vocabDeckTitleAnimals: String = "Animals"
+    override val vocabDeckTitleBody: String = "Body"
+    override val vocabDeckTitleCommonPlaces: String = "Common Places"
+    override val vocabDeckTitleCities: String = "Cities"
+    override val vocabDeckTitleTransport: String = "Transport"
 
 }
 
@@ -449,7 +521,6 @@ object EnglishDeckDetailsStrings : DeckDetailsStrings {
 
     override val dialogCommon: LetterDeckDetailDialogCommonStrings =
         EnglishLetterDeckDetailDialogCommonStrings
-    override val practiceType: PracticeTypeStrings = EnglishPracticeTypeStrings
     override val filterDialog: FilterDialogStrings = EnglishFilterDialogStrings
     override val sortDialog: SortDialogStrings = EnglishSortDialogStrings
     override val layoutDialog: PracticePreviewLayoutDialogStrings =
@@ -470,11 +541,6 @@ object EnglishDeckDetailsStrings : DeckDetailsStrings {
 object EnglishLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {
     override val buttonCancel: String = "Cancel"
     override val buttonApply: String = "Apply"
-}
-
-object EnglishPracticeTypeStrings : PracticeTypeStrings {
-    override val practiceTypeWriting: String = "Writing"
-    override val practiceTypeReading: String = "Reading"
 }
 
 object EnglishFilterDialogStrings : FilterDialogStrings {
@@ -502,11 +568,7 @@ object EnglishPracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogSt
 }
 
 object EnglishCommonPracticeStrings : CommonPracticeStrings {
-    override val leaveDialogTitle: String = "Leave practice?"
-    override val leaveDialogMessage: String = "Progress will be lost"
-    override val leaveDialogButton: String = "Confirm"
-
-    override val configurationTitle: String = "Practice Configuration"
+    override val configurationTitle: String = "Configuration"
     override val configurationSelectedItemsLabel: String = "Selected:"
     override val configurationCharactersPreview: String = "Characters preview"
     override val shuffleConfigurationTitle: String = "Shuffle"
@@ -517,27 +579,29 @@ object EnglishCommonPracticeStrings : CommonPracticeStrings {
         "Note: can also be written as ${it.joinToString()}"
     }
 
-    override val savingTitle: String = "Saving"
-    override val savingPreselectTitle: String = "Select characters to revisit tomorrow"
-    override val savingPreselectCount: (Int) -> String = {
-        "Preselect characters with more than $it mistakes"
-    }
-    override val savingMistakesMessage: (count: Int) -> String = {
-        if (it == 1) "1 mistake" else "$it mistakes"
-    }
-    override val savingButton: String = "Save"
+    override val formattedSrsInterval: (Duration) -> String = { formattedSrsDuration(it) }
+    override val flashcardRevealButton: String = "Show Answer"
+    override val againButton: String = "Again"
+    override val hardButton: String = "Hard"
+    override val goodButton: String = "Good"
+    override val easyButton: String = "Easy"
+    override val summaryItemsCountTitle: String = "Reviewed Words"
+    override val summaryNextReviewLabel: String = "Next review:"
 
-    override val savedTitle: String = "Summary"
-    override val savedReviewedCountLabel: String = "Characters reviewed"
-    override val savedTimeSpentLabel: String = "Time spent"
-    override val savedTimeSpentValue: (Duration) -> String = { formatDuration(it) }
-    override val savedAccuracyLabel: String = "Accuracy"
-    override val savedRepeatCharactersLabel: String = "Characters to revisit"
-    override val savedRetainedCharactersLabel: String = "Retained characters"
+    override val summaryReviewedCountLabel: String = "Characters reviewed"
+    override val summaryTimeSpentLabel: String = "Time spent"
+    override val summaryTimeSpentValue: (Duration) -> String = { formatDuration(it) }
+    override val summaryAccuracyLabel: String = "Accuracy"
     override val summaryButton: String = "Finish"
+
+    override val earlyFinishDialogTitle: String = "Finish practice?"
+    override val earlyFinishDialogMessage: String =
+        "Navigate to the summary, your current progress is already saved"
+    override val earlyFinishDialogCancelButton: String = "Cancel"
+    override val earlyFinishDialogAcceptButton: String = "Finish"
 }
 
-object EnglishWritingPracticeStrings : WritingPracticeStrings {
+object EnglishLetterPracticeStrings : LetterPracticeStrings {
     override val hintStrokesTitle: String = "Hint Strokes"
     override val hintStrokesMessage: String = "Controls when to show hint strokes for characters"
     override val hintStrokeNewOnlyMode: String = "New only"
@@ -562,13 +626,10 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
         "Expressions " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
     override val studyFinishedButton: String = "Review"
-    override val nextButton: String = "Good"
-    override val repeatButton: String = "Bad"
     override val noKanjiTranslationsLabel: String = "[No translations]"
 
-    override val altStrokeEvaluatorTitle: String = "Alternative Stroke Evaluator"
-    override val altStrokeEvaluatorMessage: String =
-        "Use alternative algorithm instead of the original stroke evaluator"
+    override val altStrokeEvaluatorTitle: String = "Strict Stroke Evaluator"
+    override val altStrokeEvaluatorMessage: String = "Alternative algorithm for stroke evaluation"
 
     override val variantsTitle: String = "Variants: "
     override val variantsHint: String = "Click to reveal"
@@ -576,21 +637,10 @@ object EnglishWritingPracticeStrings : WritingPracticeStrings {
     override val strokeCountTitle: (count: Int) -> String = { "Stroke count: $it" }
 }
 
-object EnglishReadingPracticeString : ReadingPracticeStrings {
-    override val kanaRomajiTitle: String = "Show romaji for kana"
-    override val kanaRomajiMessage: String = "When reviewing kana show romaji above expressions"
-    override val words: String = "Expressions"
-    override val showAnswerButton: String = "Show Answer"
-    override val goodButton: String = "Good"
-    override val repeatButton: String = "Bad"
-}
-
 object EnglishVocabPracticeStrings : VocabPracticeStrings {
-    override val practiceTypeConfigurationTitle: String = "Practice Type"
-    override val practiceTypeConfigurationMessage: String = "Choose from various modes"
-    override val practiceTypeReadingPicker: String = "Reading Picker"
-    override val practiceTypeFlashcard: String = "Flashcard"
-    override val practiceTypeWriting: String = "Writing"
+    override val configurationTitle: (practiceType: String) -> String = {
+        "Vocab Practice・$it"
+    }
     override val readingPriorityConfigurationTitle: String = "Reading Priority"
     override val readingPriorityConfigurationMessage: String =
         "Choose which reading to use if the word has multiple readings"
@@ -604,19 +654,6 @@ object EnglishVocabPracticeStrings : VocabPracticeStrings {
     override val translationInFrontConfigurationMessage: String =
         "Show translation instead of word when flashcard is hidden"
     override val detailsButton: String = "Details"
-    override val flashcardRevealButton: String = "Show Answer"
-    override val formattedSrsInterval: (Duration) -> String = { formattedSrsDuration(it) }
-    override val againButton: String = "Again"
-    override val hardButton: String = "Hard"
-    override val goodButton: String = "Good"
-    override val easyButton: String = "Easy"
-    override val summaryItemsCountTitle: String = "Reviewed Words"
-    override val summaryNextReviewLabel: String = "Next review:"
-    override val earlyFinishDialogTitle: String = "Finish practice?"
-    override val earlyFinishDialogMessage: String =
-        "Navigate to the summary, your current progress is already saved"
-    override val earlyFinishDialogCancelButton: String = "Cancel"
-    override val earlyFinishDialogAcceptButton: String = "Finish"
 }
 
 fun formattedSrsDuration(

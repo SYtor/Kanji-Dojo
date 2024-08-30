@@ -149,7 +149,7 @@ private fun BoxScope.AnswerButtons(
 
                 LetterWritingButtonsState.StudyButtons -> {
                     StyledTextButton(
-                        text = resolveString { writingPractice.studyFinishedButton },
+                        text = resolveString { letterPractice.studyFinishedButton },
                         icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentColor = MaterialTheme.colorScheme.surfaceVariant,
                         backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -137,7 +137,7 @@ private fun LazyListScope.addWordItems(
     stickyHeader {
 
         Text(
-            text = resolveString { writingPractice.headerWordsMessage(words.size) },
+            text = resolveString { letterPractice.headerWordsMessage(words.size) },
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surface)

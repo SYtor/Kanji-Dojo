@@ -31,7 +31,7 @@ enum class HomeScreenTab(
     GeneralDashboard(
         analyticsName = "general_dashboard",
         iconContent = { Icon(ExtraIcons.HomeOutline, null) },
-        titleResolver = { "Home" },
+        titleResolver = { home.generalDashboardTabLabel },
         content = { GeneralDashboardScreen(it) }
     ),
     LettersDashboard(

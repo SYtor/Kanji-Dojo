@@ -34,10 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardBottomBarLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreenContract.ScreenState
-import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -69,8 +69,14 @@ fun VocabDashboardBottomBarUI(
                                     .padding(ButtonDefaults.TextButtonContentPadding),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                val practiceTypeLabel = resolveString(
+                                    screenState.srsPracticeType.value.titleResolver
+                                )
                                 Text(
-                                    text = "Practice Mode: " + resolveString(screenState.srsPracticeType.value.titleResolver),
+                                    text = resolveString {
+                                        vocabDashboard
+                                            .selectedPracticeTypeTemplate(practiceTypeLabel)
+                                    },
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Light
                                 )

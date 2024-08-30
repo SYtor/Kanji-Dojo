@@ -342,9 +342,9 @@ private fun ColumnScope.KanjiDetails(
         KanjiVariantsRow(details.variants)
 
         val unicodeHex = String.format("U+%04X", details.character.first().code)
-        Text(text = resolveString { writingPractice.unicodeTitle(unicodeHex) })
+        Text(text = resolveString { letterPractice.unicodeTitle(unicodeHex) })
 
-        Text(text = resolveString { writingPractice.strokeCountTitle(details.strokes.size) })
+        Text(text = resolveString { letterPractice.strokeCountTitle(details.strokes.size) })
 
     }
 
@@ -405,7 +405,7 @@ private fun KanjiMeanings(
 
         Text(
             text = meanings.firstOrNull()?.capitalize(Locale.current)
-                ?: resolveString { writingPractice.noKanjiTranslationsLabel },
+                ?: resolveString { letterPractice.noKanjiTranslationsLabel },
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth()
         )
@@ -447,7 +447,7 @@ private fun ExpressionsSection(
     ) {
 
         Text(
-            text = resolveString { writingPractice.headerWordsMessage(words.size) },
+            text = resolveString { letterPractice.headerWordsMessage(words.size) },
             style = MaterialTheme.typography.titleLarge
         )
 

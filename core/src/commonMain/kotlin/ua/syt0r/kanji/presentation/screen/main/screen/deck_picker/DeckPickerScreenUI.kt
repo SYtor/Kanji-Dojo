@@ -307,7 +307,7 @@ private fun CategoryItem(
 
         if (deck is VocabDeckPickerDeck) {
             Text(
-                text = "${deck.wordsCount} words",
+                text = resolveString { deckPicker.vocabDeckItemWordsCountLabel(deck.wordsCount) },
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelSmall
             )

@@ -41,21 +41,30 @@ interface Strings {
 
     val loading: String
 
+    val letterPracticeTypeWriting: String
+    val letterPracticeTypeReading: String
+    val vocabPracticeTypeFlashcard: String
+    val vocabPracticeTypeReadingPicker: String
+    val vocabPracticeTypeWriting: String
+
     val reviewStateDone: String
     val reviewStateDue: String
     val reviewStateNew: String
 
     val home: HomeStrings
+    val generalDashboard: GeneralDashboardStrings
     val lettersDashboard: LettersDashboardStrings
     val vocabDashboard: VocabDashboardStrings
-    val dailyLimit: DailyLimitStrings
-
     val stats: StatsStrings
     val search: SearchStrings
+    val settings: SettingsStrings
+
+    val dailyLimit: DailyLimitStrings
+
+    val tutorialDialog: TutorialDialogStrings
     val alternativeDialog: AlternativeDialogStrings
     val addWordToDeckDialog: AddWordToDeckDialogStrings
 
-    val settings: SettingsStrings
     val reminderDialog: ReminderDialogStrings
     val about: AboutStrings
     val backup: BackupStrings
@@ -67,8 +76,7 @@ interface Strings {
     val deckEdit: DeckEditStrings
 
     val commonPractice: CommonPracticeStrings
-    val writingPractice: WritingPracticeStrings
-    val readingPractice: ReadingPracticeStrings
+    val letterPractice: LetterPracticeStrings
     val vocabPractice: VocabPracticeStrings
 
     val kanjiInfo: KanjiInfoStrings
@@ -78,6 +86,33 @@ interface Strings {
 
     val reminderNotification: ReminderNotificationStrings
 
+}
+
+interface GeneralDashboardStrings {
+    val buttonDailyLimit: String
+    val buttonVersionChange: String
+    val buttonTutorial: String
+
+    val letterDecksTitle: String
+    val vocabDecksTitle: String
+    val buttonNoDecksTitle: String
+    val buttonNoDecksMessage: String
+    val practiceTypeLabel: String
+    val buttonNew: String
+    val buttonDue: String
+    val buttonAll: String
+}
+
+interface TutorialDialogStrings {
+    val title: String
+    val page1: String
+    val page2Top: String
+    val page2Bottom: String
+    val page3Top: String
+    val page3Bottom: String
+    val page4Top: String
+    val page4Bottom: String
+    val page5: String
 }
 
 interface SponsorStrings {
@@ -95,33 +130,7 @@ interface AddWordToDeckDialogStrings {
 }
 
 interface VocabDashboardStrings {
-    val userDecksTitle: String
-    val userDecksEmptyMessage: String
-    val defaultDecksTitle: String
-
-    val reviewLabel: String
-    val newWordsCounter: (Int) -> String
-    val dueWordsCounter: (Int) -> String
-    val doneWordsCounter: (Int) -> String
-    val totalWordsCounter: (Int) -> String
-
-    val practiceTypeDialogTitle: String
-    val practiceTypeDialogMessage: String
-    val practiceTypeDialogCancelButton: String
-    val practiceTypeDialogApplyButton: String
-
-    val deckTitleTime: String
-    val deckTitleWeek: String
-    val deckTitleCommonVerbs: String
-    val deckTitleColors: String
-    val deckTitleRegularFood: String
-    val deckTitleJapaneseFood: String
-    val deckTitleGrammarTerms: String
-    val deckTitleAnimals: String
-    val deckTitleBody: String
-    val deckTitleCommonPlaces: String
-    val deckTitleCities: String
-    val deckTitleTransport: String
+    val selectedPracticeTypeTemplate: (practiceType: String) -> String
 }
 
 interface FeedbackStrings {
@@ -140,6 +149,7 @@ interface FeedbackStrings {
 interface HomeStrings {
     val screenTitle: String
 
+    val generalDashboardTabLabel: String
     val lettersDashboardTabLabel: String
     val vocabDashboardTabLabel: String
     val statsTabLabel: String
@@ -171,8 +181,6 @@ interface LettersDashboardStrings {
     val sortByTimeTitle: String
 
     val itemTimeMessage: (reviewToNowDuration: Duration?) -> String
-    val itemWritingTitle: String
-    val itemReadingTitle: String
     val itemTotal: String
     val itemDone: String
     val itemReview: String
@@ -195,11 +203,15 @@ interface LettersDashboardStrings {
 interface DailyLimitStrings {
     val title: String
     val message: String
-    val enabledLabel: String
+    val enableSwitchTitle: String
+    val enableSwitchDescription: String
+    val lettersSectionTitle: String
+    val vocabSectionTitle: String
     val newLabel: String
     val dueLabel: String
     val noteMessage: String
     val button: String
+    val changesSavedMessage: String
 }
 
 interface StatsStrings {
@@ -212,7 +224,8 @@ interface StatsStrings {
     val timeSpentTitle: String
     val reviewsCountTitle: String
     val formattedDuration: (Duration) -> String
-    val charactersStudiedTitle: String
+    val uniqueLettersReviewed: String
+    val uniqueWordsReviewed: String
 }
 
 interface SearchStrings {
@@ -321,6 +334,25 @@ interface DeckPickerStrings {
     val wanikaniDescription: (urlColor: Color) -> AnnotatedString
     val wanikaniItem: (Int) -> String
 
+    val vocabDeckItemWordsCountLabel: (words: Int) -> String
+
+    val vocabJlptTitle: String
+    val vocabJlptDescription: AnnotatedString
+    val vocabOtherTitle: String
+    val vocabOtherDescription: AnnotatedString
+    val vocabDeckTitleTime: String
+    val vocabDeckTitleWeek: String
+    val vocabDeckTitleCommonVerbs: String
+    val vocabDeckTitleColors: String
+    val vocabDeckTitleRegularFood: String
+    val vocabDeckTitleJapaneseFood: String
+    val vocabDeckTitleGrammarTerms: String
+    val vocabDeckTitleAnimals: String
+    val vocabDeckTitleBody: String
+    val vocabDeckTitleCommonPlaces: String
+    val vocabDeckTitleCities: String
+    val vocabDeckTitleTransport: String
+
 }
 
 interface DeckEditStrings {
@@ -387,18 +419,12 @@ interface DeckDetailsStrings {
     val kanaGroupsModeActivatedLabel: String
 
     val dialogCommon: LetterDeckDetailDialogCommonStrings
-    val practiceType: PracticeTypeStrings
     val filterDialog: FilterDialogStrings
     val sortDialog: SortDialogStrings
     val layoutDialog: PracticePreviewLayoutDialogStrings
 
     val shareLetterDeckClipboardMessage: String
 
-}
-
-interface PracticeTypeStrings {
-    val practiceTypeWriting: String
-    val practiceTypeReading: String
 }
 
 interface FilterDialogStrings {
@@ -439,27 +465,28 @@ interface CommonPracticeStrings {
 
     val additionalKanaReadingsNote: (List<String>) -> String
 
-    val leaveDialogTitle: String
-    val leaveDialogMessage: String
-    val leaveDialogButton: String
+    val formattedSrsInterval: (Duration) -> String
+    val flashcardRevealButton: String
+    val againButton: String
+    val hardButton: String
+    val goodButton: String
+    val easyButton: String
 
-    val savingTitle: String
-    val savingPreselectTitle: String
-    val savingPreselectCount: (Int) -> String
-    val savingMistakesMessage: (count: Int) -> String
-    val savingButton: String
-
-    val savedTitle: String
-    val savedReviewedCountLabel: String
-    val savedTimeSpentLabel: String
-    val savedTimeSpentValue: (Duration) -> String
-    val savedAccuracyLabel: String
-    val savedRepeatCharactersLabel: String
-    val savedRetainedCharactersLabel: String
+    val summaryReviewedCountLabel: String
+    val summaryTimeSpentLabel: String
+    val summaryTimeSpentValue: (Duration) -> String
+    val summaryAccuracyLabel: String
+    val summaryItemsCountTitle: String
+    val summaryNextReviewLabel: String
     val summaryButton: String
+
+    val earlyFinishDialogTitle: String
+    val earlyFinishDialogMessage: String
+    val earlyFinishDialogCancelButton: String
+    val earlyFinishDialogAcceptButton: String
 }
 
-interface WritingPracticeStrings {
+interface LetterPracticeStrings {
     val hintStrokesTitle: String
     val hintStrokesMessage: String
     val hintStrokeNewOnlyMode: String
@@ -478,8 +505,6 @@ interface WritingPracticeStrings {
 
     val headerWordsMessage: (count: Int) -> String
     val studyFinishedButton: String
-    val nextButton: String
-    val repeatButton: String
     val noKanjiTranslationsLabel: String
 
     val altStrokeEvaluatorTitle: String
@@ -491,21 +516,8 @@ interface WritingPracticeStrings {
     val strokeCountTitle: (Int) -> String
 }
 
-interface ReadingPracticeStrings {
-    val kanaRomajiTitle: String
-    val kanaRomajiMessage: String
-    val words: String
-    val showAnswerButton: String
-    val goodButton: String
-    val repeatButton: String
-}
-
 interface VocabPracticeStrings {
-    val practiceTypeConfigurationTitle: String
-    val practiceTypeConfigurationMessage: String
-    val practiceTypeReadingPicker: String
-    val practiceTypeFlashcard: String
-    val practiceTypeWriting: String
+    val configurationTitle: (practiceType: String) -> String
 
     val readingPriorityConfigurationTitle: String
     val readingPriorityConfigurationMessage: String
@@ -520,21 +532,6 @@ interface VocabPracticeStrings {
     val translationInFrontConfigurationMessage: String
 
     val detailsButton: String
-    val flashcardRevealButton: String
-
-    val formattedSrsInterval: (Duration) -> String
-    val againButton: String
-    val hardButton: String
-    val goodButton: String
-    val easyButton: String
-
-    val summaryItemsCountTitle: String
-    val summaryNextReviewLabel: String
-
-    val earlyFinishDialogTitle: String
-    val earlyFinishDialogMessage: String
-    val earlyFinishDialogCancelButton: String
-    val earlyFinishDialogAcceptButton: String
 
 }
 

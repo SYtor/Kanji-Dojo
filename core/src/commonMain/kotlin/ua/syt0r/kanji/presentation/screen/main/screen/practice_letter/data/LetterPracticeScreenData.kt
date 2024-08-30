@@ -98,13 +98,13 @@ enum class WritingPracticeHintMode(
     override val titleResolver: StringResolveScope<String>,
 ) : DisplayableEnum {
     OnlyNew(
-        titleResolver = { writingPractice.hintStrokeNewOnlyMode }
+        titleResolver = { letterPractice.hintStrokeNewOnlyMode }
     ),
     All(
-        titleResolver = { writingPractice.hintStrokeAllMode }
+        titleResolver = { letterPractice.hintStrokeAllMode }
     ),
     None(
-        titleResolver = { writingPractice.hintStrokeNoneMode }
+        titleResolver = { letterPractice.hintStrokeNoneMode }
     )
 }
 
@@ -113,11 +113,11 @@ enum class WritingPracticeInputMode(
     val repoType: PreferencesLetterPracticeWritingInputMode
 ) : DisplayableEnum {
     Stroke(
-        titleResolver = { writingPractice.inputModeStroke },
+        titleResolver = { letterPractice.inputModeStroke },
         repoType = PreferencesLetterPracticeWritingInputMode.Stroke
     ),
     Character(
-        titleResolver = { writingPractice.inputModeCharacter },
+        titleResolver = { letterPractice.inputModeCharacter },
         repoType = PreferencesLetterPracticeWritingInputMode.Character
     )
 }

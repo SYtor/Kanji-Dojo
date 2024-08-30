@@ -105,9 +105,9 @@ fun DailyLimitScreenUI(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text(strings.enabledLabel)
+                    Text(strings.enableSwitchTitle)
                     Text(
-                        text = "Limit number of daily reviews prompted by the app",
+                        text = strings.enableSwitchDescription,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -118,7 +118,7 @@ fun DailyLimitScreenUI(
             }
 
             ScreenContainer(
-                title = resolveString { "Letters" }
+                title = strings.lettersSectionTitle
             ) {
 
                 LimitInputRow(
@@ -143,7 +143,7 @@ fun DailyLimitScreenUI(
             }
 
             ScreenContainer(
-                title = resolveString { "Vocab" }
+                title = strings.vocabSectionTitle
             ) {
 
                 Text(
@@ -170,7 +170,7 @@ fun DailyLimitScreenUI(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = resolveString { "Done" }
+                    text = strings.changesSavedMessage
                 )
                 Icon(
                     imageVector = Icons.Default.Check,

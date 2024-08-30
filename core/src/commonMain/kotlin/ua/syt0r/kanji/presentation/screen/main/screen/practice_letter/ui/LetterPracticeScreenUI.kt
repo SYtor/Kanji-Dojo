@@ -209,7 +209,7 @@ private fun ConfiguringState(
     onConfigurationCompleted: () -> Unit
 ) {
 
-    val strings = resolveString { writingPractice }
+    val strings = resolveString { letterPractice }
 
     val practiceTypeTitle = resolveString(state.configuration.practiceType.titleResolver)
 
@@ -238,16 +238,16 @@ private fun ConfiguringState(
                 )
 
                 PracticeConfigurationEnumSelector(
-                    title = resolveString { writingPractice.hintStrokesTitle },
-                    subtitle = resolveString { writingPractice.hintStrokesMessage },
+                    title = resolveString { letterPractice.hintStrokesTitle },
+                    subtitle = resolveString { letterPractice.hintStrokesMessage },
                     values = WritingPracticeHintMode.values(),
                     selected = selectedHintMode,
                     onSelected = { selectedHintMode = it }
                 )
 
                 PracticeConfigurationEnumSelector(
-                    title = resolveString { writingPractice.inputModeTitle },
-                    subtitle = resolveString { writingPractice.inputModeMessage },
+                    title = resolveString { letterPractice.inputModeTitle },
+                    subtitle = resolveString { letterPractice.inputModeMessage },
                     values = WritingPracticeInputMode.values(),
                     selected = selectedInputMode,
                     onSelected = { selectedInputMode = it }
@@ -294,8 +294,8 @@ private fun ConfiguringState(
                 )
 
                 PracticeConfigurationOption(
-                    title = resolveString { readingPractice.kanaRomajiTitle },
-                    subtitle = resolveString { readingPractice.kanaRomajiMessage },
+                    title = resolveString { letterPractice.kanaRomajiTitle },
+                    subtitle = resolveString { letterPractice.kanaRomajiMessage },
                     checked = configuration.useRomajiForKanaWords.value,
                     onChange = { configuration.useRomajiForKanaWords.value = it }
                 )
@@ -342,21 +342,15 @@ private fun SummaryState(
 
     val strings = resolveString { commonPractice }
 
-    PracticeSummaryContainer(onFinishClick) {
-
-        PracticeSummaryInfoLabel(
-            title = strings.savedReviewedCountLabel,
-            data = screenState.items.size.toString()
-        )
-
-        PracticeSummaryInfoLabel(
-            title = strings.savedTimeSpentLabel,
-            data = strings.savedTimeSpentValue(screenState.duration)
-        )
+    PracticeSummaryContainer(
+        practiceDuration = screenState.duration,
+        summaryItemsCount = screenState.items.size,
+        onFinishClick = onFinishClick
+    ) {
 
         if (screenState.accuracy != null)
             PracticeSummaryInfoLabel(
-                title = strings.savedAccuracyLabel,
+                title = strings.summaryAccuracyLabel,
                 data = "%.2f%%".format(screenState.accuracy)
             )
 
@@ -389,7 +383,7 @@ fun KanjiVariantsRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        Text(text = resolveString { writingPractice.variantsTitle })
+        Text(text = resolveString { letterPractice.variantsTitle })
 
         val showVariants = remember { mutableStateOf(false) }
 
@@ -409,7 +403,7 @@ fun KanjiVariantsRow(
                 .padding(vertical = 4.dp, horizontal = 8.dp)
         ) {
             Text(
-                text = resolveString { writingPractice.variantsHint },
+                text = resolveString { letterPractice.variantsHint },
                 color = hintTextColor,
                 maxLines = 1
             )

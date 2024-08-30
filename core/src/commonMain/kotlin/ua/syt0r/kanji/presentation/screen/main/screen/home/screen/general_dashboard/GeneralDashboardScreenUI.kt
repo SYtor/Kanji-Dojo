@@ -30,10 +30,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ButtonDefaults
@@ -102,7 +102,7 @@ fun GeneralDashboardScreenUI(
             HeaderButton(
                 onClick = navigateToDailyLimitConfiguration,
             ) {
-                Text("Daily Limit")
+                Text(resolveString { generalDashboard.buttonDailyLimit })
                 Icon(Icons.Outlined.Settings, null)
             }
 
@@ -120,7 +120,10 @@ fun GeneralDashboardScreenUI(
                     )
                 }
 
-                Text("What's new", Modifier.alignByBaseline())
+                Text(
+                    text = resolveString { generalDashboard.buttonVersionChange },
+                    modifier = Modifier.alignByBaseline()
+                )
                 Icon(Icons.Outlined.Celebration, null)
             }
 
@@ -137,14 +140,14 @@ fun GeneralDashboardScreenUI(
                             .background(MaterialTheme.colorScheme.primary, CircleShape)
                     )
                 }
-                Text("Tutorial", Modifier.alignByBaseline())
+                Text(resolveString { generalDashboard.buttonTutorial }, Modifier.alignByBaseline())
                 Icon(Icons.AutoMirrored.Outlined.HelpOutline, null)
             }
 
         },
         content = {
 
-            val letterDecksTitle = resolveString { "Letter Decks" }
+            val letterDecksTitle = resolveString { generalDashboard.letterDecksTitle }
 
             when (it.letterDecksData) {
                 is LetterDecksData.Data -> {
@@ -175,21 +178,21 @@ fun GeneralDashboardScreenUI(
                             GeneralDashboardReviewButton(
                                 onClick = { goToLetterPractice(progress.newToDeckIdMap) },
                                 count = progress.newToDeckIdMap.size,
-                                text = "New",
+                                text = resolveString { generalDashboard.buttonNew },
                                 modifier = Modifier.weight(1f)
                             )
 
                             GeneralDashboardReviewButton(
                                 onClick = { goToLetterPractice(progress.dueToDeckIdMap) },
                                 count = progress.dueToDeckIdMap.size,
-                                text = "Due",
+                                text = resolveString { generalDashboard.buttonDue },
                                 modifier = Modifier.weight(1f)
                             )
 
                             GeneralDashboardReviewButton(
                                 onClick = { goToLetterPractice(progress.combined) },
                                 count = progress.combined.size,
-                                text = "New & Due",
+                                text = resolveString { generalDashboard.buttonAll },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -210,7 +213,7 @@ fun GeneralDashboardScreenUI(
 
             }
 
-            val vocabDecksTitle = resolveString { "Vocab Decks" }
+            val vocabDecksTitle = resolveString { generalDashboard.vocabDecksTitle }
 
             when (it.vocabDecksInfo) {
                 is VocabDecksData.Data -> {
@@ -240,7 +243,7 @@ fun GeneralDashboardScreenUI(
                             GeneralDashboardReviewButton(
                                 onClick = { goToVocabPractice(progress.dueToDeckIdMap) },
                                 count = progress.dueToDeckIdMap.size,
-                                text = "Due",
+                                text = resolveString { generalDashboard.buttonDue },
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -395,7 +398,7 @@ private fun <T : ScreenPracticeType> PracticeTypeSelector(
     ) {
 
         Text(
-            text = resolveString { "Practice Mode" },
+            text = resolveString { generalDashboard.practiceTypeLabel },
             modifier = Modifier.alignByBaseline(),
         )
 
@@ -499,18 +502,18 @@ fun GeneralDashboardNoDecksButton(
     ) {
 
         Text(
-            text = resolveString { "No decks" },
+            text = resolveString { generalDashboard.buttonNoDecksTitle },
             fontSize = 14.sp,
             fontWeight = FontWeight.Light
         )
 
         Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = "Create",
+                text = resolveString { generalDashboard.buttonNoDecksMessage },
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.weight(1f)
             )
-            Icon(Icons.Default.KeyboardArrowRight, null)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
         }
 
 

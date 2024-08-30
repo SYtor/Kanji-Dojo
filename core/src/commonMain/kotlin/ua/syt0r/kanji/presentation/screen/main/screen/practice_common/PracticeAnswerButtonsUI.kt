@@ -124,7 +124,7 @@ fun PracticeAnswerButtonsRow(
         )
     ) {
         SrsAnswerButton(
-            label = resolveString { vocabPractice.againButton },
+            label = resolveString { commonPractice.againButton },
             interval = answers.again.srsAnswer.card.interval,
             onClick = { onClick(answers.again) },
             color = MaterialTheme.colorScheme.error,
@@ -132,21 +132,21 @@ fun PracticeAnswerButtonsRow(
             innerModifier = Modifier.padding(start = 2.dp)
         )
         SrsAnswerButton(
-            label = resolveString { vocabPractice.hardButton },
+            label = resolveString { commonPractice.hardButton },
             interval = answers.hard.srsAnswer.card.interval,
             onClick = { onClick(answers.hard) },
             color = MaterialTheme.extraColorScheme.due,
             outerModifier = buttonThemeModifier
         )
         SrsAnswerButton(
-            label = resolveString { vocabPractice.goodButton },
+            label = resolveString { commonPractice.goodButton },
             interval = answers.good.srsAnswer.card.interval,
             onClick = { onClick(answers.good) },
             color = MaterialTheme.extraColorScheme.success,
             outerModifier = buttonThemeModifier
         )
         SrsAnswerButton(
-            label = resolveString { vocabPractice.easyButton },
+            label = resolveString { commonPractice.easyButton },
             interval = answers.easy.srsAnswer.card.interval,
             onClick = { onClick(answers.easy) },
             color = MaterialTheme.extraColorScheme.new,
@@ -221,7 +221,7 @@ fun FlashcardPracticeAnswerButtonsRow(
             }
 
             Text(
-                text = resolveString { vocabPractice.flashcardRevealButton },
+                text = resolveString { commonPractice.flashcardRevealButton },
                 modifier = Modifier.fillMaxSize()
                     .graphicsLayer { if (!isVisible) alpha = 0f }
                     .padding(horizontal = 20.dp)
@@ -284,7 +284,7 @@ fun RowScope.SrsAnswerButton(
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
-            text = resolveString { vocabPractice.formattedSrsInterval(interval) },
+            text = resolveString { commonPractice.formattedSrsInterval(interval) },
             style = MaterialTheme.typography.labelMedium,
             color = color,
         )

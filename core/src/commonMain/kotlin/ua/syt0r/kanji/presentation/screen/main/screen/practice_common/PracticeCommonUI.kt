@@ -111,7 +111,7 @@ fun PracticeToolbar(
                 when (it) {
                     PracticeToolbarState.Configuration -> {
                         Text(
-                            text = "Configuration"
+                            text = resolveString { commonPractice.configurationTitle }
                         )
                     }
 
@@ -513,6 +513,8 @@ fun <T> PracticeConfigurationEnumSelector(
 
 @Composable
 fun PracticeSummaryContainer(
+    practiceDuration: Duration,
+    summaryItemsCount: Int,
     onFinishClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -529,7 +531,19 @@ fun PracticeSummaryContainer(
             modifier = Modifier.weight(1f)
                 .verticalScroll(rememberScrollState())
         ) {
+
+            PracticeSummaryInfoLabel(
+                title = resolveString { commonPractice.summaryTimeSpentLabel },
+                data = resolveString { commonPractice.summaryTimeSpentValue(practiceDuration) }
+            )
+
+            PracticeSummaryInfoLabel(
+                title = resolveString { commonPractice.summaryItemsCountTitle },
+                data = summaryItemsCount.toString()
+            )
+
             content()
+
         }
 
         Button(
@@ -597,11 +611,11 @@ fun PracticeSummaryItem(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = resolveString { vocabPractice.summaryNextReviewLabel },
+                text = resolveString { commonPractice.summaryNextReviewLabel },
                 modifier = Modifier.weight(1f).alignByBaseline()
             )
             Text(
-                text = resolveString { vocabPractice.formattedSrsInterval(nextInterval) },
+                text = resolveString { commonPractice.formattedSrsInterval(nextInterval) },
                 modifier = Modifier.alignByBaseline()
             )
         }
@@ -667,7 +681,7 @@ fun PracticeEarlyFinishDialog(
     onConfirmClick: () -> Unit
 ) {
 
-    val strings = resolveString { vocabPractice }
+    val strings = resolveString { commonPractice }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,

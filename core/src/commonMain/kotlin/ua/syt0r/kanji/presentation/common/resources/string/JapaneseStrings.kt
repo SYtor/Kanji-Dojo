@@ -26,14 +26,24 @@ object JapaneseStrings : Strings {
 
     override val loading: String = "読み込み中"
 
+    override val letterPracticeTypeWriting: String = "書き"
+    override val letterPracticeTypeReading: String = "読み"
+    override val vocabPracticeTypeFlashcard: String = "フラッシュカード"
+    override val vocabPracticeTypeReadingPicker: String = "読み取りピッカー"
+    override val vocabPracticeTypeWriting: String = "書く"
+
     override val reviewStateDone: String = "完了"
     override val reviewStateDue: String = "復習"
     override val reviewStateNew: String = "未習"
 
     override val home: HomeStrings = JapaneseHomeStrings
+    override val generalDashboard: GeneralDashboardStrings
+        get() = TODO("Not yet implemented")
     override val lettersDashboard = JapaneseLettersDashboardStrings
     override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
     override val dailyLimit = JapaneseDailyLimitStrings
+    override val tutorialDialog: TutorialDialogStrings
+        get() = TODO("Not yet implemented")
     override val stats: StatsStrings = JapaneseStatsStrings
     override val search: SearchStrings = JapaneseSearchStrings
     override val alternativeDialog: AlternativeDialogStrings = JapaneseAlternativeDialogStrings
@@ -51,8 +61,7 @@ object JapaneseStrings : Strings {
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
     override val deckDetails: DeckDetailsStrings = JapaneseDeckDetailsStrings
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
-    override val writingPractice: WritingPracticeStrings = JapaneseWritingPracticeStrings
-    override val readingPractice: ReadingPracticeStrings = JapaneseReadingPracticeString
+    override val letterPractice: LetterPracticeStrings = JapaneseLetterPracticeStrings
     override val vocabPractice: VocabPracticeStrings = JapaneseVocabPracticeStrings
     override val kanjiInfo: KanjiInfoStrings = JapaneseKanjiInfoStrings
 
@@ -66,6 +75,8 @@ object JapaneseStrings : Strings {
 
 object JapaneseHomeStrings : HomeStrings {
     override val screenTitle: String = JapaneseStrings.appName
+    override val generalDashboardTabLabel: String
+        get() = TODO("Not yet implemented")
     override val lettersDashboardTabLabel: String = "文字"
     override val vocabDashboardTabLabel: String = "単語"
     override val statsTabLabel: String = "統計"
@@ -111,8 +122,6 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
         }
     }
 
-    override val itemWritingTitle: String = "書き"
-    override val itemReadingTitle: String = "読み"
     override val itemTotal: String = "合計"
     override val itemDone: String = "完了"
     override val itemReview: String = "復習"
@@ -129,33 +138,26 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val dailyIndicatorDue: (Int) -> String = { "$it 復習" }
 }
 
-object JapaneseVocabDashboardStrings : VocabDashboardStrings by EnglishVocabDashboardStrings {
-    override val userDecksTitle: String = "保存したデッキ"
-    override val userDecksEmptyMessage: String =
-        "デッキが保存されていません。既定デッキを使用して単語を復習するか、自分でデッキを作成してください。"
-    override val defaultDecksTitle: String = "既定デッキ"
-
-    override val reviewLabel: String = "復習を開始:"
-    override val newWordsCounter: (Int) -> String = { "未習: $it" }
-    override val dueWordsCounter: (Int) -> String = { "復習: $it" }
-    override val doneWordsCounter: (Int) -> String = { "完了: $it" }
-    override val totalWordsCounter: (Int) -> String = { "全て: $it" }
-
-    override val practiceTypeDialogTitle: String = "SRS 練習タイプ"
-    override val practiceTypeDialogMessage: String =
-        "単語の復讐状態を表示するために使用する練習タイプを選択してください"
-    override val practiceTypeDialogCancelButton: String = "キャンセル"
-    override val practiceTypeDialogApplyButton: String = "適用"
+object JapaneseVocabDashboardStrings : VocabDashboardStrings {
+    override val selectedPracticeTypeTemplate: (practiceType: String) -> String = { TODO() }
 }
 
 object JapaneseDailyLimitStrings : DailyLimitStrings {
     override val title: String = "毎日の目標"
     override val message: String = "クイック練習と通知に影響します"
-    override val enabledLabel: String = "有効"
+    override val enableSwitchTitle: String = "有効"
+    override val enableSwitchDescription: String
+        get() = TODO("Not yet implemented")
+    override val lettersSectionTitle: String
+        get() = TODO("Not yet implemented")
+    override val vocabSectionTitle: String
+        get() = TODO("Not yet implemented")
     override val newLabel: String = "新しい文字"
     override val dueLabel: String = "復習"
     override val noteMessage: String = "注意: 文字の書きと読みは別に数えます"
     override val button: String = "保存"
+    override val changesSavedMessage: String
+        get() = TODO("Not yet implemented")
 }
 
 private fun formatDuration(duration: Duration): String = when {
@@ -177,7 +179,9 @@ object JapaneseStatsStrings : StatsStrings {
     override val timeSpentTitle: String = "練習時間"
     override val reviewsCountTitle: String = "練習回数"
     override val formattedDuration: (Duration) -> String = { formatDuration(it) }
-    override val charactersStudiedTitle: String = "学習した文字"
+    override val uniqueLettersReviewed: String = "学習した文字"
+    override val uniqueWordsReviewed: String
+        get() = TODO("Not yet implemented")
 }
 
 
@@ -345,6 +349,40 @@ object JapaneseDeckPickerStrings : DeckPickerStrings {
         }
     }
     override val wanikaniItem: (Int) -> String = { "WaniKani レベル$it" }
+    override val vocabDeckItemWordsCountLabel: (words: Int) -> String
+        get() = TODO("Not yet implemented")
+    override val vocabJlptTitle: String
+        get() = TODO("Not yet implemented")
+    override val vocabJlptDescription: AnnotatedString
+        get() = TODO("Not yet implemented")
+    override val vocabOtherTitle: String
+        get() = TODO("Not yet implemented")
+    override val vocabOtherDescription: AnnotatedString
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleTime: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleWeek: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleCommonVerbs: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleColors: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleRegularFood: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleJapaneseFood: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleGrammarTerms: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleAnimals: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleBody: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleCommonPlaces: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleCities: String
+        get() = TODO("Not yet implemented")
+    override val vocabDeckTitleTransport: String
+        get() = TODO("Not yet implemented")
 
 }
 
@@ -413,7 +451,6 @@ object JapaneseDeckDetailsStrings : DeckDetailsStrings {
 
     override val dialogCommon: LetterDeckDetailDialogCommonStrings =
         JapaneseLetterDeckDetailDialogCommonStrings
-    override val practiceType: PracticeTypeStrings = JapanesePracticeTypeStrings
     override val filterDialog: FilterDialogStrings = JapaneseFilterDialogStrings
     override val sortDialog: SortDialogStrings = JapaneseSortDialogStrings
     override val layoutDialog: PracticePreviewLayoutDialogStrings =
@@ -434,11 +471,6 @@ object JapaneseDeckDetailsStrings : DeckDetailsStrings {
 object JapaneseLetterDeckDetailDialogCommonStrings : LetterDeckDetailDialogCommonStrings {
     override val buttonCancel: String = "キャンセル"
     override val buttonApply: String = "適用"
-}
-
-object JapanesePracticeTypeStrings : PracticeTypeStrings {
-    override val practiceTypeWriting: String = "書き"
-    override val practiceTypeReading: String = "読み"
 }
 
 object JapaneseFilterDialogStrings : FilterDialogStrings {
@@ -466,9 +498,6 @@ object JapanesePracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogS
 }
 
 object JapaneseCommonPracticeStrings : CommonPracticeStrings {
-    override val leaveDialogTitle: String = "練習をやめますか？"
-    override val leaveDialogMessage: String = "現在の進行状況は失われます"
-    override val leaveDialogButton: String = "やめる"
 
     override val configurationTitle: String = "練習の設定"
     override val configurationSelectedItemsLabel: String = "練習の数:"
@@ -481,25 +510,40 @@ object JapaneseCommonPracticeStrings : CommonPracticeStrings {
         "注：${it.joinToString { "「$it」" }}と書くこともあります"
     }
 
-    override val savingTitle: String = "練習の保存"
-    override val savingPreselectTitle: String = "明日に復習する文字を選択"
-    override val savingPreselectCount: (Int) -> String = {
-        "${it}回より多くミスがある文字は自動で選択されます"
+    override val formattedSrsInterval: (Duration) -> String = {
+        val duration = formattedSrsDuration(
+            duration = it,
+            dayLabel = "日",
+            hourLabel = "時",
+            minuteLabel = "分",
+            secondLabel = "秒",
+            separator = ""
+        )
+        "${duration}後"
     }
-    override val savingMistakesMessage: (count: Int) -> String = { "${it}回ミス" }
-    override val savingButton: String = "保存"
+    override val flashcardRevealButton: String = "答えを見る"
+    override val againButton: String = "もう一度"
+    override val hardButton: String = "難しい"
+    override val goodButton: String = "正解"
+    override val easyButton: String = "簡単"
 
-    override val savedTitle: String = "まとめ"
-    override val savedReviewedCountLabel: String = "練習した文字の数"
-    override val savedTimeSpentLabel: String = "時間"
-    override val savedTimeSpentValue: (Duration) -> String = { formatDuration(it) }
-    override val savedAccuracyLabel: String = "正解率"
-    override val savedRepeatCharactersLabel: String = "復習する文字"
-    override val savedRetainedCharactersLabel: String = "覚えた文字"
+    override val summaryReviewedCountLabel: String = "練習した文字の数"
+    override val summaryTimeSpentLabel: String = "時間"
+    override val summaryTimeSpentValue: (Duration) -> String = { formatDuration(it) }
+    override val summaryAccuracyLabel: String = "正解率"
+    override val summaryItemsCountTitle: String = "練習した単語の数"
+    override val summaryNextReviewLabel: String = "次の復習:"
     override val summaryButton: String = "終了"
+
+    override val earlyFinishDialogTitle: String = "練習を終了しますか？"
+    override val earlyFinishDialogMessage: String =
+        "まとめに移動します。現在の進捗はすでに保存されています"
+    override val earlyFinishDialogCancelButton: String = "キャンセル"
+    override val earlyFinishDialogAcceptButton: String = "終了"
+
 }
 
-object JapaneseWritingPracticeStrings : WritingPracticeStrings {
+object JapaneseLetterPracticeStrings : LetterPracticeStrings {
     override val hintStrokesTitle: String = "字画のヒント表示"
     override val hintStrokesMessage: String = "ヒントを表示する条件を設定する"
     override val hintStrokeNewOnlyMode: String = "新規のみ"
@@ -521,8 +565,6 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
         "単語  " + if (it > LetterPracticeScreenContract.WordsLimit) "(100+)" else "($it)"
     }
     override val studyFinishedButton: String = "復習"
-    override val nextButton: String = "正解"
-    override val repeatButton: String = "もう一度"
     override val altStrokeEvaluatorTitle: String = "代替字画認識"
     override val altStrokeEvaluatorMessage: String =
         "オリジナルの字画認識の代わりに代替のアルゴリズムを使う"
@@ -530,25 +572,12 @@ object JapaneseWritingPracticeStrings : WritingPracticeStrings {
 
     override val variantsTitle: String = "異体字"
     override val variantsHint: String = "クリックして表示"
-    override val unicodeTitle: (String) -> String = EnglishWritingPracticeStrings.unicodeTitle
+    override val unicodeTitle: (String) -> String = EnglishLetterPracticeStrings.unicodeTitle
     override val strokeCountTitle: (count: Int) -> String = { "${it}画" }
 }
 
-object JapaneseReadingPracticeString : ReadingPracticeStrings {
-    override val kanaRomajiTitle: String = "ローマ字を表示"
-    override val kanaRomajiMessage: String = "かなを練習するときは単語の上にローマ字を表示する"
-    override val words: String = "単語"
-    override val showAnswerButton: String = "正答を表示"
-    override val goodButton: String = "正解"
-    override val repeatButton: String = "もう一度"
-}
-
 object JapaneseVocabPracticeStrings : VocabPracticeStrings {
-    override val practiceTypeConfigurationTitle: String = "練習タイプ"
-    override val practiceTypeConfigurationMessage: String = "さまざまなモードから選ぶ"
-    override val practiceTypeReadingPicker: String = "読み取りピッカー"
-    override val practiceTypeFlashcard: String = "フラッシュカード"
-    override val practiceTypeWriting: String = "書く"
+    override val configurationTitle: (String) -> String = { TODO() }
     override val readingPriorityConfigurationTitle: String = "単語の読み方"
     override val readingPriorityConfigurationMessage: String =
         "単語に複数の読みがある場合、使用する読みを選択してください"
@@ -562,31 +591,6 @@ object JapaneseVocabPracticeStrings : VocabPracticeStrings {
     override val translationInFrontConfigurationMessage: String =
         "フラッシュカードが隠れているときに単語の代わりに翻訳を表示する"
     override val detailsButton: String = "詳細"
-    override val flashcardRevealButton: String = "答えを見る"
-
-    override val formattedSrsInterval: (Duration) -> String = {
-        val duration = formattedSrsDuration(
-            duration = it,
-            dayLabel = "日",
-            hourLabel = "時",
-            minuteLabel = "分",
-            secondLabel = "秒",
-            separator = ""
-        )
-        "${duration}後"
-    }
-    override val againButton: String = "もう一度"
-    override val hardButton: String = "難しい"
-    override val goodButton: String = "正解"
-    override val easyButton: String = "簡単"
-
-    override val summaryItemsCountTitle: String = "練習した単語の数"
-    override val summaryNextReviewLabel: String = "次の復習:"
-    override val earlyFinishDialogTitle: String = "練習を終了しますか？"
-    override val earlyFinishDialogMessage: String =
-        "まとめに移動します。現在の進捗はすでに保存されています"
-    override val earlyFinishDialogCancelButton: String = "キャンセル"
-    override val earlyFinishDialogAcceptButton: String = "終了"
 }
 
 object JapaneseKanjiInfoStrings : KanjiInfoStrings {

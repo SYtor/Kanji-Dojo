@@ -49,45 +49,17 @@ fun TutorialDialog(
     onDismissRequest: () -> Unit
 ) {
 
+    val strings = resolveString { tutorialDialog }
+
     val pages = listOf(
         TutorialPage {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    """
-                    • The app is built with Spaced Repetition System (SRS) in mind
-                    • You'll be prompted to repeatedly review letters and vocab you study withing the app according to you ability to recall relevant information
-                    """.trimIndent(),
+                    text = strings.page1,
                     textAlign = TextAlign.Justify
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 4,
-                        text = "New",
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 40,
-                        text = "Due",
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    GeneralDashboardReviewButton(
-                        onClick = {},
-                        count = 44,
-                        text = "New & Due",
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
             }
         },
         TutorialPage {
@@ -95,9 +67,7 @@ fun TutorialDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    """
-                    • To estimate your recall ability the app will offer you various rating options after review
-                    """.trimIndent(),
+                    text = strings.page2Top,
                     textAlign = TextAlign.Justify
                 )
                 Row(
@@ -105,21 +75,21 @@ fun TutorialDialog(
                         .clip(MaterialTheme.shapes.medium)
                 ) {
                     SrsAnswerButton(
-                        label = resolveString { vocabPractice.hardButton },
+                        label = resolveString { commonPractice.hardButton },
                         interval = 1.days,
                         onClick = { },
                         color = MaterialTheme.extraColorScheme.due,
                         outerModifier = Modifier
                     )
                     SrsAnswerButton(
-                        label = resolveString { vocabPractice.goodButton },
+                        label = resolveString { commonPractice.goodButton },
                         interval = 3.days,
                         onClick = { },
                         color = MaterialTheme.extraColorScheme.success,
                         outerModifier = Modifier
                     )
                     SrsAnswerButton(
-                        label = resolveString { vocabPractice.easyButton },
+                        label = resolveString { commonPractice.easyButton },
                         interval = 12.days,
                         onClick = { },
                         color = MaterialTheme.extraColorScheme.new,
@@ -128,10 +98,7 @@ fun TutorialDialog(
                 }
 
                 Text(
-                    """
-                    • Choose the option that best matches your ability to recall the item you're reviewing
-                    • Grading your own answers lets you adjust the learning experience to match your memory
-                    """.trimIndent(),
+                    text = strings.page2Bottom,
                     textAlign = TextAlign.Justify
                 )
             }
@@ -141,10 +108,7 @@ fun TutorialDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    """
-                    • Every day, the status of all reviewed items is updated, prompting you to review some of them again
-                    • Make sure to visit the app daily because due items that are pending for review will build up over time
-                    """.trimIndent(),
+                    text = strings.page3Top,
                     textAlign = TextAlign.Justify
                 )
 
@@ -155,29 +119,27 @@ fun TutorialDialog(
                     GeneralDashboardReviewButton(
                         onClick = {},
                         count = 0,
-                        text = "New",
+                        text = resolveString { generalDashboard.buttonNew },
                         modifier = Modifier.weight(1f)
                     )
 
                     GeneralDashboardReviewButton(
                         onClick = {},
-                        count = 999,
-                        text = "Due",
+                        count = 60,
+                        text = resolveString { generalDashboard.buttonDue },
                         modifier = Modifier.weight(1f)
                     )
 
                     GeneralDashboardReviewButton(
                         onClick = {},
-                        count = 999,
-                        text = "New & Due",
+                        count = 60,
+                        text = resolveString { generalDashboard.buttonAll },
                         modifier = Modifier.weight(1f)
                     )
                 }
 
                 Text(
-                    """
-                    • Setup daily limit to avoid getting overwhelmed by reviews number
-                    """.trimIndent(),
+                    text = strings.page3Bottom,
                     textAlign = TextAlign.Justify
                 )
 
@@ -189,9 +151,7 @@ fun TutorialDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    """
-                    • To start using tha app create a deck. Decks are used to organize the data you are learning and consist of either letters or words
-                    """.trimIndent(),
+                    text = strings.page4Top,
                     textAlign = TextAlign.Justify
                 )
 
@@ -201,19 +161,26 @@ fun TutorialDialog(
                 )
 
                 Text(
-                    """
-                    • You can create your own decks or select from several pre-made ones based on your skill level
-                    • Once any deck is created you can start doing reviews
-                    """.trimIndent(),
+                    text = strings.page4Bottom,
                     textAlign = TextAlign.Justify
                 )
             }
         },
+        TutorialPage {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = strings.page5,
+                    textAlign = TextAlign.Justify
+                )
+            }
+        }
     )
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Tutorial") },
+        title = { Text(text = strings.title) },
         paddedContent = false,
         content = {
             val pagerState = rememberPagerState { pages.size }

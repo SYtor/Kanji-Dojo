@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.use_case
 
-import androidx.compose.ui.text.buildAnnotatedString
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -33,17 +32,8 @@ class DefaultGetDeckPickerCategoriesUseCase(
     private suspend fun getVocabCategories(): List<DeckPickerCategory> {
         return listOf(
             DeckPickerCategory(
-                title = { "JLPT *Experimental*" },
-                description = {
-                    buildAnnotatedString {
-                        append(
-                            """
-                            The JLPT (Japanese Language Proficiency Test) vocabulary decks are organized by levels, ranging from N5 to N1, with N5 being the most basic and N1 the most advanced.
-                            * Experimental: Decks might be incomplete and contain irrelevant words with similar reading
-                            """.trimIndent()
-                        )
-                    }
-                },
+                title = { deckPicker.vocabJlptTitle },
+                description = { deckPicker.vocabJlptDescription },
                 items = WordClassification.JLPT.all.map { jlpt ->
                     VocabDeckPickerDeck(
                         title = { deckPicker.jlptItem(jlpt.level) },
@@ -53,8 +43,8 @@ class DefaultGetDeckPickerCategoriesUseCase(
                 }
             ),
             DeckPickerCategory(
-                title = { "Other" },
-                description = { buildAnnotatedString { append("Some basic decks to get started") } },
+                title = { deckPicker.vocabOtherTitle },
+                description = { deckPicker.vocabOtherDescription },
                 items = WordClassification.Other.all.zip(vocabOtherTitles).map { (clazz, title) ->
                     VocabDeckPickerDeck(
                         title = title,
@@ -68,18 +58,18 @@ class DefaultGetDeckPickerCategoriesUseCase(
 
     companion object {
         private val vocabOtherTitles = listOf<StringResolveScope<String>>(
-            { vocabDashboard.deckTitleTime },
-            { vocabDashboard.deckTitleWeek },
-            { vocabDashboard.deckTitleCommonVerbs },
-            { vocabDashboard.deckTitleColors },
-            { vocabDashboard.deckTitleRegularFood },
-            { vocabDashboard.deckTitleJapaneseFood },
-            { vocabDashboard.deckTitleGrammarTerms },
-            { vocabDashboard.deckTitleAnimals },
-            { vocabDashboard.deckTitleBody },
-            { vocabDashboard.deckTitleCommonPlaces },
-            { vocabDashboard.deckTitleCities },
-            { vocabDashboard.deckTitleTransport }
+            { deckPicker.vocabDeckTitleTime },
+            { deckPicker.vocabDeckTitleWeek },
+            { deckPicker.vocabDeckTitleCommonVerbs },
+            { deckPicker.vocabDeckTitleColors },
+            { deckPicker.vocabDeckTitleRegularFood },
+            { deckPicker.vocabDeckTitleJapaneseFood },
+            { deckPicker.vocabDeckTitleGrammarTerms },
+            { deckPicker.vocabDeckTitleAnimals },
+            { deckPicker.vocabDeckTitleBody },
+            { deckPicker.vocabDeckTitleCommonPlaces },
+            { deckPicker.vocabDeckTitleCities },
+            { deckPicker.vocabDeckTitleTransport }
         )
 
     }

@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -48,11 +50,9 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_comm
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
-import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksMergeRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DecksSortRequestData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addMergeItems
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.addSortItems
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.deckDashboardListModeButtons
@@ -196,7 +196,8 @@ private fun LetterDeckItem(
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    val writingProgress = item.studyProgress.getValue(ScreenLetterPracticeType.Writing)
+                    val writingProgress = item.studyProgress
+                        .getValue(ScreenLetterPracticeType.Writing)
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.Draw,
                         dailyGoalEnabled = dailyGoalEnabled,
@@ -204,7 +205,8 @@ private fun LetterDeckItem(
                         review = writingProgress.quickReview.size
                     )
 
-                    val readingProgress = item.studyProgress.getValue(ScreenLetterPracticeType.Reading)
+                    val readingProgress = item.studyProgress
+                        .getValue(ScreenLetterPracticeType.Reading)
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.LocalLibrary,
                         dailyGoalEnabled = dailyGoalEnabled,
@@ -274,13 +276,13 @@ private fun ColumnScope.PracticeTypeSwitch(
         ScreenLetterPracticeType.Writing -> {
             switchEnabled = false
             icon = Icons.Default.Draw
-            title = resolveString { lettersDashboard.itemWritingTitle }
+            title = resolveString { letterPracticeTypeWriting }
         }
 
         ScreenLetterPracticeType.Reading -> {
             switchEnabled = true
             icon = Icons.Default.LocalLibrary
-            title = resolveString { lettersDashboard.itemReadingTitle }
+            title = resolveString { letterPracticeTypeReading }
         }
 
         else -> throw IllegalStateException()

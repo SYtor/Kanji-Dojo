@@ -193,14 +193,14 @@ private fun LoadedState(screenState: ScreenState.Loaded) {
         item {
             InfoCard(
                 title = statsData.uniqueLettersStudied.toString(),
-                subtitle = strings.charactersStudiedTitle
+                subtitle = strings.uniqueLettersReviewed
             )
         }
 
         item {
             InfoCard(
                 title = statsData.uniqueWordsStudied.toString(),
-                subtitle = "Unique words studied"
+                subtitle = strings.uniqueWordsReviewed
             )
         }
 

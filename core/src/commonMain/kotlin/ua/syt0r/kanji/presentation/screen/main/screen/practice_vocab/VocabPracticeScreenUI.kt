@@ -32,7 +32,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeCo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationOption
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeEarlyFinishDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryInfoLabel
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeSummaryItem
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeToolbarState
@@ -157,7 +156,7 @@ private fun ScreenConfiguration(
 
     PracticeConfigurationContainer(
         onClick = onConfigured,
-        practiceTypeMessage = "Vocab Practice・$practiceTypeTitle"
+        practiceTypeMessage = resolveString { vocabPractice.configurationTitle(practiceTypeTitle) }
     ) {
 
         PracticeConfigurationItemsSelector(
@@ -268,20 +267,10 @@ private fun ScreenSummary(
 ) {
 
     PracticeSummaryContainer(
+        practiceDuration = screenState.practiceDuration,
+        summaryItemsCount = screenState.results.size,
         onFinishClick = onFinishClick
     ) {
-
-        PracticeSummaryInfoLabel(
-            title = resolveString { commonPractice.savedTimeSpentLabel },
-            data = resolveString {
-                commonPractice.savedTimeSpentValue(screenState.practiceDuration)
-            }
-        )
-
-        PracticeSummaryInfoLabel(
-            title = resolveString { vocabPractice.summaryItemsCountTitle },
-            data = resolveString { screenState.results.size.toString() }
-        )
 
         screenState.results.forEachIndexed { index, item ->
             PracticeSummaryItem(
