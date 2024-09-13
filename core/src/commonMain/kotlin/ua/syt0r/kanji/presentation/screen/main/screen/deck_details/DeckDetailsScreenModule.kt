@@ -36,8 +36,7 @@ val deckDetailsScreenModule = module {
     factory<SubscribeOnDeckDetailsDataUseCase> {
         DefaultSubscribeOnDeckDetailsDataUseCase(
             letterSrsManager = get(),
-            appDataRepository = get(),
-            reviewHistoryRepository = get()
+            appDataRepository = get()
         )
     }
 

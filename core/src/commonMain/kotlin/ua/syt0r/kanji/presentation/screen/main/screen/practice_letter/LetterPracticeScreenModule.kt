@@ -31,7 +31,7 @@ val letterPracticeScreenModule = module {
     factory<GetLetterPracticeQueueDataUseCase> {
         DefaultGetLetterPracticeQueueDataUseCase(
             userPreferencesRepository = get(),
-            letterSrsManager = get(),
+            srsItemRepository = get(),
             configurationUpdateScope = it.component1()
         )
     }

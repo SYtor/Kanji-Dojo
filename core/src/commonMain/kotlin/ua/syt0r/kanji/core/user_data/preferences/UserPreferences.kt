@@ -23,8 +23,7 @@ interface UserPreferencesRepository : SuspendedPropertyRepository {
     val theme: SuspendedProperty<PreferencesTheme>
 
     val dailyLimitEnabled: SuspendedProperty<Boolean>
-    val dailyNewLimit: SuspendedProperty<Int>
-    val dailyDueLimit: SuspendedProperty<Int>
+    val dailyLimitConfigurationJson: SuspendedProperty<String>
 
     val reminderEnabled: SuspendedProperty<Boolean>
     val reminderTime: SuspendedProperty<LocalTime>

@@ -101,7 +101,7 @@ fun LettersDashboardScreenUI(
                                 is DeckDashboardListMode.Browsing -> {
                                     screenState.listState.addBrowseItems(
                                         scope = this,
-                                        dailyGoalEnabled = screenState.dailyIndicatorData.configuration.enabled,
+                                        dailyGoalEnabled = screenState.dailyIndicatorData.dailyLimitEnabled,
                                         navigateToDetails = navigateToDeckDetails,
                                         navigateToPractice = startQuickPractice
                                     )
@@ -201,8 +201,8 @@ private fun LetterDeckItem(
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.Draw,
                         dailyGoalEnabled = dailyGoalEnabled,
-                        study = writingProgress.quickLearn.size,
-                        review = writingProgress.quickReview.size
+                        study = writingProgress.dailyNew.size,
+                        review = writingProgress.dailyDue.size
                     )
 
                     val readingProgress = item.studyProgress
@@ -210,8 +210,8 @@ private fun LetterDeckItem(
                     DeckPendingReviewsCountIndicator(
                         icon = Icons.Default.LocalLibrary,
                         dailyGoalEnabled = dailyGoalEnabled,
-                        study = readingProgress.quickLearn.size,
-                        review = readingProgress.quickReview.size
+                        study = readingProgress.dailyNew.size,
+                        review = readingProgress.dailyDue.size
                     )
                 }
 

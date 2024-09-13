@@ -97,17 +97,10 @@ class DefaultUserPreferencesRepository private constructor(
         )
     }
 
-    override val dailyNewLimit: SuspendedProperty<Int> = registerProperty {
-        createIntProperty(
-            key = "daily_learn_limit",
-            initialValueProvider = { 4 }
-        )
-    }
-
-    override val dailyDueLimit: SuspendedProperty<Int> = registerProperty {
-        createIntProperty(
-            key = "daily_review_limit",
-            initialValueProvider = { 60 }
+    override val dailyLimitConfigurationJson: SuspendedProperty<String> = registerProperty {
+        createStringProperty(
+            key = "daily_limit_configuration",
+            initialValueProvider = { "" }
         )
     }
 

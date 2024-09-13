@@ -1,22 +1,16 @@
 package ua.syt0r.kanji.core.srs
 
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.fsrs.FsrsCard
-import ua.syt0r.kanji.core.srs.fsrs.FsrsReviewRating
-import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
-import ua.syt0r.kanji.core.user_data.practice.FsrsItemRepository
 import kotlin.time.Duration
 
-sealed interface PracticeType
-
-interface PracticeTypeItem {
+sealed interface PracticeType {
     val srsPracticeType: SrsPracticeType
 }
 
 enum class LetterPracticeType(
     override val srsPracticeType: SrsPracticeType
-) : PracticeType, PracticeTypeItem {
+) : PracticeType {
 
     Writing(SrsPracticeType.LetterWriting),
     Reading(SrsPracticeType.LetterReading);
@@ -31,7 +25,7 @@ enum class LetterPracticeType(
 
 enum class VocabPracticeType(
     override val srsPracticeType: SrsPracticeType
-) : PracticeType, PracticeTypeItem {
+) : PracticeType {
 
     Flashcard(SrsPracticeType.VocabFlashcard),
     ReadingPicker(SrsPracticeType.VocabReadingPicker),
@@ -66,6 +60,7 @@ data class SrsCard(
 ) {
     val lastReview: Instant? = fsrsCard.lastReview
     val interval: Duration = fsrsCard.interval
+    val expectedReview = lastReview?.plus(interval)
 }
 
 enum class SrsItemStatus { New, Done, Review }
@@ -81,60 +76,3 @@ data class SrsAnswers(
     val good: SrsAnswer,
     val easy: SrsAnswer
 )
-
-interface SrsItemRepository {
-
-    val updatesFlow: SharedFlow<Unit>
-
-    suspend fun get(key: SrsCardKey): SrsCard?
-    suspend fun getAll(): Map<SrsCardKey, SrsCard>
-    suspend fun update(key: SrsCardKey, card: SrsCard)
-
-}
-
-interface SrsScheduler {
-    fun newCard(): SrsCard
-    fun answers(data: SrsCard, reviewTime: Instant): SrsAnswers
-}
-
-class DefaultSrsItemRepository(
-    private val fsrsItemRepository: FsrsItemRepository
-) : SrsItemRepository {
-
-    override val updatesFlow: SharedFlow<Unit> = fsrsItemRepository.updatesFlow
-
-    override suspend fun get(key: SrsCardKey): SrsCard? {
-        return fsrsItemRepository.get(key)?.let { SrsCard(it) }
-    }
-
-    override suspend fun getAll(): Map<SrsCardKey, SrsCard> {
-        return fsrsItemRepository.getAll().mapValues { SrsCard(it.value) }
-    }
-
-    override suspend fun update(key: SrsCardKey, card: SrsCard) {
-        fsrsItemRepository.update(key, card.fsrsCard)
-    }
-
-}
-
-class DefaultSrsScheduler(
-    private val fsrsScheduler: FsrsScheduler
-) : SrsScheduler {
-
-    override fun newCard(): SrsCard = SrsCard(fsrsScheduler.newCard())
-
-    override fun answers(
-        data: SrsCard,
-        reviewTime: Instant
-    ): SrsAnswers {
-        return fsrsScheduler.schedule(data.fsrsCard, reviewTime).let {
-            SrsAnswers(
-                again = SrsAnswer(FsrsReviewRating.Again.grade, SrsCard(it.again)),
-                hard = SrsAnswer(FsrsReviewRating.Hard.grade, SrsCard(it.hard)),
-                good = SrsAnswer(FsrsReviewRating.Good.grade, SrsCard(it.good)),
-                easy = SrsAnswer(FsrsReviewRating.Easy.grade, SrsCard(it.easy))
-            )
-        }
-    }
-
-}

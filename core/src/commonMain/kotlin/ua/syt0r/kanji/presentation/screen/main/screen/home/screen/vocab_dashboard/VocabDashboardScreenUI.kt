@@ -169,7 +169,7 @@ private fun VocabDeckItem(
                 elapsedSinceLastReview = item.elapsedSinceLastReview,
                 onDetailsClick = navigateToDetails
             ) {
-                if (studyProgress.value.quickReview.isNotEmpty())
+                if (studyProgress.value.dailyDue.isNotEmpty())
                     Box(
                         modifier = Modifier.clip(CircleShape).size(6.dp)
                             .background(MaterialTheme.extraColorScheme.due)

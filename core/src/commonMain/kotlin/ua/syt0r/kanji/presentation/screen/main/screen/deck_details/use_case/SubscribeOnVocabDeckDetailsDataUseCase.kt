@@ -10,10 +10,10 @@ import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
-import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import kotlin.coroutines.CoroutineContext
 import kotlin.system.measureTimeMillis
 
@@ -49,16 +49,16 @@ class DefaultSubscribeOnVocabDeckDetailsDataUseCase(
     private suspend fun getUpdatedData(
         configuration: DeckDetailsScreenConfiguration.VocabDeck
     ): DeckDetailsData.VocabDeckData = withContext(coroutineContext) {
-        val deckInfo = vocabSrsManager.getUpdatedDeckInfo(configuration.deckId)
+        val deckInfo = vocabSrsManager.getDeck(configuration.deckId)
         DeckDetailsData.VocabDeckData(
             deckTitle = deckInfo.title,
-            items = deckInfo.words.mapIndexed { index, wordId ->
+            items = deckInfo.items.mapIndexed { index, wordId ->
                 DeckDetailsItemData.VocabData(
                     word = appDataRepository.getWord(wordId),
                     positionInPractice = index,
                     srsStatus = ScreenVocabPracticeType.values().associateWith {
-                        deckInfo.summaries.getValue(it.dataType)
-                            .wordsData.getValue(wordId).status
+                        deckInfo.progressMap.getValue(it.dataType).itemsData
+                            .getValue(wordId).status
                     }
                 )
             }

@@ -261,13 +261,25 @@ fun GeneralDashboardScreenUI(
                             }
 
                             GeneralDashboardReviewButton(
+                                onClick = { goToVocabPractice(progress.newToDeckIdMap) },
+                                count = progress.newToDeckIdMap.size,
+                                text = resolveString { generalDashboard.buttonNew },
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            GeneralDashboardReviewButton(
                                 onClick = { goToVocabPractice(progress.dueToDeckIdMap) },
                                 count = progress.dueToDeckIdMap.size,
                                 text = resolveString { generalDashboard.buttonDue },
                                 modifier = Modifier.weight(1f)
                             )
 
-                            Box(Modifier.weight(2f))
+                            GeneralDashboardReviewButton(
+                                onClick = { goToVocabPractice(progress.combined) },
+                                count = progress.combined.size,
+                                text = resolveString { generalDashboard.buttonAll },
+                                modifier = Modifier.weight(1f)
+                            )
 
                         }
                     )

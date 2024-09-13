@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
-import ua.syt0r.kanji.core.srs.VocabDeckSrsProgress
+import ua.syt0r.kanji.core.srs.VocabSrsDeckProgress
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
@@ -40,7 +40,7 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
 
     private suspend fun getUpdatedDecks(): VocabDashboardScreenData {
         Logger.logMethod()
-        val decks = vocabSrsManager.getUpdatedDecksData().decks
+        val decks = vocabSrsManager.getDecks().decks
         val now = timeUtils.now()
         return VocabDashboardScreenData(
             decks = decks.map {
@@ -48,27 +48,25 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
                     deckId = it.id,
                     title = it.title,
                     position = it.position,
-                    elapsedSinceLastReview = it.summaries
-                        .flatMap { it.value.wordsData.mapNotNull { it.value.lastReviewTime } }
-                        .maxOrNull()
-                        ?.let { now.minus(it) },
-                    studyProgress = it.summaries.toList()
-                        .associate { (practiceType, srsProgress) ->
+                    elapsedSinceLastReview = it.lastReview?.let { now.minus(it) },
+                    studyProgress = it.progressMap
+                        .map { (practiceType, srsProgress) ->
                             ScreenVocabPracticeType.from(practiceType) to srsProgress.toStudyProgress()
                         }
+                        .toMap()
                 )
             }
         )
     }
 
-    private fun VocabDeckSrsProgress.toStudyProgress(): VocabDeckStudyProgress {
+    private fun VocabSrsDeckProgress.toStudyProgress(): VocabDeckStudyProgress {
         return VocabDeckStudyProgress(
-            all = all,
+            all = itemsData.keys.toList(),
             known = done,
             review = due,
             new = new,
-            quickLearn = new,
-            quickReview = due
+            dailyNew = new,
+            dailyDue = due
         )
     }
 

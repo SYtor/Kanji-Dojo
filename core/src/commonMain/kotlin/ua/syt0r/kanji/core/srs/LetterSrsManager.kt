@@ -1,166 +1,139 @@
 package ua.syt0r.kanji.core.srs
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import ua.syt0r.kanji.core.mergeSharedFlows
-import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
-import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
-import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.practice.Deck
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
-import kotlin.math.max
-import kotlin.math.min
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 
 interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
-    suspend fun getUpdatedDecksData(): LetterSrsDecksData
-    suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo
-    suspend fun getLetterSrsData(letter: String, practiceType: LetterPracticeType): CharacterSrsData
+    suspend fun getDecks(): LetterSrsDecksData
+    suspend fun getDeck(deckId: Long): LetterSrsDeck
 }
 
+typealias LetterSrsDecksData = SrsDecksData<LetterSrsDeck, LetterPracticeType>
+typealias LetterSrsDeckDescriptor = SrsDeckDescriptor<String, LetterPracticeType>
+typealias LetterSrsDeckProgress = SrsDeckProgress<String>
+
+data class LetterSrsDeck(
+    override val id: Long,
+    override val title: String,
+    override val position: Int,
+    override val items: List<String>,
+    override val lastReview: Instant?,
+    override val progressMap: Map<LetterPracticeType, LetterSrsDeckProgress>
+) : SrsDeckData<LetterPracticeType, String>
+
 class DefaultLetterSrsManager(
-    private val dailyLimitManager: DailyLimitManager,
     private val practiceRepository: LetterPracticeRepository,
     private val srsItemRepository: SrsItemRepository,
+    dailyLimitManager: DailyLimitManager,
+    timeUtils: TimeUtils,
+    private val userPreferencesRepository: UserPreferencesRepository,
     private val reviewHistoryRepository: ReviewHistoryRepository,
-    private val getDeckSrsProgressUseCase: GetLetterDeckSrsProgressUseCase,
-    private val getLetterSrsStatusUseCase: GetLetterSrsStatusUseCase,
-    private val getSrsStatusUseCase: GetSrsStatusUseCase,
-    private val timeUtils: TimeUtils,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
-) : LetterSrsManager {
+    coroutineScope: CoroutineScope
+) : SrsManager<String, LetterPracticeType, LetterSrsDeck>(
+    deckChangesFlow = practiceRepository.changesFlow,
+    dailyLimitManager = dailyLimitManager,
+    timeUtils = timeUtils,
+    coroutineScope = coroutineScope
+), LetterSrsManager {
 
-    private val _dataChangeFlow = MutableSharedFlow<Unit>()
-    override val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
+    override val practiceTypes: List<LetterPracticeType> = LetterPracticeType.values().toList()
 
-    private val supportedLetterPracticeTypeValues = LetterPracticeType.srsPracticeTypeValues
-
-    init {
-        val dataChangeFlowWithCacheClearing = mergeSharedFlows(
-            coroutineScope,
-            practiceRepository.changesFlow,
-            dailyLimitManager.changesFlow,
-            srsItemRepository.updatesFlow
-        )
-
-        dataChangeFlowWithCacheClearing
-            .onEach { _dataChangeFlow.emit(it) }
-            .launchIn(coroutineScope)
+    override suspend fun getDecks(): LetterSrsDecksData {
+        return getDecksInternal()
     }
 
-    override suspend fun getUpdatedDecksData(): LetterSrsDecksData {
-        val dailyLimitConfiguration = dailyLimitManager.getConfiguration()
-        val currentDate = getSrsDate()
-
-        val decks = practiceRepository.getDecks()
-        val dailyProgress = getDailyProgress(currentDate, decks, dailyLimitConfiguration)
-
-        val decksInfo = decks.map { getDeckSrsProgressUseCase(it.id, currentDate) }
-
-        return LetterSrsDecksData(
-            decks = decksInfo,
-            dailyLimitConfiguration = dailyLimitConfiguration,
-            dailyProgress = dailyProgress
-        )
+    override suspend fun getDeck(deckId: Long): LetterSrsDeck {
+        return getDecksInternal().decks.first { it.id == deckId }
     }
 
-    override suspend fun getUpdatedDeckInfo(deckId: Long): LetterSrsDeckInfo {
-        return getDeckSrsProgressUseCase(
-            deckId = deckId,
-            srsDate = getSrsDate()
-        )
-    }
+    override suspend fun getDeckDescriptors(): List<LetterSrsDeckDescriptor> {
+        return practiceRepository.getDecks().map {
+            val items = practiceRepository.getDeckCharacters(it.id)
 
-    override suspend fun getLetterSrsData(
-        letter: String,
-        practiceType: LetterPracticeType,
-    ): CharacterSrsData {
-        return getLetterSrsStatusUseCase(letter, practiceType, getSrsDate())
-    }
-
-    private suspend fun getDailyProgress(
-        date: LocalDate,
-        decks: List<Deck>,
-        dailyLimitConfiguration: DailyLimitConfiguration
-    ): DailyProgress {
-
-        val allSrsItems = decks
-            .flatMap { practiceRepository.getDeckCharacters(it.id) }
-            .distinct()
-
-        val allSrsItemKeys = allSrsItems
-            .flatMap { letter -> supportedLetterPracticeTypeValues.map { SrsCardKey(letter, it) } }
-            .toSet()
-
-        val reviewedSrsItemsMap = srsItemRepository.getAll()
-            .filter { it.key.practiceType in supportedLetterPracticeTypeValues }
-
-        val totalNew = allSrsItemKeys.minus(reviewedSrsItemsMap.keys).size
-
-        val totalDue = reviewedSrsItemsMap
-            .filter {
-                getSrsStatusUseCase(it.value.lastReview!! + it.value.interval) == SrsItemStatus.Review
+            val itemsDataMap = LetterPracticeType.values().associateWith { practiceType ->
+                val itemsData: Map<String, SrsCardData> = items.associateWith { letter ->
+                    val key = practiceType.toSrsKey(letter)
+                    val card = srsItemRepository.get(key)
+                    val firstReview = reviewHistoryRepository.getFirstReviewTime(
+                        key = key.itemKey,
+                        practiceType = practiceType.srsPracticeType.value
+                    )
+                    SrsCardData(
+                        key = key,
+                        card = card,
+                        status = getSrsStatus(card),
+                        lapses = card?.fsrsCard?.lapses ?: 0,
+                        repeats = card?.fsrsCard?.repeats ?: 0,
+                        firstReview = firstReview,
+                        firstReviewSrsDate = firstReview?.toSrsDate(),
+                        lastReview = card?.lastReview,
+                        lastReviewSrsDate = card?.lastReview?.toSrsDate(),
+                        expectedReviewDate = card?.expectedReview?.toSrsDate()
+                    )
+                }
+                PracticeTypeDeckData(itemsData = itemsData)
             }
-            .size
 
-        val srsItemsReviewedToday = reviewedSrsItemsMap
-            .filter { getSrsDate(it.value.lastReview!!) == date }
-
-        val newSrsItemsReviewedToday = srsItemsReviewedToday.filter { (srsCardKey, _) ->
-            val firstReviewTime = reviewHistoryRepository.getFirstReviewTime(
-                key = srsCardKey.itemKey,
-                practiceType = srsCardKey.practiceType
-            )!!
-            getSrsDate(firstReviewTime) == date
+            LetterSrsDeckDescriptor(
+                id = it.id,
+                title = it.name,
+                position = it.position,
+                lastReview = reviewHistoryRepository.getDeckLastReview(
+                    deckId = it.id,
+                    practiceTypes = LetterPracticeType.srsPracticeTypeValues
+                ),
+                items = items,
+                itemsData = itemsDataMap
+            )
         }
+    }
 
-        val newReviewedToday = newSrsItemsReviewedToday.size
-        val dueReviewedToday = srsItemsReviewedToday.keys.minus(newSrsItemsReviewedToday.keys).size
-
-        val newLeft: Int
-        val dueLeft: Int
-
-        when (dailyLimitConfiguration.enabled) {
-            true -> {
-                newLeft = max(
-                    a = 0,
-                    b = min(dailyLimitConfiguration.newLimit - newReviewedToday, totalNew)
-                )
-
-                dueLeft = max(
-                    a = 0,
-                    b = min(dailyLimitConfiguration.dueLimit - dueReviewedToday, totalDue)
-                )
-            }
-
-            false -> {
-                newLeft = totalNew
-                dueLeft = totalDue
-            }
-        }
-
-        return DailyProgress(
-            newReviewed = newReviewedToday,
-            dueReviewed = dueReviewedToday,
-            newLeft = newLeft,
-            dueLeft = dueLeft
+    override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {
+        return DeckSortConfiguration(
+            sortByReviewDate = userPreferencesRepository.dashboardSortByTime.get()
         )
     }
 
-    private fun getSrsDate(
-        instant: Instant = timeUtils.now(),
-    ): LocalDate {
-        return instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    override suspend fun getDeckLimit(
+        configuration: DailyLimitConfiguration,
+        newDoneToday: Int,
+        dueDoneToday: Int
+    ): DeckLimit.EnabledDeckLimit {
+        return when {
+            configuration.isLetterLimitCombined -> DeckLimit.Combined(
+                limit = configuration.letterCombinedLimit,
+                newDone = newDoneToday,
+                dueDone = dueDoneToday
+            )
+
+            else -> DeckLimit.Separate(
+                limitsMap = configuration.letterSeparatedLimit
+            )
+        }
+    }
+
+    override fun createDeck(
+        deckDescriptor: LetterSrsDeckDescriptor,
+        deckLimit: DeckLimit,
+        currentSrsDate: LocalDate
+    ): LetterSrsDeck {
+        return LetterSrsDeck(
+            id = deckDescriptor.id,
+            title = deckDescriptor.title,
+            position = deckDescriptor.position,
+            lastReview = deckDescriptor.lastReview,
+            items = deckDescriptor.items,
+            progressMap = deckDescriptor.itemsData.mapValues { (practiceType, deckData) ->
+                deckData.toProgress(deckLimit, practiceType, currentSrsDate)
+            }
+        )
     }
 
 }

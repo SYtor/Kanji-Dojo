@@ -30,14 +30,16 @@ class ReminderNotificationHandleScheduledActionUseCase(
             return
         }
 
-        val srsData = letterSrsManager.getUpdatedDecksData()
+        val srsData = letterSrsManager.getDecks()
         val dailyProgress = srsData.dailyProgress
+        val newLeft = dailyProgress.leftoversMap.map { it.value.new }.sum()
+        val dueLeft = dailyProgress.leftoversMap.map { it.value.due }.sum()
 
         Logger.d("Preparing to show notification: dailyProgress[$dailyProgress]")
-        if (dailyProgress.newLeft > 0 || dailyProgress.dueLeft > 0) {
+        if (newLeft > 0 || dueLeft > 0) {
             notificationManager.showNotification(
-                learn = dailyProgress.newLeft,
-                review = dailyProgress.dueLeft
+                learn = newLeft,
+                review = dueLeft
             )
             analyticsManager.sendEvent("showing_notification")
         } else {

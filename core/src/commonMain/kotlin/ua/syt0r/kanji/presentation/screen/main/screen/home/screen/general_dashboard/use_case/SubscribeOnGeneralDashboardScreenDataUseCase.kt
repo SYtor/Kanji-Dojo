@@ -14,7 +14,6 @@ import ua.syt0r.kanji.BuildConfig
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.refreshableDataFlow
-import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -111,42 +110,39 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
     }
 
     private suspend fun getLetterDecksData(): LetterDecksData {
-        val data = letterSrsManager.getUpdatedDecksData()
-        if (data.decks.isEmpty()) return LetterDecksData.NoDecks
+        val decksData = letterSrsManager.getDecks()
+        if (decksData.decks.isEmpty()) return LetterDecksData.NoDecks
+
+        val preferencesPracticeType = ScreenLetterPracticeType.from(
+            preferencesRepository.generalDashboardLetterPracticeType.get()
+        )
 
         return LetterDecksData.Data(
-            practiceType = mutableStateOf(
-                value = ScreenLetterPracticeType.from(
-                    preferencesRepository.generalDashboardLetterPracticeType.get()
-                )
-            ),
-            studyProgressMap = LetterPracticeType.values().associate { practiceType ->
+            practiceType = mutableStateOf(preferencesPracticeType),
+            studyProgressMap = ScreenLetterPracticeType.values().associateWith { practiceType ->
                 val new = mutableMapOf<String, Long>()
                 val due = mutableMapOf<String, Long>()
 
-                data.decks
-                    .map {
-                        it.id to when (practiceType) {
-                            LetterPracticeType.Writing -> it.writingDetails
-                            LetterPracticeType.Reading -> it.readingDetails
-                        }
-                    }
+                decksData.decks
+                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
                     .forEach { (deckId, srsProgress) ->
-                        new.putAll(srsProgress.new.associateWith { deckId })
-                        due.putAll(srsProgress.due.associateWith { deckId })
+                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
+                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
                     }
 
-                ScreenLetterPracticeType.from(practiceType) to LetterDecksStudyProgress(
-                    newToDeckIdMap = new.toList().take(data.dailyProgress.newLeft).toMap(),
-                    dueToDeckIdMap = due.toList().take(data.dailyProgress.dueLeft).toMap()
+                val leftover = decksData.dailyProgress.leftoversMap.getValue(practiceType.dataType)
+
+                LetterDecksStudyProgress(
+                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
+                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
                 )
             }
         )
     }
 
     private suspend fun getVocabDecksData(): VocabDecksData {
-        val data = vocabSrsManager.getUpdatedDecksData()
-        if (data.decks.isEmpty()) return VocabDecksData.NoDecks
+        val decksData = vocabSrsManager.getDecks()
+        if (decksData.decks.isEmpty()) return VocabDecksData.NoDecks
 
         val preferencesPracticeType = ScreenVocabPracticeType.from(
             preferencesRepository.generalDashboardVocabPracticeType.get()
@@ -155,16 +151,21 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
         return VocabDecksData.Data(
             practiceType = mutableStateOf(preferencesPracticeType),
             studyProgressMap = ScreenVocabPracticeType.values().associateWith { practiceType ->
+                val new = mutableMapOf<Long, Long>()
                 val due = mutableMapOf<Long, Long>()
 
-                data.decks
-                    .map { it.id to it.summaries.getValue(practiceType.dataType) }
+                decksData.decks
+                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
                     .forEach { (deckId, srsProgress) ->
-                        due.putAll(srsProgress.due.associateWith { deckId })
+                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
+                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
                     }
 
+                val leftover = decksData.dailyProgress.leftoversMap.getValue(practiceType.dataType)
+
                 VocabDecksStudyProgress(
-                    dueToDeckIdMap = due
+                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
+                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
                 )
             }
         )

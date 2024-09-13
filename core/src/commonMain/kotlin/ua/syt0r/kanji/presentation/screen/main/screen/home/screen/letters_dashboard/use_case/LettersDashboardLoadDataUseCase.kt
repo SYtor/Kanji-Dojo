@@ -2,13 +2,11 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashb
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
-import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
-import ua.syt0r.kanji.core.srs.LetterDeckSrsProgress
-import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
+import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.srs.LetterSrsDeckProgress
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
@@ -36,64 +34,55 @@ class LettersDashboardLoadDataUseCase(
 
     private suspend fun getUpdatedScreenData(): LettersDashboardScreenData {
         Logger.logMethod()
-        val srsDecksData = srsManager.getUpdatedDecksData()
-        val time = timeUtils.now()
+        val srsDecksData = srsManager.getDecks()
+        val currentInstant = timeUtils.now()
 
         return LettersDashboardScreenData(
-            items = srsDecksData.decks
-                .map { deckInfo ->
-                    val writingProgress = deckInfo.writingDetails.toPracticeStudyProgress(
-                        configuration = srsDecksData.dailyLimitConfiguration,
-                        leftToStudy = srsDecksData.dailyProgress.newLeft,
-                        leftToReview = srsDecksData.dailyProgress.dueLeft
-                    )
-                    val readingProgress = deckInfo.readingDetails.toPracticeStudyProgress(
-                        configuration = srsDecksData.dailyLimitConfiguration,
-                        leftToStudy = srsDecksData.dailyProgress.newLeft,
-                        leftToReview = srsDecksData.dailyProgress.dueLeft
-                    )
-                    LetterDeckDashboardItem(
-                        deckId = deckInfo.id,
-                        title = deckInfo.title,
-                        position = deckInfo.position,
-                        elapsedSinceLastReview = deckInfo.getLastReviewTime()?.let { time - it },
-                        writingProgress = writingProgress,
-                        readingProgress = readingProgress
-                    )
-                },
+            items = srsDecksData.decks.map { deck ->
+                val writingProgress = deck.progressMap
+                    .getValue(LetterPracticeType.Writing)
+                    .toPracticeStudyProgress()
+                val readingProgress = deck.progressMap
+                    .getValue(LetterPracticeType.Reading)
+                    .toPracticeStudyProgress()
+                LetterDeckDashboardItem(
+                    deckId = deck.id,
+                    title = deck.title,
+                    position = deck.position,
+                    elapsedSinceLastReview = deck.lastReview?.let { currentInstant - it },
+                    writingProgress = writingProgress,
+                    readingProgress = readingProgress
+                )
+            },
             dailyIndicatorData = DailyIndicatorData(
-                configuration = srsDecksData.dailyLimitConfiguration,
+                dailyLimitEnabled = srsDecksData.dailyLimitEnabled,
                 progress = getDailyProgress(
-                    configuration = srsDecksData.dailyLimitConfiguration,
-                    leftToStudy = srsDecksData.dailyProgress.newLeft,
-                    leftToReview = srsDecksData.dailyProgress.dueLeft
+                    enabled = srsDecksData.dailyLimitEnabled,
+                    leftToStudy = 0, // TODO
+                    leftToReview = 0
                 )
             )
         )
     }
 
-    private fun LetterDeckSrsProgress.toPracticeStudyProgress(
-        configuration: DailyLimitConfiguration,
-        leftToStudy: Int,
-        leftToReview: Int,
-    ): LetterDeckStudyProgress {
+    private fun LetterSrsDeckProgress.toPracticeStudyProgress(): LetterDeckStudyProgress {
         return LetterDeckStudyProgress(
-            all = all,
+            all = itemsData.keys.toList(),
             known = done,
             review = due,
             new = new,
-            quickLearn = if (configuration.enabled) new.take(leftToStudy) else new,
-            quickReview = if (configuration.enabled) due.take(leftToReview) else due
+            dailyNew = dailyNew,
+            dailyDue = dailyDue
         )
     }
 
     private fun getDailyProgress(
-        configuration: DailyLimitConfiguration,
+        enabled: Boolean,
         leftToStudy: Int,
         leftToReview: Int,
     ): DailyProgress {
         return when {
-            !configuration.enabled -> DailyProgress.Disabled
+            !enabled -> DailyProgress.Disabled
             leftToStudy > 0 && leftToReview > 0 -> DailyProgress.StudyAndReview(
                 leftToStudy,
                 leftToReview
@@ -103,14 +92,6 @@ class LettersDashboardLoadDataUseCase(
             leftToStudy > 0 && leftToReview == 0 -> DailyProgress.StudyOnly(leftToStudy)
             else -> DailyProgress.Completed
         }
-    }
-
-    private fun LetterSrsDeckInfo.getLastReviewTime(): Instant? {
-        val reviewTimes = writingDetails.charactersData
-            .mapNotNull { it.value.studyProgress?.lastReviewTime } +
-                readingDetails.charactersData
-                    .mapNotNull { it.value.studyProgress?.lastReviewTime }
-        return reviewTimes.maxOrNull()
     }
 
 }

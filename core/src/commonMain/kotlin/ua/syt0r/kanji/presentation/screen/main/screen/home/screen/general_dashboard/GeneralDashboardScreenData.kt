@@ -35,8 +35,11 @@ sealed interface VocabDecksData {
 }
 
 data class VocabDecksStudyProgress(
+    val newToDeckIdMap: Map<Long, Long>,
     val dueToDeckIdMap: Map<Long, Long>,
-)
+) {
+    val combined: Map<Long, Long> = newToDeckIdMap + dueToDeckIdMap
+}
 
 data class StreakCalendarItem(
     val date: LocalDate,

@@ -11,8 +11,8 @@ data class DeckStudyProgress<T>(
     val known: List<T>,
     val review: List<T>,
     val new: List<T>,
-    val quickLearn: List<T>,
-    val quickReview: List<T>,
+    val dailyNew: List<T>,
+    val dailyDue: List<T>,
 ) {
 
     fun completionPercentage(): Float = when {

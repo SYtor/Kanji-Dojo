@@ -103,7 +103,7 @@ SELECT * FROM vocab_deck;
 getVocabDeckEntries:
 SELECT * FROM vocab_deck_entry WHERE deck_id = :deckId;
 
-------- SRS DECKS -------
+------- FSRS -------
 
 CREATE TABLE IF NOT EXISTS fsrs_card (
     key TEXT NOT NULL,
@@ -164,6 +164,12 @@ SELECT key, practice_type, timestamp, duration, grade, mistakes, deck_id
 FROM review_history
 WHERE key = :itemKey AND practice_type = :practiceType
 ORDER BY timestamp DESC
+LIMIT 1;
+
+getLastDeckReview:
+SELECT MAX(timestamp)
+FROM review_history
+WHERE deck_id = :deckId AND practice_type IN :practiceTypes
 LIMIT 1;
 
 getTotalReviewsCount:

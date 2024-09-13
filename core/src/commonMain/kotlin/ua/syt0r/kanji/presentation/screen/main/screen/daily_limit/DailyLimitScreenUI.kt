@@ -10,13 +10,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -27,9 +32,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.LocalLibrary
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -38,9 +42,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -52,8 +55,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -79,11 +82,8 @@ fun DailyLimitScreenUI(
 
     val strings = resolveString { dailyLimit }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
     ScreenLayout(
         state = state,
-        snackbarHostState = snackbarHostState,
         topBarContent = {
             TopAppBar(
                 title = { Text(text = strings.title) },
@@ -101,11 +101,17 @@ fun DailyLimitScreenUI(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clip(MaterialTheme.shapes.medium)
                     .clickable { screenState.enabled.run { value = !value } }
-                    .padding(horizontal = 20.dp, vertical = 4.dp),
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(Modifier.weight(1f)) {
-                    Text(strings.enableSwitchTitle)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = strings.enableSwitchTitle,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     Text(
                         text = strings.enableSwitchDescription,
                         style = MaterialTheme.typography.labelSmall
@@ -117,40 +123,62 @@ fun DailyLimitScreenUI(
                 )
             }
 
-            ScreenContainer(
-                title = strings.lettersSectionTitle
-            ) {
+            CardContainer(
+                title = strings.lettersSectionTitle,
+                combinedLimit = screenState.isLetterLimitCombined
+            ) { selectedCombinedLimit ->
 
-                LimitInputRow(
-                    icon = Icons.Default.LocalLibrary,
-                    label = strings.newLabel,
-                    input = screenState.newLimitInput,
-                    validatedValue = screenState.newLimitValidated
-                )
+                when {
+                    selectedCombinedLimit -> {
 
-                LimitInputRow(
-                    icon = Icons.Default.Cached,
-                    label = strings.dueLabel,
-                    input = screenState.dueLimitInput,
-                    validatedValue = screenState.dueLimitValidated
-                )
+                        InputColumn(
+                            title = resolveString { "Total reviews cap" },
+                            limitItem = screenState.letterCombined
+                        )
 
-                Text(
-                    text = strings.noteMessage,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                    }
+
+                    else -> {
+
+                        screenState.letterSeparate.forEach { (practiceType, limitItem) ->
+
+                            InputColumn(
+                                title = resolveString(practiceType.titleResolver),
+                                limitItem = limitItem
+                            )
+
+                        }
+                    }
+                }
 
             }
 
-            ScreenContainer(
-                title = strings.vocabSectionTitle
-            ) {
+            CardContainer(
+                title = strings.vocabSectionTitle,
+                combinedLimit = screenState.isVocabLimitCombined
+            ) { selectedCombinedLimit ->
 
-                Text(
-                    text = resolveString { "// Under development" },
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
+                when {
+                    selectedCombinedLimit -> {
+
+                        InputColumn(
+                            title = resolveString { "Total reviews cap" },
+                            limitItem = screenState.vocabCombined
+                        )
+
+                    }
+
+                    else -> {
+
+                        screenState.vocabSeparate.forEach { (practiceType, limitItem) ->
+                            InputColumn(
+                                title = resolveString(practiceType.titleResolver),
+                                limitItem = limitItem
+                            )
+                        }
+                    }
+                }
+
 
             }
 
@@ -195,7 +223,6 @@ fun DailyLimitScreenUI(
 @Composable
 private fun ScreenLayout(
     state: State<ScreenState>,
-    snackbarHostState: SnackbarHostState,
     topBarContent: @Composable () -> Unit,
     loadingStateContent: @Composable () -> Unit,
     loadedStateContent: @Composable ColumnScope.(ScreenState.Loaded) -> Unit,
@@ -209,51 +236,33 @@ private fun ScreenLayout(
     Scaffold(
         topBar = { topBarContent() },
         floatingActionButton = {
-            val fabState = remember {
-                derivedStateOf {
-                    val loadedState = state.value as? ScreenState.Loaded
-                        ?: return@derivedStateOf null
-
-                    val isInputValid = loadedState.newLimitValidated.value != null &&
-                            loadedState.dueLimitValidated.value != null
-
-                    loadedState to isInputValid
-                }
-            }
-            AnimatedContent(
-                targetState = fabState.value,
-                transitionSpec = {
-                    scaleIn() togetherWith scaleOut() using snapToBiggerSizeTransform()
-                },
-                modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) }
-            ) {
-
-                if (it == null || !it.second) return@AnimatedContent
-                loadedStateFabContent(it.first)
-            }
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) {
+            FabContainer(
+                state = state,
+                modifier = Modifier.onGloballyPositioned { extraListSpacerState.updateOverlay(it) },
+                content = loadedStateFabContent
+            )
+        }
+    ) { paddingValues ->
 
         AnimatedContent(
             targetState = state.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() },
-            modifier = Modifier.padding(it)
-        ) {
+            modifier = Modifier.padding(paddingValues)
+        ) { screenState ->
 
-            when (it) {
+            when (screenState) {
                 ScreenState.Loading -> loadingStateContent()
                 is ScreenState.Loaded -> {
                     Column(
                         modifier = Modifier.fillMaxSize()
+                            .onGloballyPositioned { extraListSpacerState.updateList(it) }
                             .verticalScroll(rememberScrollState())
                             .wrapContentWidth()
-                            .onGloballyPositioned { extraListSpacerState.updateList(it) }
                             .padding(horizontal = 20.dp)
                             .widthIn(max = 400.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        loadedStateContent(it)
+                        loadedStateContent(screenState)
                         extraListSpacerState.ExtraSpacer()
                     }
                 }
@@ -268,10 +277,55 @@ private fun ScreenLayout(
 }
 
 @Composable
-private fun ScreenContainer(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit
+private fun FabContainer(
+    state: State<ScreenState>,
+    modifier: Modifier,
+    content: @Composable (ScreenState.Loaded) -> Unit
 ) {
+
+    fun LimitItem.isValid(): Boolean {
+        return new.validated.value != null && due.validated.value != null
+    }
+
+    val fabState = remember {
+        derivedStateOf {
+            val loadedState = state.value as? ScreenState.Loaded
+                ?: return@derivedStateOf null
+
+            val isLetterInputValid = when {
+                loadedState.isLetterLimitCombined.value -> loadedState.letterCombined.isValid()
+                else -> loadedState.letterSeparate.all { (_, item) -> item.isValid() }
+            }
+
+            val isVocabInputValid = when {
+                loadedState.isVocabLimitCombined.value -> loadedState.vocabCombined.isValid()
+                else -> loadedState.vocabSeparate.all { (_, item) -> item.isValid() }
+            }
+
+            val isInputValid = isLetterInputValid && isVocabInputValid
+
+            loadedState to isInputValid
+        }
+    }
+
+    AnimatedContent(
+        targetState = fabState.value,
+        transitionSpec = { scaleIn() togetherWith scaleOut() using snapToBiggerSizeTransform() },
+        modifier = modifier
+    ) {
+        if (it == null || !it.second) return@AnimatedContent
+        content(it.first)
+    }
+
+}
+
+@Composable
+private fun CardContainer(
+    title: String,
+    combinedLimit: MutableState<Boolean>,
+    content: @Composable ColumnScope.(isCombinedLimit: Boolean) -> Unit
+) {
+
     Column(
         modifier = Modifier.fillMaxWidth()
             .background(
@@ -279,7 +333,7 @@ private fun ScreenContainer(
                 shape = MaterialTheme.shapes.medium
             )
             .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Text(
@@ -288,34 +342,143 @@ private fun ScreenContainer(
             fontWeight = FontWeight.Bold
         )
 
-        content()
+        LimitModeSwitch(
+            combinedLimit = combinedLimit,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        AnimatedContent(
+            targetState = combinedLimit.value,
+            transitionSpec = { fadeIn() togetherWith fadeOut() }
+        ) {
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                content(it)
+            }
+
+        }
 
     }
+}
+
+@Composable
+private fun InputColumn(
+    title: String? = null,
+    limitItem: LimitItem
+) {
+
+    Column(
+        modifier = Modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        title?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+
+        LimitInputRow(
+            indicatorColor = MaterialTheme.extraColorScheme.new,
+            label = resolveString { dailyLimit.newLabel },
+            input = limitItem.new.input,
+            validatedValue = limitItem.new.validated
+        )
+
+        LimitInputRow(
+            indicatorColor = MaterialTheme.extraColorScheme.due,
+            label = resolveString { dailyLimit.dueLabel },
+            input = limitItem.due.input,
+            validatedValue = limitItem.due.validated
+        )
+
+    }
+
+}
+
+@Composable
+private fun LimitModeSwitch(
+    combinedLimit: MutableState<Boolean>,
+    modifier: Modifier
+) {
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier
+    ) {
+
+        Text(
+            text = resolveString { "Combined Limit" },
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.ExtraLight,
+            modifier = Modifier.weight(1f)
+        )
+
+        val outline = MaterialTheme.colorScheme.outline
+        val variant = MaterialTheme.colorScheme.surface
+
+        Switch(
+            checked = combinedLimit.value,
+            onCheckedChange = { combinedLimit.value = it },
+            thumbContent = {
+                Icon(
+                    imageVector = when (combinedLimit.value) {
+                        true -> Icons.Default.Check
+                        false -> Icons.Default.Close
+                    },
+                    contentDescription = null
+                )
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = outline,
+                checkedTrackColor = variant,
+                checkedIconColor = variant,
+                checkedBorderColor = variant,
+                uncheckedThumbColor = outline,
+                uncheckedTrackColor = variant,
+                uncheckedIconColor = variant,
+                uncheckedBorderColor = variant,
+            )
+        )
+
+    }
+
 }
 
 
 @Composable
 private fun LimitInputRow(
-    icon: ImageVector,
+    indicatorColor: Color,
     label: String,
     input: MutableState<String>,
     validatedValue: State<Int?>
 ) {
     Row(
+        modifier = Modifier.height(IntrinsicSize.Max),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
 
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier
+        Box(
+            modifier = Modifier.fillMaxHeight().width(4.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(indicatorColor)
         )
 
         Text(
             text = label,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f).alignByBaseline()
         )
+
+        val borderColor = when (validatedValue.value) {
+            null -> MaterialTheme.colorScheme.error
+            else -> MaterialTheme.colorScheme.outline
+        }
 
         BasicTextField(
             value = input.value,
@@ -328,12 +491,9 @@ private fun LimitInputRow(
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
             modifier = Modifier.weight(2f)
-                .border(
-                    width = 2.dp,
-                    color = if (validatedValue.value == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline,
-                    shape = getBottomLineShape(2.dp)
-                )
-                .padding(4.dp)
+                .border(2.dp, borderColor, getBottomLineShape(2.dp))
+                .alignByBaseline()
+                .padding(8.dp)
         )
 
     }

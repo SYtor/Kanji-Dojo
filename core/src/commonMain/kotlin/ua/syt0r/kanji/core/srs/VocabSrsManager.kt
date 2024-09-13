@@ -1,127 +1,138 @@
 package ua.syt0r.kanji.core.srs
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
-import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
+import kotlinx.datetime.LocalDate
+import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 
 interface VocabSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
-    suspend fun getUpdatedDecksData(): SrsDecksData
-    suspend fun getUpdatedDeckInfo(deckId: Long): SrsDeckInfo
+    suspend fun getDecks(): VocabSrsDecksData
+    suspend fun getDeck(deckId: Long): VocabSrsDeck
 }
 
-data class SrsDecksData(
-    val decks: List<SrsDeckInfo>
-)
+typealias VocabSrsDecksData = SrsDecksData<VocabSrsDeck, VocabPracticeType>
+typealias VocabSrsDeckDescriptor = SrsDeckDescriptor<Long, VocabPracticeType>
+typealias VocabSrsDeckProgress = SrsDeckProgress<Long>
 
-data class SrsDeckInfo(
-    val id: Long,
-    val title: String,
-    val position: Int,
-    val words: List<Long>,
-    val summaries: Map<VocabPracticeType, VocabDeckSrsProgress>
-)
-
-data class VocabDeckSrsProgress(
-    val wordsData: Map<Long, VocabSrsData>,
-    val all: List<Long>,
-    val done: List<Long>,
-    val due: List<Long>,
-    val new: List<Long>
-)
-
-data class VocabSrsData(
-    val status: SrsItemStatus,
-    val lastReviewTime: Instant?
-)
+data class VocabSrsDeck(
+    override val id: Long,
+    override val title: String,
+    override val position: Int,
+    override val items: List<Long>,
+    override val lastReview: Instant?,
+    override val progressMap: Map<VocabPracticeType, VocabSrsDeckProgress>
+) : SrsDeckData<VocabPracticeType, Long>
 
 class DefaultVocabSrsManager(
     private val practiceRepository: VocabPracticeRepository,
     private val srsItemRepository: SrsItemRepository,
-    private val getSrsStatusUseCase: GetSrsStatusUseCase,
+    dailyLimitManager: DailyLimitManager,
+    timeUtils: TimeUtils,
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val reviewHistoryRepository: ReviewHistoryRepository,
     coroutineScope: CoroutineScope
-) : VocabSrsManager {
+) : SrsManager<Long, VocabPracticeType, VocabSrsDeck>(
+    deckChangesFlow = practiceRepository.changesFlow,
+    dailyLimitManager = dailyLimitManager,
+    timeUtils = timeUtils,
+    coroutineScope = coroutineScope
+), VocabSrsManager {
 
-    private val _dataChangeFlow = MutableSharedFlow<Unit>()
-    override val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
+    override val practiceTypes: List<VocabPracticeType> = VocabPracticeType.values().toList()
 
-    private var cache: SrsDecksData? = null
+    override suspend fun getDecks(): VocabSrsDecksData {
+        return getDecksInternal()
+    }
 
-    init {
-        practiceRepository.changesFlow
-            .onEach {
-                cache = null
-                _dataChangeFlow.emit(Unit)
+    override suspend fun getDeck(deckId: Long): VocabSrsDeck {
+        return getDecksInternal().decks.first { it.id == deckId }
+    }
+
+    override suspend fun getDeckDescriptors(): List<VocabSrsDeckDescriptor> {
+        return practiceRepository.getDecks().map {
+            val items = practiceRepository.getDeckWords(it.id)
+
+            val itemsDataMap = VocabPracticeType.values().associateWith { practiceType ->
+                val itemsData: Map<Long, SrsCardData> = items.associateWith { wordId ->
+                    val key = practiceType.toSrsKey(wordId)
+                    val card = srsItemRepository.get(key)
+                    val firstReview = reviewHistoryRepository.getFirstReviewTime(
+                        key = key.itemKey,
+                        practiceType = practiceType.srsPracticeType.value
+                    )
+                    SrsCardData(
+                        key = key,
+                        card = card,
+                        status = getSrsStatus(card),
+                        lapses = card?.fsrsCard?.lapses ?: 0,
+                        repeats = card?.fsrsCard?.repeats ?: 0,
+                        firstReview = firstReview,
+                        firstReviewSrsDate = firstReview?.toSrsDate(),
+                        lastReview = card?.lastReview,
+                        lastReviewSrsDate = card?.lastReview?.toSrsDate(),
+                        expectedReviewDate = card?.expectedReview?.toSrsDate()
+                    )
+                }
+                PracticeTypeDeckData(itemsData = itemsData)
             }
-            .launchIn(coroutineScope)
-    }
 
-    override suspend fun getUpdatedDecksData(): SrsDecksData {
-        return getCache()
-    }
-
-    override suspend fun getUpdatedDeckInfo(deckId: Long): SrsDeckInfo {
-        return getCache().decks.first { it.id == deckId }
-    }
-
-    private suspend fun getCache(): SrsDecksData = cache ?: withContext(Dispatchers.IO) {
-        val decks = practiceRepository.getDecks()
-        val srsCardsMap = srsItemRepository.getAll()
-
-        val srsDeckInfoList = decks.map {
-            val deckItems = practiceRepository.getDeckWords(it.id)
-            SrsDeckInfo(
+            VocabSrsDeckDescriptor(
                 id = it.id,
                 title = it.title,
                 position = it.position,
-                words = deckItems,
-                summaries = VocabPracticeType.values()
-                    .associateWith { getVocabDeckSummary(deckItems, srsCardsMap, it) }
+                lastReview = reviewHistoryRepository.getDeckLastReview(
+                    deckId = it.id,
+                    practiceTypes = VocabPracticeType.srsPracticeTypeValues
+                ),
+                items = items,
+                itemsData = itemsDataMap
             )
         }
+    }
 
-        SrsDecksData(srsDeckInfoList)
-    }.also { cache = it }
+    override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {
+        return DeckSortConfiguration(
+            sortByReviewDate = userPreferencesRepository.dashboardSortByTime.get()
+        )
+    }
 
-    private fun getVocabDeckSummary(
-        items: List<Long>,
-        srsCards: Map<SrsCardKey, SrsCard>,
-        practiceType: VocabPracticeType
-    ): VocabDeckSrsProgress {
-        val wordsData = mutableMapOf<Long, VocabSrsData>()
-        val done = mutableListOf<Long>()
-        val due = mutableListOf<Long>()
-        val new = mutableListOf<Long>()
-        items.forEach { wordId ->
-            val key = practiceType.toSrsKey(wordId)
-            val srsCard = srsCards[key]
-            val status = srsCard?.let { it.lastReview?.plus(it.interval) }
-                ?.let { getSrsStatusUseCase(it) }
-                ?: SrsItemStatus.New
-            wordsData[wordId] = VocabSrsData(
-                status = status,
-                lastReviewTime = srsCard?.lastReview
+    override suspend fun getDeckLimit(
+        configuration: DailyLimitConfiguration,
+        newDoneToday: Int,
+        dueDoneToday: Int
+    ): DeckLimit.EnabledDeckLimit {
+        return when {
+            configuration.isVocabLimitCombined -> DeckLimit.Combined(
+                limit = configuration.vocabCombinedLimit,
+                newDone = newDoneToday,
+                dueDone = dueDoneToday
             )
-            val list = when (status) {
-                SrsItemStatus.New -> new
-                SrsItemStatus.Done -> done
-                SrsItemStatus.Review -> due
+
+            else -> DeckLimit.Separate(
+                limitsMap = configuration.vocabSeparatedLimit
+            )
+        }
+    }
+
+    override fun createDeck(
+        deckDescriptor: VocabSrsDeckDescriptor,
+        deckLimit: DeckLimit,
+        currentSrsDate: LocalDate
+    ): VocabSrsDeck {
+        return VocabSrsDeck(
+            id = deckDescriptor.id,
+            title = deckDescriptor.title,
+            position = deckDescriptor.position,
+            lastReview = deckDescriptor.lastReview,
+            items = deckDescriptor.items,
+            progressMap = deckDescriptor.itemsData.mapValues { (practiceType, deckData) ->
+                deckData.toProgress(deckLimit, practiceType, currentSrsDate)
             }
-            list.add(wordId)
-        }
-        return VocabDeckSrsProgress(
-            wordsData = wordsData,
-            all = items,
-            done = done,
-            due = due,
-            new = new
         )
     }
 

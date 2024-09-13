@@ -11,6 +11,7 @@ interface ReviewHistoryRepository {
     suspend fun addReview(item: ReviewHistoryItem)
     suspend fun getReviews(start: Instant, end: Instant): List<ReviewHistoryItem>
     suspend fun getFirstReviewTime(key: String, practiceType: Long): Instant?
+    suspend fun getDeckLastReview(deckId: Long, practiceTypes: List<Long>): Instant?
     suspend fun getTotalReviewsCount(): Long
     suspend fun getUniqueReviewItemsCount(practiceTypes: List<Long>): Long
     suspend fun getTotalPracticeTime(singleReviewDurationLimit: Long): Duration
@@ -70,6 +71,14 @@ class SqlDelightReviewHistoryRepository(
             .executeAsOneOrNull()
             ?.converted()
             ?.timestamp
+    }
+
+    override suspend fun getDeckLastReview(
+        deckId: Long,
+        practiceTypes: List<Long>
+    ): Instant? = userDataDatabaseManager.runTransaction {
+        getLastDeckReview(deckId, practiceTypes).executeAsOneOrNull()?.MAX
+            ?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     override suspend fun getTotalReviewsCount(): Long = userDataDatabaseManager.runTransaction {

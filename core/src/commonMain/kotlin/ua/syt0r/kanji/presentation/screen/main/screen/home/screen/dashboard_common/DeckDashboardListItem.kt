@@ -26,12 +26,9 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Details
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -250,15 +247,15 @@ fun <T> DeckDashboardListItemDetails(
         ) {
 
             QuickPracticeButton(
-                enabled = studyProgress.quickLearn.isNotEmpty(),
-                text = strings.itemQuickPracticeLearn(studyProgress.quickLearn.size),
-                onClick = { navigateToPractice(studyProgress.quickLearn) }
+                enabled = studyProgress.dailyNew.isNotEmpty(),
+                text = strings.itemQuickPracticeLearn(studyProgress.dailyNew.size),
+                onClick = { navigateToPractice(studyProgress.dailyNew) }
             )
 
             QuickPracticeButton(
-                enabled = studyProgress.quickReview.isNotEmpty(),
-                text = strings.itemQuickPracticeReview(studyProgress.quickReview.size),
-                onClick = { navigateToPractice(studyProgress.quickReview) }
+                enabled = studyProgress.dailyDue.isNotEmpty(),
+                text = strings.itemQuickPracticeReview(studyProgress.dailyDue.size),
+                onClick = { navigateToPractice(studyProgress.dailyDue) }
             )
 
         }

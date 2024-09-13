@@ -6,8 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.srs.LetterPracticeType
-import ua.syt0r.kanji.core.srs.LetterSrsManager
-import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
@@ -26,7 +25,7 @@ interface GetLetterPracticeQueueDataUseCase {
 
 class DefaultGetLetterPracticeQueueDataUseCase(
     private val userPreferencesRepository: PracticeUserPreferencesRepository,
-    private val letterSrsManager: LetterSrsManager,
+    private val srsItemRepository: SrsItemRepository,
     private val configurationUpdateScope: CoroutineScope
 ) : GetLetterPracticeQueueDataUseCase {
 
@@ -68,9 +67,9 @@ class DefaultGetLetterPracticeQueueDataUseCase(
                 configuration.selectorState.result.map { (character, deckId) ->
                     val shouldStudy: Boolean = when (configuration.hintMode.value) {
                         WritingPracticeHintMode.OnlyNew -> {
-                            val srsData = letterSrsManager
-                                .getLetterSrsData(character, LetterPracticeType.Writing)
-                            srsData.status == SrsItemStatus.New
+                            val isNew = srsItemRepository
+                                .get(LetterPracticeType.Writing.toSrsKey(character)) == null
+                            isNew
                         }
 
                         WritingPracticeHintMode.All -> true

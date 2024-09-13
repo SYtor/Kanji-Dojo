@@ -10,11 +10,10 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.refreshableDataFlow
-import ua.syt0r.kanji.core.srs.CharacterSrsData
-import ua.syt0r.kanji.core.srs.LetterSrsDeckInfo
+import ua.syt0r.kanji.core.srs.LetterPracticeType
+import ua.syt0r.kanji.core.srs.LetterSrsDeck
 import ua.syt0r.kanji.core.srs.LetterSrsManager
-import ua.syt0r.kanji.core.srs.SrsPracticeType
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
+import ua.syt0r.kanji.core.srs.SrsCardData
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
@@ -33,7 +32,6 @@ interface SubscribeOnDeckDetailsDataUseCase {
 class DefaultSubscribeOnDeckDetailsDataUseCase(
     private val letterSrsManager: LetterSrsManager,
     private val appDataRepository: AppDataRepository,
-    private val reviewHistoryRepository: ReviewHistoryRepository,
     private val coroutineContext: CoroutineContext = Dispatchers.IO
 ) : SubscribeOnDeckDetailsDataUseCase {
 
@@ -59,54 +57,48 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
     ): DeckDetailsData.LetterDeckData = withContext(coroutineContext) {
         Logger.logMethod()
 
-        val deckInfo: LetterSrsDeckInfo
-        val writingMap: Map<String, CharacterSrsData>
-        val readingMap: Map<String, CharacterSrsData>
+        val deck: LetterSrsDeck
+        val writingMap: Map<String, SrsCardData>
+        val readingMap: Map<String, SrsCardData>
 
         val timeToGetDeckInfo = measureTimeMillis {
-            deckInfo = letterSrsManager.getUpdatedDeckInfo(deckId)
-            writingMap = deckInfo.writingDetails.charactersData
-            readingMap = deckInfo.readingDetails.charactersData
+            deck = letterSrsManager.getDeck(deckId)
+            writingMap = deck.progressMap.getValue(LetterPracticeType.Writing).itemsData
+            readingMap = deck.progressMap.getValue(LetterPracticeType.Reading).itemsData
         }
         Logger.d("timeToGetDeckInfo[$timeToGetDeckInfo]")
 
         val timeZone = TimeZone.currentSystemDefault()
 
-        val items = deckInfo.characters.mapIndexed { index, character ->
-            val writingData = writingMap.getValue(character)
-            val readingData = readingMap.getValue(character)
+        val items = deck.items.mapIndexed { index, character ->
+            val writingCardData = writingMap.getValue(character)
+            val readingCardData = readingMap.getValue(character)
 
             DeckDetailsItemData.LetterData(
                 character = character,
                 positionInPractice = index,
                 frequency = appDataRepository.getData(character)?.frequency,
                 writingSummary = PracticeItemSummary(
-                    firstReviewDate = reviewHistoryRepository
-                        .getFirstReviewTime(character, SrsPracticeType.LetterWriting.value)
-                        ?.toLocalDateTime(timeZone),
-                    lastReviewDate = writingData.studyProgress?.lastReviewTime
-                        ?.toLocalDateTime(timeZone),
-                    expectedReviewDate = writingData.expectedReviewDate,
-                    lapses = writingData.studyProgress?.lapses ?: 0,
-                    repeats = writingData.studyProgress?.repeats ?: 0,
-                    srsItemStatus = writingData.status
+                    firstReviewDate = writingCardData.firstReview?.toLocalDateTime(timeZone),
+                    lastReviewDate = writingCardData.lastReview?.toLocalDateTime(timeZone),
+                    expectedReviewDate = writingCardData.expectedReviewDate,
+                    lapses = writingCardData.lapses,
+                    repeats = writingCardData.repeats,
+                    srsItemStatus = writingCardData.status
                 ),
                 readingSummary = PracticeItemSummary(
-                    firstReviewDate = reviewHistoryRepository
-                        .getFirstReviewTime(character, SrsPracticeType.LetterReading.value)
-                        ?.toLocalDateTime(timeZone),
-                    lastReviewDate = readingData.studyProgress?.lastReviewTime
-                        ?.toLocalDateTime(timeZone),
-                    expectedReviewDate = readingData.expectedReviewDate,
-                    lapses = readingData.studyProgress?.lapses ?: 0,
-                    repeats = readingData.studyProgress?.repeats ?: 0,
-                    srsItemStatus = readingData.status
+                    firstReviewDate = readingCardData.firstReview?.toLocalDateTime(timeZone),
+                    lastReviewDate = readingCardData.lastReview?.toLocalDateTime(timeZone),
+                    expectedReviewDate = readingCardData.expectedReviewDate,
+                    lapses = readingCardData.lapses,
+                    repeats = readingCardData.repeats,
+                    srsItemStatus = readingCardData.status
                 )
             )
         }
 
         DeckDetailsData.LetterDeckData(
-            deckTitle = deckInfo.title,
+            deckTitle = deck.title,
             items = items,
             sharableDeckData = items.joinToString("") { it.character }
         )

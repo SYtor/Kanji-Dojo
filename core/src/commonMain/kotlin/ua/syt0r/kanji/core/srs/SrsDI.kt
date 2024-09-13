@@ -6,11 +6,7 @@ import org.koin.core.module.Module
 import ua.syt0r.kanji.core.srs.fsrs.DefaultFsrsScheduler
 import ua.syt0r.kanji.core.srs.fsrs.Fsrs5
 import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
-import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterDeckSrsProgressUseCase
-import ua.syt0r.kanji.core.srs.use_case.DefaultGetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.DefaultGetSrsStatusUseCase
-import ua.syt0r.kanji.core.srs.use_case.GetLetterDeckSrsProgressUseCase
-import ua.syt0r.kanji.core.srs.use_case.GetLetterSrsStatusUseCase
 import ua.syt0r.kanji.core.srs.use_case.GetSrsStatusUseCase
 
 fun Module.applySrsDefinitions() {
@@ -27,29 +23,14 @@ fun Module.applySrsDefinitions() {
             practiceRepository = get(),
             srsItemRepository = get(),
             reviewHistoryRepository = get(),
-            getSrsStatusUseCase = get(),
-            getLetterSrsStatusUseCase = get(),
-            getDeckSrsProgressUseCase = get(),
-            timeUtils = get()
-        )
-    }
-
-    factory<GetLetterDeckSrsProgressUseCase> {
-        DefaultGetLetterDeckSrsProgressUseCase(
-            repository = get(),
-            getLetterSrsStatusUseCase = get()
+            timeUtils = get(),
+            userPreferencesRepository = get(),
+            coroutineScope = CoroutineScope(Dispatchers.IO)
         )
     }
 
     factory<GetSrsStatusUseCase> {
         DefaultGetSrsStatusUseCase(timeUtils = get())
-    }
-
-    factory<GetLetterSrsStatusUseCase> {
-        DefaultGetLetterSrsStatusUseCase(
-            srsItemRepository = get(),
-            getSrsStatusUseCase = get()
-        )
     }
 
     single<SrsItemRepository> {
@@ -63,7 +44,10 @@ fun Module.applySrsDefinitions() {
         DefaultVocabSrsManager(
             practiceRepository = get(),
             srsItemRepository = get(),
-            getSrsStatusUseCase = get(),
+            dailyLimitManager = get(),
+            timeUtils = get(),
+            userPreferencesRepository = get(),
+            reviewHistoryRepository = get(),
             coroutineScope = CoroutineScope(Dispatchers.IO)
         )
     }

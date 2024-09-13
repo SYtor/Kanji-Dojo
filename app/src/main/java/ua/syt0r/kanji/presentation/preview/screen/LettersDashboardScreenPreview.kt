@@ -21,7 +21,7 @@ import kotlin.random.Random
 import kotlin.time.Duration.Companion.days
 
 private val dailyIndicatorData = DailyIndicatorData(
-    configuration = DailyLimitConfiguration(true, 6, 12),
+    dailyLimitEnabled = true,
     progress = DailyProgress.Completed
 )
 
@@ -32,8 +32,8 @@ private fun randomStudyProgress(): LetterDeckStudyProgress {
         known = randomKanjiList(Random.nextInt(1, 6)),
         review = randomKanjiList(Random.nextInt(1, 6)),
         new = randomKanjiList(Random.nextInt(1, 30)),
-        quickLearn = emptyList(),
-        quickReview = emptyList(),
+        dailyNew = emptyList(),
+        dailyDue = emptyList(),
         all = emptyList()
     )
 }
