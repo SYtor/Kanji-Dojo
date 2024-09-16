@@ -39,7 +39,6 @@ val letterPracticeScreenModule = module {
     factory<GetLetterPracticeQueueItemDataUseCase> {
         DefaultGetLetterPracticeQueueItemDataUseCase(
             appDataRepository = get(),
-            userPreferencesRepository = get(),
             romajiConverter = get()
         )
     }

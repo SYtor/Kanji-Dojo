@@ -13,13 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,21 +57,19 @@ fun LetterPracticeReadingUI(
         )
     }
 
-    val words = when (reviewState.revealed.value) {
-        true -> reviewState.itemData.words
-        false -> reviewState.itemData.encodedWords
-    }
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
+
+        val listState = key(reviewState) { rememberLazyListState() }
 
         if (LocalOrientation.current == Orientation.Portrait) {
 
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                state = listState
             ) {
                 item {
                     LetterPracticeReadingInfoSection(
@@ -78,7 +79,8 @@ fun LetterPracticeReadingUI(
                     )
                 }
                 addWordItems(
-                    words = words,
+                    words = reviewState.itemData.words,
+                    revealed = reviewState.revealed,
                     onWordClick = onWordClick,
                     addWordToDeck = { wordToAddToVocabDeck = it }
                 )
@@ -97,13 +99,15 @@ fun LetterPracticeReadingUI(
                         .padding(horizontal = 20.dp)
                 )
 
-                VerticalDivider(color = MaterialTheme.colorScheme.outline)
+                VerticalDivider()
 
                 LazyColumn(
-                    modifier = Modifier.weight(1f).fillMaxHeight()
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    state = listState
                 ) {
                     addWordItems(
-                        words = words,
+                        words = reviewState.itemData.words,
+                        revealed = reviewState.revealed,
                         onWordClick = onWordClick,
                         addWordToDeck = { wordToAddToVocabDeck = it }
                     )
@@ -118,7 +122,8 @@ fun LetterPracticeReadingUI(
             showAnswer = reviewState.revealed,
             onRevealAnswerClick = { reviewState.revealed.value = true },
             onAnswerClick = onNextClick,
-            modifier = Modifier.padding(vertical = 20.dp).align(Alignment.CenterHorizontally)
+            modifier = Modifier.padding(bottom = 20.dp, top = 8.dp)
+                .align(Alignment.CenterHorizontally)
         )
 
     }
@@ -130,6 +135,7 @@ fun LetterPracticeReadingUI(
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.addWordItems(
     words: List<JapaneseWord>,
+    revealed: MutableState<Boolean>,
     onWordClick: (JapaneseWord) -> Unit,
     addWordToDeck: (JapaneseWord) -> Unit
 ) {
@@ -147,11 +153,15 @@ private fun LazyListScope.addWordItems(
     }
 
     itemsIndexed(words) { index, word ->
+        val string = when {
+            revealed.value -> word.orderedPreview(index)
+            else -> word.orderedPreviewWithHiddenMeaning(index)
+        }
         LetterPracticeWordRow(
-            index = index,
-            word = word,
-            onWordClick = onWordClick,
-            addWordToDeckClick = addWordToDeck
+            furiganaString = string,
+            clickable = revealed.value,
+            onWordClick = { onWordClick(word) },
+            addWordToDeckClick = { addWordToDeck(word) }
         )
     }
 

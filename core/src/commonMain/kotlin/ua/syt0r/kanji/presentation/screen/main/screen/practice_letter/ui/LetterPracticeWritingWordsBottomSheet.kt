@@ -102,10 +102,9 @@ fun LetterPracticeWritingWordsBottomSheet(
 
             itemsIndexed(currentState.words) { index, word ->
                 LetterPracticeWordRow(
-                    index = index,
-                    word = word,
-                    onWordClick = onWordClick,
-                    addWordToDeckClick = { wordToAddToVocabDeck = it }
+                    furiganaString = word.orderedPreview(index),
+                    onWordClick = { onWordClick(word) },
+                    addWordToDeckClick = { wordToAddToVocabDeck = word }
                 )
             }
 

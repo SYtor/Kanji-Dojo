@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
@@ -542,7 +543,8 @@ fun ColumnScope.KanaVoiceMenu(
 
         WaveStrokesPhaseShifts.forEach { phaseShift ->
             val phase = Math.toRadians(-waveAnimationProgress.value * 360 - phaseShift)
-            val height = WaveMinFraction + cos(phase).absoluteValue * (WaveMaxFraction - WaveMinFraction)
+            val height =
+                WaveMinFraction + cos(phase).absoluteValue * (WaveMaxFraction - WaveMinFraction)
             Box(
                 modifier = Modifier
                     .padding(horizontal = 1.dp)
@@ -563,10 +565,10 @@ fun ColumnScope.KanaVoiceMenu(
 
 @Composable
 fun LetterPracticeWordRow(
-    index: Int,
-    word: JapaneseWord,
-    onWordClick: (JapaneseWord) -> Unit,
-    addWordToDeckClick: (JapaneseWord) -> Unit
+    furiganaString: FuriganaString,
+    clickable: Boolean = true,
+    onWordClick: () -> Unit,
+    addWordToDeckClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -574,17 +576,17 @@ fun LetterPracticeWordRow(
             .heightIn(min = 50.dp)
             .padding(horizontal = 12.dp)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { onWordClick(word) }
+            .clickable(enabled = clickable, onClick = onWordClick)
             .padding(vertical = 4.dp, horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         FuriganaText(
-            furiganaString = word.orderedPreview(index),
+            furiganaString = furiganaString,
             textStyle = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = { addWordToDeckClick(word) }) {
+        IconButton(onClick = addWordToDeckClick) {
             Icon(Icons.Default.AddCircleOutline, null)
         }
     }

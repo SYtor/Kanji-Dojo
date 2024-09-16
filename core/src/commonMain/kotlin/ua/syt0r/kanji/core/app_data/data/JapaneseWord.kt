@@ -22,4 +22,9 @@ data class JapaneseWord(
         append(meanings.first())
     }
 
+    fun orderedPreviewWithHiddenMeaning(index: Int) = buildFuriganaString {
+        append("${index + 1}. ")
+        append(readings.first().withEmptyFurigana())
+    }
+
 }
