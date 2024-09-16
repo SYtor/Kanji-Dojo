@@ -8,7 +8,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -23,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material.icons.Icons
@@ -33,8 +37,9 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Mediation
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +55,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.Placeholder
@@ -59,6 +67,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
+import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
@@ -109,7 +118,7 @@ fun DeckDashboardListState.addMergeItems(
             modifier = Modifier.padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            val strings = resolveString { lettersDashboard }
+            val strings = resolveString { commonDashboard }
             Text(
                 text = strings.mergeTitle,
                 style = MaterialTheme.typography.titleMedium,
@@ -161,7 +170,9 @@ fun DeckDashboardListState.addMergeItems(
         key = { listModeKey to it.deckId }
     ) {
         val isSelected = selected.contains(it.deckId)
-        val onClick = { selected = selected.run { if (isSelected) minus(it.deckId) else plus(it.deckId) } }
+        val onClick = {
+            selected = selected.run { if (isSelected) minus(it.deckId) else plus(it.deckId) }
+        }
         Row(
             modifier = Modifier
                 .padding(horizontal = 20.dp)
@@ -196,7 +207,7 @@ fun DeckDashboardListState.addSortItems(
 
     item {
         Text(
-            text = resolveString { lettersDashboard.sortTitle },
+            text = resolveString { commonDashboard.sortTitle },
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.fillMaxWidth()
@@ -217,7 +228,7 @@ fun DeckDashboardListState.addSortItems(
                 .padding(start = 16.dp, end = 8.dp)
         ) {
             Text(
-                text = resolveString { lettersDashboard.sortByTimeTitle },
+                text = resolveString { commonDashboard.sortByTimeTitle },
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.weight(1f)
             )
@@ -308,8 +319,13 @@ fun LazyListScope.deckDashboardListModeButtons(
             targetState = listState.mode.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) {
-            val strings = resolveString { lettersDashboard }
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+
+            val strings = resolveString { commonDashboard }
+
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
                 when (it) {
                     is DeckDashboardListMode.Browsing -> {
                         OptionButton(
@@ -329,7 +345,7 @@ fun LazyListScope.deckDashboardListModeButtons(
                             onClick = {
                                 listState.mode.value = DeckDashboardListMode.SortMode(
                                     reorderedList = mutableStateOf(listState.items),
-                                    sortByReviewTime = mutableStateOf(listState.appliedSortByReviewTime.value)
+                                    sortByReviewTime = mutableStateOf(listState.sortByReviewTime)
                                 )
                             },
                             alignment = Alignment.End
@@ -378,7 +394,6 @@ fun LazyListScope.deckDashboardListModeButtons(
                             title = strings.sortAcceptButton,
                             icon = Icons.Default.Check,
                             onClick = {
-                                listState.appliedSortByReviewTime.value = it.sortByReviewTime.value
                                 sortDecks(
                                     DecksSortRequestData(
                                         reorderedList = it.reorderedList.value,
@@ -418,11 +433,11 @@ private fun RowScope.OptionButton(
 
         else -> throw IllegalStateException("Unsupported alignment")
     }
-    FilledTonalButton(
+    Button(
         onClick = onClick,
         modifier = Modifier.weight(1f),
         shape = buttonShape,
-        colors = ButtonDefaults.filledTonalButtonColors(
+        colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
@@ -447,7 +462,7 @@ private const val InlineIconId = "icon"
 @Composable
 fun DeckDashboardEmptyState() {
     Text(
-        text = resolveString { lettersDashboard.emptyScreenMessage(InlineIconId) },
+        text = resolveString { commonDashboard.emptyScreenMessage(InlineIconId) },
         inlineContent = mapOf(
             InlineIconId to InlineTextContent(
                 placeholder = Placeholder(
@@ -477,4 +492,51 @@ fun DeckDashboardEmptyState() {
             .padding(horizontal = 20.dp),
         textAlign = TextAlign.Center
     )
+}
+
+@Composable
+fun PracticeTypeDropdownItem(
+    practiceType: ScreenPracticeType,
+    showIndicator: Boolean,
+    onClick: () -> Unit
+) {
+    DropdownMenuItem(
+        text = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.height(IntrinsicSize.Max)
+            ) {
+
+                Text(
+                    text = resolveString(practiceType.titleResolver),
+                    modifier = Modifier.weight(1f).alignByBaseline()
+                )
+
+                IndicatorCircle(
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.alignBy { it.measuredHeight }
+                        .alpha(if (showIndicator) 1f else 0f)
+                )
+
+            }
+        },
+        onClick = onClick
+    )
+}
+
+private val SrsIndicatorCircleMinSize = 8.dp
+
+@Composable
+fun IndicatorCircle(
+    color: Color = MaterialTheme.colorScheme.primary,
+    shape: Shape = CircleShape,
+    modifier: Modifier = Modifier
+) {
+
+    Box(
+        modifier = modifier.sizeIn(SrsIndicatorCircleMinSize, SrsIndicatorCircleMinSize)
+            .background(color, shape)
+    )
+
 }

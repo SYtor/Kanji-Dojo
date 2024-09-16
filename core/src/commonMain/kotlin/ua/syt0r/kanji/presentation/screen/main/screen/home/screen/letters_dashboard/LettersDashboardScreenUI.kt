@@ -4,49 +4,24 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Draw
-import androidx.compose.material.icons.filled.LocalLibrary
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
-import ua.syt0r.kanji.presentation.common.ScreenPracticeType
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
-import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardEmptyState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemHeader
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
@@ -66,7 +41,6 @@ fun LettersDashboardScreenUI(
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (LetterDeckDashboardItem) -> Unit,
     startQuickPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
-    navigateToDailyLimit: () -> Unit,
     navigateToDeckPicker: () -> Unit
 ) {
 
@@ -87,6 +61,9 @@ fun LettersDashboardScreenUI(
                     if (screenState.listState.items.isEmpty()) {
                         DeckDashboardEmptyState()
                     } else {
+                        val practiceType = remember {
+                            derivedStateOf { screenState.selectedPracticeTypeItem.value.practiceType }
+                        }
                         DeckDashboardLoadedStateContainer(extraListSpacerState) {
 
                             if (screenState.listState.items.size > 1) {
@@ -101,7 +78,8 @@ fun LettersDashboardScreenUI(
                                 is DeckDashboardListMode.Browsing -> {
                                     screenState.listState.addBrowseItems(
                                         scope = this,
-                                        dailyGoalEnabled = screenState.dailyIndicatorData.dailyLimitEnabled,
+                                        practiceType = practiceType,
+                                        showPendingNewIndicator = screenState.listState.showDailyNewIndicator,
                                         navigateToDetails = navigateToDeckDetails,
                                         navigateToPractice = startQuickPractice
                                     )
@@ -130,7 +108,6 @@ fun LettersDashboardScreenUI(
         LetterDashboardBottomBarUI(
             state = state,
             navigateToDeckPicker = navigateToDeckPicker,
-            onDailyLimitIndicatorClick = navigateToDailyLimit,
             modifier = Modifier.align(Alignment.BottomCenter)
                 .onGloballyPositioned { extraListSpacerState.updateOverlay(it) },
         )
@@ -146,7 +123,8 @@ private fun LoadingState() {
 
 private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
-    dailyGoalEnabled: Boolean,
+    practiceType: State<ScreenLetterPracticeType>,
+    showPendingNewIndicator: Boolean,
     navigateToDetails: (LetterDeckDashboardItem) -> Unit,
     navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
 ) = scope.apply {
@@ -158,7 +136,8 @@ private fun DeckDashboardListState.addBrowseItems(
 
         LetterDeckItem(
             item = it as LetterDeckDashboardItem,
-            dailyGoalEnabled = dailyGoalEnabled,
+            practiceType = practiceType,
+            showPendingNewIndicator = showPendingNewIndicator,
             navigateToDetails = { navigateToDetails(it) },
             navigateToPractice = navigateToPractice,
         )
@@ -170,160 +149,24 @@ private fun DeckDashboardListState.addBrowseItems(
 @Composable
 private fun LetterDeckItem(
     item: LetterDeckDashboardItem,
-    dailyGoalEnabled: Boolean,
+    practiceType: State<ScreenLetterPracticeType>,
+    showPendingNewIndicator: Boolean,
     navigateToDetails: () -> Unit,
     navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit
 ) {
-
-    val practiceType: MutableState<ScreenPracticeType> = remember {
-        mutableStateOf(ScreenLetterPracticeType.Writing)
-    }
 
     val studyProgress = remember {
         derivedStateOf { item.studyProgress.getValue(practiceType.value) }
     }
 
-    DeckDashboardListItemContainer(
+    DeckDashboardListItem(
         itemKey = item.deckId,
-        header = {
-
-            DeckDashboardListItemHeader(
-                title = item.title,
-                elapsedSinceLastReview = item.elapsedSinceLastReview,
-                onDetailsClick = navigateToDetails
-            ) {
-
-                Column(
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    val writingProgress = item.studyProgress
-                        .getValue(ScreenLetterPracticeType.Writing)
-                    DeckPendingReviewsCountIndicator(
-                        icon = Icons.Default.Draw,
-                        dailyGoalEnabled = dailyGoalEnabled,
-                        study = writingProgress.dailyNew.size,
-                        review = writingProgress.dailyDue.size
-                    )
-
-                    val readingProgress = item.studyProgress
-                        .getValue(ScreenLetterPracticeType.Reading)
-                    DeckPendingReviewsCountIndicator(
-                        icon = Icons.Default.LocalLibrary,
-                        dailyGoalEnabled = dailyGoalEnabled,
-                        study = readingProgress.dailyNew.size,
-                        review = readingProgress.dailyDue.size
-                    )
-                }
-
-            }
-        },
-        details = {
-            DeckDashboardListItemDetails(
-                studyProgress = studyProgress.value,
-                indicatorColumnTopContent = { PracticeTypeSwitch(practiceType) },
-                indicatorsRowContentAlignment = Alignment.Bottom,
-                navigateToPractice = {
-                    navigateToPractice(item, practiceType.value as ScreenLetterPracticeType, it)
-                }
-            )
-        }
+        title = item.title,
+        elapsedSinceLastReview = item.elapsedSinceLastReview,
+        showNewIndicator = showPendingNewIndicator,
+        studyProgress = studyProgress.value,
+        onDetailsClick = navigateToDetails,
+        navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
     )
-}
-
-@Composable
-private fun DeckPendingReviewsCountIndicator(
-    icon: ImageVector,
-    dailyGoalEnabled: Boolean,
-    study: Int,
-    review: Int
-) {
-    val showStudy = study > 0 && dailyGoalEnabled
-    val showDue = review > 0
-    if (!showStudy && !showDue) return
-
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-        )
-        if (showStudy) {
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(MaterialTheme.extraColorScheme.new, CircleShape)
-            )
-        }
-        if (showDue) {
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically).size(4.dp)
-                    .background(MaterialTheme.extraColorScheme.due, CircleShape)
-            )
-        }
-    }
-}
-
-@Composable
-private fun ColumnScope.PracticeTypeSwitch(
-    practiceType: MutableState<ScreenPracticeType>
-) {
-
-    val switchEnabled: Boolean
-    val icon: ImageVector
-    val title: String
-
-    when (practiceType.value) {
-        ScreenLetterPracticeType.Writing -> {
-            switchEnabled = false
-            icon = Icons.Default.Draw
-            title = resolveString { letterPracticeTypeWriting }
-        }
-
-        ScreenLetterPracticeType.Reading -> {
-            switchEnabled = true
-            icon = Icons.Default.LocalLibrary
-            title = resolveString { letterPracticeTypeReading }
-        }
-
-        else -> throw IllegalStateException()
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.align(Alignment.Start)
-    ) {
-
-        Switch(
-            checked = switchEnabled,
-            onCheckedChange = {
-                if (it) practiceType.value = ScreenLetterPracticeType.Reading
-                else practiceType.value = ScreenLetterPracticeType.Writing
-            },
-            thumbContent = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(SwitchDefaults.IconSize)
-                )
-            },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.outline,
-                checkedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                checkedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                checkedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant,
-                uncheckedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
-        )
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.ExtraLight
-        )
-
-    }
 
 }

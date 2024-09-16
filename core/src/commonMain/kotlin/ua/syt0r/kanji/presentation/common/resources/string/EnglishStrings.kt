@@ -39,8 +39,7 @@ object EnglishStrings : Strings {
 
     override val home: HomeStrings = EnglishHomeStrings
     override val generalDashboard: GeneralDashboardStrings = EnglishGeneralDashboardStrings
-    override val lettersDashboard = EnglishLettersDashboardStrings
-    override val vocabDashboard: VocabDashboardStrings = EnglishVocabDashboardStrings
+    override val commonDashboard = EnglishCommonDashboardStrings
     override val dailyLimit: DailyLimitStrings = EnglishDailyLimitStrings
     override val tutorialDialog: TutorialDialogStrings = EnglishTutorialDialogStrings
 
@@ -99,7 +98,7 @@ object EnglishGeneralDashboardStrings : GeneralDashboardStrings {
     override val longestStreakLabel: String = "Longest Streak"
 }
 
-object EnglishLettersDashboardStrings : LettersDashboardStrings {
+object EnglishCommonDashboardStrings : CommonDashboardStrings {
 
     override val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString = { inlineIconId ->
         buildAnnotatedString {
@@ -142,19 +141,11 @@ object EnglishLettersDashboardStrings : LettersDashboardStrings {
     override val itemDone: String = "Done"
     override val itemReview: String = "Due"
     override val itemNew: String = "New"
-    override val itemQuickPracticeTitle: String = "Daily practice"
-    override val itemQuickPracticeLearn: (Int) -> String = { "New ($it)" }
-    override val itemQuickPracticeReview: (Int) -> String = { "Due ($it)" }
+    override val dailyPracticeTitle: String = "Daily practice"
+    override val dailyPracticeNew: (Int) -> String = { "New ($it)" }
+    override val dailyPracticeDue: (Int) -> String = { "Due ($it)" }
     override val itemGraphProgressTitle: String = "Completion"
 
-    override val dailyIndicatorPrefix: String = "Today: "
-    override val dailyIndicatorCompleted: String = "Done"
-    override val dailyIndicatorDisabled: String = "No limit set"
-    override val dailyIndicatorNew: (Int) -> String = { "$it new" }
-    override val dailyIndicatorDue: (Int) -> String = { "$it due" }
-}
-
-object EnglishVocabDashboardStrings : VocabDashboardStrings {
     override val selectedPracticeTypeTemplate: (practiceType: String) -> String = {
         "Practice Type: $it"
     }

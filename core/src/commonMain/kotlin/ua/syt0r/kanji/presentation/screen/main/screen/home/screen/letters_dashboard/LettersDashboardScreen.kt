@@ -31,9 +31,6 @@ fun LettersDashboardScreen(
             )
             mainNavigationState.navigate(destination)
         },
-        navigateToDailyLimit = {
-            mainNavigationState.navigate(MainDestination.DailyLimit)
-        },
         navigateToDeckPicker = {
             val destination = MainDestination.DeckPicker(DeckPickerScreenConfiguration.Letters)
             mainNavigationState.navigate(destination)

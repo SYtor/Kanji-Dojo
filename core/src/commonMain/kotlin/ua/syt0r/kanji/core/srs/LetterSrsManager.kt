@@ -97,7 +97,7 @@ class DefaultLetterSrsManager(
 
     override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {
         return DeckSortConfiguration(
-            sortByReviewDate = userPreferencesRepository.dashboardSortByTime.get()
+            sortByReviewDate = userPreferencesRepository.letterDashboardSortByTime.get()
         )
     }
 

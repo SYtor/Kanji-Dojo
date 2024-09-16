@@ -8,8 +8,8 @@ import kotlin.time.Duration
 
 data class DeckStudyProgress<T>(
     val all: List<T>,
-    val known: List<T>,
-    val review: List<T>,
+    val completed: List<T>,
+    val due: List<T>,
     val new: List<T>,
     val dailyNew: List<T>,
     val dailyDue: List<T>,
@@ -17,7 +17,7 @@ data class DeckStudyProgress<T>(
 
     fun completionPercentage(): Float = when {
         all.isEmpty() -> 100f
-        else -> (known.size + review.size).toFloat() / all.size * 100
+        else -> (completed.size + due.size).toFloat() / all.size * 100
     }
 
 }
@@ -59,7 +59,8 @@ data class VocabDeckDashboardItem(
 
 data class DeckDashboardListState(
     val items: List<DeckDashboardItem>,
-    val appliedSortByReviewTime: MutableState<Boolean>,
+    val sortByReviewTime: Boolean,
+    val showDailyNewIndicator: Boolean,
     val mode: MutableState<DeckDashboardListMode>
 )
 

@@ -30,7 +30,6 @@ val lettersDashboardScreenModule = module {
         LettersDashboardViewModel(
             viewModelScope = it.component1(),
             loadDataUseCase = get(),
-            sortDecksUseCase = get(),
             mergeDecksUseCase = get(),
             updateSortUseCase = get(),
             userPreferencesRepository = get(),

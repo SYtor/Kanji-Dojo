@@ -53,8 +53,7 @@ interface Strings {
 
     val home: HomeStrings
     val generalDashboard: GeneralDashboardStrings
-    val lettersDashboard: LettersDashboardStrings
-    val vocabDashboard: VocabDashboardStrings
+    val commonDashboard: CommonDashboardStrings
     val stats: StatsStrings
     val search: SearchStrings
     val settings: SettingsStrings
@@ -133,10 +132,6 @@ interface AddWordToDeckDialogStrings {
     val buttonAdd: String
 }
 
-interface VocabDashboardStrings {
-    val selectedPracticeTypeTemplate: (practiceType: String) -> String
-}
-
 interface FeedbackStrings {
     val title: String
     val topicTitle: String
@@ -161,7 +156,7 @@ interface HomeStrings {
     val settingsTabLabel: String
 }
 
-interface LettersDashboardStrings {
+interface CommonDashboardStrings {
 
     val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString
 
@@ -189,18 +184,14 @@ interface LettersDashboardStrings {
     val itemDone: String
     val itemReview: String
     val itemNew: String
-    val itemQuickPracticeTitle: String
-    val itemQuickPracticeLearn: (Int) -> String
-    val itemQuickPracticeReview: (Int) -> String
+    val dailyPracticeTitle: String
+    val dailyPracticeNew: (Int) -> String
+    val dailyPracticeDue: (Int) -> String
     val itemGraphProgressTitle: String
     val itemGraphProgressValue: (Float) -> String
         get() = { " ${it.roundToInt()}%" }
 
-    val dailyIndicatorPrefix: String
-    val dailyIndicatorCompleted: String
-    val dailyIndicatorDisabled: String
-    val dailyIndicatorNew: (Int) -> String
-    val dailyIndicatorDue: (Int) -> String
+    val selectedPracticeTypeTemplate: (practiceType: String) -> String
 
 }
 

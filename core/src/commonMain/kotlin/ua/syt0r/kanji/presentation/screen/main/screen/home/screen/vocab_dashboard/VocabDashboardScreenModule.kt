@@ -15,7 +15,6 @@ val vocabDashboardScreenModule = module {
         VocabDashboardViewModel(
             viewModelScope = it.component1(),
             subscribeOnDashboardVocabDecksUseCase = get(),
-            sortDecksUseCase = get(),
             mergeVocabDecksUseCase = get(),
             updateDecksOrderUseCase = get(),
             preferencesRepository = get(),

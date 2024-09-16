@@ -4,33 +4,24 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
-import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardEmptyState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemDetails
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItemHeader
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListMode
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardListState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.DeckDashboardLoadedStateContainer
@@ -72,6 +63,9 @@ fun VocabDashboardScreenUI(
                     if (screenState.listState.items.isEmpty()) {
                         DeckDashboardEmptyState()
                     } else {
+                        val practiceType = remember {
+                            derivedStateOf { screenState.selectedPracticeTypeItem.value.practiceType }
+                        }
                         DeckDashboardLoadedStateContainer(extraListSpacerState) {
 
                             if (screenState.listState.items.size > 1) {
@@ -86,7 +80,8 @@ fun VocabDashboardScreenUI(
                                 is DeckDashboardListMode.Browsing -> {
                                     screenState.listState.addBrowseItems(
                                         scope = this,
-                                        practiceType = screenState.srsPracticeType,
+                                        practiceType = practiceType,
+                                        showNewIndicator = screenState.listState.showDailyNewIndicator,
                                         navigateToDetails = navigateToDeckDetails,
                                         navigateToPractice = startQuickPractice
                                     )
@@ -128,6 +123,7 @@ fun VocabDashboardScreenUI(
 private fun DeckDashboardListState.addBrowseItems(
     scope: LazyListScope,
     practiceType: State<ScreenVocabPracticeType>,
+    showNewIndicator: Boolean,
     navigateToDetails: (VocabDeckDashboardItem) -> Unit,
     navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit,
 ) = scope.apply {
@@ -140,6 +136,7 @@ private fun DeckDashboardListState.addBrowseItems(
         VocabDeckItem(
             practiceType = practiceType,
             item = it as VocabDeckDashboardItem,
+            showNewIndicator = showNewIndicator,
             navigateToDetails = { navigateToDetails(it) },
             navigateToPractice = navigateToPractice,
         )
@@ -153,36 +150,23 @@ private fun DeckDashboardListState.addBrowseItems(
 private fun VocabDeckItem(
     practiceType: State<ScreenVocabPracticeType>,
     item: VocabDeckDashboardItem,
+    showNewIndicator: Boolean,
     navigateToDetails: () -> Unit,
     navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit
 ) {
+
     val studyProgress = remember {
         derivedStateOf { item.studyProgress.getValue(practiceType.value) }
     }
 
-    DeckDashboardListItemContainer(
+    DeckDashboardListItem(
         itemKey = item.deckId,
-        header = {
-
-            DeckDashboardListItemHeader(
-                title = item.title,
-                elapsedSinceLastReview = item.elapsedSinceLastReview,
-                onDetailsClick = navigateToDetails
-            ) {
-                if (studyProgress.value.dailyDue.isNotEmpty())
-                    Box(
-                        modifier = Modifier.clip(CircleShape).size(6.dp)
-                            .background(MaterialTheme.extraColorScheme.due)
-                    )
-            }
-        },
-        details = {
-            DeckDashboardListItemDetails(
-                studyProgress = studyProgress.value,
-                indicatorColumnTopContent = {},
-                indicatorsRowContentAlignment = Alignment.CenterVertically,
-                navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
-            )
-        }
+        title = item.title,
+        elapsedSinceLastReview = item.elapsedSinceLastReview,
+        showNewIndicator = showNewIndicator,
+        studyProgress = studyProgress.value,
+        onDetailsClick = navigateToDetails,
+        navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
     )
+
 }

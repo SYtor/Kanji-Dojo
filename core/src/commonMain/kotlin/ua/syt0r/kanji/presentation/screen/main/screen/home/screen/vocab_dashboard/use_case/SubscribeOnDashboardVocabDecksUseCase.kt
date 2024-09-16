@@ -20,7 +20,8 @@ interface SubscribeOnDashboardVocabDecksUseCase {
 }
 
 data class VocabDashboardScreenData(
-    val decks: List<VocabDeckDashboardItem>
+    val decks: List<VocabDeckDashboardItem>,
+    val dailyLimitEnabled: Boolean
 )
 
 class DefaultSubscribeOnDashboardVocabDecksUseCase(
@@ -40,7 +41,8 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
 
     private suspend fun getUpdatedDecks(): VocabDashboardScreenData {
         Logger.logMethod()
-        val decks = vocabSrsManager.getDecks().decks
+        val decksData = vocabSrsManager.getDecks()
+        val decks = decksData.decks
         val now = timeUtils.now()
         return VocabDashboardScreenData(
             decks = decks.map {
@@ -55,15 +57,16 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
                         }
                         .toMap()
                 )
-            }
+            },
+            dailyLimitEnabled = decksData.dailyLimitEnabled
         )
     }
 
     private fun VocabSrsDeckProgress.toStudyProgress(): VocabDeckStudyProgress {
         return VocabDeckStudyProgress(
             all = itemsData.keys.toList(),
-            known = done,
-            review = due,
+            completed = done,
+            due = due,
             new = new,
             dailyNew = new,
             dailyDue = due

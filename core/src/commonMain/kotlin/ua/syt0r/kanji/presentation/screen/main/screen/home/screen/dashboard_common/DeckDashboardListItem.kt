@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,9 +30,12 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,10 +63,14 @@ import kotlin.time.Duration
 
 
 @Composable
-fun DeckDashboardListItemContainer(
+fun <T> DeckDashboardListItem(
     itemKey: Any,
-    header: @Composable RowScope.() -> Unit,
-    details: @Composable () -> Unit
+    title: String,
+    elapsedSinceLastReview: Duration?,
+    showNewIndicator: Boolean,
+    studyProgress: DeckStudyProgress<T>,
+    onDetailsClick: () -> Unit,
+    navigateToPractice: (List<T>) -> Unit
 ) {
 
     var expanded by rememberSaveable(itemKey) { mutableStateOf(false) }
@@ -81,7 +89,18 @@ fun DeckDashboardListItemContainer(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            header()
+            DeckDashboardListItemHeader(
+                title = title,
+                elapsedSinceLastReview = elapsedSinceLastReview,
+                onDetailsClick = onDetailsClick,
+                indicatorContent = {
+                    PendingReviewsCountIndicator(
+                        showNewIndicator = showNewIndicator,
+                        new = studyProgress.dailyNew.size,
+                        due = studyProgress.dailyDue.size
+                    )
+                }
+            )
         }
 
         AnimatedVisibility(
@@ -89,7 +108,10 @@ fun DeckDashboardListItemContainer(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            details()
+            DeckDashboardListItemDetails(
+                studyProgress = studyProgress,
+                navigateToPractice = navigateToPractice
+            )
         }
 
     }
@@ -101,7 +123,7 @@ fun RowScope.DeckDashboardListItemHeader(
     title: String,
     elapsedSinceLastReview: Duration?,
     onDetailsClick: () -> Unit,
-    extraIndicatorContent: @Composable RowScope.() -> Unit
+    indicatorContent: @Composable RowScope.() -> Unit
 ) {
 
     Column(
@@ -117,14 +139,14 @@ fun RowScope.DeckDashboardListItemHeader(
 
         Text(
             text = resolveString {
-                lettersDashboard.itemTimeMessage(elapsedSinceLastReview)
+                commonDashboard.itemTimeMessage(elapsedSinceLastReview)
             },
             style = MaterialTheme.typography.bodySmall,
         )
 
     }
 
-    extraIndicatorContent()
+    indicatorContent()
 
     Box(
         modifier = Modifier
@@ -139,30 +161,66 @@ fun RowScope.DeckDashboardListItemHeader(
 }
 
 @Composable
+private fun PendingReviewsCountIndicator(
+    showNewIndicator: Boolean,
+    new: Int,
+    due: Int
+) {
+
+    val showNew = new > 0 && showNewIndicator
+    val showDue = due > 0
+    if (!showNew && !showDue) return
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.height(IntrinsicSize.Min)
+    ) {
+        CompositionLocalProvider(
+            LocalTextStyle provides MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        ) {
+            if (showNew) {
+                Text(
+                    text = new.toString(),
+                    color = MaterialTheme.extraColorScheme.new
+                )
+            }
+            if (showNew && showDue) VerticalDivider()
+            if (showDue) {
+                Text(
+                    text = due.toString(),
+                    color = MaterialTheme.extraColorScheme.due
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun <T> DeckDashboardListItemDetails(
     studyProgress: DeckStudyProgress<T>,
-    indicatorColumnTopContent: @Composable ColumnScope.() -> Unit,
-    indicatorsRowContentAlignment: Alignment.Vertical,
     navigateToPractice: (List<T>) -> Unit
 ) {
 
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.padding(horizontal = 10.dp)
+        modifier = Modifier.padding(horizontal = 10.dp).padding(top = 10.dp)
     ) {
 
-        val strings = resolveString { lettersDashboard }
+        val strings = resolveString { commonDashboard }
 
         Row(
-            modifier = Modifier.height(IntrinsicSize.Min).padding(end = 6.dp),
-            verticalAlignment = indicatorsRowContentAlignment
+            modifier = Modifier.height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
 
-                indicatorColumnTopContent()
+                Spacer(Modifier.weight(1f))
 
                 IndicatorTextRow(
                     color = MaterialTheme.colorScheme.outline,
@@ -174,14 +232,14 @@ fun <T> DeckDashboardListItemDetails(
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.success,
                     label = strings.itemDone,
-                    items = studyProgress.known,
+                    items = studyProgress.completed,
                     onClick = navigateToPractice
                 )
 
                 IndicatorTextRow(
                     color = MaterialTheme.extraColorScheme.due,
                     label = strings.itemReview,
-                    items = studyProgress.review,
+                    items = studyProgress.due,
                     onClick = navigateToPractice
                 )
 
@@ -192,17 +250,24 @@ fun <T> DeckDashboardListItemDetails(
                     onClick = navigateToPractice
                 )
 
+                Spacer(Modifier.weight(1f))
+
+                Text(
+                    text = strings.dailyPracticeTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 6.dp, top = 10.dp)
+                )
+
             }
 
             Box(
-                modifier = Modifier.padding(vertical = 8.dp)
-                    .size(120.dp)
+                modifier = Modifier.padding(end = 6.dp).size(120.dp)
             ) {
 
                 PieIndicator(
                     max = studyProgress.all.size.toFloat(),
-                    known = animateFloatAsState(targetValue = studyProgress.known.size.toFloat()),
-                    review = animateFloatAsState(targetValue = studyProgress.review.size.toFloat()),
+                    known = animateFloatAsState(targetValue = studyProgress.completed.size.toFloat()),
+                    review = animateFloatAsState(targetValue = studyProgress.due.size.toFloat()),
                     new = animateFloatAsState(targetValue = studyProgress.new.size.toFloat()),
                     modifier = Modifier.fillMaxSize()
                 )
@@ -234,12 +299,6 @@ fun <T> DeckDashboardListItemDetails(
 
         }
 
-        Text(
-            text = strings.itemQuickPracticeTitle,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(horizontal = 6.dp)
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
                 .padding(horizontal = 6.dp),
@@ -248,13 +307,13 @@ fun <T> DeckDashboardListItemDetails(
 
             QuickPracticeButton(
                 enabled = studyProgress.dailyNew.isNotEmpty(),
-                text = strings.itemQuickPracticeLearn(studyProgress.dailyNew.size),
+                text = strings.dailyPracticeNew(studyProgress.dailyNew.size),
                 onClick = { navigateToPractice(studyProgress.dailyNew) }
             )
 
             QuickPracticeButton(
                 enabled = studyProgress.dailyDue.isNotEmpty(),
-                text = strings.itemQuickPracticeReview(studyProgress.dailyDue.size),
+                text = strings.dailyPracticeDue(studyProgress.dailyDue.size),
                 onClick = { navigateToPractice(studyProgress.dailyDue) }
             )
 
@@ -276,7 +335,7 @@ private fun <T> ColumnScope.IndicatorTextRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .fillMaxWidth(fraction = 0.8f)
+            .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
             .clickable(enabled = items.isNotEmpty(), onClick = { onClick(items) })
             .padding(start = 10.dp, end = 4.dp)

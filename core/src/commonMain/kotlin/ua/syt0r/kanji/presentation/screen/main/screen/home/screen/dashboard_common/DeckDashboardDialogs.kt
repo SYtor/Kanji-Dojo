@@ -16,7 +16,7 @@ fun MergeConfirmationDialog(
     onDismissRequest: () -> Unit,
     onConfirmed: (DecksMergeRequestData) -> Unit
 ) {
-    val strings = resolveString { lettersDashboard }
+    val strings = resolveString { commonDashboard }
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         title = {

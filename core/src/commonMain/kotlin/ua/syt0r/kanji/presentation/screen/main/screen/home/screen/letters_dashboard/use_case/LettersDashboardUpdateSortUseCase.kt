@@ -11,7 +11,7 @@ class LettersDashboardUpdateSortUseCase(
 ) : LettersDashboardScreenContract.UpdateSortUseCase {
 
     override suspend fun update(data: DecksSortRequestData) {
-        userPreferencesRepository.dashboardSortByTime.set(data.sortByTime)
+        userPreferencesRepository.letterDashboardSortByTime.set(data.sortByTime)
         practiceRepository.updateDeckPositions(
             deckIdToPositionMap = data.reorderedList.reversed()
                 .mapIndexed { index, item -> item.deckId to index }

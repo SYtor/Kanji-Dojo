@@ -38,8 +38,7 @@ object JapaneseStrings : Strings {
 
     override val home: HomeStrings = JapaneseHomeStrings
     override val generalDashboard: GeneralDashboardStrings = JapaneseGeneralDashboardStrings
-    override val lettersDashboard = JapaneseLettersDashboardStrings
-    override val vocabDashboard: VocabDashboardStrings = JapaneseVocabDashboardStrings
+    override val commonDashboard = JapaneseCommonDashboardStrings
     override val dailyLimit = JapaneseDailyLimitStrings
     override val tutorialDialog: TutorialDialogStrings = JapaneseTutorialDialogStrings
     override val stats: StatsStrings = JapaneseStatsStrings
@@ -98,7 +97,7 @@ object JapaneseHomeStrings : HomeStrings {
     override val settingsTabLabel: String = "設定"
 }
 
-object JapaneseLettersDashboardStrings : LettersDashboardStrings {
+object JapaneseCommonDashboardStrings : CommonDashboardStrings {
     override val emptyScreenMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
             append("アプリを使うにはデッキが必要です。")
@@ -140,21 +139,14 @@ object JapaneseLettersDashboardStrings : LettersDashboardStrings {
     override val itemDone: String = "完了"
     override val itemReview: String = "復習"
     override val itemNew: String = "未習"
-    override val itemQuickPracticeTitle: String = "クイック練習"
-    override val itemQuickPracticeLearn: (Int) -> String = { "新しく学習 ($it)" }
-    override val itemQuickPracticeReview: (Int) -> String = { "復習 ($it)" }
+    override val dailyPracticeTitle: String = "クイック練習"
+    override val dailyPracticeNew: (Int) -> String = { "新しく学習 ($it)" }
+    override val dailyPracticeDue: (Int) -> String = { "復習 ($it)" }
     override val itemGraphProgressTitle: String = "完了率"
 
-    override val dailyIndicatorPrefix: String = "毎日の目標: "
-    override val dailyIndicatorCompleted: String = "完了"
-    override val dailyIndicatorDisabled: String = "無効"
-    override val dailyIndicatorNew: (Int) -> String = { "$it 学習" }
-    override val dailyIndicatorDue: (Int) -> String = { "$it 復習" }
-}
-
-object JapaneseVocabDashboardStrings : VocabDashboardStrings {
     override val selectedPracticeTypeTemplate: (practiceType: String) -> String =
         { "練習タイプ: $it" }
+
 }
 
 object JapaneseDailyLimitStrings : DailyLimitStrings {

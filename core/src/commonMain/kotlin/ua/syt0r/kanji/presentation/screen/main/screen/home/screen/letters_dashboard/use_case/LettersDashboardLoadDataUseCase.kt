@@ -12,8 +12,6 @@ import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckDashboardItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.LetterDeckStudyProgress
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyIndicatorData
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.DailyProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreenData
 
@@ -36,7 +34,6 @@ class LettersDashboardLoadDataUseCase(
         Logger.logMethod()
         val srsDecksData = srsManager.getDecks()
         val currentInstant = timeUtils.now()
-
         return LettersDashboardScreenData(
             items = srsDecksData.decks.map { deck ->
                 val writingProgress = deck.progressMap
@@ -54,44 +51,19 @@ class LettersDashboardLoadDataUseCase(
                     readingProgress = readingProgress
                 )
             },
-            dailyIndicatorData = DailyIndicatorData(
-                dailyLimitEnabled = srsDecksData.dailyLimitEnabled,
-                progress = getDailyProgress(
-                    enabled = srsDecksData.dailyLimitEnabled,
-                    leftToStudy = 0, // TODO
-                    leftToReview = 0
-                )
-            )
+            dailyLimitEnabled = srsDecksData.dailyLimitEnabled
         )
     }
 
     private fun LetterSrsDeckProgress.toPracticeStudyProgress(): LetterDeckStudyProgress {
         return LetterDeckStudyProgress(
             all = itemsData.keys.toList(),
-            known = done,
-            review = due,
+            completed = done,
+            due = due,
             new = new,
             dailyNew = dailyNew,
             dailyDue = dailyDue
         )
-    }
-
-    private fun getDailyProgress(
-        enabled: Boolean,
-        leftToStudy: Int,
-        leftToReview: Int,
-    ): DailyProgress {
-        return when {
-            !enabled -> DailyProgress.Disabled
-            leftToStudy > 0 && leftToReview > 0 -> DailyProgress.StudyAndReview(
-                leftToStudy,
-                leftToReview
-            )
-
-            leftToStudy == 0 && leftToReview > 0 -> DailyProgress.ReviewOnly(leftToReview)
-            leftToStudy > 0 && leftToReview == 0 -> DailyProgress.StudyOnly(leftToStudy)
-            else -> DailyProgress.Completed
-        }
     }
 
 }

@@ -15,7 +15,7 @@ class DefaultUpdateVocabDecksOrderUseCase(
 ) : UpdateVocabDecksOrderUseCase {
 
     override suspend fun update(data: DecksSortRequestData) {
-        userPreferencesRepository.dashboardSortByTime.set(data.sortByTime)
+        userPreferencesRepository.vocabDashboardSortByTime.set(data.sortByTime)
         practiceRepository.updateDeckPositions(
             deckIdToPositionMap = data.reorderedList.reversed()
                 .mapIndexed { index, item -> item.deckId to index }
