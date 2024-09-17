@@ -196,11 +196,12 @@ interface CommonDashboardStrings {
 }
 
 interface DailyLimitStrings {
-    val title: String
     val enableSwitchTitle: String
     val enableSwitchDescription: String
     val lettersSectionTitle: String
     val vocabSectionTitle: String
+    val combinedLimitSwitchTitle: String
+    val combinedLimitSwitchDescription: String
     val newLabel: String
     val dueLabel: String
     val noteMessage: String

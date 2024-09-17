@@ -150,12 +150,13 @@ object JapaneseCommonDashboardStrings : CommonDashboardStrings {
 }
 
 object JapaneseDailyLimitStrings : DailyLimitStrings {
-    override val title: String = "毎日の目標"
     override val enableSwitchTitle: String = "有効"
     override val enableSwitchDescription: String =
         "アプリによって促される毎日の練習の数を制限するには有効にします"
     override val lettersSectionTitle: String = "文字"
     override val vocabSectionTitle: String = "単語"
+    override val combinedLimitSwitchTitle: String = "共通の上限"
+    override val combinedLimitSwitchDescription: String = "すべての練習タイプで共通の上限を設定"
     override val newLabel: String = "新しい"
     override val dueLabel: String = "期限"
     override val noteMessage: String = "注意: 書く練習と読み練習は、制限に別々に加増されます"

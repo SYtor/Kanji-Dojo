@@ -152,12 +152,13 @@ object EnglishCommonDashboardStrings : CommonDashboardStrings {
 }
 
 object EnglishDailyLimitStrings : DailyLimitStrings {
-    override val title: String = "Daily Limit"
-    override val enableSwitchTitle: String = "Enabled"
+    override val enableSwitchTitle: String = "Daily Limit"
     override val enableSwitchDescription: String =
-        "Enable to limit the number of daily reviews prompted by the app"
+        "Limit the number of daily reviews prompted by the app"
     override val lettersSectionTitle: String = "Letters"
     override val vocabSectionTitle: String = "Vocab"
+    override val combinedLimitSwitchTitle: String = "Combined Limit"
+    override val combinedLimitSwitchDescription: String = "Share limit across all practice types"
     override val newLabel: String = "New"
     override val dueLabel: String = "Due"
     override val noteMessage: String =
