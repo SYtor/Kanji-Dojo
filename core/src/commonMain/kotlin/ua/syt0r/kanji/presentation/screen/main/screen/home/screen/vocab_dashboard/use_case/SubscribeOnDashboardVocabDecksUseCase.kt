@@ -68,8 +68,8 @@ class DefaultSubscribeOnDashboardVocabDecksUseCase(
             completed = done,
             due = due,
             new = new,
-            dailyNew = new,
-            dailyDue = due
+            dailyNew = dailyNew,
+            dailyDue = dailyDue
         )
     }
 

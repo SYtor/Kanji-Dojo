@@ -14,7 +14,8 @@ data class SrsDecksData<Deck, PracticeType>(
 data class SrsDailyProgress<PracticeType>(
     val newReviewed: Int,
     val dueReviewed: Int,
-    val leftoversMap: Map<PracticeType, DailyLeftover>
+    val leftoversByPracticeTypeMap: Map<PracticeType, DailyLeftover>,
+    val totalLeftover: DailyLeftover
 )
 
 data class DailyLeftover(val new: Int, val due: Int)

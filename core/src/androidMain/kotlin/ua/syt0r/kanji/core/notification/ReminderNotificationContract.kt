@@ -11,7 +11,7 @@ interface ReminderNotificationContract {
 
     interface Manager {
         fun showNotification()
-        fun showNotification(learn: Int, review: Int)
+        fun showNotification(new: Int, due: Int)
         fun dismissNotification()
     }
 

@@ -711,15 +711,15 @@ object EnglishKanjiInfoStrings : KanjiInfoStrings {
 
 object EnglishReminderNotificationStrings : ReminderNotificationStrings {
     override val channelName: String = "Reminder Notifications"
-    override val title: String = "It's study time!"
+    override val title: String = "It's review time!"
     override val noDetailsMessage: String = "Continue to learn Japanese now"
-    override val learnOnlyMessage: (Int) -> String = {
-        "There are $it characters to learn today"
+    override val newOnlyMessage: (Int) -> String = {
+        "$it new cards to study today"
     }
-    override val reviewOnlyMessage: (Int) -> String = {
-        "There are $it pending reviews today"
+    override val dueOnlyMessage: (Int) -> String = {
+        "$it due cards to review today"
     }
-    override val message: (Int, Int) -> String = { learn, review ->
-        "There are $learn characters to learn and $review pending reviews today"
+    override val message: (Int, Int) -> String = { new, due ->
+        "$new new cards and $due due cards to review today"
     }
 }

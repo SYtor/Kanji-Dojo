@@ -130,7 +130,8 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                         srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
                     }
 
-                val leftover = decksData.dailyProgress.leftoversMap.getValue(practiceType.dataType)
+                val leftover = decksData.dailyProgress
+                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
 
                 LetterDecksStudyProgress(
                     newToDeckIdMap = new.toList().take(leftover.new).toMap(),
@@ -161,7 +162,8 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
                         srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
                     }
 
-                val leftover = decksData.dailyProgress.leftoversMap.getValue(practiceType.dataType)
+                val leftover = decksData.dailyProgress
+                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
 
                 VocabDecksStudyProgress(
                     newToDeckIdMap = new.toList().take(leftover.new).toMap(),

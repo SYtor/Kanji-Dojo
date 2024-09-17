@@ -105,6 +105,7 @@ actual val platformComponentsModule: Module = module {
         ReminderNotificationHandleScheduledActionUseCase(
             activityManager = get(),
             letterSrsManager = get(),
+            vocabSrsManager = get(),
             notificationManager = get(),
             repository = get(),
             scheduler = get(),

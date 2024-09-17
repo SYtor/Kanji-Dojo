@@ -103,30 +103,11 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
 
         val decks = deckDescriptors.map { createDeck(it, deckLimit, currentSrsDate) }
 
-        val dailyProgress = SrsDailyProgress(
-            newReviewed = newCardsReviewedToday.size,
-            dueReviewed = dueCardsReviewedToday.size,
-            leftoversMap = practiceTypes.associateWith { practiceType ->
-                val limit = deckLimit.getLimit(practiceType)
-                val newReviewedByPracticeType = newCardsReviewedToday
-                    .filter { it.key.practiceType == practiceType.srsPracticeType.value }
-                val dueReviewedByPracticeType = dueCardsReviewedToday
-                    .filter { it.key.practiceType == practiceType.srsPracticeType.value }
-                val newLeft = (limit.new - newReviewedByPracticeType.size).coerceAtLeast(0)
-                val dueLeft = (limit.due - dueReviewedByPracticeType.size).coerceAtLeast(0)
-                DailyLeftover(
-                    new = decks
-                        .flatMap { deck -> deck.progressMap.getValue(practiceType).dailyNew }
-                        .distinct()
-                        .size
-                        .coerceAtMost(newLeft),
-                    due = decks
-                        .flatMap { deck -> deck.progressMap.getValue(practiceType).dailyDue }
-                        .distinct()
-                        .size
-                        .coerceAtMost(dueLeft)
-                )
-            }
+        val dailyProgress: SrsDailyProgress<PracticeType> = getDailyProgress(
+            newCardsReviewedToday = newCardsReviewedToday,
+            dueCardsReviewedToday = dueCardsReviewedToday,
+            decks = decks,
+            deckLimit = deckLimit
         )
 
         return SrsDecksData(
@@ -207,6 +188,63 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
             new = new,
             dailyNew = new.take(newLeft),
             dailyDue = due.take(dueLeft)
+        )
+    }
+
+    private fun getDailyProgress(
+        newCardsReviewedToday: Map<SrsCardKey, SrsCardData>,
+        dueCardsReviewedToday: Map<SrsCardKey, SrsCardData>,
+        decks: List<Deck>,
+        deckLimit: DeckLimit,
+    ): SrsDailyProgress<PracticeType> {
+        val leftoversByPracticeTypeMap = practiceTypes.associateWith { practiceType ->
+            val limit = deckLimit.getLimit(practiceType)
+            val newReviewedByPracticeType = newCardsReviewedToday
+                .filter { it.key.practiceType == practiceType.srsPracticeType.value }
+            val dueReviewedByPracticeType = dueCardsReviewedToday
+                .filter { it.key.practiceType == practiceType.srsPracticeType.value }
+            val newLeft = (limit.new - newReviewedByPracticeType.size).coerceAtLeast(0)
+            val dueLeft = (limit.due - dueReviewedByPracticeType.size).coerceAtLeast(0)
+            DailyLeftover(
+                new = decks
+                    .flatMap { deck -> deck.progressMap.getValue(practiceType).dailyNew }
+                    .distinct()
+                    .size
+                    .coerceAtMost(newLeft),
+                due = decks
+                    .flatMap { deck -> deck.progressMap.getValue(practiceType).dailyDue }
+                    .distinct()
+                    .size
+                    .coerceAtMost(dueLeft)
+            )
+        }
+
+        val leftoversList = leftoversByPracticeTypeMap.toList()
+
+        val totalLeftover = when (deckLimit) {
+            is DeckLimit.Combined -> DailyLeftover(
+                new = leftoversList.sumOf { it.second.new }.coerceAtMost(deckLimit.limit.new),
+                due = leftoversList.sumOf { it.second.due }.coerceAtMost(deckLimit.limit.due)
+            )
+
+            DeckLimit.Disabled,
+            is DeckLimit.Separate -> DailyLeftover(
+                new = leftoversList.sumOf { (practiceType, leftover) ->
+                    val limit = deckLimit.getLimit(practiceType).new
+                    leftover.new.coerceAtMost(limit)
+                },
+                due = leftoversList.sumOf { (practiceType, leftover) ->
+                    val limit = deckLimit.getLimit(practiceType).due
+                    leftover.due.coerceAtMost(limit)
+                }
+            )
+        }
+
+        return SrsDailyProgress(
+            newReviewed = newCardsReviewedToday.size,
+            dueReviewed = dueCardsReviewedToday.size,
+            leftoversByPracticeTypeMap = leftoversByPracticeTypeMap,
+            totalLeftover = totalLeftover
         )
     }
 

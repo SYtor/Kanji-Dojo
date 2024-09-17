@@ -663,13 +663,13 @@ object JapaneseReminderNotificationStrings : ReminderNotificationStrings {
     override val channelName: String = "リマインダー通知"
     override val title: String = "勉強の時間です！"
     override val noDetailsMessage: String = "日本語の学習を続ける"
-    override val learnOnlyMessage: (Int) -> String = {
-        "今日は学習する文字が${it}字残っています"
+    override val newOnlyMessage: (Int) -> String = {
+        "今日は未習うカードが${it}枚あります"
     }
-    override val reviewOnlyMessage: (Int) -> String = {
-        "今日は復習する文字が${it}字残っています"
+    override val dueOnlyMessage: (Int) -> String = {
+        "今日は復習するカードが${it}枚あります"
     }
-    override val message: (Int, Int) -> String = { learn, review ->
-        "今日は学習する文字が${learn}字、復習する文字が${review}字残っています"
+    override val message: (Int, Int) -> String = { new, due ->
+        "今日は未習うカードが${new}枚、復習するカードが${due}枚あります"
     }
 }

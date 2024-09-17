@@ -24,13 +24,13 @@ class ReminderNotificationManager(
         )
     }
 
-    override fun showNotification(learn: Int, review: Int) {
+    override fun showNotification(new: Int, due: Int) {
         val strings = getStrings().reminderNotification
         showNotificationInternal(
             message = when {
-                learn == 0 -> strings.reviewOnlyMessage(review)
-                review == 0 -> strings.learnOnlyMessage(learn)
-                else -> strings.message(learn, review)
+                new == 0 -> strings.dueOnlyMessage(due)
+                due == 0 -> strings.newOnlyMessage(new)
+                else -> strings.message(new, due)
             }
         )
     }

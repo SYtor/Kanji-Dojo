@@ -546,8 +546,8 @@ interface ReminderNotificationStrings {
     val channelName: String
     val title: String
     val noDetailsMessage: String
-    val learnOnlyMessage: (Int) -> String
-    val reviewOnlyMessage: (Int) -> String
+    val newOnlyMessage: (Int) -> String
+    val dueOnlyMessage: (Int) -> String
     val message: (Int, Int) -> String
 }
 
