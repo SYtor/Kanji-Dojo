@@ -549,6 +549,9 @@ object EnglishSortDialogStrings : SortDialogStrings {
         "Occurrence frequency of a character in newspapers\n↑ Frequent first\n↓ Frequent last"
     override val sortOptionName: String = "Name"
     override val sortOptionNameHint: String = "↑ Smaller first\n↓ Smaller last"
+    override val sortOptionReviewTime: String = "Expected Review"
+    override val sortOptionReviewTimeHint: String =
+        "↑ Never reviewed first\n↓ Furthest scheduled first"
 }
 
 object EnglishPracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogStrings {

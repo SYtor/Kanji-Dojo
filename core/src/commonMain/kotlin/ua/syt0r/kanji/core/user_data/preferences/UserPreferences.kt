@@ -63,7 +63,7 @@ interface PracticeUserPreferencesRepository : SuspendedPropertyRepository {
 }
 
 enum class PreferencesLetterPracticeType { Writing, Reading }
-enum class PreferencesLetterSortOption { AddOrder, Frequency, Name }
+enum class PreferencesLetterSortOption { AddOrder, Frequency, Name, ReviewTime }
 enum class PreferencesDeckDetailsLetterLayout { Character, Groups }
 enum class PreferencesTheme { System, Light, Dark }
 enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }

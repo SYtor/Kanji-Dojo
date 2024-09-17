@@ -30,11 +30,8 @@ class DefaultDeckDetailsApplyFilterUseCase : DeckDetailsApplyFilterUseCase {
         filterConfiguration: FilterConfiguration,
     ): List<DeckDetailsItemData.LetterData> {
         return items.filter {
-            val reviewState = when (practiceType) {
-                ScreenLetterPracticeType.Writing -> it.writingSummary.srsItemStatus
-                ScreenLetterPracticeType.Reading -> it.readingSummary.srsItemStatus
-            }
-            when (reviewState) {
+            val srsStatus = it.summaryMap.getValue(practiceType).srsItemStatus
+            when (srsStatus) {
                 SrsItemStatus.New -> filterConfiguration.showNew
                 SrsItemStatus.Review -> filterConfiguration.showDue
                 SrsItemStatus.Done -> filterConfiguration.showDone

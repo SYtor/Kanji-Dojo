@@ -524,6 +524,9 @@ object JapaneseSortDialogStrings : SortDialogStrings {
         "新聞で使われる頻度\n↑ 頻度が高い文字が最初\n↓ 頻度が高い文字が最後"
     override val sortOptionName: String = "符号順"
     override val sortOptionNameHint: String = "↑ 小さい文字が最初\n↓ 小さい文字が最後"
+    override val sortOptionReviewTime: String = "予想復習時間"
+    override val sortOptionReviewTimeHint: String =
+        "↑ 一度も復習していないカードが最初\n↓ 予定が最も遠いカードが最初"
 }
 
 object JapanesePracticePreviewLayoutDialogStrings : PracticePreviewLayoutDialogStrings {

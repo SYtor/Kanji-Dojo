@@ -435,6 +435,8 @@ interface SortDialogStrings {
     val sortOptionFrequencyHint: String
     val sortOptionName: String
     val sortOptionNameHint: String
+    val sortOptionReviewTime: String
+    val sortOptionReviewTimeHint: String
 }
 
 interface PracticePreviewLayoutDialogStrings {

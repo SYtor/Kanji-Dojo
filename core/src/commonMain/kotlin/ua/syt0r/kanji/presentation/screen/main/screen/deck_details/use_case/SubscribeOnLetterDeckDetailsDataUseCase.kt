@@ -15,6 +15,7 @@ import ua.syt0r.kanji.core.srs.LetterSrsDeck
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.srs.SrsCardData
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
@@ -71,28 +72,34 @@ class DefaultSubscribeOnDeckDetailsDataUseCase(
         val timeZone = TimeZone.currentSystemDefault()
 
         val items = deck.items.mapIndexed { index, character ->
+
             val writingCardData = writingMap.getValue(character)
+            val writingSummary = PracticeItemSummary(
+                firstReviewDate = writingCardData.firstReview?.toLocalDateTime(timeZone),
+                lastReviewDate = writingCardData.lastReview?.toLocalDateTime(timeZone),
+                expectedReviewDate = writingCardData.expectedReviewDate,
+                lapses = writingCardData.lapses,
+                repeats = writingCardData.repeats,
+                srsItemStatus = writingCardData.status
+            )
+
             val readingCardData = readingMap.getValue(character)
+            val readingSummary = PracticeItemSummary(
+                firstReviewDate = readingCardData.firstReview?.toLocalDateTime(timeZone),
+                lastReviewDate = readingCardData.lastReview?.toLocalDateTime(timeZone),
+                expectedReviewDate = readingCardData.expectedReviewDate,
+                lapses = readingCardData.lapses,
+                repeats = readingCardData.repeats,
+                srsItemStatus = readingCardData.status
+            )
 
             DeckDetailsItemData.LetterData(
                 character = character,
                 positionInPractice = index,
                 frequency = appDataRepository.getData(character)?.frequency,
-                writingSummary = PracticeItemSummary(
-                    firstReviewDate = writingCardData.firstReview?.toLocalDateTime(timeZone),
-                    lastReviewDate = writingCardData.lastReview?.toLocalDateTime(timeZone),
-                    expectedReviewDate = writingCardData.expectedReviewDate,
-                    lapses = writingCardData.lapses,
-                    repeats = writingCardData.repeats,
-                    srsItemStatus = writingCardData.status
-                ),
-                readingSummary = PracticeItemSummary(
-                    firstReviewDate = readingCardData.firstReview?.toLocalDateTime(timeZone),
-                    lastReviewDate = readingCardData.lastReview?.toLocalDateTime(timeZone),
-                    expectedReviewDate = readingCardData.expectedReviewDate,
-                    lapses = readingCardData.lapses,
-                    repeats = readingCardData.repeats,
-                    srsItemStatus = readingCardData.status
+                summaryMap = mapOf(
+                    ScreenLetterPracticeType.Writing to writingSummary,
+                    ScreenLetterPracticeType.Reading to readingSummary
                 )
             )
         }

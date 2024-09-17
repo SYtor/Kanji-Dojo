@@ -546,7 +546,7 @@ fun DeckDetailsConfigurationRow(
 @Composable
 fun DeckDetailsCharacterBox(
     character: String,
-    reviewState: SrsItemStatus,
+    srsStatus: SrsItemStatus,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -556,7 +556,7 @@ fun DeckDetailsCharacterBox(
         modifier = modifier.size(60.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(2.dp, reviewState.toColor(), MaterialTheme.shapes.medium)
+            .border(2.dp, srsStatus.toColor(), MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .wrapContentSize()
     )

@@ -47,6 +47,7 @@ class DefaultGetDeckDetailsVisibleDataUseCase(
             .let {
                 applySortUseCase(
                     items = it,
+                    practiceType = configuration.practiceType,
                     sortOption = configuration.sortOption,
                     isDescending = configuration.isDescending
                 )

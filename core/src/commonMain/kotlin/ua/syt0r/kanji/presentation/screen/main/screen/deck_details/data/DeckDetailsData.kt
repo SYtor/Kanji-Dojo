@@ -7,6 +7,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
 
@@ -67,8 +68,7 @@ sealed interface DeckDetailsItemData {
         val character: String,
         val positionInPractice: Int,
         val frequency: Int?,
-        val writingSummary: PracticeItemSummary,
-        val readingSummary: PracticeItemSummary,
+        val summaryMap: Map<ScreenLetterPracticeType, PracticeItemSummary>
     ) : DeckDetailsItemData
 
     data class VocabData(

@@ -128,10 +128,7 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
         previousSelectionStates: Map<DeckDetailsListItemKey, Boolean>?,
     ): DeckDetailsListItem.Group {
 
-        val itemReviewStates = when (practiceType) {
-            ScreenLetterPracticeType.Writing -> groupItems.map { it.writingSummary.srsItemStatus }
-            ScreenLetterPracticeType.Reading -> groupItems.map { it.readingSummary.srsItemStatus }
-        }
+        val itemReviewStates = groupItems.map { it.summaryMap.getValue(practiceType).srsItemStatus }
 
         val groupReviewState = when {
             itemReviewStates.all { it == SrsItemStatus.Done } -> SrsItemStatus.Done
@@ -142,20 +139,28 @@ class DefaultDeckDetailsCreateLetterGroupsUseCase :
         val summary = when (practiceType) {
             ScreenLetterPracticeType.Writing -> PracticeGroupSummary(
                 firstReviewDate = groupItems
-                    .mapNotNull { it.writingSummary.firstReviewDate }
+                    .mapNotNull {
+                        it.summaryMap.getValue(ScreenLetterPracticeType.Writing).firstReviewDate
+                    }
                     .minOrNull(),
                 lastReviewDate = groupItems
-                    .mapNotNull { it.writingSummary.lastReviewDate }
+                    .mapNotNull {
+                        it.summaryMap.getValue(ScreenLetterPracticeType.Writing).lastReviewDate
+                    }
                     .maxOrNull(),
                 state = groupReviewState
             )
 
             ScreenLetterPracticeType.Reading -> PracticeGroupSummary(
                 firstReviewDate = groupItems
-                    .mapNotNull { it.readingSummary.firstReviewDate }
+                    .mapNotNull {
+                        it.summaryMap.getValue(ScreenLetterPracticeType.Reading).firstReviewDate
+                    }
                     .minOrNull(),
                 lastReviewDate = groupItems
-                    .mapNotNull { it.readingSummary.lastReviewDate }
+                    .mapNotNull {
+                        it.summaryMap.getValue(ScreenLetterPracticeType.Reading).lastReviewDate
+                    }
                     .maxOrNull(),
                 state = groupReviewState
             )

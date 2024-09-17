@@ -52,6 +52,11 @@ enum class LettersSortOption(
         titleResolver = { deckDetails.sortDialog.sortOptionName },
         hintResolver = { deckDetails.sortDialog.sortOptionNameHint },
         preferencesType = PreferencesLetterSortOption.Name
+    ),
+    REVIEW_TIME(
+        titleResolver = { deckDetails.sortDialog.sortOptionReviewTime },
+        hintResolver = { deckDetails.sortDialog.sortOptionReviewTimeHint },
+        preferencesType = PreferencesLetterSortOption.ReviewTime
     );
 
     val imageVector = Icons.AutoMirrored.Filled.ArrowForward

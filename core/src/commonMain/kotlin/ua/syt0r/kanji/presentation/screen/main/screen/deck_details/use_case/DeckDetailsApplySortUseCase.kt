@@ -1,11 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.LettersSortOption
 
 interface DeckDetailsApplySortUseCase {
     operator fun invoke(
         items: List<DeckDetailsItemData.LetterData>,
+        practiceType: ScreenLetterPracticeType,
         sortOption: LettersSortOption,
         isDescending: Boolean,
     ): List<DeckDetailsItemData.LetterData>
@@ -15,6 +17,7 @@ class DefaultDeckDetailsApplySortUseCase : DeckDetailsApplySortUseCase {
 
     override fun invoke(
         items: List<DeckDetailsItemData.LetterData>,
+        practiceType: ScreenLetterPracticeType,
         sortOption: LettersSortOption,
         isDescending: Boolean,
     ): List<DeckDetailsItemData.LetterData> {
@@ -54,6 +57,18 @@ class DefaultDeckDetailsApplySortUseCase : DeckDetailsApplySortUseCase {
 
                 frequencyComparator.thenBy { it.character }
 
+            }
+
+            LettersSortOption.REVIEW_TIME -> {
+                when {
+                    isDescending -> compareByDescending {
+                        it.summaryMap.getValue(practiceType).expectedReviewDate
+                    }
+
+                    else -> compareBy {
+                        it.summaryMap.getValue(practiceType).expectedReviewDate
+                    }
+                }
             }
         }
 

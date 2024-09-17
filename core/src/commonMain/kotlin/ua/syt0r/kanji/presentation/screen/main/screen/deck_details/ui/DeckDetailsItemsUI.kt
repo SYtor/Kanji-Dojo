@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
@@ -127,14 +126,11 @@ private fun LetterListItem(
         verticalAlignment = Alignment.Top
     ) {
 
-        val summary = when (configuration.practiceType) {
-            ScreenLetterPracticeType.Writing -> item.data.writingSummary
-            ScreenLetterPracticeType.Reading -> item.data.readingSummary
-        }
+        val summary = item.data.summaryMap.getValue(configuration.practiceType)
 
         DeckDetailsCharacterBox(
             character = item.data.character,
-            reviewState = summary.srsItemStatus,
+            srsStatus = summary.srsItemStatus,
             onClick = { onCharacterClick(item.data.character) }
         )
 

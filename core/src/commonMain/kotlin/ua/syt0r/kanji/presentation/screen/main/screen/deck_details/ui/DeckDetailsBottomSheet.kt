@@ -236,14 +236,11 @@ private fun PracticeGroupDetails(
 
             items(group.items) {
 
-                val reviewState = when (practiceType) {
-                    ScreenLetterPracticeType.Writing -> it.writingSummary.srsItemStatus
-                    ScreenLetterPracticeType.Reading -> it.readingSummary.srsItemStatus
-                }
+                val srsStatus = it.summaryMap.getValue(practiceType).srsItemStatus
 
                 DeckDetailsCharacterBox(
                     character = it.character,
-                    reviewState = reviewState,
+                    srsStatus = srsStatus,
                     onClick = { onCharacterClick(it.character) },
                     modifier = Modifier.padding(end = 12.dp)
                 )
