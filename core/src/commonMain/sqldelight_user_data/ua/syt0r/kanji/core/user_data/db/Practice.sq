@@ -187,7 +187,7 @@ FROM review_history;
 
 getReviewStreaks:
 WITH DateList AS (
-    SELECT DISTINCT date(round(timestamp / 1000), 'unixepoch') AS date
+    SELECT DISTINCT date(round(timestamp / 1000), 'unixepoch', 'localtime') AS date
     FROM review_history
 ),
 DateWithLag AS (
