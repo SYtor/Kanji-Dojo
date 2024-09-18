@@ -222,6 +222,8 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
             put("practice_type", item.srsCardKey.practiceType)
             put("duration", reviewDuration.inWholeMilliseconds)
             put("mistakes", answer.mistakes)
+            put("repeats", item.srsCard.fsrsCard.repeats)
+            put("lapses", item.srsCard.fsrsCard.lapses)
         }
     }
 
