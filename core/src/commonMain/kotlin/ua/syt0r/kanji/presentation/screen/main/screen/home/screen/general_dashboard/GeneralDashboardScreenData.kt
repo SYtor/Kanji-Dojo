@@ -5,6 +5,17 @@ import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
+
+data class DecksStudyProgress<ItemType>(
+    val newToDeckIdMap: Map<ItemType, Long>,
+    val dueToDeckIdMap: Map<ItemType, Long>,
+) {
+    val combined: Map<ItemType, Long> = newToDeckIdMap + dueToDeckIdMap
+}
+
+typealias LetterDecksStudyProgress = DecksStudyProgress<String>
+typealias VocabDecksStudyProgress = DecksStudyProgress<Long>
+
 sealed interface LetterDecksData {
 
     object NoDecks : LetterDecksData
@@ -12,15 +23,10 @@ sealed interface LetterDecksData {
     data class Data(
         val practiceType: MutableState<ScreenLetterPracticeType>,
         val studyProgressMap: Map<ScreenLetterPracticeType, LetterDecksStudyProgress>
-    ) : LetterDecksData
+    ) : LetterDecksData {
+        val pendingReviewsMap = studyProgressMap.mapValues { it.value.combined.isNotEmpty() }
+    }
 
-}
-
-data class LetterDecksStudyProgress(
-    val newToDeckIdMap: Map<String, Long>,
-    val dueToDeckIdMap: Map<String, Long>,
-) {
-    val combined: Map<String, Long> = newToDeckIdMap + dueToDeckIdMap
 }
 
 sealed interface VocabDecksData {
@@ -30,15 +36,10 @@ sealed interface VocabDecksData {
     data class Data(
         val practiceType: MutableState<ScreenVocabPracticeType>,
         val studyProgressMap: Map<ScreenVocabPracticeType, VocabDecksStudyProgress>
-    ) : VocabDecksData
+    ) : VocabDecksData {
+        val pendingReviewsMap = studyProgressMap.mapValues { it.value.combined.isNotEmpty() }
+    }
 
-}
-
-data class VocabDecksStudyProgress(
-    val newToDeckIdMap: Map<Long, Long>,
-    val dueToDeckIdMap: Map<Long, Long>,
-) {
-    val combined: Map<Long, Long> = newToDeckIdMap + dueToDeckIdMap
 }
 
 data class StreakCalendarItem(

@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -73,9 +72,7 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
-import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.icon.Discord
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.YouTube
@@ -85,9 +82,10 @@ import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import ua.syt0r.kanji.presentation.dialog.VersionChangeDialog
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.IndicatorCircle
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.PracticeTypeDropdownItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
@@ -133,10 +131,8 @@ fun GeneralDashboardScreenUI(
                 }
             ) {
                 if (it.showAppVersionChangeHint.value) {
-                    Box(
-                        modifier = Modifier.alignBy { it.measuredHeight }
-                            .size(10.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    IndicatorCircle(
+                        modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp)
                     )
                 }
 
@@ -154,10 +150,8 @@ fun GeneralDashboardScreenUI(
                 },
             ) {
                 if (it.showTutorialHint.value) {
-                    Box(
-                        modifier = Modifier.alignBy { it.measuredHeight }
-                            .size(10.dp)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    IndicatorCircle(
+                        modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp)
                     )
                 }
                 Text(resolveString { generalDashboard.buttonTutorial }, Modifier.alignByBaseline())
@@ -176,7 +170,7 @@ fun GeneralDashboardScreenUI(
                         middleContent = {
                             PracticeTypeSelector(
                                 selectedType = it.letterDecksData.practiceType,
-                                availablePracticeTypes = ScreenLetterPracticeType.values().toList(),
+                                pendingReviewsMap = it.letterDecksData.pendingReviewsMap
                             )
                         },
                         buttonsContent = {
@@ -243,7 +237,7 @@ fun GeneralDashboardScreenUI(
                         middleContent = {
                             PracticeTypeSelector(
                                 selectedType = it.vocabDecksInfo.practiceType,
-                                availablePracticeTypes = ScreenVocabPracticeType.values().toList(),
+                                pendingReviewsMap = it.vocabDecksInfo.pendingReviewsMap
                             )
                         },
                         buttonsContent = {
@@ -506,7 +500,7 @@ private fun DashboardItemLayout(
 @Composable
 private fun <T : ScreenPracticeType> PracticeTypeSelector(
     selectedType: MutableState<T>,
-    availablePracticeTypes: List<T>,
+    pendingReviewsMap: Map<T, Boolean>
 ) {
 
     Row(
@@ -546,15 +540,15 @@ private fun <T : ScreenPracticeType> PracticeTypeSelector(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                availablePracticeTypes.forEach {
-                    PopupContentItem(
+                pendingReviewsMap.forEach { (practiceType, pendingReviews) ->
+                    PracticeTypeDropdownItem(
+                        practiceType = practiceType,
+                        showIndicator = pendingReviews,
                         onClick = {
-                            selectedType.value = it
+                            selectedType.value = practiceType
                             expanded = false
                         }
-                    ) {
-                        Text(resolveString(it.titleResolver))
-                    }
+                    )
                 }
             }
         }
@@ -590,7 +584,7 @@ fun GeneralDashboardReviewButton(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 modifier = Modifier
-                    .background(MaterialTheme.extraColorScheme.success, CircleShape)
+                    .background(MaterialTheme.extraColorScheme.success, MaterialTheme.shapes.medium)
                     .padding(4.dp),
                 tint = Color.White
             )
