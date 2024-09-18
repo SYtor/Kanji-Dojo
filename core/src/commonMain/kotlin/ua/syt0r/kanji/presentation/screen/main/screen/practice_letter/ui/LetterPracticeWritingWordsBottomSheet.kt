@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
@@ -42,10 +43,13 @@ fun State<LetterPracticeReviewState.Writing>.asWordsBottomSheetState(): State<Bo
     return remember {
         derivedStateOf {
             val currentState = value
-            val revealCharacter = currentState.writerState.value.progress
+            val writerState = currentState.writerState.value
+            val isStudyMode = writerState.configuration
+                .run { this is CharacterWriterConfiguration.StrokeInput && isStudyMode }
+            val revealCharacter = writerState.progress
                 .value !is CharacterWritingProgress.Writing
 
-            val words = if (revealCharacter) {
+            val words = if (isStudyMode || revealCharacter) {
                 currentState.itemData.words
             } else {
                 currentState.itemData.encodedWords
