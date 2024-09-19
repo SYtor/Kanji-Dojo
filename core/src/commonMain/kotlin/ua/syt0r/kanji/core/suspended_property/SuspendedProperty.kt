@@ -4,12 +4,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 
-/***
- * Component for repositories with following features:
- * - multiplatform provider - need to maintain only one repository
- * - suspend invocations - allows to avoid getters and setters since Kotlin properties can't be suspended
- * - exposes json values for backup support
- */
 interface SuspendedProperty<T> {
 
     val key: String
@@ -45,6 +39,19 @@ interface IntegerSuspendedProperty : SuspendedProperty<Int> {
     override suspend fun restore(value: JsonElement) {
         value as JsonPrimitive
         set(value.content.toIntOrNull() ?: return)
+    }
+
+}
+
+interface LongSuspendedProperty : SuspendedProperty<Long> {
+
+    override suspend fun backup(): JsonElement {
+        return JsonPrimitive(get())
+    }
+
+    override suspend fun restore(value: JsonElement) {
+        value as JsonPrimitive
+        set(value.content.toLongOrNull() ?: return)
     }
 
 }

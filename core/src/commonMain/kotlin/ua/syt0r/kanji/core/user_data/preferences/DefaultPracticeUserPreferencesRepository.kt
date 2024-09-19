@@ -7,15 +7,11 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 
-class DefaultPracticeUserPreferencesRepository private constructor(
-    suspendedPropertyRepository: SuspendedPropertyRepository,
+class DefaultPracticeUserPreferencesRepository(
+    suspendedPropertyProvider: SuspendedPropertyProvider,
     private val isSystemLanguageJapanese: Boolean = Locale.current.language == "ja"
 ) : PracticeUserPreferencesRepository,
-    SuspendedPropertyRepository by suspendedPropertyRepository {
-
-    constructor(provider: SuspendedPropertyProvider) : this(
-        suspendedPropertyRepository = DefaultSuspendedPropertyRepository(provider)
-    )
+    SuspendedPropertyRepository by DefaultSuspendedPropertyRepository(suspendedPropertyProvider) {
 
     override val noTranslationLayout: SuspendedProperty<Boolean> = registerProperty {
         createBooleanProperty(

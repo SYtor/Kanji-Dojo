@@ -8,14 +8,10 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.suspended_property.createEnumProperty
 import ua.syt0r.kanji.core.suspended_property.createLocalTimeProperty
 
-class DefaultUserPreferencesRepository private constructor(
-    suspendedPropertyRepository: SuspendedPropertyRepository
+class DefaultUserPreferencesRepository(
+    suspendedPropertyProvider: SuspendedPropertyProvider
 ) : UserPreferencesRepository,
-    SuspendedPropertyRepository by suspendedPropertyRepository {
-
-    constructor(provider: SuspendedPropertyProvider) : this(
-        suspendedPropertyRepository = DefaultSuspendedPropertyRepository(provider)
-    )
+    SuspendedPropertyRepository by DefaultSuspendedPropertyRepository(suspendedPropertyProvider) {
 
     override val analyticsEnabled: SuspendedProperty<Boolean> = registerProperty(
         enableBackup = false

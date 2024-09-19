@@ -15,6 +15,11 @@ interface SuspendedPropertyProvider {
         initialValueProvider: () -> Int
     ): SuspendedProperty<Int>
 
+    fun createLongProperty(
+        key: String,
+        initialValueProvider: () -> Long
+    ): SuspendedProperty<Long>
+
     fun createStringProperty(
         key: String,
         initialValueProvider: () -> String

@@ -17,3 +17,7 @@ fun getUserDataDirectory(): File {
         else -> File("KanjiDojoData/")
     }
 }
+
+fun getUserPreferencesFile(): File {
+    return File(getUserDataDirectory(), "user.preferences_pb")
+}

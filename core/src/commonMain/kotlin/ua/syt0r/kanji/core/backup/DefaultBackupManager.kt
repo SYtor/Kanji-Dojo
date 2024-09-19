@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.json.encodeToStream
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesBackupManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream
 class DefaultBackupManager(
     private val platformFileHandler: PlatformFileHandler,
     private val userDataDatabaseManager: UserDataDatabaseManager,
-    private val suspendedPropertiesBackupManager: SuspendedPropertiesBackupManager,
+    private val userPreferencesBackupManager: UserPreferencesBackupManager,
     private val themeManager: ThemeManager,
     private val restoreCompletionNotifier: BackupRestoreCompletionNotifier
 ) : BackupManager {
@@ -43,7 +43,7 @@ class DefaultBackupManager(
                 )
                 it.writeJsonFile(BACKUP_INFO_FILENAME, backupInfo)
 
-                val preferences = suspendedPropertiesBackupManager.exportModifiedProperties()
+                val preferences = userPreferencesBackupManager.exportPreferences()
                 it.writeJsonFile(PREFERENCES_FILENAME, preferences)
 
                 it.writeFile(databaseInfo.file)
@@ -71,7 +71,7 @@ class DefaultBackupManager(
             it.findZipEntry { zipEntry -> zipEntry.name == PREFERENCES_FILENAME }
             json.decodeFromStream(it)
         }
-        suspendedPropertiesBackupManager.importProperties(jsonObject = preferences)
+        userPreferencesBackupManager.importPreferences(jsonObject = preferences)
 
         val databaseFileName = readBackupInfo(location).userDatabaseFileName
         ZipInputStream(platformFileHandler.getInputStream(location)).use {

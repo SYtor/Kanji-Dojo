@@ -30,6 +30,8 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.kotlinx.datetime)
                 api(libs.kotlinx.serialization.json)
+
+                implementation(libs.datastore.preferences.core)
                 implementation(libs.kotlin.reflect)
                 implementation(libs.wanakana.core)
 

@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import org.koin.dsl.bind
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -24,10 +23,6 @@ import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.srs.applySrsDefinitions
-import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertiesBackupManager
-import ua.syt0r.kanji.core.suspended_property.DefaultSuspendedPropertyRepository
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertiesBackupManager
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -40,8 +35,11 @@ import ua.syt0r.kanji.core.user_data.practice.SqlDelightReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.preferences.DefaultPracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesBackupManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesRepository
 import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesBackupManager
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 
 val coreModule = module {
@@ -82,30 +80,25 @@ val coreModule = module {
         )
     }
 
-    single<SuspendedPropertyRepository> {
-        DefaultSuspendedPropertyRepository(
-            provider = get()
-        )
-    }
-
-    factory<SuspendedPropertiesBackupManager> {
-        DefaultSuspendedPropertiesBackupManager(
-            repositories = getAll<SuspendedPropertyRepository>()
+    factory<UserPreferencesBackupManager> {
+        DefaultUserPreferencesBackupManager(
+            userPreferences = get(),
+            userPreferencesRepository = get(),
+            practiceUserPreferencesRepository = get()
         )
     }
 
     single<PracticeUserPreferencesRepository> {
         DefaultPracticeUserPreferencesRepository(
-            provider = get()
+            suspendedPropertyProvider = get<UserPreferencesManager>().suspendedPropertyProvider
         )
-    } bind SuspendedPropertyRepository::class
+    }
 
     single<UserPreferencesRepository> {
         DefaultUserPreferencesRepository(
-            provider = get()
+            suspendedPropertyProvider = get<UserPreferencesManager>().suspendedPropertyProvider
         )
-    } bind SuspendedPropertyRepository::class
-
+    }
 
     single { BackupRestoreObservable() } binds arrayOf(
         BackupRestoreCompletionNotifier::class,
@@ -116,7 +109,7 @@ val coreModule = module {
         DefaultBackupManager(
             platformFileHandler = get(),
             userDataDatabaseManager = get(),
-            suspendedPropertiesBackupManager = get(),
+            userPreferencesBackupManager = get(),
             themeManager = get(),
             restoreCompletionNotifier = get()
         )

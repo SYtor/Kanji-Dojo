@@ -5,10 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
 
-private abstract class AndroidSuspendedProperty<T>(
+private abstract class DataStoreSuspendedProperty<T>(
     private val dataStore: DataStore<Preferences>,
     override val key: String,
     private val initialValueProvider: () -> T
@@ -38,7 +39,7 @@ class DataStoreSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Boolean
     ): SuspendedProperty<Boolean> {
-        return object : AndroidSuspendedProperty<Boolean>(
+        return object : DataStoreSuspendedProperty<Boolean>(
             dataStore = dataStore,
             key = key,
             initialValueProvider = initialValueProvider
@@ -53,7 +54,7 @@ class DataStoreSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Int
     ): SuspendedProperty<Int> {
-        return object : AndroidSuspendedProperty<Int>(
+        return object : DataStoreSuspendedProperty<Int>(
             dataStore = dataStore,
             key = key,
             initialValueProvider = initialValueProvider
@@ -64,11 +65,26 @@ class DataStoreSuspendedPropertyProvider(
         }
     }
 
+    override fun createLongProperty(
+        key: String,
+        initialValueProvider: () -> Long
+    ): SuspendedProperty<Long> {
+        return object : DataStoreSuspendedProperty<Long>(
+            dataStore = dataStore,
+            key = key,
+            initialValueProvider = initialValueProvider
+        ), LongSuspendedProperty {
+
+            override val dataStoreKey: Preferences.Key<Long> = longPreferencesKey(key)
+
+        }
+    }
+
     override fun createStringProperty(
         key: String,
         initialValueProvider: () -> String
     ): SuspendedProperty<String> {
-        return object : AndroidSuspendedProperty<String>(
+        return object : DataStoreSuspendedProperty<String>(
             dataStore = dataStore,
             key = key,
             initialValueProvider = initialValueProvider
