@@ -127,6 +127,7 @@ compose.desktop {
 
             packageName = "Kanji Dojo"
             packageVersion = AppVersion.desktopAppVersion
+            modules("jdk.unsupported", "java.sql")
 
             macOS {
                 bundleID = macOsBundleId

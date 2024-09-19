@@ -79,13 +79,13 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: ./gradlew core:packageUberJarForCurrentOS
+        run: ./gradlew core:packageDistributionForCurrentOS
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
         with:
           name: mac-intel
-          path: core/build/compose/jars/*.jar
+          path: core/build/compose/binaries/*.dmg
           retention-days: 1
 
 
@@ -103,13 +103,13 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: ./gradlew core:packageUberJarForCurrentOS
+        run: ./gradlew core:packageDistributionForCurrentOS
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
         with:
           name: mac-arm
-          path: core/build/compose/jars/*.jar
+          path: core/build/compose/binaries/*.dmg
           retention-days: 1
 
   verify-uploaded-builds:
