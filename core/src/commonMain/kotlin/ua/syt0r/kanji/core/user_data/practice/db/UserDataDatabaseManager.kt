@@ -4,6 +4,7 @@ import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +18,7 @@ import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import java.io.File
 import java.io.InputStream
+import kotlin.coroutines.CoroutineContext
 
 interface UserDataDatabaseManager {
 
@@ -36,8 +38,11 @@ class UserDatabaseInfo(
 )
 
 abstract class BaseUserDataDatabaseManager(
-    private val coroutineScope: CoroutineScope
+    private val initContext: CoroutineContext,
+    private val queryContext: CoroutineContext
 ) : UserDataDatabaseManager {
+
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
 
     protected data class DatabaseConnection(
         val sqlDriver: SqlDriver,
@@ -61,7 +66,7 @@ abstract class BaseUserDataDatabaseManager(
     override suspend fun <T> runTransaction(
         block: PracticeQueries.() -> T
     ): T {
-        return withContext(coroutineScope.coroutineContext) {
+        return withContext(queryContext) {
             val queries = waitDatabaseConnection().database.practiceQueries
             queries.transactionWithResult { queries.block() }
         }
@@ -100,7 +105,7 @@ abstract class BaseUserDataDatabaseManager(
     }
 
     private fun createDeferredDatabaseConnection(): Deferred<DatabaseConnection> {
-        return coroutineScope.async { createDatabaseConnection() }
+        return coroutineScope.async(initContext) { createDatabaseConnection() }
     }
 
     private suspend fun waitDatabaseConnection(): DatabaseConnection {
