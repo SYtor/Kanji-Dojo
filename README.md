@@ -34,8 +34,6 @@ Practice writing Japanese letters, learn their meanings and related words
 Repository with dictionary data and parsers here: [Kanji-Dojo-Data](https://github.com/syt0r/Kanji-Dojo-Data)
 
 ## Screenshots
-<details>
-<summary>Toggle Spoiler</summary>
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" height="400"/>
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" height="400"/>
@@ -43,18 +41,15 @@ Repository with dictionary data and parsers here: [Kanji-Dojo-Data](https://gith
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" height="400"/>
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" height="400"/>
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" height="400"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" height="400"/>
-<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" height="400"/>
 
-</details>
 
 ## Downloads
 ### Android
 [![Play Store](https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=google-play&logoColor=white)](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 [![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/en/packages/ua.syt0r.kanji.fdroid/)
 
-1. Available in F-Droid,the same version is available in [GitHub Releases](https://github.com/syt0r/Kanji-Dojo/releases/latest)
-2. Google Play
+1. Available in [F-Droid](https://f-droid.org/en/packages/ua.syt0r.kanji.fdroid/), the same version is published in [GitHub Releases](https://github.com/syt0r/Kanji-Dojo/releases/latest)
+2. [Google Play](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 
 ### MacOS
 1. Download `.dmg` installer from [Github Releases](https://github.com/syt0r/Kanji-Dojo/releases) for your platform
