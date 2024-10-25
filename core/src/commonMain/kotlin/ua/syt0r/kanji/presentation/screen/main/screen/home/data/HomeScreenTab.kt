@@ -8,7 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
-import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.compose.koinInject
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.HomeOutline
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -75,7 +75,7 @@ enum class HomeScreenTab(
         iconContent = { Icon(Icons.Outlined.Settings, null) },
         titleResolver = { home.settingsTabLabel },
         content = {
-            val settingsScreenContent = getKoin().get<SettingsScreenContract.Content>()
+            val settingsScreenContent = koinInject<SettingsScreenContract.Content>()
             settingsScreenContent.Draw(mainNavigationState = it)
         }
     );

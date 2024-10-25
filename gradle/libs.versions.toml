@@ -1,10 +1,10 @@
 [versions]
 
 kotlin = "2.0.20"
-kotlinx-serialization = "1.7.1"
+kotlinx-serialization = "1.7.3"
 kotlinx-datetime = "0.6.0"
 
-koin = "3.2.0"
+koin = "4.0.0"
 ktor = "2.3.12"
 sqldelight = "2.0.1"
 wanakana-core = "1.1.1"
@@ -12,17 +12,17 @@ aboutlibraries = "11.2.0"
 
 core-ktx = "1.13.1"
 appcompat = "1.7.0"
-lifecycle = "2.8.4"
-navigation-compose = "2.7.7"
-activity-compose = "1.9.1"
+lifecycle = "2.8.6"
+navigation-compose = "2.8.3"
+activity-compose = "1.9.3"
 work-runtime-ktx = "2.9.1"
 datastore-preferences-core = "1.1.1"
 datastore-preferences = "1.1.1"
 media3-exoplayer = "1.4.1"
 
-firebase = "33.2.0"
-billing = "7.0.0"
-review-ktx = "2.0.1"
+firebase = "33.5.1"
+billing = "7.1.1"
+review-ktx = "2.0.2"
 
 build-config = "5.4.0"
 
@@ -38,9 +38,10 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 
 # Koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-compose-viewmodel = {module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
-
 # Ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }

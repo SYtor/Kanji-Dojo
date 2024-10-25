@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.review.AppReviewContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.DefaultLetterPracticeScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
@@ -15,7 +15,7 @@ object GooglePlayLetterPracticeScreenContent : LetterPracticeScreenContract.Cont
 
     @Composable
     override fun invoke(
-        configuration: LetterPracticeScreenConfiguration ,
+        configuration: LetterPracticeScreenConfiguration,
         mainNavigationState: MainNavigationState,
         viewModel: LetterPracticeScreenContract.ViewModel
     ) {
@@ -38,7 +38,7 @@ object GooglePlayLetterPracticeScreenContent : LetterPracticeScreenContract.Cont
         }
 
         if (canStartReview.value) {
-            val reviewManager = get<AppReviewContract.ReviewManager>()
+            val reviewManager = koinInject<AppReviewContract.ReviewManager>()
             reviewManager.AttemptReview()
         }
 

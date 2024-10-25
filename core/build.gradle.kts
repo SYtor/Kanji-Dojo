@@ -27,12 +27,16 @@ kotlin {
                 api(compose.material3)
                 api(compose.runtime)
                 api(compose.materialIconsExtended)
+
                 api(libs.koin.core)
+                api(libs.koin.compose)
+                api(libs.koin.compose.viewmodel)
+
                 api(libs.kotlinx.datetime)
                 api(libs.kotlinx.serialization.json)
+                implementation(libs.kotlin.reflect)
 
                 implementation(libs.datastore.preferences.core)
-                implementation(libs.kotlin.reflect)
                 implementation(libs.wanakana.core)
 
                 api(libs.ktor.client.core)

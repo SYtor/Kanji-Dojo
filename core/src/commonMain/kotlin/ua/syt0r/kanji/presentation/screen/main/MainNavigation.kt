@@ -2,11 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
-import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.compose.koinInject
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
@@ -20,9 +21,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
@@ -152,9 +152,11 @@ interface MainDestination {
 
         @Composable
         override fun Content(state: MainNavigationState) {
-            LetterPracticeScreen(
+            val content = koinInject<LetterPracticeScreenContract.Content>()
+            content(
+                configuration = configuration,
                 mainNavigationState = state,
-                configuration = configuration
+                viewModel = getMultiplatformViewModel()
             )
         }
 
@@ -230,7 +232,7 @@ interface MainDestination {
 
         @Composable
         override fun Content(state: MainNavigationState) {
-            val content = remember { getKoin().get<SponsorScreenContract.Content>() }
+            val content = koinInject<SponsorScreenContract.Content>()
             content(state)
         }
 

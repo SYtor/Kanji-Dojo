@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_common
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,15 +29,19 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -61,6 +66,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,10 +76,7 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
-import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
-import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 import kotlin.time.Duration
 
 sealed interface PracticeToolbarState {
@@ -165,10 +168,12 @@ fun PracticeProgressCounter(pending: Int, repeat: Int, completed: Int) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ToolbarCountItem(count: Int, color: Color) {
-    val rippleTheme = remember { CustomRippleTheme(colorProvider = { color }) }
-    CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides RippleConfiguration(color)
+    ) {
         TextButton(onClick = {}) {
             Box(
                 modifier = Modifier
@@ -258,6 +263,7 @@ fun <T> rememberPracticeConfigurationItemsSelectorState(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> PracticeConfigurationItemsSelector(
     state: PracticeConfigurationItemsSelectorState<T>
@@ -304,6 +310,14 @@ fun <T> PracticeConfigurationItemsSelector(
 
         Text(text = 1.toString())
 
+        val interactionSource = remember { MutableInteractionSource() }
+        val colors = SliderDefaults.colors(
+            activeTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+            activeTickColor = MaterialTheme.colorScheme.primary,
+            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+            inactiveTickColor = MaterialTheme.colorScheme.primary
+        )
+
         Slider(
             value = selectedCharactersCount.coerceIn(range).toFloat(),
             onValueChange = {
@@ -312,7 +326,23 @@ fun <T> PracticeConfigurationItemsSelector(
             },
             steps = state.itemToDeckIdMap.size,
             valueRange = 1f..range.last.toFloat(),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            interactionSource = interactionSource,
+            track = {
+                SliderDefaults.Track(
+                    sliderState = it,
+                    thumbTrackGapSize = 2.dp,
+                    colors = colors,
+                    drawTick = { _, _ -> }
+                )
+            },
+            thumb = {
+                SliderDefaults.Thumb(
+                    interactionSource,
+                    colors = colors,
+                    thumbSize = DpSize(6.dp, 30.dp)
+                )
+            }
         )
 
         Text(text = state.itemToDeckIdMap.size.toString())
@@ -488,19 +518,19 @@ fun <T> PracticeConfigurationEnumSelector(
                 onClick = { expanded = true }
             )
 
-            MultiplatformPopup(
+            DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 values.forEach {
-                    PopupContentItem(
+                    DropdownMenuItem(
                         onClick = {
                             onSelected(it)
                             expanded = false
-                        }
-                    ) {
-                        Text(resolveString(it.titleResolver))
-                    }
+                        },
+                        text = { Text(resolveString(it.titleResolver)) }
+                    )
                 }
             }
         }
