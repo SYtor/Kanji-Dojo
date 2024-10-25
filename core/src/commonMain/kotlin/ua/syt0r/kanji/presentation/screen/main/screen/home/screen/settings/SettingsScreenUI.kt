@@ -169,6 +169,14 @@ fun SettingsBackupButton(onClick: () -> Unit) {
 }
 
 @Composable
+fun SettingsAccountButton(onClick: () -> Unit) {
+    SettingsTextButton(
+        text = resolveString { "Account" },
+        onClick = onClick
+    )
+}
+
+@Composable
 fun SettingsFeedbackButton(onClick: () -> Unit) {
     SettingsTextButton(
         text = resolveString { settings.feedbackTitle },

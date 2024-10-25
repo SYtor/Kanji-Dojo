@@ -17,6 +17,8 @@ import ua.syt0r.kanji.core.user_data.JvmUserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.preferences.DataStoreUserPreferencesManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesManager
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.JvmGetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.JvmSettingsScreenContent
@@ -60,6 +62,7 @@ actual val platformComponentsModule: Module = module {
 
     single<SettingsScreenContract.Content> { JvmSettingsScreenContent }
     single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
+    single<AccountScreenContract.Content> { JvmAccountScreenContent }
 
     factory<GetCreditLibrariesUseCase> { JvmGetCreditLibrariesUseCase }
 
