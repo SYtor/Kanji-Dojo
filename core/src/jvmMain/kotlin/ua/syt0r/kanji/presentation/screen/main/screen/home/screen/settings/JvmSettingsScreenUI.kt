@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun JvmSettingsScreenUI(
     onBackupButtonClick: () -> Unit,
+    onAccountButtonClick: () -> Unit,
     onFeedbackButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit
 ) {
@@ -14,6 +15,8 @@ fun JvmSettingsScreenUI(
         SettingsThemeToggle()
 
         SettingsBackupButton(onBackupButtonClick)
+
+        SettingsAccountButton(onAccountButtonClick)
 
         SettingsFeedbackButton(onFeedbackButtonClick)
 

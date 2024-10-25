@@ -9,6 +9,7 @@ import org.koin.compose.koinInject
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.about.AboutScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.backup.BackupScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.CreditsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.daily_limit.DailyLimitScreen
@@ -250,6 +251,19 @@ interface MainDestination {
 
     }
 
+    @Serializable
+    object Account : MainDestination {
+
+        override val analyticsName: String = "account"
+
+        @Composable
+        override fun Content(state: MainNavigationState) {
+            val content = koinInject<AccountScreenContract.Content>()
+            content(state)
+        }
+
+    }
+
 }
 
 sealed interface MainDestinationConfiguration<T : MainDestination> {
@@ -302,6 +316,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Credits.configuration(),
     MainDestination.Sponsor.configuration(),
     MainDestination.DailyLimit.configuration(),
+    MainDestination.Account.configuration(),
     MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),

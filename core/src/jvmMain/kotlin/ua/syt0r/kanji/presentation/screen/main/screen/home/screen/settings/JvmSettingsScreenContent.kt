@@ -11,10 +11,9 @@ object JvmSettingsScreenContent : SettingsScreenContract.Content {
     override fun Draw(mainNavigationState: MainNavigationState) {
         JvmSettingsScreenUI(
             onBackupButtonClick = { mainNavigationState.navigate(MainDestination.Backup) },
+            onAccountButtonClick = { mainNavigationState.navigate(MainDestination.Account) },
             onFeedbackButtonClick = {
-                mainNavigationState.navigate(
-                    MainDestination.Feedback(FeedbackTopic.General)
-                )
+                mainNavigationState.navigate(MainDestination.Feedback(FeedbackTopic.General))
             },
             onAboutButtonClick = { mainNavigationState.navigate(MainDestination.About) }
         )
