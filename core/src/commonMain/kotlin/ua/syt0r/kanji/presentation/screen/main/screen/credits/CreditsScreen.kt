@@ -19,7 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
-import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.compose.koinInject
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
@@ -41,7 +41,7 @@ fun CreditsScreen(
         }
     ) { paddingValues ->
 
-        val libs = remember { getKoin().get<GetCreditLibrariesUseCase>().invoke() }
+        val libs = koinInject<GetCreditLibrariesUseCase>().invoke()
 
         var selectedLib by remember { mutableStateOf<Library?>(null) }
         selectedLib?.let {

@@ -20,6 +20,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -41,9 +43,7 @@ import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.common.ui.PopupContentItem
 
 @Composable
 fun SettingsContent(
@@ -142,21 +142,18 @@ fun SettingsThemeToggle() {
                 Text(themeManager.currentTheme.value.resolveDisplayText())
                 Icon(Icons.Default.ArrowDropDown, null)
             }
-            MultiplatformPopup(
+
+            DropdownMenu(
                 expanded = isExpanded,
-                onDismissRequest = { isExpanded = false }
+                onDismissRequest = { isExpanded = false },
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             ) {
-
-                Column {
-                    PreferencesTheme.values().forEach {
-                        PopupContentItem(
-                            onClick = { coroutineScope.launch { themeManager.changeTheme(it) } }
-                        ) {
-                            Text(text = it.resolveDisplayText())
-                        }
-                    }
+                PreferencesTheme.values().forEach {
+                    DropdownMenuItem(
+                        onClick = { coroutineScope.launch { themeManager.changeTheme(it) } },
+                        text = { Text(text = it.resolveDisplayText()) }
+                    )
                 }
-
             }
         }
 

@@ -4,12 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
@@ -39,7 +38,7 @@ fun HomeScreen(
 
     }
 
-    val analyticsManager = remember { getKoin().get<AnalyticsManager>() }
+    val analyticsManager = koinInject<AnalyticsManager>()
     LaunchedEffect(Unit) {
         snapshotFlow { homeNavigationState.selectedTab.value }
             .distinctUntilChanged()

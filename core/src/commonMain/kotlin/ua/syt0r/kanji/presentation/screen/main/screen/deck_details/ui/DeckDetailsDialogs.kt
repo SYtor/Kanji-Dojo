@@ -22,7 +22,7 @@ import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +48,6 @@ import ua.syt0r.kanji.presentation.common.resources.icon.Help
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsLayout
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.FilterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.LettersSortOption
@@ -179,9 +178,10 @@ fun DeckDetailsSortDialog(
                     Icon(ExtraIcons.Help, null)
                 }
 
-                MultiplatformPopup(
+                DropdownMenu(
                     expanded = showHint,
-                    onDismissRequest = { showHint = false }
+                    onDismissRequest = { showHint = false },
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 ) {
                     Text(
                         text = resolveString(it.hintResolver),
@@ -309,13 +309,10 @@ private fun SelectableRow(
     content: @Composable RowScope.() -> Unit
 ) {
 
-    val rippleColor = LocalRippleTheme.current.defaultColor()
-    val rippleAlpha = LocalRippleTheme.current.rippleAlpha()
-
     val rowColor by animateColorAsState(
         targetValue = when (isSelected) {
-            true -> rippleColor.copy(alpha = rippleAlpha.pressedAlpha)
-            false -> rippleColor.copy(alpha = 0f)
+            true -> MaterialTheme.colorScheme.surfaceVariant
+            false -> MaterialTheme.colorScheme.surface
         }
     )
 

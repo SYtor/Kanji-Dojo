@@ -20,13 +20,15 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -47,9 +49,6 @@ import kotlinx.coroutines.flow.filterIsInstance
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.ui.CustomRippleTheme
-import ua.syt0r.kanji.presentation.common.ui.MultiplatformPopup
-import ua.syt0r.kanji.presentation.common.ui.PreferredPopupLocation
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
@@ -135,6 +134,7 @@ fun DeckDetailsBottomSheet(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PracticeGroupDetails(
     practiceType: ScreenLetterPracticeType,
@@ -163,9 +163,9 @@ private fun PracticeGroupDetails(
             var hintDropdownShown by remember { mutableStateOf(false) }
 
             val dotColor = group.reviewState.toColor()
-            val rippleTheme = remember(dotColor) { CustomRippleTheme { dotColor } }
-
-            CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
+            CompositionLocalProvider(
+                LocalRippleConfiguration provides RippleConfiguration(dotColor)
+            ) {
                 Box(
                     modifier = Modifier
                         .padding(start = 4.dp)
@@ -183,10 +183,10 @@ private fun PracticeGroupDetails(
                             .align(Alignment.Center)
                     )
 
-                    MultiplatformPopup(
+                    DropdownMenu(
                         expanded = hintDropdownShown,
                         onDismissRequest = { hintDropdownShown = false },
-                        preferredPopupLocation = PreferredPopupLocation.Top
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Text(
                             text = resolveString {

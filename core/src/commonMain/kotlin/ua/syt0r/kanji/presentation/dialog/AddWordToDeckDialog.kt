@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.getKoin
+import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -209,12 +209,12 @@ private data class AddingDeckInfo(
 @Composable
 private fun rememberAddWordToDeckDialogState(wordId: Long): AddWordToDeckDialogState {
     val coroutineScope = rememberCoroutineScope()
+    val repository = koinInject<VocabPracticeRepository>()
     return remember {
-        val koin = getKoin()
         AddWordToDeckDialogState(
             wordId = wordId,
             coroutineScope = coroutineScope,
-            repository = koin.get()
+            repository = repository
         )
     }
 }
