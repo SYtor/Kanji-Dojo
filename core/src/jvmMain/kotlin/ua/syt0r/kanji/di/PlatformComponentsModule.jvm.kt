@@ -17,8 +17,11 @@ import ua.syt0r.kanji.core.user_data.JvmUserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.preferences.DataStoreUserPreferencesManager
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesManager
+import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContent
+import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.JvmGetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.JvmSettingsScreenContent
@@ -63,6 +66,12 @@ actual val platformComponentsModule: Module = module {
     single<SettingsScreenContract.Content> { JvmSettingsScreenContent }
     single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
     single<AccountScreenContract.Content> { JvmAccountScreenContent }
+    multiplatformViewModel<JvmAccountScreenContract.ViewModel> {
+        JvmAccountScreenViewModel(
+            coroutineScope = it.component1(),
+            userPreferencesRepository = get()
+        )
+    }
 
     factory<GetCreditLibrariesUseCase> { JvmGetCreditLibrariesUseCase }
 

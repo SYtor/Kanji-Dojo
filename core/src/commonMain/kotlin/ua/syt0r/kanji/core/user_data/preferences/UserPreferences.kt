@@ -6,6 +6,9 @@ import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyRepository
 
 interface UserPreferencesRepository : SuspendedPropertyRepository {
 
+    val refreshToken: SuspendedProperty<String?>
+    val idToken: SuspendedProperty<String?>
+
     val analyticsEnabled: SuspendedProperty<Boolean>
 
     val practiceType: SuspendedProperty<PreferencesLetterPracticeType>

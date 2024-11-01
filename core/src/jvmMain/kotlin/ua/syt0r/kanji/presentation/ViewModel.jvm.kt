@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.koin.compose.koinInject
@@ -14,7 +15,8 @@ actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
      * Using custom coroutine scope instead of remember one since it can leave composition when
      * navigating so view model will have canceled scope after returning to the screen
      */
-    return koinInject<T> { parametersOf(CoroutineScope(Dispatchers.Unconfined)) }
+    val coroutineScope = rememberCoroutineScope()
+    return koinInject<T> { parametersOf(coroutineScope) }
 }
 
 actual inline fun <reified T> Module.platformMultiplatformViewModel(

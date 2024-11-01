@@ -13,6 +13,24 @@ class DefaultUserPreferencesRepository(
 ) : UserPreferencesRepository,
     SuspendedPropertyRepository by DefaultSuspendedPropertyRepository(suspendedPropertyProvider) {
 
+    override val refreshToken: SuspendedProperty<String?> = registerProperty(
+        enableBackup = false
+    ) {
+        createNullableStringProperty(
+            key = "refresh_token",
+            initialValueProvider = { null }
+        )
+    }
+
+    override val idToken: SuspendedProperty<String?> = registerProperty(
+        enableBackup = false
+    ) {
+        createNullableStringProperty(
+            key = "id_token",
+            initialValueProvider = { null }
+        )
+    }
+
     override val analyticsEnabled: SuspendedProperty<Boolean> = registerProperty(
         enableBackup = false
     ) {
