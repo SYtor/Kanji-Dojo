@@ -8,7 +8,8 @@ val mainScreenModule = module {
 
     multiplatformViewModel<MainContract.ViewModel> {
         MainViewModel(
-            viewModelScope = it.component1()
+            viewModelScope = it.component1(),
+            syncManager = get()
         )
     }
 

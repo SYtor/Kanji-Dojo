@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,7 +31,9 @@ fun HomeScreen(
     HomeScreenUI(
         availableTabs = HomeScreenTab.VisibleTabs,
         selectedTabState = homeNavigationState.selectedTab,
+        syncState = viewModel.syncState.collectAsState(),
         onTabSelected = { homeNavigationState.navigate(it) },
+        onSyncButtonClick = viewModel::sync,
         onSponsorButtonClick = { mainNavigationState.value.navigate(MainDestination.Sponsor) }
     ) {
 
