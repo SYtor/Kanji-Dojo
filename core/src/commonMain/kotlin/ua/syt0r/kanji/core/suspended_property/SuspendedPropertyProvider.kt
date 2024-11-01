@@ -25,6 +25,11 @@ interface SuspendedPropertyProvider {
         initialValueProvider: () -> String
     ): SuspendedProperty<String>
 
+    fun createNullableStringProperty(
+        key: String,
+        initialValueProvider: () -> String?
+    ): SuspendedProperty<String?>
+
 }
 
 inline fun <reified T : Enum<T>> SuspendedPropertyProvider.createEnumProperty(

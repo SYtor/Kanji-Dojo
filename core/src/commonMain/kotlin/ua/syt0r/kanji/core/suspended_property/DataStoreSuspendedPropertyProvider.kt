@@ -31,6 +31,35 @@ private abstract class DataStoreSuspendedProperty<T>(
 
 }
 
+private abstract class NullableDataStoreSuspendedProperty<T>(
+    private val dataStore: DataStore<Preferences>,
+    override val key: String,
+    private val initialValueProvider: () -> T?
+) : SuspendedProperty<T?> {
+
+    abstract val dataStoreKey: Preferences.Key<T>
+
+    override suspend fun isModified(): Boolean {
+        return dataStore.data.first().contains(dataStoreKey)
+    }
+
+    override suspend fun get(): T? {
+        val data = dataStore.data.first()
+        return when {
+            data.contains(dataStoreKey) -> data[dataStoreKey]
+            else -> initialValueProvider()
+        }
+    }
+
+    override suspend fun set(value: T?) {
+        dataStore.edit {
+            if (value == null) it.remove(dataStoreKey)
+            else it[dataStoreKey] = value
+        }
+    }
+
+}
+
 class DataStoreSuspendedPropertyProvider(
     private val dataStore: DataStore<Preferences>,
 ) : SuspendedPropertyProvider {
@@ -89,6 +118,21 @@ class DataStoreSuspendedPropertyProvider(
             key = key,
             initialValueProvider = initialValueProvider
         ), StringSuspendedProperty {
+
+            override val dataStoreKey: Preferences.Key<String> = stringPreferencesKey(key)
+
+        }
+    }
+
+    override fun createNullableStringProperty(
+        key: String,
+        initialValueProvider: () -> String?
+    ): SuspendedProperty<String?> {
+        return object : NullableDataStoreSuspendedProperty<String>(
+            dataStore = dataStore,
+            key = key,
+            initialValueProvider = initialValueProvider
+        ), NullableStringSuspendedProperty {
 
             override val dataStoreKey: Preferences.Key<String> = stringPreferencesKey(key)
 

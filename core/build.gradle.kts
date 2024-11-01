@@ -77,6 +77,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.sqldelight.jvm.sqlite.driver)
+                implementation(libs.ktor.server.netty)
             }
         }
     }

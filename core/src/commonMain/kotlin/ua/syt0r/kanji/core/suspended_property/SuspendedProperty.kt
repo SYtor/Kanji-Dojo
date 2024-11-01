@@ -68,3 +68,16 @@ interface StringSuspendedProperty : SuspendedProperty<String> {
     }
 
 }
+
+interface NullableStringSuspendedProperty : SuspendedProperty<String?> {
+
+    override suspend fun backup(): JsonElement {
+        return JsonPrimitive(get())
+    }
+
+    override suspend fun restore(value: JsonElement) {
+        if (value !is JsonPrimitive) return
+        set(value.content)
+    }
+
+}
