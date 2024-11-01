@@ -3,6 +3,7 @@ package ua.syt0r.kanji
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.platform.LocalDensity
@@ -12,22 +13,46 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
+import ua.syt0r.kanji.core.sync.SyncManager
+import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.KanjiDojoApp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 fun main(args: Array<String>) = application {
-    startKoin { loadKoinModules(appModules) }
+    val koinApplication = startKoin { loadKoinModules(appModules) }
 
     val windowState = rememberWindowState()
 
     val icon = painterResource("icon.png")
     val density = LocalDensity.current
 
+    val syncManager = koinApplication.koin.get<SyncManager>()
+    val coroutineScope = rememberCoroutineScope()
+
     Window(
-        onCloseRequest = ::exitApplication,
+        onCloseRequest = {
+            if (syncManager.state.value is SyncState.Disabled) {
+                exitApplication()
+                return@Window
+            }
+
+            coroutineScope.launch {
+                syncManager.state
+                    .onStart { syncManager.forceSync() }
+                    .filter { it is SyncState.NoChanges || it is SyncState.Canceled }
+                    .take(1)
+                    .collect()
+                exitApplication()
+            }
+        },
         state = windowState,
         title = resolveString { appName },
         icon = icon
@@ -41,6 +66,7 @@ fun main(args: Array<String>) = application {
         CompositionLocalProvider(LocalWindowState provides windowState) {
             KanjiDojoApp()
         }
+
     }
 }
 

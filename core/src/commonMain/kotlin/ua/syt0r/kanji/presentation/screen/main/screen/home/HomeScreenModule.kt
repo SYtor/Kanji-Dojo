@@ -6,7 +6,10 @@ import ua.syt0r.kanji.presentation.multiplatformViewModel
 val homeScreenModule = module {
 
     multiplatformViewModel<HomeScreenContract.ViewModel> { parametersHolder ->
-        HomeViewModel(parametersHolder.component1())
+        HomeViewModel(
+            viewModelScope = parametersHolder.component1(),
+            syncManager = get()
+        )
     }
 
 }

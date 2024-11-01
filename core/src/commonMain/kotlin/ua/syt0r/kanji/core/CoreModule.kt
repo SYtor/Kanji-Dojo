@@ -23,6 +23,8 @@ import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.srs.applySrsDefinitions
+import ua.syt0r.kanji.core.sync.DefaultSyncManager
+import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -45,6 +47,13 @@ import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
 val coreModule = module {
 
     applySrsDefinitions()
+
+    single<SyncManager> {
+        DefaultSyncManager(
+            userPreferencesRepository = get(),
+            backupManager = get()
+        )
+    }
 
     single<AnalyticsManager> { PrintAnalyticsManager() }
 

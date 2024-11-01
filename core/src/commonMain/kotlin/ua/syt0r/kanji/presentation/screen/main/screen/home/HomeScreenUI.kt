@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +47,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
@@ -58,7 +60,9 @@ private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
 fun HomeScreenUI(
     availableTabs: List<HomeScreenTab>,
     selectedTabState: State<HomeScreenTab>,
+    syncState: State<SyncState>,
     onTabSelected: (HomeScreenTab) -> Unit,
+    onSyncButtonClick: () -> Unit,
     onSponsorButtonClick: () -> Unit,
     screenTabContent: @Composable () -> Unit
 ) {
@@ -75,11 +79,19 @@ fun HomeScreenUI(
                     .width(IntrinsicSize.Max)
             ) {
 
-                Text(
-                    text = resolveString { appName },
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
-                )
+                Row {
+                    Text(
+                        text = resolveString { appName },
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Bottom)
+                    )
+
+                    SyncButton(
+                        state = syncState,
+                        onClick = onSyncButtonClick
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -119,6 +131,10 @@ fun HomeScreenUI(
                         }
                     },
                     actions = {
+                        SyncButton(
+                            state = syncState,
+                            onClick = onSyncButtonClick
+                        )
                         IconButton(onClick = onSponsorButtonClick) {
                             Icon(SponsorIcon, null)
                         }
@@ -162,6 +178,19 @@ fun HomeScreenUI(
 
     }
 
+}
+
+@Composable
+private fun RowScope.SyncButton(
+    state: State<SyncState>,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier.align(Alignment.Top)
+    ) {
+        Icon(Icons.Default.Sync, null)
+    }
 }
 
 @Composable
