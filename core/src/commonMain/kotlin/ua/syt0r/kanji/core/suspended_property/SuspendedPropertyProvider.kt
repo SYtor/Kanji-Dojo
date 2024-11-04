@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.core.suspended_property
 
 import kotlinx.datetime.LocalTime
-import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 
 interface SuspendedPropertyProvider {
 
@@ -19,6 +19,11 @@ interface SuspendedPropertyProvider {
         key: String,
         initialValueProvider: () -> Long
     ): SuspendedProperty<Long>
+
+    fun createNullableLongProperty(
+        key: String,
+        initialValueProvider: () -> Long?
+    ): SuspendedProperty<Long?>
 
     fun createStringProperty(
         key: String,
@@ -82,11 +87,11 @@ class SuspendedPropertyProxy<WrapperType, BackingType>(
         return backingProperty.isModified()
     }
 
-    override suspend fun backup(): JsonElement {
+    override suspend fun backup(): JsonPrimitive {
         return backingProperty.backup()
     }
 
-    override suspend fun restore(value: JsonElement) {
+    override suspend fun restore(value: JsonPrimitive) {
         backingProperty.restore(value)
     }
 

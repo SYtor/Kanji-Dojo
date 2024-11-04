@@ -1,7 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,20 +44,27 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.IndicatorCircle
 
 private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
 
@@ -181,16 +194,76 @@ fun HomeScreenUI(
 }
 
 @Composable
-private fun RowScope.SyncButton(
+private fun SyncButton(
     state: State<SyncState>,
     onClick: () -> Unit
 ) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier.align(Alignment.Top)
+
+    Box(
+        modifier = Modifier
     ) {
-        Icon(Icons.Default.Sync, null)
+
+        IconButton(
+            onClick = onClick
+        ) {
+
+            val rotation = rememberSyncIconRotation(state)
+
+            Icon(
+                imageVector = Icons.Default.Sync,
+                contentDescription = null,
+                modifier = Modifier.graphicsLayer { rotationZ = rotation.value }
+            )
+
+        }
+
+        AnimatedVisibility(
+            visible = state.value is SyncState.SyncAvailable,
+            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+            enter = scaleIn(),
+            exit = scaleOut()
+        ) {
+            IndicatorCircle(MaterialTheme.extraColorScheme.due)
+        }
+
     }
+
+}
+
+@Composable
+private fun rememberSyncIconRotation(
+    state: State<SyncState>
+): Animatable<Float, AnimationVector1D> {
+    val rotation = remember { Animatable(360f) }
+
+    LaunchedEffect(Unit) {
+        var shouldLoop = false
+
+        val animateLoop = suspend {
+            while (shouldLoop) {
+                rotation.snapTo(360f)
+                rotation.animateTo(0f, tween(2000, 200))
+            }
+        }
+
+        var animateLoopJob: Job? = null
+
+        snapshotFlow { state.value }.collect {
+            when (it) {
+                is SyncState.Preparing,
+                is SyncState.Syncing -> {
+                    shouldLoop = true
+                    val currentJob = animateLoopJob
+                    if (currentJob == null || currentJob.isCompleted)
+                        animateLoopJob = launch { animateLoop() }
+                }
+
+                else -> shouldLoop = false
+            }
+        }
+    }
+
+    return rotation
 }
 
 @Composable

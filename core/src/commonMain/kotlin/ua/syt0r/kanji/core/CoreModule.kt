@@ -51,7 +51,6 @@ val coreModule = module {
     single<SyncManager> {
         DefaultSyncManager(
             userPreferencesRepository = get(),
-            backupManager = get()
         )
     }
 

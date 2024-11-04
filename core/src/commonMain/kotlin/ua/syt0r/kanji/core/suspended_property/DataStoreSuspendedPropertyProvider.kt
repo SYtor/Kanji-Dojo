@@ -8,14 +8,19 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.long
 
-private abstract class DataStoreSuspendedProperty<T>(
+private class DataStoreSuspendedProperty<T>(
     private val dataStore: DataStore<Preferences>,
-    override val key: String,
+    val dataStoreKey: Preferences.Key<T>,
+    val restoreParser: JsonPrimitive.() -> T,
     private val initialValueProvider: () -> T
 ) : SuspendedProperty<T> {
 
-    abstract val dataStoreKey: Preferences.Key<T>
+    override val key: String = dataStoreKey.name
 
     override suspend fun isModified(): Boolean {
         return dataStore.data.first().contains(dataStoreKey)
@@ -29,15 +34,19 @@ private abstract class DataStoreSuspendedProperty<T>(
         dataStore.edit { it[dataStoreKey] = value }
     }
 
+    override suspend fun backup(): JsonPrimitive = get().toJsonPrimitive()
+    override suspend fun restore(value: JsonPrimitive) = set(value.restoreParser())
+
 }
 
-private abstract class NullableDataStoreSuspendedProperty<T>(
+private class NullableDataStoreSuspendedProperty<T>(
     private val dataStore: DataStore<Preferences>,
-    override val key: String,
+    val dataStoreKey: Preferences.Key<T>,
+    val restoreParser: JsonPrimitive.() -> T,
     private val initialValueProvider: () -> T?
 ) : SuspendedProperty<T?> {
 
-    abstract val dataStoreKey: Preferences.Key<T>
+    override val key: String = dataStoreKey.name
 
     override suspend fun isModified(): Boolean {
         return dataStore.data.first().contains(dataStoreKey)
@@ -58,6 +67,29 @@ private abstract class NullableDataStoreSuspendedProperty<T>(
         }
     }
 
+    override suspend fun backup(): JsonPrimitive = get()!!.toJsonPrimitive()
+    override suspend fun restore(value: JsonPrimitive) = set(value.restoreParser())
+
+}
+
+private fun <T> T.toJsonPrimitive(): JsonPrimitive {
+    return when (this) {
+        is Boolean -> JsonPrimitive(this)
+        is Int -> JsonPrimitive(this)
+        is Long -> JsonPrimitive(this)
+        is String -> JsonPrimitive(this)
+        else -> error("Unsupported type")
+    }
+}
+
+private inline fun <reified T> JsonPrimitive.getValue(): T {
+    return when (T::class) {
+        Boolean::class -> boolean as T
+        Int::class -> int as T
+        Long::class -> long as T
+        String::class -> content as T
+        else -> error("Unsupported type")
+    }
 }
 
 class DataStoreSuspendedPropertyProvider(
@@ -68,75 +100,72 @@ class DataStoreSuspendedPropertyProvider(
         key: String,
         initialValueProvider: () -> Boolean
     ): SuspendedProperty<Boolean> {
-        return object : DataStoreSuspendedProperty<Boolean>(
+        return DataStoreSuspendedProperty(
             dataStore = dataStore,
-            key = key,
+            dataStoreKey = booleanPreferencesKey(key),
+            restoreParser = { getValue() },
             initialValueProvider = initialValueProvider
-        ), BooleanSuspendedProperty {
-
-            override val dataStoreKey: Preferences.Key<Boolean> = booleanPreferencesKey(key)
-
-        }
+        )
     }
 
     override fun createIntProperty(
         key: String,
         initialValueProvider: () -> Int
     ): SuspendedProperty<Int> {
-        return object : DataStoreSuspendedProperty<Int>(
+        return DataStoreSuspendedProperty(
             dataStore = dataStore,
-            key = key,
+            dataStoreKey = intPreferencesKey(key),
+            restoreParser = { getValue() },
             initialValueProvider = initialValueProvider
-        ), IntegerSuspendedProperty {
-
-            override val dataStoreKey: Preferences.Key<Int> = intPreferencesKey(key)
-
-        }
+        )
     }
 
     override fun createLongProperty(
         key: String,
         initialValueProvider: () -> Long
     ): SuspendedProperty<Long> {
-        return object : DataStoreSuspendedProperty<Long>(
+        return DataStoreSuspendedProperty(
             dataStore = dataStore,
-            key = key,
+            dataStoreKey = longPreferencesKey(key),
+            restoreParser = { getValue() },
             initialValueProvider = initialValueProvider
-        ), LongSuspendedProperty {
+        )
+    }
 
-            override val dataStoreKey: Preferences.Key<Long> = longPreferencesKey(key)
-
-        }
+    override fun createNullableLongProperty(
+        key: String,
+        initialValueProvider: () -> Long?
+    ): SuspendedProperty<Long?> {
+        return NullableDataStoreSuspendedProperty(
+            dataStore = dataStore,
+            dataStoreKey = longPreferencesKey(key),
+            restoreParser = { getValue() },
+            initialValueProvider = initialValueProvider
+        )
     }
 
     override fun createStringProperty(
         key: String,
         initialValueProvider: () -> String
     ): SuspendedProperty<String> {
-        return object : DataStoreSuspendedProperty<String>(
+        return DataStoreSuspendedProperty(
             dataStore = dataStore,
-            key = key,
+            dataStoreKey = stringPreferencesKey(key),
+            restoreParser = { getValue() },
             initialValueProvider = initialValueProvider
-        ), StringSuspendedProperty {
-
-            override val dataStoreKey: Preferences.Key<String> = stringPreferencesKey(key)
-
-        }
+        )
     }
 
     override fun createNullableStringProperty(
         key: String,
         initialValueProvider: () -> String?
     ): SuspendedProperty<String?> {
-        return object : NullableDataStoreSuspendedProperty<String>(
+        return NullableDataStoreSuspendedProperty(
             dataStore = dataStore,
-            key = key,
+            dataStoreKey = stringPreferencesKey(key),
+            restoreParser = { getValue() },
             initialValueProvider = initialValueProvider
-        ), NullableStringSuspendedProperty {
-
-            override val dataStoreKey: Preferences.Key<String> = stringPreferencesKey(key)
-
-        }
+        )
     }
 
 }

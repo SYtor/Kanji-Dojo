@@ -30,7 +30,7 @@ fun MainScreen() {
 
     when (syncState.value) {
         SyncState.Syncing,
-        SyncState.Fail -> {
+        is SyncState.Fail -> {
             SyncDialog(
                 state = syncState,
                 onCancelRequest = viewModel::cancelSync

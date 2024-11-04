@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 interface UserPreferencesBackupManager {
     suspend fun exportPreferences(): JsonObject
@@ -30,7 +31,7 @@ class DefaultUserPreferencesBackupManager(
         val importedPropertiesMap = jsonObject.entries.associate { it.key to it.value }
         supportedRepositories.flatMap { it.backupProperties }.forEach { property ->
             val value = importedPropertiesMap[property.key]
-            if (value != null) property.restore(value)
+            if (value != null) property.restore(value.jsonPrimitive)
         }
         userPreferences.migrate()
     }
