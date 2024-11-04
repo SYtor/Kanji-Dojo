@@ -9,6 +9,9 @@ interface UserPreferencesRepository : SuspendedPropertyRepository {
     val refreshToken: SuspendedProperty<String?>
     val idToken: SuspendedProperty<String?>
 
+    val syncEnabled: SuspendedProperty<Boolean>
+    val lastDataModifyTimestamp: SuspendedProperty<Long?>
+
     val analyticsEnabled: SuspendedProperty<Boolean>
 
     val practiceType: SuspendedProperty<PreferencesLetterPracticeType>

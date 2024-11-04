@@ -31,6 +31,22 @@ class DefaultUserPreferencesRepository(
         )
     }
 
+    override val syncEnabled: SuspendedProperty<Boolean> = registerProperty(
+        enableBackup = false
+    ) {
+        createBooleanProperty(
+            key = "sync_enabled",
+            initialValueProvider = { false }
+        )
+    }
+
+    override val lastDataModifyTimestamp: SuspendedProperty<Long?> = registerProperty {
+        createNullableLongProperty(
+            key = "last_modify_timestamp",
+            initialValueProvider = { null }
+        )
+    }
+
     override val analyticsEnabled: SuspendedProperty<Boolean> = registerProperty(
         enableBackup = false
     ) {
