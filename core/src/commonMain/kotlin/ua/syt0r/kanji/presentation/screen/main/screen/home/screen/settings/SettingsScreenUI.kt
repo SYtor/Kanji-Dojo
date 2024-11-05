@@ -177,6 +177,14 @@ fun SettingsAccountButton(onClick: () -> Unit) {
 }
 
 @Composable
+fun SettingsSyncButton(onClick: () -> Unit) {
+    SettingsTextButton(
+        text = resolveString { "Sync" },
+        onClick = onClick
+    )
+}
+
+@Composable
 fun SettingsFeedbackButton(onClick: () -> Unit) {
     SettingsTextButton(
         text = resolveString { settings.feedbackTitle },

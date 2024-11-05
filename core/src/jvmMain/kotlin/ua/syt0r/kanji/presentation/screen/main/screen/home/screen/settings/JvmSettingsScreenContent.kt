@@ -12,6 +12,7 @@ object JvmSettingsScreenContent : SettingsScreenContract.Content {
         JvmSettingsScreenUI(
             onBackupButtonClick = { mainNavigationState.navigate(MainDestination.Backup) },
             onAccountButtonClick = { mainNavigationState.navigate(MainDestination.Account) },
+            onSyncButtonClick = { mainNavigationState.navigate(MainDestination.Sync) },
             onFeedbackButtonClick = {
                 mainNavigationState.navigate(MainDestination.Feedback(FeedbackTopic.General))
             },
