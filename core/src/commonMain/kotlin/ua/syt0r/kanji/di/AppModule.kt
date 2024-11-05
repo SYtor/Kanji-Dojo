@@ -20,6 +20,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboar
 import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.kanjiInfoScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.letterPracticeScreenModule
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.vocabPracticeScreenModule
+import ua.syt0r.kanji.presentation.screen.main.screen.sync.syncScreenModule
 
 private val screenModules = listOf(
     mainScreenModule,
@@ -37,6 +38,7 @@ private val screenModules = listOf(
     letterPracticeScreenModule,
     vocabPracticeScreenModule,
     kanjiInfoScreenModule,
+    syncScreenModule,
     backupScreenModule,
     feedbackScreenModule,
     dailyLimitScreenModule
