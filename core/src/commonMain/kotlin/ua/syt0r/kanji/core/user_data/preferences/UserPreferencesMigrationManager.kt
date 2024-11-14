@@ -4,39 +4,24 @@ import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.srs.DailyLimitConfiguration
 import ua.syt0r.kanji.core.srs.PracticeLimit
-import ua.syt0r.kanji.core.suspended_property.DataStoreSuspendedPropertyProvider
-import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyProvider
 
-interface UserPreferencesManager {
-
-    val suspendedPropertyProvider: SuspendedPropertyProvider
-
-    suspend fun clear()
+interface UserPreferencesMigrationManager {
     suspend fun migrate()
-
 }
 
-class DataStoreUserPreferencesManager(
+class DefaultUserPreferencesMigrationManager(
     private val dataStore: DataStore<Preferences>,
-    private val migrations: List<DataMigration<Preferences>>
-) : UserPreferencesManager {
+    private val migrations: List<DataMigration<Preferences>> = DefaultMigrations
+) : UserPreferencesMigrationManager {
 
     companion object {
         val DefaultMigrations: List<DataMigration<Preferences>> = listOf(DailyLimitDataMigration)
-    }
-
-    override val suspendedPropertyProvider: SuspendedPropertyProvider =
-        DataStoreSuspendedPropertyProvider(dataStore)
-
-    override suspend fun clear() {
-        dataStore.edit { it.clear() }
     }
 
     override suspend fun migrate() {

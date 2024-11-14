@@ -64,7 +64,7 @@ val vocabPracticeScreenModule = module {
     multiplatformViewModel<VocabPracticeScreenContract.ViewModel> {
         VocabPracticeViewModel(
             viewModelScope = it.component1(),
-            userPreferencesRepository = get(),
+            practicePreferences = get(),
             getQueueDataUseCase = get(),
             practiceQueue = get { it },
             analyticsManager = get()

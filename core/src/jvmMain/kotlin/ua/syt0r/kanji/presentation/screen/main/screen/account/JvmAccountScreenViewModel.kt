@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenContract.ScreenState
 
 @Serializable
@@ -31,7 +31,7 @@ data class SignInData(
 
 class JvmAccountScreenViewModel(
     private val coroutineScope: CoroutineScope,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val serverCleanupScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) : JvmAccountScreenContract.ViewModel {
 
@@ -42,7 +42,7 @@ class JvmAccountScreenViewModel(
 
         coroutineScope.launch {
 
-            val (refreshToken, idToken) = userPreferencesRepository.run {
+            val (refreshToken, idToken) = appPreferences.run {
                 refreshToken.get() to idToken.get()
             }
 
@@ -64,7 +64,7 @@ class JvmAccountScreenViewModel(
             when {
                 signInDataResult.isSuccess -> {
                     val data = signInDataResult.getOrThrow()
-                    userPreferencesRepository.apply {
+                    appPreferences.apply {
                         refreshToken.set(data.refreshToken)
                         idToken.set(data.refreshToken)
                     }
@@ -83,7 +83,7 @@ class JvmAccountScreenViewModel(
     override fun signOut() {
         _state.value = ScreenState.LoadingUserData
         coroutineScope.launch {
-            userPreferencesRepository.run {
+            appPreferences.run {
                 refreshToken.set(null)
                 idToken.set(null)
             }

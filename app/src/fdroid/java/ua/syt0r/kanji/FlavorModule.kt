@@ -16,7 +16,7 @@ val flavorModule = module {
     multiplatformViewModel<FdroidSettingsScreenContract.ViewModel> {
         FdroidSettingsViewModel(
             viewModelScope = it.component1(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             reminderScheduler = get()
         )
     }

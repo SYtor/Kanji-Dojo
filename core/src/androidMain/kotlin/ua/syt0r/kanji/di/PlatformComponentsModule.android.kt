@@ -3,6 +3,7 @@ package ua.syt0r.kanji.di
 import android.app.ActivityManager
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.media3.exoplayer.ExoPlayer
@@ -28,8 +29,7 @@ import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.preferences.DataStoreUserPreferencesManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesManager
+import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 
 actual val platformComponentsModule: Module = module {
 
@@ -62,19 +62,15 @@ actual val platformComponentsModule: Module = module {
         )
     }
 
-    single<UserPreferencesManager> {
-        val dataStore = PreferenceDataStoreFactory.create(
-            migrations = DataStoreUserPreferencesManager.DefaultMigrations,
+    single<DataStore<*>> {
+        PreferenceDataStoreFactory.create(
+            migrations = DefaultUserPreferencesMigrationManager.DefaultMigrations,
             produceFile = { androidContext().preferencesDataStoreFile("preferences") }
-        )
-        DataStoreUserPreferencesManager(
-            dataStore = dataStore,
-            migrations = DataStoreUserPreferencesManager.DefaultMigrations
         )
     }
 
     single<ThemeManager> {
-        AndroidThemeManager(userPreferencesRepository = get())
+        AndroidThemeManager(appPreferences = get())
     }
 
     factory<WorkManager> { WorkManager.getInstance(androidContext()) }
@@ -101,7 +97,7 @@ actual val platformComponentsModule: Module = module {
             letterSrsManager = get(),
             vocabSrsManager = get(),
             notificationManager = get(),
-            repository = get(),
+            appPreferences = get(),
             scheduler = get(),
             analyticsManager = get()
         )

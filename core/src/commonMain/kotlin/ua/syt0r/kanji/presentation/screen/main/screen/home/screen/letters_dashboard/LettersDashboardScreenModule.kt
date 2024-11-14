@@ -21,7 +21,7 @@ val lettersDashboardScreenModule = module {
 
     factory<LettersDashboardScreenContract.UpdateSortUseCase> {
         LettersDashboardUpdateSortUseCase(
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             practiceRepository = get()
         )
     }
@@ -32,7 +32,7 @@ val lettersDashboardScreenModule = module {
             loadDataUseCase = get(),
             mergeDecksUseCase = get(),
             updateSortUseCase = get(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             analyticsManager = get()
         )
     }

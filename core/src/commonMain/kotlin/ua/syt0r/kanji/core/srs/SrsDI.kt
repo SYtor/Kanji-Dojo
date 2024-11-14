@@ -13,7 +13,7 @@ fun Module.applySrsDefinitions() {
 
     single<DailyLimitManager> {
         DefaultDailyLimitManager(
-            userPreferencesRepository = get()
+            appPreferences = get()
         )
     }
 
@@ -24,7 +24,7 @@ fun Module.applySrsDefinitions() {
             srsItemRepository = get(),
             reviewHistoryRepository = get(),
             timeUtils = get(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             coroutineScope = CoroutineScope(Dispatchers.IO)
         )
     }
@@ -46,7 +46,7 @@ fun Module.applySrsDefinitions() {
             srsItemRepository = get(),
             dailyLimitManager = get(),
             timeUtils = get(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             reviewHistoryRepository = get(),
             coroutineScope = CoroutineScope(Dispatchers.IO)
         )

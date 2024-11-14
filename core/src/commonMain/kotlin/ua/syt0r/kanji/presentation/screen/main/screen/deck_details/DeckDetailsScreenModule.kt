@@ -55,7 +55,7 @@ val deckDetailsScreenModule = module {
 
     factory<UpdateDeckDetailsConfigurationUseCase> {
         DefaultUpdateDeckDetailsConfigurationUseCase(
-            repository = get()
+            appPreferences = get()
         )
     }
 

@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case
 
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeConfiguration
 
 interface UpdateLetterPracticeConfigurationUseCase {
@@ -8,12 +8,12 @@ interface UpdateLetterPracticeConfigurationUseCase {
 }
 
 class DefaultUpdateLetterPracticeConfigurationUseCase(
-    private val userPreferencesRepository: PracticeUserPreferencesRepository
+    private val practicePreferences: PreferencesContract.PracticePreferences
 ) : UpdateLetterPracticeConfigurationUseCase {
 
     override suspend fun invoke(
         configuration: LetterPracticeConfiguration
-    ) = userPreferencesRepository.run {
+    ) = practicePreferences.run {
         when (configuration) {
             is LetterPracticeConfiguration.Writing -> {
                 noTranslationLayout.set(configuration.noTranslationsLayout.value)

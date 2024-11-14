@@ -37,7 +37,7 @@ val vocabDashboardScreenModule = module {
 
     factory<UpdateVocabDecksOrderUseCase> {
         DefaultUpdateVocabDecksOrderUseCase(
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             practiceRepository = get()
         )
     }

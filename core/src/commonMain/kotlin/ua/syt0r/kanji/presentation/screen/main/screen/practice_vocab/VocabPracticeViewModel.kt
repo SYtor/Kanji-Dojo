@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
@@ -25,7 +25,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case.Ge
 
 class VocabPracticeViewModel(
     private val viewModelScope: CoroutineScope,
-    private val userPreferencesRepository: PracticeUserPreferencesRepository,
+    private val practicePreferences: PreferencesContract.PracticePreferences,
     private val getQueueDataUseCase: GetVocabPracticeQueueDataUseCase,
     private val practiceQueue: VocabPracticeQueue,
     private val analyticsManager: AnalyticsManager
@@ -52,16 +52,16 @@ class VocabPracticeViewModel(
                 ),
                 shuffle = mutableStateOf(true),
                 readingPriority = mutableStateOf(
-                    userPreferencesRepository.vocabReadingPriority.get().toScreenType()
+                    practicePreferences.vocabReadingPriority.get().toScreenType()
                 ),
                 flashcard = VocabPracticeConfiguration.Flashcard(
                     translationInFront = mutableStateOf(
-                        userPreferencesRepository.vocabFlashcardMeaningInFront.get()
+                        practicePreferences.vocabFlashcardMeaningInFront.get()
                     )
                 ),
                 readingPicker = VocabPracticeConfiguration.ReadingPicker(
                     showMeaning = mutableStateOf(
-                        userPreferencesRepository.vocabReadingPickerShowMeaning.get()
+                        practicePreferences.vocabReadingPickerShowMeaning.get()
                     )
                 )
             )
@@ -73,7 +73,7 @@ class VocabPracticeViewModel(
         _state.value = ScreenState.Loading
 
         viewModelScope.launch {
-            userPreferencesRepository.apply {
+            practicePreferences.apply {
                 vocabReadingPriority.set(configurationState.readingPriority.value.repoType)
                 vocabReadingPickerShowMeaning.set(configurationState.readingPicker.showMeaning.value)
                 vocabFlashcardMeaningInFront.set(configurationState.flashcard.translationInFront.value)

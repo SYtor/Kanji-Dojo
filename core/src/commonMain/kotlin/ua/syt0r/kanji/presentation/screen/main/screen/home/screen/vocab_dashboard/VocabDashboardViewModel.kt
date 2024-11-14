@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
@@ -34,7 +34,7 @@ class VocabDashboardViewModel(
     subscribeOnDashboardVocabDecksUseCase: SubscribeOnDashboardVocabDecksUseCase,
     private val mergeVocabDecksUseCase: MergeVocabDecksUseCase,
     private val updateDecksOrderUseCase: UpdateVocabDecksOrderUseCase,
-    private val preferencesRepository: UserPreferencesRepository,
+    private val preferencesRepository: PreferencesContract.AppPreferences,
     private val analyticsManager: AnalyticsManager
 ) : VocabDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
 

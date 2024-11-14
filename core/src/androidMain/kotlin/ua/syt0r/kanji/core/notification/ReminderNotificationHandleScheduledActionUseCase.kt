@@ -5,14 +5,14 @@ import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.srs.LetterSrsManager
 import ua.syt0r.kanji.core.srs.VocabSrsManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 class ReminderNotificationHandleScheduledActionUseCase(
     private val activityManager: ActivityManager,
     private val letterSrsManager: LetterSrsManager,
     private val vocabSrsManager: VocabSrsManager,
     private val notificationManager: ReminderNotificationContract.Manager,
-    private val repository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val scheduler: ReminderNotificationContract.Scheduler,
     private val analyticsManager: AnalyticsManager,
 ) : ReminderNotificationContract.HandleScheduledActionUseCase {
@@ -26,7 +26,7 @@ class ReminderNotificationHandleScheduledActionUseCase(
         val isInForeground = activityManager.appTasks.isNotEmpty()
         if (isInForeground) return
 
-        if (!repository.dailyLimitEnabled.get()) {
+        if (!appPreferences.dailyLimitEnabled.get()) {
             notificationManager.showNotification()
             analyticsManager.sendEvent("showing_notification_no_limit")
             return
@@ -52,7 +52,7 @@ class ReminderNotificationHandleScheduledActionUseCase(
     }
 
     private suspend fun scheduleNextNotification() {
-        val time = repository.reminderTime.get()
+        val time = appPreferences.reminderTime.get()
         scheduler.scheduleNotification(time)
     }
 

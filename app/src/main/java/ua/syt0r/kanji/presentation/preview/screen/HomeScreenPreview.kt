@@ -17,7 +17,7 @@ fun HomeScreenPreview(
     AppTheme {
         HomeScreenUI(
             availableTabs = HomeScreenTab.values().toList(),
-            syncState = rememberUpdatedState(SyncState.SyncAvailable),
+            syncState = rememberUpdatedState(SyncState.PendingUpload),
             selectedTabState = HomeScreenTab.values().first().run { rememberUpdatedState(this) },
             onTabSelected = {},
             onSyncButtonClick = {},
