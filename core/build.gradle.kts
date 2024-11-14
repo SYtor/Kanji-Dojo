@@ -41,6 +41,7 @@ kotlin {
 
                 api(libs.ktor.client.core)
                 implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.auth)
 
                 api(libs.aboutlibraries.core)
                 implementation(libs.aboutlibraries.compose.m3)
