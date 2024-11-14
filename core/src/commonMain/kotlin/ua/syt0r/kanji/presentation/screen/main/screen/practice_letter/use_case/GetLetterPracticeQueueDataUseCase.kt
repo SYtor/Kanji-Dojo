@@ -9,7 +9,7 @@ import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.srs.SrsItemRepository
 import ua.syt0r.kanji.core.stroke_evaluator.AltKanjiStrokeEvaluator
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeQueueItemDescriptor
@@ -24,7 +24,7 @@ interface GetLetterPracticeQueueDataUseCase {
 }
 
 class DefaultGetLetterPracticeQueueDataUseCase(
-    private val userPreferencesRepository: PracticeUserPreferencesRepository,
+    private val practicePreferences: PreferencesContract.PracticePreferences,
     private val srsItemRepository: SrsItemRepository,
     private val configurationUpdateScope: CoroutineScope
 ) : GetLetterPracticeQueueDataUseCase {
@@ -34,22 +34,22 @@ class DefaultGetLetterPracticeQueueDataUseCase(
     ): List<LetterPracticeQueueItemDescriptor> {
 
         val kanaAutoPlay = mutableStateOf(
-            value = userPreferencesRepository.kanaAutoPlay.get()
+            value = practicePreferences.kanaAutoPlay.get()
         )
 
         snapshotFlow { kanaAutoPlay.value }
-            .onEach { userPreferencesRepository.kanaAutoPlay.set(it) }
+            .onEach { practicePreferences.kanaAutoPlay.set(it) }
             .launchIn(configurationUpdateScope)
 
         return when (configuration) {
             is LetterPracticeConfiguration.Writing -> {
 
                 val radicalsHighlight = mutableStateOf(
-                    value = userPreferencesRepository.highlightRadicals.get()
+                    value = practicePreferences.highlightRadicals.get()
                 )
 
                 snapshotFlow { radicalsHighlight.value }
-                    .onEach { userPreferencesRepository.highlightRadicals.set(it) }
+                    .onEach { practicePreferences.highlightRadicals.set(it) }
                     .launchIn(configurationUpdateScope)
 
                 val layout = LetterPracticeLayoutConfiguration.WritingLayoutConfiguration(

@@ -1,6 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 
 interface UpdateDeckDetailsConfigurationUseCase {
@@ -16,11 +17,11 @@ interface UpdateDeckDetailsConfigurationUseCase {
 }
 
 class DefaultUpdateDeckDetailsConfigurationUseCase(
-    private val repository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences
 ) : UpdateDeckDetailsConfigurationUseCase {
 
     override suspend fun invoke(configuration: DeckDetailsConfiguration.LetterDeckConfiguration) {
-        repository.apply {
+        appPreferences.apply {
             practiceType.set(configuration.practiceType.preferencesType)
             filterNew.set(configuration.filterConfiguration.showNew)
             filterDue.set(configuration.filterConfiguration.showDue)

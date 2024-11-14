@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface VocabSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
@@ -33,7 +33,7 @@ class DefaultVocabSrsManager(
     private val srsItemRepository: SrsItemRepository,
     dailyLimitManager: DailyLimitManager,
     timeUtils: TimeUtils,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val reviewHistoryRepository: ReviewHistoryRepository,
     coroutineScope: CoroutineScope
 ) : SrsManager<Long, VocabPracticeType, VocabSrsDeck>(
@@ -97,7 +97,7 @@ class DefaultVocabSrsManager(
 
     override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {
         return DeckSortConfiguration(
-            sortByReviewDate = userPreferencesRepository.vocabDashboardSortByTime.get()
+            sortByReviewDate = appPreferences.vocabDashboardSortByTime.get()
         )
     }
 

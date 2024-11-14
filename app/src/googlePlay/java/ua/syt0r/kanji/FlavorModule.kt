@@ -55,7 +55,7 @@ val flavorModule = module {
     multiplatformViewModel<GooglePlaySettingsScreenContract.ViewModel> {
         GooglePlaySettingsViewModel(
             viewModelScope = it.component1(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             analyticsManager = get(),
             reminderScheduler = get()
         )

@@ -6,12 +6,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract.AppPreferences
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 
 class AndroidThemeManager(
-    userPreferencesRepository: UserPreferencesRepository
-) : ThemeManager(userPreferencesRepository) {
+    appPreferences: AppPreferences
+) : ThemeManager(appPreferences) {
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 

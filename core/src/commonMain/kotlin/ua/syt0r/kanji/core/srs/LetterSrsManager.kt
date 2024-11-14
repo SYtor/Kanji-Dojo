@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface LetterSrsManager {
     val dataChangeFlow: SharedFlow<Unit>
@@ -33,7 +33,7 @@ class DefaultLetterSrsManager(
     private val srsItemRepository: SrsItemRepository,
     dailyLimitManager: DailyLimitManager,
     timeUtils: TimeUtils,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val reviewHistoryRepository: ReviewHistoryRepository,
     coroutineScope: CoroutineScope
 ) : SrsManager<String, LetterPracticeType, LetterSrsDeck>(
@@ -97,7 +97,7 @@ class DefaultLetterSrsManager(
 
     override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {
         return DeckSortConfiguration(
-            sortByReviewDate = userPreferencesRepository.letterDashboardSortByTime.get()
+            sortByReviewDate = appPreferences.letterDashboardSortByTime.get()
         )
     }
 

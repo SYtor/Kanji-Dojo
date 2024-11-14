@@ -19,7 +19,7 @@ import ua.syt0r.kanji.core.srs.VocabSrsManager
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.StreakData
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
@@ -42,7 +42,7 @@ interface SubscribeOnGeneralDashboardScreenDataUseCase {
 class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
     private val letterSrsManager: LetterSrsManager,
     private val vocabSrsManager: VocabSrsManager,
-    private val preferencesRepository: UserPreferencesRepository,
+    private val preferencesRepository: PreferencesContract.AppPreferences,
     private val reviewHistoryRepository: ReviewHistoryRepository,
     private val timeUtils: TimeUtils
 ) : SubscribeOnGeneralDashboardScreenDataUseCase {

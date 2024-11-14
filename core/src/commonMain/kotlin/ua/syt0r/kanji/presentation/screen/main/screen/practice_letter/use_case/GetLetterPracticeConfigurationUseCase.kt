@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case
 
 import androidx.compose.runtime.mutableStateOf
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationItemsSelectorState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeConfiguration
@@ -16,7 +16,7 @@ interface GetLetterPracticeConfigurationUseCase {
 }
 
 class DefaultGetLetterPracticeConfigurationUseCase(
-    private val repository: PracticeUserPreferencesRepository
+    private val practicePreferences: PreferencesContract.PracticePreferences
 ) : GetLetterPracticeConfigurationUseCase {
 
     override suspend fun invoke(configuration: LetterPracticeScreenConfiguration): LetterPracticeConfiguration {
@@ -27,12 +27,14 @@ class DefaultGetLetterPracticeConfigurationUseCase(
                         itemToDeckIdMap = configuration.characterToDeckIdMap.toList(),
                         shuffle = true
                     ),
-                    noTranslationsLayout = mutableStateOf(repository.noTranslationLayout.get()),
-                    leftHandedMode = mutableStateOf(repository.leftHandMode.get()),
-                    useRomajiForKanaWords = mutableStateOf(repository.writingRomajiInsteadOfKanaWords.get()),
-                    inputMode = mutableStateOf(repository.writingInputMethod.get().toScreenType()),
+                    noTranslationsLayout = mutableStateOf(practicePreferences.noTranslationLayout.get()),
+                    leftHandedMode = mutableStateOf(practicePreferences.leftHandMode.get()),
+                    useRomajiForKanaWords = mutableStateOf(practicePreferences.writingRomajiInsteadOfKanaWords.get()),
+                    inputMode = mutableStateOf(
+                        practicePreferences.writingInputMethod.get().toScreenType()
+                    ),
                     hintMode = mutableStateOf(WritingPracticeHintMode.OnlyNew),
-                    altStrokeEvaluatorEnabled = mutableStateOf(repository.altStrokeEvaluator.get())
+                    altStrokeEvaluatorEnabled = mutableStateOf(practicePreferences.altStrokeEvaluator.get())
                 )
             }
 
@@ -42,7 +44,7 @@ class DefaultGetLetterPracticeConfigurationUseCase(
                         itemToDeckIdMap = configuration.characterToDeckIdMap.toList(),
                         shuffle = true
                     ),
-                    useRomajiForKanaWords = mutableStateOf(repository.readingRomajiFuriganaForKanaWords.get())
+                    useRomajiForKanaWords = mutableStateOf(practicePreferences.readingRomajiFuriganaForKanaWords.get())
                 )
             }
         }

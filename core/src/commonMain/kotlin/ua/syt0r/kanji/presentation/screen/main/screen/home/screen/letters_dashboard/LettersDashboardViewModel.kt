@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
@@ -33,7 +33,7 @@ class LettersDashboardViewModel(
     private val viewModelScope: CoroutineScope,
     loadDataUseCase: LettersDashboardScreenContract.LoadDataUseCase,
     private val updateSortUseCase: LettersDashboardScreenContract.UpdateSortUseCase,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val mergeDecksUseCase: LettersDashboardScreenContract.MergeDecksUseCase,
     private val analyticsManager: AnalyticsManager
 ) : LettersDashboardScreenContract.ViewModel, LifecycleAwareViewModel {
@@ -51,7 +51,7 @@ class LettersDashboardViewModel(
                 state.value = when (it) {
                     is RefreshableData.Loaded -> {
                         val screenData = it.value
-                        val sortByTimeEnabled = userPreferencesRepository
+                        val sortByTimeEnabled = appPreferences
                             .letterDashboardSortByTime.get()
                         val listState = DeckDashboardListState(
                             items = screenData.items,
@@ -74,7 +74,7 @@ class LettersDashboardViewModel(
                             }
 
                         val practiceType = ScreenLetterPracticeType.from(
-                            userPreferencesRepository.letterDashboardPracticeType.get()
+                            appPreferences.letterDashboardPracticeType.get()
                         )
 
                         val selectedItemState = mutableStateOf(
@@ -83,7 +83,7 @@ class LettersDashboardViewModel(
 
                         snapshotFlow { selectedItemState.value }
                             .map { it.practiceType.preferencesType }
-                            .onEach { userPreferencesRepository.letterDashboardPracticeType.set(it) }
+                            .onEach { appPreferences.letterDashboardPracticeType.set(it) }
                             .launchIn(viewModelScope)
 
                         ScreenState.Loaded(

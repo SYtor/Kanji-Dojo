@@ -6,27 +6,27 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.runBlocking
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 
 
 open class ThemeManager(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val appPreferences: PreferencesContract.AppPreferences
 ) {
 
     private val mCurrentTheme = mutableStateOf(
-        value = runBlocking { userPreferencesRepository.theme.get() }
+        value = runBlocking { appPreferences.theme.get() }
     )
 
     val currentTheme: State<PreferencesTheme> = mCurrentTheme
 
     open suspend fun changeTheme(theme: PreferencesTheme) {
         mCurrentTheme.value = theme
-        userPreferencesRepository.theme.set(theme)
+        appPreferences.theme.set(theme)
     }
 
     suspend fun invalidate() {
-        changeTheme(userPreferencesRepository.theme.get())
+        changeTheme(appPreferences.theme.get())
     }
 
     val isDarkTheme: Boolean

@@ -18,19 +18,19 @@ val letterPracticeScreenModule = module {
 
     factory<GetLetterPracticeConfigurationUseCase> {
         DefaultGetLetterPracticeConfigurationUseCase(
-            repository = get()
+            practicePreferences = get()
         )
     }
 
     factory<UpdateLetterPracticeConfigurationUseCase> {
         DefaultUpdateLetterPracticeConfigurationUseCase(
-            userPreferencesRepository = get()
+            practicePreferences = get()
         )
     }
 
     factory<GetLetterPracticeQueueDataUseCase> {
         DefaultGetLetterPracticeQueueDataUseCase(
-            userPreferencesRepository = get(),
+            practicePreferences = get(),
             srsItemRepository = get(),
             configurationUpdateScope = it.component1()
         )

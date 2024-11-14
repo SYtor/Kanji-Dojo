@@ -218,7 +218,7 @@ private fun SyncButton(
         }
 
         AnimatedVisibility(
-            visible = state.value is SyncState.SyncAvailable,
+            visible = state.value is SyncState.PendingUpload,
             modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
             enter = scaleIn(),
             exit = scaleOut()
@@ -250,7 +250,7 @@ private fun rememberSyncIconRotation(
 
         snapshotFlow { state.value }.collect {
             when (it) {
-                is SyncState.Preparing,
+                is SyncState.Refreshing,
                 is SyncState.Syncing -> {
                     shouldLoop = true
                     val currentJob = animateLoopJob

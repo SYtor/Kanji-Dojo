@@ -6,12 +6,12 @@ import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
 import ua.syt0r.kanji.core.notification.ReminderNotificationContract
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract.ScreenState
 
 class GooglePlaySettingsViewModel(
     private val viewModelScope: CoroutineScope,
-    private val userPreferencesRepository: UserPreferencesRepository,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val analyticsManager: AnalyticsManager,
     private val reminderScheduler: ReminderNotificationContract.Scheduler
 ) : GooglePlaySettingsScreenContract.ViewModel {
@@ -22,10 +22,10 @@ class GooglePlaySettingsViewModel(
         viewModelScope.launch {
             state.value = ScreenState.Loaded(
                 reminderConfiguration = ReminderNotificationConfiguration(
-                    enabled = userPreferencesRepository.reminderEnabled.get(),
-                    time = userPreferencesRepository.reminderTime.get()
+                    enabled = appPreferences.reminderEnabled.get(),
+                    time = appPreferences.reminderTime.get()
                 ),
-                analyticsEnabled = userPreferencesRepository.analyticsEnabled.get()
+                analyticsEnabled = appPreferences.analyticsEnabled.get()
             )
         }
     }
@@ -34,8 +34,8 @@ class GooglePlaySettingsViewModel(
         val currentState = state.value as ScreenState.Loaded
         viewModelScope.launch {
             state.value = currentState.copy(reminderConfiguration = configuration)
-            userPreferencesRepository.reminderEnabled.set(configuration.enabled)
-            userPreferencesRepository.reminderTime.set(configuration.time)
+            appPreferences.reminderEnabled.set(configuration.enabled)
+            appPreferences.reminderTime.set(configuration.time)
             if (configuration.enabled) {
                 reminderScheduler.scheduleNotification(configuration.time)
                 analyticsManager.sendEvent("reminder_enabled") {
@@ -52,7 +52,7 @@ class GooglePlaySettingsViewModel(
         val currentState = state.value as ScreenState.Loaded
         viewModelScope.launch {
             state.value = currentState.copy(analyticsEnabled = enabled)
-            userPreferencesRepository.analyticsEnabled.set(enabled)
+            appPreferences.analyticsEnabled.set(enabled)
             analyticsManager.setAnalyticsEnabled(enabled)
             analyticsManager.sendEvent("analytics_toggled") {
                 put("analytics_enabled", enabled)

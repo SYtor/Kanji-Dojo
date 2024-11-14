@@ -21,7 +21,7 @@ val generalDashboardScreenModule = module {
         GeneralDashboardViewModel(
             viewModelScope = it.component1(),
             subscribeOnScreenDataUseCase = get(),
-            userPreferencesRepository = get(),
+            appPreferences = get(),
             analyticsManager = get()
         )
     }

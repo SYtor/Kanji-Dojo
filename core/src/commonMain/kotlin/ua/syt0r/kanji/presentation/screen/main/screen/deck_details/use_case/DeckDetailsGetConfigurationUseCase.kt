@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case
 
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
@@ -13,7 +13,7 @@ interface DeckDetailsGetConfigurationUseCase {
 }
 
 class DefaultDeckDetailsGetConfigurationUseCase(
-    private val repository: UserPreferencesRepository,
+    private val repository: PreferencesContract.AppPreferences,
 ) : DeckDetailsGetConfigurationUseCase {
 
     override suspend fun lettersConfiguration(): DeckDetailsConfiguration.LetterDeckConfiguration {

@@ -9,6 +9,9 @@ import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
+import ua.syt0r.kanji.core.auth.AuthManager
+import ua.syt0r.kanji.core.auth.DefaultAuthManager
+import ua.syt0r.kanji.core.auth.addAuthHttpClient
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.backup.BackupRestoreCompletionNotifier
 import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
@@ -23,8 +26,7 @@ import ua.syt0r.kanji.core.japanese.DefaultCharacterClassifier
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.WanakanaRomajiConverter
 import ua.syt0r.kanji.core.srs.applySrsDefinitions
-import ua.syt0r.kanji.core.sync.DefaultSyncManager
-import ua.syt0r.kanji.core.sync.SyncManager
+import ua.syt0r.kanji.core.sync.addSyncDefinitions
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.time.DefaultTimeUtils
 import ua.syt0r.kanji.core.time.TimeUtils
@@ -36,25 +38,31 @@ import ua.syt0r.kanji.core.user_data.practice.SqlDelightLetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.practice.SqlDelightVocabPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
-import ua.syt0r.kanji.core.user_data.preferences.DefaultPracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesBackupManager
-import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.preferences.PracticeUserPreferencesRepository
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesBackupManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesManager
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.BackupPropertiesHolder
+import ua.syt0r.kanji.core.user_data.preferences.DataStorePreferencesManager
+import ua.syt0r.kanji.core.user_data.preferences.DefaultPreferencesBackupManager
+import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesManager
+import ua.syt0r.kanji.core.user_data.preferences.SyncPropertiesObservable
+import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesMigrationManager
 
 val coreModule = module {
 
     applySrsDefinitions()
+    addSyncDefinitions()
 
-    single<SyncManager> {
-        DefaultSyncManager(
-            userPreferencesRepository = get(),
+    single<AnalyticsManager> { PrintAnalyticsManager() }
+
+    single<AuthManager> {
+        DefaultAuthManager(
+            appPreferences = get(),
+            unauthorisedClient = get()
         )
     }
 
-    single<AnalyticsManager> { PrintAnalyticsManager() }
+    addAuthHttpClient()
 
     single<AppDataRepository> {
         val deferredDatabase = get<AppDataDatabaseProvider>().provideAsync()
@@ -88,25 +96,34 @@ val coreModule = module {
         )
     }
 
-    factory<UserPreferencesBackupManager> {
-        DefaultUserPreferencesBackupManager(
-            userPreferences = get(),
-            userPreferencesRepository = get(),
-            practiceUserPreferencesRepository = get()
+    factory<PreferencesBackupManager> {
+        DefaultPreferencesBackupManager(
+            preferencesManager = get(),
+            backupPropertiesHolder = get()
         )
     }
 
-    single<PracticeUserPreferencesRepository> {
-        DefaultPracticeUserPreferencesRepository(
-            suspendedPropertyProvider = get<UserPreferencesManager>().suspendedPropertyProvider
+    single<UserPreferencesMigrationManager> {
+        DefaultUserPreferencesMigrationManager(
+            dataStore = get()
         )
     }
 
-    single<UserPreferencesRepository> {
-        DefaultUserPreferencesRepository(
-            suspendedPropertyProvider = get<UserPreferencesManager>().suspendedPropertyProvider
+    single {
+        DataStorePreferencesManager(
+            dataStore = get(),
+            migrationManager = get(),
+            timeUtils = get()
         )
-    }
+    } binds arrayOf(
+        PreferencesManager::class,
+        BackupPropertiesHolder::class,
+        SyncPropertiesObservable::class
+    )
+
+    single<PreferencesContract.AppPreferences> { get<PreferencesManager>().appPreferences }
+
+    single<PreferencesContract.PracticePreferences> { get<PreferencesManager>().practicePreferences }
 
     single { BackupRestoreObservable() } binds arrayOf(
         BackupRestoreCompletionNotifier::class,
@@ -117,7 +134,7 @@ val coreModule = module {
         DefaultBackupManager(
             platformFileHandler = get(),
             userDataDatabaseManager = get(),
-            userPreferencesBackupManager = get(),
+            preferencesBackupManager = get(),
             themeManager = get(),
             restoreCompletionNotifier = get()
         )
@@ -126,7 +143,7 @@ val coreModule = module {
     factory<TimeUtils> { DefaultTimeUtils }
 
     single<ThemeManager> {
-        ThemeManager(userPreferencesRepository = get())
+        ThemeManager(appPreferences = get())
     }
 
     single<CharacterClassifier> { DefaultCharacterClassifier(appDataRepository = get()) }

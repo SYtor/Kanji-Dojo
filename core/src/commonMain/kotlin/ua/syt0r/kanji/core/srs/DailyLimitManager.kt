@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesRepository
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface DailyLimitManager {
 
@@ -42,7 +42,7 @@ data class DailyLimitConfiguration(
 )
 
 class DefaultDailyLimitManager(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val appPreferences: PreferencesContract.AppPreferences
 ) : DailyLimitManager {
 
     private val json = Json { encodeDefaults = true }
@@ -51,11 +51,11 @@ class DefaultDailyLimitManager(
     override val changesFlow: SharedFlow<Unit> = _changesFlow // TODO migration?
 
     override suspend fun isEnabled(): Boolean {
-        return userPreferencesRepository.dailyLimitEnabled.get()
+        return appPreferences.dailyLimitEnabled.get()
     }
 
     override suspend fun getConfiguration(): DailyLimitConfiguration {
-        val configurationJson = userPreferencesRepository.dailyLimitConfigurationJson.get()
+        val configurationJson = appPreferences.dailyLimitConfigurationJson.get()
         val configuration = Json
             .runCatching { decodeFromString<DailyLimitConfiguration>(configurationJson) }
             .getOrElse { null }
@@ -65,9 +65,9 @@ class DefaultDailyLimitManager(
     }
 
     override suspend fun update(isEnabled: Boolean, configuration: DailyLimitConfiguration) {
-        userPreferencesRepository.dailyLimitEnabled.set(isEnabled)
+        appPreferences.dailyLimitEnabled.set(isEnabled)
         val configurationJson = json.encodeToString(configuration)
-        userPreferencesRepository.dailyLimitConfigurationJson.set(configurationJson)
+        appPreferences.dailyLimitConfigurationJson.set(configurationJson)
         _changesFlow.emit(Unit)
     }
 
