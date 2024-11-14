@@ -11,6 +11,8 @@ import ua.syt0r.kanji.core.backup.JvmPlatformFileHandler
 import ua.syt0r.kanji.core.backup.PlatformFileHandler
 import ua.syt0r.kanji.core.getUserPreferencesFile
 import ua.syt0r.kanji.core.logger.LoggerConfiguration
+import ua.syt0r.kanji.core.sync.JvmSyncBackupFileManager
+import ua.syt0r.kanji.core.sync.SyncBackupFileManager
 import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
@@ -44,15 +46,8 @@ actual val platformComponentsModule: Module = module {
         AppDataDatabaseProviderJvm()
     }
 
-    single<UserPreferencesManager> {
-        val dataStore = PreferenceDataStoreFactory.create(
-            migrations = DataStoreUserPreferencesManager.DefaultMigrations,
-            produceFile = { getUserPreferencesFile() }
-        )
-        DataStoreUserPreferencesManager(
-            dataStore = dataStore,
-            migrations = DataStoreUserPreferencesManager.DefaultMigrations
-        )
+    single<SyncBackupFileManager> {
+        JvmSyncBackupFileManager()
     }
 
     single<DataStore<*>> {

@@ -11,7 +11,6 @@ object NetworkApi {
         const val GET_BACKUP = "$BASE/getBackup"
         const val UPDATE_BACKUP = "$BASE/updateBackup"
 
-
         private const val FIREBASE_KEY = "AIzaSyCP9IzlOBkf9C6VHXBsD7xJr88R-ZOUKsA"
         const val REFRESH_AUTH_TOKEN =
             "https://securetoken.googleapis.com/v1/token?key=$FIREBASE_KEY"

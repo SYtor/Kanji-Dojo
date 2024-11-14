@@ -7,7 +7,8 @@ val syncScreenModule = module {
 
     multiplatformViewModel<SyncScreenContract.ViewModel> {
         SyncScreenViewModel(
-            coroutineScope = it.component1()
+            coroutineScope = it.component1(),
+            appPreferences = get()
         )
     }
 
