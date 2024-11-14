@@ -9,9 +9,7 @@ import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
-import ua.syt0r.kanji.core.auth.AuthManager
-import ua.syt0r.kanji.core.auth.DefaultAuthManager
-import ua.syt0r.kanji.core.auth.addAuthHttpClient
+import ua.syt0r.kanji.core.auth.addAuthDefinitions
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.backup.BackupRestoreCompletionNotifier
 import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
@@ -42,8 +40,8 @@ import ua.syt0r.kanji.core.user_data.preferences.BackupPropertiesHolder
 import ua.syt0r.kanji.core.user_data.preferences.DataStorePreferencesManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultPreferencesBackupManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesManager
 import ua.syt0r.kanji.core.user_data.preferences.SyncPropertiesObservable
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesMigrationManager
@@ -51,18 +49,11 @@ import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesMigrationManager
 val coreModule = module {
 
     applySrsDefinitions()
+    addAuthDefinitions()
     addSyncDefinitions()
 
     single<AnalyticsManager> { PrintAnalyticsManager() }
 
-    single<AuthManager> {
-        DefaultAuthManager(
-            appPreferences = get(),
-            unauthorisedClient = get()
-        )
-    }
-
-    addAuthHttpClient()
 
     single<AppDataRepository> {
         val deferredDatabase = get<AppDataDatabaseProvider>().provideAsync()
