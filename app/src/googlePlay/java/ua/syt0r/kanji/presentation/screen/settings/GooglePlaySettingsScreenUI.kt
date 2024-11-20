@@ -14,11 +14,13 @@ import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAboutButton
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsAccountButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsBackupButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsContent
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsFeedbackButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsReminderNotification
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsSwitchRow
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsSyncButton
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsThemeToggle
 import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract.ScreenState
 
@@ -27,6 +29,8 @@ fun GooglePlaySettingsScreenUI(
     state: State<ScreenState>,
     onReminderConfigurationChange: (ReminderNotificationConfiguration) -> Unit,
     onBackupButtonClick: () -> Unit,
+    onAccountButtonClick: () -> Unit,
+    onSyncButtonClick: () -> Unit,
     onFeedbackButtonClick: () -> Unit,
     onAboutButtonClick: () -> Unit,
     onAnalyticsToggled: (Boolean) -> Unit
@@ -69,6 +73,10 @@ fun GooglePlaySettingsScreenUI(
                     SettingsThemeToggle()
 
                     SettingsBackupButton(onBackupButtonClick)
+
+                    SettingsAccountButton(onAccountButtonClick)
+
+                    SettingsSyncButton(onSyncButtonClick)
 
                     SettingsFeedbackButton(onFeedbackButtonClick)
 

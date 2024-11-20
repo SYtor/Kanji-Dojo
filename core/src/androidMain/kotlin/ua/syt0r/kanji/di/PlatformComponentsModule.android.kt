@@ -23,6 +23,8 @@ import ua.syt0r.kanji.core.notification.ReminderNotificationContract
 import ua.syt0r.kanji.core.notification.ReminderNotificationHandleScheduledActionUseCase
 import ua.syt0r.kanji.core.notification.ReminderNotificationManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationScheduler
+import ua.syt0r.kanji.core.sync.AndroidSyncBackupFileManager
+import ua.syt0r.kanji.core.sync.SyncBackupFileManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
@@ -36,6 +38,12 @@ actual val platformComponentsModule: Module = module {
     factory { LoggerConfiguration(isEnabled = BuildConfig.DEBUG) }
 
     factory { ExoPlayer.Builder(androidContext()).build() }
+
+    factory<SyncBackupFileManager> {
+        AndroidSyncBackupFileManager(
+            workingDir = androidContext().cacheDir
+        )
+    }
 
     factory<KanaTtsManager> {
         AndroidKanaTtsManager(
