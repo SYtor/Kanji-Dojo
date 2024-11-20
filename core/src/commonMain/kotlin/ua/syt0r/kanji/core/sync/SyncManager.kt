@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.sync.use_case.GetRemoteBackupUseCase
+import ua.syt0r.kanji.core.sync.use_case.ApplyRemoteSyncDataUseCase
 import ua.syt0r.kanji.core.sync.use_case.RefreshSyncStateUseCase
 import ua.syt0r.kanji.core.sync.use_case.SubscribeOnSyncDataChangeUseCase
-import ua.syt0r.kanji.core.sync.use_case.UploadBackupUseCase
+import ua.syt0r.kanji.core.sync.use_case.UploadSyncDataUseCase
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import kotlin.coroutines.CoroutineContext
 
 interface SyncManager {
@@ -29,10 +30,11 @@ interface SyncManager {
 }
 
 class DefaultSyncManager(
-    subscribeOnSyncDataChangeUseCase: SubscribeOnSyncDataChangeUseCase,
+    private val appPreferences: PreferencesContract.AppPreferences,
+    private val subscribeOnSyncDataChangeUseCase: SubscribeOnSyncDataChangeUseCase,
     private val refreshSyncStateUseCase: RefreshSyncStateUseCase,
-    private val uploadBackupUseCase: UploadBackupUseCase,
-    private val getRemoteBackupUseCase: GetRemoteBackupUseCase,
+    private val uploadSyncDataUseCase: UploadSyncDataUseCase,
+    private val applyRemoteSyncDataUseCase: ApplyRemoteSyncDataUseCase,
     syncContext: CoroutineContext = Dispatchers.IO
 ) : SyncManager {
 
@@ -46,7 +48,9 @@ class DefaultSyncManager(
     private val coroutineScope = CoroutineScope(syncContext)
     private val managerActionFlow = Channel<ManagerAction>()
 
-    private val _state = MutableStateFlow<SyncState>(SyncState.Refreshing)
+    private val isDataChangedSinceLastSync = MutableStateFlow(false)
+
+    private val _state = MutableStateFlow<SyncState>(SyncState.Loading.Refreshing)
     override val state: StateFlow<SyncState> = _state
 
     init {
@@ -55,8 +59,12 @@ class DefaultSyncManager(
             .onEach { _state.value = it }
             .launchIn(coroutineScope)
 
-        subscribeOnSyncDataChangeUseCase()
-            .onEach {  }
+        appPreferences.syncEnabled.onModified
+            .onEach { refreshState() }
+            .launchIn(coroutineScope)
+
+        subscribeOnSyncDataChangeUseCase(state)
+            .onEach { isDataChangedSinceLastSync.value = it }
             .launchIn(coroutineScope)
 
         refreshState()
@@ -83,24 +91,47 @@ class DefaultSyncManager(
             ManagerAction.Cancel -> flowOf(SyncState.Canceled)
 
             ManagerAction.Refresh -> flow {
-                emit(SyncState.Refreshing)
-                emit(refreshSyncStateUseCase().also { Logger.d("refreshState[$it]") })
+                emit(SyncState.Loading.Refreshing)
+                Logger.d("Refresh sync, refreshing")
+                val refreshResultState = refreshSyncStateUseCase()
+                Logger.d("Refresh sync, refreshResultState[$refreshResultState]")
+                emit(refreshResultState)
             }
 
             ManagerAction.Sync -> flow {
-                emit(SyncState.Syncing)
-                val refreshState = refreshSyncStateUseCase().also { Logger.d("refreshState[$it]") }
-                if (refreshState == SyncState.PendingUpload) emit(uploadBackupUseCase())
-                else emit(refreshState)
+                emit(SyncState.Loading.Uploading)
+                Logger.d("Uploading sync, refreshing")
+                val refreshResultState = refreshSyncStateUseCase()
+                Logger.d("Uploading sync, refreshResultState[$refreshResultState]")
+
+                if (refreshResultState != SyncState.Enabled.PendingUpload) {
+                    emit(refreshResultState)
+                    return@flow
+                }
+
+                Logger.d("Uploading sync, starting upload")
+                val uploadResultState = uploadSyncDataUseCase()
+                Logger.d("Uploading sync, uploadResultState[$uploadResultState]")
+                emit(uploadResultState)
             }
 
             is ManagerAction.ResolveConflict -> flow {
-                emit(SyncState.Syncing)
-                when(action.strategy) {
+                when (action.strategy) {
                     SyncConflictResolveStrategy.UploadLocal -> {
-                        emit(uploadBackupUseCase())
+                        Logger.d("Uploading sync, starting upload")
+                        emit(SyncState.Loading.Uploading)
+                        val uploadResultState = uploadSyncDataUseCase()
+                        Logger.d("Uploading sync, uploadResultState[$uploadResultState]")
+                        emit(uploadResultState)
                     }
-                    SyncConflictResolveStrategy.DownloadRemote -> TODO()
+
+                    SyncConflictResolveStrategy.DownloadRemote -> {
+                        Logger.d("Downloading remote")
+                        emit(SyncState.Loading.Downloading)
+                        val applyRemoteSyncDataResult = applyRemoteSyncDataUseCase()
+                        Logger.d("applyRemoteSyncDataResult[$applyRemoteSyncDataResult]")
+                        emit(applyRemoteSyncDataResult)
+                    }
                 }
             }
         }

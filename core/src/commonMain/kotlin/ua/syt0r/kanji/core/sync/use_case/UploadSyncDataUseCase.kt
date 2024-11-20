@@ -12,67 +12,65 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
-import ua.syt0r.kanji.core.sync.ApiBackupInfo
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.HttpResponseException
 import ua.syt0r.kanji.core.sync.SyncBackupFileManager
 import ua.syt0r.kanji.core.sync.SyncState
-import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
-interface UploadBackupUseCase {
+interface UploadSyncDataUseCase {
     suspend operator fun invoke(): SyncState
 }
 
-class DefaultUploadBackupUseCase(
+class DefaultUploadSyncDataUseCase(
+    private val getLocalSyncDataInfoUseCase: GetLocalSyncDataInfoUseCase,
     private val appPreferences: PreferencesContract.AppPreferences,
     private val httpClient: HttpClient,
-    private val syncFileManager: SyncBackupFileManager,
+    private val syncBackupFileManager: SyncBackupFileManager,
     private val backupManager: BackupManager,
     private val json: Json
-) : UploadBackupUseCase {
+) : UploadSyncDataUseCase {
 
     override suspend fun invoke(): SyncState = kotlin.runCatching {
-        val localApiBackupInfo = ApiBackupInfo(
-            dataId = appPreferences.localDataId.get(),
-            dataVersion = UserDataDatabase.Schema.version,
-            dataTimestamp = appPreferences.localDataTimestamp.get()
-        )
-        val infoJson = json.encodeToString(localApiBackupInfo)
+        Logger.logMethod()
 
-        val backupFile = syncFileManager.getFile()
+        val localSyncDataInfo = getLocalSyncDataInfoUseCase()
+        val infoJson = json.encodeToString(localSyncDataInfo)
+
+        val backupFile = syncBackupFileManager.getFile()
         backupManager.performBackup(backupFile)
 
         val response = httpClient.post(NetworkApi.Url.UPDATE_BACKUP) {
             val partDataList = formData {
                 append("info", infoJson)
-                append("data", syncFileManager.getChannelProvider(), Headers.build {
+                append("data", syncBackupFileManager.getChannelProvider(), Headers.build {
                     append(HttpHeaders.ContentDisposition, "filename=\"data.zip\"")
                 })
             }
             setBody(MultiPartFormDataContent(partDataList))
         }
 
-        syncFileManager.clean()
+        syncBackupFileManager.clean()
 
         when (response.status) {
             HttpStatusCode.OK -> {
                 appPreferences.lastSyncedDataInfoJson.set(infoJson)
-                SyncState.NoChanges
+                SyncState.Enabled.UpToDate
             }
 
             HttpStatusCode.Unauthorized -> {
-                SyncState.AuthExpired
+                SyncState.Error.AuthExpired
             }
 
             HttpStatusCode.PaymentRequired -> {
-                SyncState.MissingSubscription
+                SyncState.Error.MissingSubscription
             }
 
             else -> throw HttpResponseException(response.status)
         }
     }.getOrElse {
-        syncFileManager.clean()
-        SyncState.Fail(it)
+        syncBackupFileManager.clean()
+        SyncState.Error.Fail(it)
     }
 
 }

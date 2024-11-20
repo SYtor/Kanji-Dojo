@@ -43,7 +43,6 @@ import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigration
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesBackupManager
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesManager
-import ua.syt0r.kanji.core.user_data.preferences.SyncPropertiesObservable
 import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesMigrationManager
 
 val coreModule = module {
@@ -108,8 +107,7 @@ val coreModule = module {
         )
     } binds arrayOf(
         PreferencesManager::class,
-        BackupPropertiesHolder::class,
-        SyncPropertiesObservable::class
+        BackupPropertiesHolder::class
     )
 
     single<PreferencesContract.AppPreferences> { get<PreferencesManager>().appPreferences }

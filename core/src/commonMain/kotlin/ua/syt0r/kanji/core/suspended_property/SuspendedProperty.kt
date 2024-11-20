@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonPrimitive
 interface SuspendedProperty<T> {
 
     val key: String
-    val onModified: SharedFlow<Unit>
+    val onModified: SharedFlow<T>
 
     suspend fun get(): T
     suspend fun set(value: T)

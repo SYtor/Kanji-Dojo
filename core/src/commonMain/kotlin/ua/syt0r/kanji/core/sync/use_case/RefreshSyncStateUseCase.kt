@@ -4,13 +4,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.NetworkApi
-import ua.syt0r.kanji.core.sync.ApiBackupInfo
+import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.core.sync.CurrentSyncDataVersion
 import ua.syt0r.kanji.core.sync.HttpResponseException
+import ua.syt0r.kanji.core.sync.SyncDataInfo
 import ua.syt0r.kanji.core.sync.SyncState
-import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 
@@ -20,61 +20,61 @@ interface RefreshSyncStateUseCase {
 
 class DefaultRefreshSyncStateUseCase(
     private val appPreferences: PreferencesContract.AppPreferences,
+    private val getLocalSyncDataInfoUseCase: GetLocalSyncDataInfoUseCase,
     private val httpClient: HttpClient,
     private val json: Json
 ) : RefreshSyncStateUseCase {
 
     override suspend fun invoke(): SyncState {
+        Logger.logMethod()
         val isSyncEnabled = appPreferences.syncEnabled.get()
         if (!isSyncEnabled) return SyncState.Disabled
 
-        val remoteBackupInfo = kotlin.runCatching {
+        val remoteSyncDataInfo = kotlin.runCatching {
             val response = httpClient.get(NetworkApi.Url.GET_BACKUP_INFO)
 
             when (response.status) {
                 HttpStatusCode.OK -> {
                     val jsonValue = response.bodyAsText()
-                    json.decodeFromString<ApiBackupInfo>(jsonValue)
+                    json.decodeFromString<SyncDataInfo>(jsonValue)
                 }
 
-                HttpStatusCode.NoContent -> return SyncState.PendingUpload
+                HttpStatusCode.NoContent -> return SyncState.Enabled.PendingUpload
                 else -> throw HttpResponseException(response.status)
             }
         }.getOrElse { exception ->
             return when {
-                exception is HttpResponseException &&
-                        exception.statusCode == HttpStatusCode.Unauthorized -> SyncState.AuthExpired
+                exception is HttpResponseException && exception.statusCode == HttpStatusCode.Unauthorized -> {
+                    SyncState.Error.AuthExpired
+                }
 
-                else -> SyncState.Fail(exception)
+                else -> SyncState.Error.Fail(exception)
             }
         }
 
-        val cachedRemoteBackupInfo = appPreferences.lastSyncedDataInfoJson.get()?.let {
-            json.decodeFromString<ApiBackupInfo>(it)
+        val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfoJson.get()?.let {
+            json.decodeFromString<SyncDataInfo>(it)
         }
 
-        val localBackupInfo = ApiBackupInfo(
-            dataId = appPreferences.localDataId.get(),
-            dataVersion = UserDataDatabase.Schema.version,
-            dataTimestamp = appPreferences.localDataTimestamp.get(),
-        )
+        val localSyncDataInfo = getLocalSyncDataInfoUseCase()
 
-        val isLocalDataOutdated = cachedRemoteBackupInfo != null &&
-                remoteBackupInfo != cachedRemoteBackupInfo
-        val isRemoteDataSupported = remoteBackupInfo.dataVersion <= UserDataDatabase.Schema.version
+        val isLocalDataOutdated = cachedRemoteSyncDataInfo != null
+                && remoteSyncDataInfo != cachedRemoteSyncDataInfo
+        val isRemoteDataSupported = remoteSyncDataInfo.dataVersion <= CurrentSyncDataVersion
 
         return when {
-            localBackupInfo == remoteBackupInfo -> SyncState.NoChanges
+            localSyncDataInfo == remoteSyncDataInfo -> SyncState.Enabled.UpToDate
 
             isLocalDataOutdated || !isRemoteDataSupported -> {
                 SyncState.Conflict(
-                    remoteTime = remoteBackupInfo.dataTimestamp
-                        ?.let { Instant.fromEpochMilliseconds(it) }
+                    remoteDataInfo = remoteSyncDataInfo,
+                    localDataInfo = localSyncDataInfo,
+                    cachedDataInfo = cachedRemoteSyncDataInfo
                 )
             }
 
             else -> {
-                SyncState.PendingUpload
+                SyncState.Enabled.PendingUpload
             }
         }
     }

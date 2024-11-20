@@ -45,12 +45,23 @@ fun main(args: Array<String>) = application {
             }
 
             coroutineScope.launch {
-                syncManager.state
-                    .onStart { syncManager.forceSync() }
-                    .filter { it is SyncState.NoChanges || it is SyncState.Canceled }
-                    .take(1)
-                    .collect()
+
+                if (syncManager.state.value !is SyncState.Disabled) {
+
+                    syncManager.state
+                        .onStart { syncManager.forceSync() }
+                        .filter {
+                            it is SyncState.Disabled ||
+                                    it == SyncState.Enabled.UpToDate ||
+                                    it is SyncState.Canceled
+                        }
+                        .take(1)
+                        .collect()
+
+                }
+
                 exitApplication()
+
             }
         },
         state = windowState,
