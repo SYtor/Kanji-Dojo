@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -51,15 +53,14 @@ private fun SyncDialog(
     resolveConflict: (SyncConflictResolveStrategy) -> Unit
 ) {
 
-    val currentState = state.value
+    val currentState = remember { derivedStateOf { state.value } }.value
 
-    when (currentState) {
-        SyncState.Syncing,
-        is SyncState.Error,
-        is SyncState.Conflict -> {
-        }
+    val showDialog = (currentState is SyncState.Loading && currentState.isBlocking) ||
+            currentState is SyncState.Error ||
+            currentState is SyncState.Conflict
 
-        else -> return
+    if (!showDialog) {
+        return
     }
 
     MultiplatformDialog(

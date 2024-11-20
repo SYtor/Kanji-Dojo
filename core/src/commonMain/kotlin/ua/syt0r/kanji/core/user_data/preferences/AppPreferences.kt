@@ -19,16 +19,14 @@ class AppPreferences(
         type = StringSuspendedPropertyType,
         key = "refresh_token",
         initialValue = { null },
-        enableBackup = false,
-        affectSync = false
+        enableBackup = false
     )
 
     override val idToken: SuspendedProperty<String?> = createNullableProperty(
         type = StringSuspendedPropertyType,
         key = "id_token",
         initialValue = { null },
-        enableBackup = false,
-        affectSync = false
+        enableBackup = false
     )
 
     override val syncEnabled: SuspendedProperty<Boolean> = createProperty(
@@ -48,23 +46,20 @@ class AppPreferences(
     override val localDataTimestamp: SuspendedProperty<Long?> = createNullableProperty(
         type = LongSuspendedPropertyType,
         key = "local_data_timestamp",
-        initialValue = { null },
-        affectSync = false
+        initialValue = { null }
     )
 
     override val lastSyncedDataInfoJson: SuspendedProperty<String?> = createNullableProperty(
         type = StringSuspendedPropertyType,
         key = "last_synced_data_info_json",
-        initialValue = { null },
-        affectSync = false
+        initialValue = { null }
     )
 
     override val analyticsEnabled: SuspendedProperty<Boolean> = createProperty(
         type = BooleanSuspendedPropertyType,
         key = "analytics_enabled",
         initialValue = { true },
-        enableBackup = false,
-        affectSync = false
+        enableBackup = false
     )
 
     override val practiceType: SuspendedProperty<PreferencesLetterPracticeType> = createProperty(
@@ -125,13 +120,15 @@ class AppPreferences(
     override val dailyLimitEnabled: SuspendedProperty<Boolean> = createProperty(
         type = BooleanSuspendedPropertyType,
         key = "daily_limit_enabled",
-        initialValue = { true }
+        initialValue = { true },
+        affectSync = true
     )
 
     override val dailyLimitConfigurationJson: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "daily_limit_configuration",
-        initialValue = { "" }
+        initialValue = { "" },
+        affectSync = true
     )
 
     override val reminderEnabled: SuspendedProperty<Boolean> = createProperty(
@@ -145,14 +142,13 @@ class AppPreferences(
         type = LocalTimeSuspendedPropertyType,
         key = "reminder_time",
         initialValue = { LocalTime(hour = 9, minute = 0) },
-        enableBackup = false
+        affectSync = true
     )
 
     override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "last_changes_dialog_version_shown",
-        initialValue = { "" },
-        enableBackup = false
+        initialValue = { "" }
     )
 
     override val tutorialSeen: SuspendedProperty<Boolean> = createProperty(

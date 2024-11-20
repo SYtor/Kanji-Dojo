@@ -8,7 +8,7 @@ interface SuspendedPropertyCreatorScope {
         key: String,
         enableBackup: Boolean = true,
         saveInitialValue: Boolean = false,
-        affectSync: Boolean = true,
+        affectSync: Boolean = false,
         initialValue: () -> ExposedType
     ): SuspendedProperty<ExposedType>
 
@@ -18,7 +18,7 @@ interface SuspendedPropertyCreatorScope {
         key: String,
         enableBackup: Boolean = true,
         saveInitialValue: Boolean = false,
-        affectSync: Boolean = true,
+        affectSync: Boolean = false,
         initialValue: () -> ExposedType?
     ): SuspendedProperty<ExposedType?>
 

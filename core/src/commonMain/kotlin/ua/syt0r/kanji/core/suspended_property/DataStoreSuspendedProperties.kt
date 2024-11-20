@@ -19,8 +19,8 @@ class DataStoreSuspendedProperty<ExposedType, BackingType>(
 
     private val dataStoreKey = type.createKey(key)
 
-    private val _onModifier = MutableSharedFlow<Unit>()
-    override val onModified: SharedFlow<Unit> = _onModifier
+    private val _onModifier = MutableSharedFlow<ExposedType>()
+    override val onModified: SharedFlow<ExposedType> = _onModifier
 
     override suspend fun isModified(): Boolean {
         return dataStore.data.first().contains(dataStoreKey)
@@ -37,7 +37,7 @@ class DataStoreSuspendedProperty<ExposedType, BackingType>(
 
     override suspend fun set(value: ExposedType) {
         internalSet(value = type.convertToBacking(value))
-        _onModifier.emit(Unit)
+        _onModifier.emit(value)
     }
 
     private suspend fun internalSet(value: BackingType) {
@@ -62,8 +62,8 @@ class NullableDataStoreSuspendedProperty<ExposedType, BackingType>(
 
     private val dataStoreKey = type.createKey(key)
 
-    private val _onModifier = MutableSharedFlow<Unit>()
-    override val onModified: SharedFlow<Unit> = _onModifier
+    private val _onModifier = MutableSharedFlow<ExposedType?>()
+    override val onModified: SharedFlow<ExposedType?> = _onModifier
 
     override suspend fun isModified(): Boolean {
         return dataStore.data.first().contains(dataStoreKey)
@@ -80,7 +80,7 @@ class NullableDataStoreSuspendedProperty<ExposedType, BackingType>(
 
     override suspend fun set(value: ExposedType?) {
         internalSet(value = value?.let(type::convertToBacking))
-        _onModifier.emit(Unit)
+        _onModifier.emit(value)
     }
 
     private suspend fun internalSet(value: BackingType?) {

@@ -4,8 +4,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -30,10 +28,6 @@ interface BackupPropertiesHolder {
     val backupProperties: List<SuspendedProperty<*>>
 }
 
-interface SyncPropertiesObservable {
-    val changeEvents: SharedFlow<Unit>
-}
-
 class DataStorePreferencesManager(
     private val dataStore: DataStore<androidx.datastore.preferences.core.Preferences>,
     private val timeUtils: TimeUtils,
@@ -41,18 +35,15 @@ class DataStorePreferencesManager(
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
 ) : PreferencesManager,
     BackupPropertiesHolder,
-    SuspendedPropertyCreatorScope,
-    SyncPropertiesObservable {
+    SuspendedPropertyCreatorScope {
 
     private val _backupProperties = mutableSetOf<SuspendedProperty<*>>()
     override val backupProperties: List<SuspendedProperty<*>>
         get() = _backupProperties.toList()
 
-    private val _syncChangeEvents = MutableSharedFlow<Unit>(replay = 1)
-    override val changeEvents: SharedFlow<Unit> = _syncChangeEvents
-
     override val appPreferences: PreferencesContract.AppPreferences = AppPreferences(this)
-    override val practicePreferences: PreferencesContract.PracticePreferences = PracticePreferences(this)
+    override val practicePreferences: PreferencesContract.PracticePreferences =
+        PracticePreferences(this)
 
     override suspend fun clear() {
         dataStore.edit { it.clear() }
@@ -110,7 +101,6 @@ class DataStorePreferencesManager(
             .onEach {
                 val time = timeUtils.now().toEpochMilliseconds()
                 appPreferences.localDataTimestamp.set(time)
-                _syncChangeEvents.emit(Unit)
             }
             .collect()
     }
