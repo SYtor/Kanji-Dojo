@@ -13,4 +13,6 @@ val mainScreenModule = module {
         )
     }
 
+    single { DeepLinkHandler() }
+
 }

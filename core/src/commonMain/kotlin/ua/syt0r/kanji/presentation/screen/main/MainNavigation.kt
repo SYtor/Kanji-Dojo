@@ -36,6 +36,7 @@ interface MainNavigationState {
     fun navigateBack()
     fun popUpToHome()
     fun navigate(destination: MainDestination)
+    fun navigateToTop(destination: MainDestination)
 }
 
 @Composable
@@ -253,14 +254,16 @@ interface MainDestination {
     }
 
     @Serializable
-    object Account : MainDestination {
+    data class Account(
+        val screenData: AccountScreenContract.ScreenData? = null
+    ) : MainDestination {
 
         override val analyticsName: String = "account"
 
         @Composable
         override fun Content(state: MainNavigationState) {
             val content = koinInject<AccountScreenContract.Content>()
-            content(state)
+            content(state, screenData)
         }
 
     }
@@ -331,7 +334,6 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.Credits.configuration(),
     MainDestination.Sponsor.configuration(),
     MainDestination.DailyLimit.configuration(),
-    MainDestination.Account.configuration(),
     MainDestination.Sync.configuration(),
     MainDestination.DeckPicker::class.configuration(),
     MainDestination.DeckDetails::class.configuration(),
@@ -340,4 +342,5 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.KanjiInfo::class.configuration(),
     MainDestination.LetterPractice::class.configuration(),
     MainDestination.VocabPractice::class.configuration(),
+    MainDestination.Account::class.configuration(),
 )

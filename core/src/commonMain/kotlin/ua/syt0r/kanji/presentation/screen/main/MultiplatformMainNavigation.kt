@@ -60,6 +60,14 @@ fun rememberMultiplatformMainNavigationState(): MainNavigationState {
                 stack.value = stack.value.plus(destination)
             }
 
+            override fun navigateToTop(destination: MainDestination) {
+                val currentStack = stack.value
+                val destinationIndex = currentStack.indexOfFirst { it::class == destination::class }
+                    .takeIf { it != -1 }
+                    ?: (currentStack.size - 1)
+                stack.value = currentStack.take(destinationIndex).plus(destination)
+            }
+
         }
     }
 }
