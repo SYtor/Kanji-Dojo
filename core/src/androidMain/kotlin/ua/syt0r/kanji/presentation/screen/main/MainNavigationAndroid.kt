@@ -21,6 +21,7 @@ import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
+import ua.syt0r.kanji.core.logger.Logger
 import kotlin.reflect.KClass
 
 @Composable
@@ -72,6 +73,15 @@ private class AndroidMainNavigationState(
     override fun navigate(destination: MainDestination) {
         val route = getActualRoute(destination)
         navHostController.navigate(route)
+    }
+
+    override fun navigateToTop(destination: MainDestination) {
+        val destinationRoute = getActualRoute(destination)
+        val popUpToRoute = getRoute(destination::class)
+        Logger.d("destinationRoute[$destinationRoute], popUpToRoute[$popUpToRoute]")
+        navHostController.navigate(destinationRoute) {
+            popUpTo(popUpToRoute) { inclusive = true }
+        }
     }
 
     fun applyDestinations(builder: NavGraphBuilder) {

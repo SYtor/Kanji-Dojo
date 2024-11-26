@@ -19,14 +19,21 @@ import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenCo
 object JvmAccountScreenContent : AccountScreenContract.Content {
 
     @Composable
-    override fun invoke(state: MainNavigationState) {
+    override fun invoke(
+        state: MainNavigationState,
+        data: AccountScreenContract.ScreenData?
+    ) {
 
         val viewModel = getMultiplatformViewModel<JvmAccountScreenContract.ViewModel>()
         val urlHandler = rememberUrlHandler()
 
         LaunchedEffect(Unit) {
             viewModel.state.filterIsInstance<ScreenState.WaitingForSignIn>()
-                .onEach { urlHandler.openInBrowser("https://kanji-dojo.com/account?callbackPort=${it.serverPort}") }
+                .onEach {
+                    urlHandler.openInBrowser(
+                        url = AccountScreenContract.serverAuthUrl(it.serverPort)
+                    )
+                }
                 .collect()
         }
 

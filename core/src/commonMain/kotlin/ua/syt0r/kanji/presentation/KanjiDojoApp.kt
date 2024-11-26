@@ -10,10 +10,12 @@ import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.presentation.common.theme.AppTheme
+import ua.syt0r.kanji.presentation.screen.main.DeepLinkHandler
 import ua.syt0r.kanji.presentation.screen.main.MainScreen
 
 @Composable
 fun KanjiDojoApp(
+    deepLinkHandler: DeepLinkHandler = koinInject(),
     themeManager: ThemeManager = koinInject()
 ) {
     CompositionLocalProvider(LocalThemeManager provides themeManager) {
@@ -22,7 +24,7 @@ fun KanjiDojoApp(
                 Box(
                     modifier = Modifier.safeDrawingPadding()
                 ) {
-                    MainScreen()
+                    MainScreen(deepLinkHandler)
                 }
             }
         }

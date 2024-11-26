@@ -14,6 +14,10 @@ import ua.syt0r.kanji.core.review.PlayServicesReviewManager
 import ua.syt0r.kanji.core.review.ReviewEligibilityUseCase
 import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.GooglePlayLetterPracticeScreenContent
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContent
+import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
@@ -82,6 +86,15 @@ val flavorModule = module {
             purchaseManager = get { it },
             sendSponsorResultsUseCase = get(),
             analyticsManager = get()
+        )
+    }
+
+    single<AccountScreenContract.Content> { GooglePlayAccountScreenContent }
+
+    multiplatformViewModel<GooglePlayAccountScreenContract.ViewModel> {
+        GooglePlayAccountScreenViewModel(
+            coroutineScope = it.component1(),
+            appPreferences = get()
         )
     }
 
