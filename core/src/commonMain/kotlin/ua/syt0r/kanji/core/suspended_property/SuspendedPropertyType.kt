@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -68,6 +69,7 @@ object StringSuspendedPropertyType : SuspendedPropertyType.Raw<String> {
     override fun restore(value: JsonPrimitive): String = value.content
 }
 
+
 class EnumSuspendedPropertyType<T : Enum<T>>(
     private val enumValues: Array<T>
 ) : SuspendedPropertyType.Wrapper<T, String> {
@@ -89,4 +91,10 @@ object LocalTimeSuspendedPropertyType : SuspendedPropertyType.Wrapper<LocalTime,
     override val backingPropertyType = IntSuspendedPropertyType
     override fun convertToBacking(value: LocalTime): Int = value.toSecondOfDay()
     override fun convertToExposed(value: Int): LocalTime = LocalTime.fromSecondOfDay(value)
+}
+
+object LocalDateSuspendedPropertyType : SuspendedPropertyType.Wrapper<LocalDate, Int> {
+    override val backingPropertyType: SuspendedPropertyType.Raw<Int> = IntSuspendedPropertyType
+    override fun convertToBacking(value: LocalDate): Int = value.toEpochDays()
+    override fun convertToExposed(value: Int): LocalDate = LocalDate.fromEpochDays(value)
 }

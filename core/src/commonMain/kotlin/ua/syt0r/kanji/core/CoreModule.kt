@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import kotlinx.serialization.json.Json
 import org.koin.dsl.binds
 import org.koin.dsl.module
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -9,7 +8,6 @@ import ua.syt0r.kanji.core.analytics.PrintAnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataDatabaseProvider
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.SqlDelightAppDataRepository
-import ua.syt0r.kanji.core.auth.addAuthDefinitions
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.backup.BackupRestoreCompletionNotifier
 import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
@@ -48,11 +46,11 @@ import ua.syt0r.kanji.core.user_data.preferences.UserPreferencesMigrationManager
 val coreModule = module {
 
     applySrsDefinitions()
-    addAuthDefinitions()
+    addNetworkClientsDefinitions()
     addSyncDefinitions()
+    addAccountDefinitions()
 
     single<AnalyticsManager> { PrintAnalyticsManager() }
-
 
     single<AppDataRepository> {
         val deferredDatabase = get<AppDataDatabaseProvider>().provideAsync()
@@ -139,11 +137,18 @@ val coreModule = module {
 
     factory<RomajiConverter> { WanakanaRomajiConverter() }
 
-    single { HttpClient(CIO) }
+    single<Json> { Json.Default }
+
+    single<NetworkApi> {
+        DefaultNetworkApi(
+            networkClients = get(),
+            jsonHandler = get()
+        )
+    }
 
     factory<FeedbackManager> {
         DefaultFeedbackManager(
-            httpClient = get(),
+            networkApi = get(),
             userDataProvider = get()
         )
     }

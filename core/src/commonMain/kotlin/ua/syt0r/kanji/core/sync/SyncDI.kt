@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core.sync
 
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
-import ua.syt0r.kanji.core.auth.authHttpClient
 import ua.syt0r.kanji.core.sync.use_case.ApplyRemoteSyncDataUseCase
 import ua.syt0r.kanji.core.sync.use_case.DefaultApplyRemoteSyncDataUseCase
 import ua.syt0r.kanji.core.sync.use_case.DefaultGetLocalSyncDataInfoUseCase
@@ -43,7 +42,7 @@ fun Module.addSyncDefinitions() {
         DefaultRefreshSyncStateUseCase(
             appPreferences = get(),
             getLocalSyncDataInfoUseCase = get(),
-            httpClient = authHttpClient(),
+            networkApi = get(),
             json = Json
         )
     }
@@ -52,7 +51,7 @@ fun Module.addSyncDefinitions() {
         DefaultUploadSyncDataUseCase(
             appPreferences = get(),
             getLocalSyncDataInfoUseCase = get(),
-            httpClient = authHttpClient(),
+            networkApi = get(),
             syncBackupFileManager = get(),
             backupManager = get(),
             json = Json
@@ -61,7 +60,7 @@ fun Module.addSyncDefinitions() {
 
     factory<ApplyRemoteSyncDataUseCase> {
         DefaultApplyRemoteSyncDataUseCase(
-            httpClient = authHttpClient(),
+            networkApi = get(),
             syncBackupFileManager = get(),
             backupManager = get(),
             appPreferences = get()

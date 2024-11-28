@@ -76,7 +76,7 @@ val flavorModule = module {
 
     factory<GooglePlaySendSponsorResultsUseCase> {
         DefaultGooglePlaySendSponsorResultsUseCase(
-            httpClient = get()
+            networkApi = get()
         )
     }
 

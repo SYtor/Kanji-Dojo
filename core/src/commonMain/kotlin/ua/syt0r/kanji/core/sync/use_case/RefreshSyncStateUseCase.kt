@@ -1,14 +1,11 @@
 package ua.syt0r.kanji.core.sync.use_case
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
+import ua.syt0r.kanji.core.HttpResponseException
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.CurrentSyncDataVersion
-import ua.syt0r.kanji.core.sync.HttpResponseException
 import ua.syt0r.kanji.core.sync.SyncDataInfo
 import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
@@ -21,7 +18,7 @@ interface RefreshSyncStateUseCase {
 class DefaultRefreshSyncStateUseCase(
     private val appPreferences: PreferencesContract.AppPreferences,
     private val getLocalSyncDataInfoUseCase: GetLocalSyncDataInfoUseCase,
-    private val httpClient: HttpClient,
+    private val networkApi: NetworkApi,
     private val json: Json
 ) : RefreshSyncStateUseCase {
 
@@ -30,25 +27,13 @@ class DefaultRefreshSyncStateUseCase(
         val isSyncEnabled = appPreferences.syncEnabled.get()
         if (!isSyncEnabled) return SyncState.Disabled
 
-        val remoteSyncDataInfo = kotlin.runCatching {
-            val response = httpClient.get(NetworkApi.Url.GET_BACKUP_INFO)
-
-            when (response.status) {
-                HttpStatusCode.OK -> {
-                    val jsonValue = response.bodyAsText()
-                    json.decodeFromString<SyncDataInfo>(jsonValue)
-                }
-
-                HttpStatusCode.NoContent -> return SyncState.Enabled.PendingUpload
-                else -> throw HttpResponseException(response.status)
-            }
-        }.getOrElse { exception ->
-            return when {
-                exception is HttpResponseException && exception.statusCode == HttpStatusCode.Unauthorized -> {
-                    SyncState.Error.AuthExpired
-                }
-
+        val remoteSyncDataInfo: SyncDataInfo = networkApi.getBackupInfo().getOrElse { exception ->
+            return if (exception is HttpResponseException) when (exception.statusCode) {
+                HttpStatusCode.Unauthorized -> SyncState.Error.AuthExpired
+                HttpStatusCode.NoContent -> SyncState.Enabled.PendingUpload
                 else -> SyncState.Error.Fail(exception)
+            } else {
+                SyncState.Error.Fail(exception)
             }
         }
 
