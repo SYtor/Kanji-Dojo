@@ -1,8 +1,10 @@
 package ua.syt0r.kanji.core.user_data.preferences
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.BooleanSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.EnumSuspendedPropertyType.Companion.enumSuspendedPropertyType
+import ua.syt0r.kanji.core.suspended_property.LocalDateSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.LocalTimeSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.LongSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.StringSuspendedPropertyType
@@ -25,6 +27,20 @@ class AppPreferences(
     override val idToken: SuspendedProperty<String?> = createNullableProperty(
         type = StringSuspendedPropertyType,
         key = "id_token",
+        initialValue = { null },
+        enableBackup = false
+    )
+
+    override val userEmail: SuspendedProperty<String?> = createNullableProperty(
+        type = StringSuspendedPropertyType,
+        key = "user_email",
+        initialValue = { null },
+        enableBackup = false
+    )
+
+    override val subscriptionDue: SuspendedProperty<LocalDate?> = createNullableProperty(
+        type = LocalDateSuspendedPropertyType,
+        key = "subscription_due",
         initialValue = { null },
         enableBackup = false
     )

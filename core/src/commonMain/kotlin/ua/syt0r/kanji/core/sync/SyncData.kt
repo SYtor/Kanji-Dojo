@@ -46,7 +46,3 @@ data class SyncDataInfo(
 )
 
 val CurrentSyncDataVersion = UserDataDatabase.Schema.version
-
-data class HttpResponseException(
-    val statusCode: HttpStatusCode
-) : Throwable()

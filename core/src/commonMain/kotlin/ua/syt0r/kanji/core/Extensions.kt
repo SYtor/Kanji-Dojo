@@ -4,8 +4,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -62,4 +66,14 @@ fun <T> mergeSharedFlows(
     val sharedFlow = MutableSharedFlow<T>()
     coroutineScope.launch { merge(*flows).collect { sharedFlow.emit(it) } }
     return sharedFlow
+}
+
+fun MutableSharedFlow<*>.launchWhenHasSubscribers(
+    coroutineScope: CoroutineScope,
+    block: suspend () -> Unit
+) {
+    subscriptionCount.filter { it > 0 }
+        .take(1)
+        .onEach { block() }
+        .launchIn(coroutineScope)
 }

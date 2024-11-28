@@ -1,70 +1,61 @@
-package ua.syt0r.kanji.core.auth
+package ua.syt0r.kanji.core
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.RefreshTokensParams
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import ua.syt0r.kanji.core.NetworkApi
+import org.koin.core.module.Module
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
-interface AuthManager {
-    val state: StateFlow<AuthState>
-    val httpClient: HttpClient
+interface NetworkClients {
+
+    val unauthenticatedClient: HttpClient
+
+    val authenticatedClient: HttpClient
+    fun invalidateTokens()
+
 }
 
-sealed interface AuthState {
-    object Loading : AuthState
-    object SignedOut : AuthState
-    object Expired : AuthState
-    object SignedIn : AuthState
+fun Module.addNetworkClientsDefinitions() {
+
+    single<NetworkClients> {
+        DefaultNetworkClients(
+            appPreferences = get()
+        )
+    }
+
 }
 
-class DefaultAuthManager(
-    private val appPreferences: PreferencesContract.AppPreferences,
-    private val unauthorisedClient: HttpClient,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
-) : AuthManager {
+class DefaultNetworkClients(
+    private val appPreferences: PreferencesContract.AppPreferences
+) : NetworkClients {
 
-    private val _state = MutableStateFlow<AuthState>(AuthState.Loading)
-    override val state: StateFlow<AuthState> = _state
-
-    override val httpClient: HttpClient
-
-    init {
-
-        httpClient = HttpClient(CIO) {
-            install(Auth) {
-                bearer {
-                    loadTokens(::loadInitialTokens)
-                    refreshTokens(::tokenRefreshHandler)
-                }
+    override val unauthenticatedClient: HttpClient = HttpClient(CIO)
+    override val authenticatedClient: HttpClient = HttpClient(CIO) {
+        install(Auth) {
+            bearer {
+                loadTokens(::loadInitialTokens)
+                refreshTokens(::tokenRefreshHandler)
             }
         }
+    }
 
-        coroutineScope.launch {
-            _state.value = when {
-                loadInitialTokens() == null -> AuthState.SignedOut
-                else -> AuthState.SignedIn
-            }
-        }
-
+    override fun invalidateTokens() {
+        authenticatedClient.authProvider<BearerAuthProvider>()!!.clearToken()
     }
 
     private suspend fun loadInitialTokens(): BearerTokens? {
@@ -88,7 +79,7 @@ class DefaultAuthManager(
         }
 
         val newTokens = runCatching {
-            val response = unauthorisedClient.post(NetworkApi.Url.REFRESH_AUTH_TOKEN) {
+            val response = unauthenticatedClient.post(TOKEN_REFRESH_URL) {
                 val payload = buildJsonObject {
                     put("grant_type", "refresh_token")
                     put("refresh_token", refreshToken)
@@ -110,11 +101,15 @@ class DefaultAuthManager(
             )
         }.getOrElse {
             Logger.d("Id Token refreshing error [$it]")
-            _state.value = AuthState.Expired
             null
         }
 
         return newTokens
+    }
+
+    private companion object {
+        const val PROJECT_KEY = "AIzaSyCP9IzlOBkf9C6VHXBsD7xJr88R-ZOUKsA"
+        const val TOKEN_REFRESH_URL = "https://securetoken.googleapis.com/v1/token?key=$PROJECT_KEY"
     }
 
 }

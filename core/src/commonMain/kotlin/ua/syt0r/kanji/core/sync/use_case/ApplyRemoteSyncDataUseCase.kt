@@ -1,8 +1,5 @@
 package ua.syt0r.kanji.core.sync.use_case
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
@@ -18,19 +15,19 @@ interface ApplyRemoteSyncDataUseCase {
 }
 
 class DefaultApplyRemoteSyncDataUseCase(
-    private val httpClient: HttpClient,
     private val syncBackupFileManager: SyncBackupFileManager,
     private val backupManager: BackupManager,
-    private val appPreferences: PreferencesContract.AppPreferences
+    private val appPreferences: PreferencesContract.AppPreferences,
+    private val networkApi: NetworkApi
 ) : ApplyRemoteSyncDataUseCase {
 
     override suspend fun invoke(): SyncState {
         Logger.logMethod()
 
         kotlin.runCatching {
-            val response = httpClient.get(NetworkApi.Url.GET_BACKUP)
+            val byteReadChannel = networkApi.getBackup().getOrThrow()
 
-            val inputStream = response.bodyAsChannel().toInputStream()
+            val inputStream = byteReadChannel.toInputStream()
             val dataInputStream = DataInputStream(inputStream)
 
             val infoLength = dataInputStream.readInt()
