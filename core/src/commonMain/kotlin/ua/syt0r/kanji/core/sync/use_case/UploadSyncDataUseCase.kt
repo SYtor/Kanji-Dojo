@@ -33,7 +33,7 @@ class DefaultUploadSyncDataUseCase(
         val backupFile = syncBackupFileManager.getFile()
         backupManager.performBackup(backupFile)
 
-        networkApi.updateBackup(
+        networkApi.updateSyncData(
             info = localSyncDataInfo,
             file = syncBackupFileManager.getChannelProvider()
         ).getOrThrow()

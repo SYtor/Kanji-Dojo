@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.core.sync
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
 

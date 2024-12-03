@@ -25,7 +25,7 @@ class DefaultApplyRemoteSyncDataUseCase(
         Logger.logMethod()
 
         kotlin.runCatching {
-            val byteReadChannel = networkApi.getBackup().getOrThrow()
+            val byteReadChannel = networkApi.getSyncData().getOrThrow()
 
             val inputStream = byteReadChannel.toInputStream()
             val dataInputStream = DataInputStream(inputStream)

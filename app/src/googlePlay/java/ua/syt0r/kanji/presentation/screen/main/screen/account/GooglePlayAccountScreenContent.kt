@@ -1,9 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.account
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -11,8 +7,11 @@ import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import ua.syt0r.kanji.core.AccountManager
+import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
@@ -37,9 +36,8 @@ object GooglePlayAccountScreenContent : AccountScreenContract.Content {
             state = viewModel.state.collectAsState(),
             onUpClick = { state.navigateBack() },
             onSignInClick = { urlHandler.openInBrowser(AccountScreenContract.DEEP_LINK_AUTH_URL) },
-            onSignOutClick = {
-                viewModel.signOut()
-            }
+            onSignOutClick = { viewModel.signOut() },
+            refresh = { viewModel.refresh() }
         )
 
     }
@@ -52,12 +50,16 @@ interface GooglePlayAccountScreenContract {
         val state: StateFlow<ScreenState>
         fun signIn(data: AccountScreenContract.ScreenData)
         fun signOut()
+        fun refresh()
     }
 
     interface ScreenState {
         object Loading : ScreenState
         object SignedOut : ScreenState
-        object SignedIn : ScreenState
+        data class SignedIn(
+            val email: String,
+            val subscriptionInfo: SubscriptionInfo
+        ) : ScreenState
     }
 
 }
@@ -67,29 +69,33 @@ fun GooglePlayAccountScreenUI(
     state: State<ScreenState>,
     onUpClick: () -> Unit,
     onSignInClick: () -> Unit,
-    onSignOutClick: () -> Unit
+    onSignOutClick: () -> Unit,
+    refresh: () -> Unit
 ) {
 
     AccountScreenContainer(
+        state = state,
         onUpClick = onUpClick
-    ) {
+    ) { screenState ->
 
-        when (val screenState = state.value) {
+        when (screenState) {
             ScreenState.SignedOut -> {
-                AccountScreenLoggedOutState(
+                AccountScreenSignedOut(
                     openLoginWebPage = onSignInClick
                 )
             }
 
             ScreenState.Loading -> {
-                CircularProgressIndicator()
+                AccountScreenLoading()
             }
 
             is ScreenState.SignedIn -> {
-                Column {
-                    Text("Logged in!")
-                    TextButton(onSignOutClick) { Text("Sign out") }
-                }
+                AccountScreenSignedIn(
+                    email = screenState.email,
+                    subscriptionInfo = screenState.subscriptionInfo,
+                    refresh = refresh,
+                    signOut = onSignOutClick
+                )
             }
         }
 
@@ -98,42 +104,42 @@ fun GooglePlayAccountScreenUI(
 }
 
 class GooglePlayAccountScreenViewModel(
-    private val coroutineScope: CoroutineScope,
-    private val appPreferences: PreferencesContract.AppPreferences
+    coroutineScope: CoroutineScope,
+    private val accountManager: AccountManager
 ) : GooglePlayAccountScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
     override val state: StateFlow<ScreenState> = _state
 
     init {
-        coroutineScope.launch {
 
-            val data = appPreferences.run {
-                AccountScreenContract.ScreenData(
-                    refreshToken = refreshToken.get() ?: return@run null,
-                    idToken = idToken.get() ?: return@run null
-                )
+        accountManager.state
+            .onEach {
+                _state.value = when (it) {
+                    AccountState.Loading -> ScreenState.Loading
+                    AccountState.LoggedOut -> ScreenState.SignedOut
+                    is AccountState.LoggedIn -> ScreenState.SignedIn(
+                        email = it.email,
+                        subscriptionInfo = it.subscriptionInfo
+                    )
+
+                    is AccountState.Error -> TODO()
+                }
             }
+            .launchIn(coroutineScope)
 
-            if (data != null)
-                _state.value = ScreenState.SignedIn
-            else
-                _state.value = ScreenState.SignedOut
-
-        }
     }
 
     override fun signIn(data: AccountScreenContract.ScreenData) {
-        _state.value = ScreenState.Loading
-        coroutineScope.launch {
-            appPreferences.refreshToken.set(data.refreshToken)
-            appPreferences.idToken.set(data.idToken)
-            _state.value = ScreenState.SignedIn
-        }
+        accountManager.signIn(data.refreshToken, data.idToken)
     }
 
     override fun signOut() {
-        _state.value = ScreenState.SignedOut
+        accountManager.signOut()
+    }
+
+    override fun refresh() {
+        accountManager.refreshUserData()
     }
 
 }

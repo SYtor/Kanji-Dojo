@@ -27,7 +27,7 @@ class DefaultRefreshSyncStateUseCase(
         val isSyncEnabled = appPreferences.syncEnabled.get()
         if (!isSyncEnabled) return SyncState.Disabled
 
-        val remoteSyncDataInfo: SyncDataInfo = networkApi.getBackupInfo().getOrElse { exception ->
+        val remoteSyncDataInfo: SyncDataInfo = networkApi.getSyncDataInfo().getOrElse { exception ->
             return if (exception is HttpResponseException) when (exception.statusCode) {
                 HttpStatusCode.Unauthorized -> SyncState.Error.AuthExpired
                 HttpStatusCode.NoContent -> SyncState.Enabled.PendingUpload

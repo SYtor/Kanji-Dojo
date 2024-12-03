@@ -71,7 +71,7 @@ actual val platformComponentsModule: Module = module {
     multiplatformViewModel<JvmAccountScreenContract.ViewModel> {
         JvmAccountScreenViewModel(
             coroutineScope = it.component1(),
-            appPreferences = get()
+            accountManager = get()
         )
     }
 
