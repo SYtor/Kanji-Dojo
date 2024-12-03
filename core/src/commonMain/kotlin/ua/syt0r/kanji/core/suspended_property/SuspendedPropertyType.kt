@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
@@ -93,8 +93,8 @@ object LocalTimeSuspendedPropertyType : SuspendedPropertyType.Wrapper<LocalTime,
     override fun convertToExposed(value: Int): LocalTime = LocalTime.fromSecondOfDay(value)
 }
 
-object LocalDateSuspendedPropertyType : SuspendedPropertyType.Wrapper<LocalDate, Int> {
-    override val backingPropertyType: SuspendedPropertyType.Raw<Int> = IntSuspendedPropertyType
-    override fun convertToBacking(value: LocalDate): Int = value.toEpochDays()
-    override fun convertToExposed(value: Int): LocalDate = LocalDate.fromEpochDays(value)
+object InstantSuspendedPropertyType : SuspendedPropertyType.Wrapper<Instant, Long> {
+    override val backingPropertyType: SuspendedPropertyType.Raw<Long> = LongSuspendedPropertyType
+    override fun convertToBacking(value: Instant): Long = value.toEpochMilliseconds()
+    override fun convertToExposed(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }

@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.core.user_data.preferences
 
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 
@@ -12,7 +12,7 @@ interface PreferencesContract {
         val refreshToken: SuspendedProperty<String?>
         val idToken: SuspendedProperty<String?>
         val userEmail: SuspendedProperty<String?>
-        val subscriptionDue: SuspendedProperty<LocalDate?>
+        val subscriptionDue: SuspendedProperty<Instant?>
 
         val syncEnabled: SuspendedProperty<Boolean>
 

@@ -14,7 +14,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.utils.io.ByteReadChannel
-import kotlinx.datetime.LocalDate
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -24,11 +24,11 @@ import ua.syt0r.kanji.core.sync.SyncDataInfo
 
 interface NetworkApi {
 
-    suspend fun getUserInfo(): Result<UserInfo>
+    suspend fun getUserInfo(): Result<ApiUserInfo>
 
-    suspend fun getBackupInfo(): Result<SyncDataInfo>
-    suspend fun getBackup(): Result<ByteReadChannel>
-    suspend fun updateBackup(info: SyncDataInfo, file: ChannelProvider): Result<Unit>
+    suspend fun getSyncDataInfo(): Result<SyncDataInfo>
+    suspend fun getSyncData(): Result<ByteReadChannel>
+    suspend fun updateSyncData(info: SyncDataInfo, file: ChannelProvider): Result<Unit>
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
@@ -39,10 +39,11 @@ data class HttpResponseException(
     val statusCode: HttpStatusCode
 ) : Throwable()
 
-data class UserInfo(
+@Serializable
+data class ApiUserInfo(
     val email: String,
     val subscription: Boolean,
-    val subscriptionDue: LocalDate?
+    val subscriptionDue: Long?
 )
 
 data class FeedbackApiData(
@@ -62,7 +63,7 @@ class DefaultNetworkApi(
     private val jsonHandler: Json
 ) : NetworkApi {
 
-    override suspend fun getUserInfo(): Result<UserInfo> {
+    override suspend fun getUserInfo(): Result<ApiUserInfo> {
         return runCatching {
             val response = networkClients.authenticatedClient.get(GET_USER_INFO_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
@@ -71,28 +72,28 @@ class DefaultNetworkApi(
         }
     }
 
-    override suspend fun getBackupInfo(): Result<SyncDataInfo> {
+    override suspend fun getSyncDataInfo(): Result<SyncDataInfo> {
         return runCatching {
-            val response = networkClients.authenticatedClient.get(GET_BACKUP_INFO_URL)
+            val response = networkClients.authenticatedClient.get(GET_SYNC_INFO_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
             val json = response.bodyAsText()
             jsonHandler.decodeFromString(json)
         }
     }
 
-    override suspend fun getBackup(): Result<ByteReadChannel> {
+    override suspend fun getSyncData(): Result<ByteReadChannel> {
         return runCatching {
-            val response = networkClients.authenticatedClient.get(GET_BACKUP_URL)
+            val response = networkClients.authenticatedClient.get(GET_SYNC_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
             response.bodyAsChannel()
         }
     }
 
-    override suspend fun updateBackup(info: SyncDataInfo, file: ChannelProvider): Result<Unit> {
+    override suspend fun updateSyncData(info: SyncDataInfo, file: ChannelProvider): Result<Unit> {
         return runCatching {
             val infoJson = jsonHandler.encodeToString(info)
 
-            val response = networkClients.authenticatedClient.post(UPDATE_BACKUP_URL) {
+            val response = networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
                 val partDataList = formData {
                     append("info", infoJson)
                     append("data", file, Headers.build {
@@ -150,10 +151,10 @@ class DefaultNetworkApi(
 
         const val BASE = "http://localhost:8080"
 
-        const val GET_USER_INFO_URL = "$BASE/getUserInfo"
-        const val GET_BACKUP_INFO_URL = "$BASE/getBackupInfo"
-        const val GET_BACKUP_URL = "$BASE/getBackup"
-        const val UPDATE_BACKUP_URL = "$BASE/updateBackup"
+        const val GET_USER_INFO_URL = "$BASE/user/info"
+        const val GET_SYNC_INFO_URL = "$BASE/sync/info"
+        const val GET_SYNC_URL = "$BASE/sync/get"
+        const val UPDATE_SYNC_URL = "$BASE/sync/update"
         const val FEEDBACK_URL = "$BASE/feedback"
         const val SPONSOR_URL = "$BASE/sponsor"
 
