@@ -60,7 +60,8 @@ actual val platformComponentsModule: Module = module {
 
     single<UserDataDatabaseManager> {
         AndroidUserDataDatabaseManager(
-            context = androidContext()
+            context = androidContext(),
+            updateLocalDataTimestampUseCase = get()
         )
     }
 

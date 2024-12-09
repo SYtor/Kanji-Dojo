@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Stable
 interface HomeNavigationState {

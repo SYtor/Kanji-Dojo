@@ -17,7 +17,7 @@ interface PreferencesContract {
         val syncEnabled: SuspendedProperty<Boolean>
 
         val localDataId: SuspendedProperty<String>
-        val localDataTimestamp: SuspendedProperty<Long?>
+        val localDataTimestamp: SuspendedProperty<Instant?>
         val lastSyncedDataInfoJson: SuspendedProperty<String?>
 
         val analyticsEnabled: SuspendedProperty<Boolean>

@@ -26,7 +26,7 @@ interface NetworkApi {
 
     suspend fun getUserInfo(): Result<ApiUserInfo>
 
-    suspend fun getSyncDataInfo(): Result<SyncDataInfo>
+    suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo>
     suspend fun getSyncData(): Result<ByteReadChannel>
     suspend fun updateSyncData(info: SyncDataInfo, file: ChannelProvider): Result<Unit>
 
@@ -39,11 +39,40 @@ data class HttpResponseException(
     val statusCode: HttpStatusCode
 ) : Throwable()
 
+sealed interface ApiRequestIssue {
+
+    object NoConnection : ApiRequestIssue
+    object NotAuthenticated : ApiRequestIssue
+    object NoSubscription : ApiRequestIssue
+    data class Other(val throwable: Throwable) : ApiRequestIssue
+
+    companion object {
+        fun classify(throwable: Throwable): ApiRequestIssue {
+            return if (throwable is HttpResponseException) when (throwable.statusCode) {
+                HttpStatusCode.Unauthorized -> NotAuthenticated
+                HttpStatusCode.PaymentRequired -> NoSubscription
+                else -> Other(throwable)
+            } else {
+                Other(throwable)
+            }
+        }
+    }
+
+}
+
+
 @Serializable
 data class ApiUserInfo(
     val email: String,
     val subscription: Boolean,
     val subscriptionDue: Long?
+)
+
+@Serializable
+data class ApiSyncDataInfo(
+    val dataId: String,
+    val dataVersion: Long,
+    val dataTimestamp: Long?
 )
 
 data class FeedbackApiData(
@@ -72,12 +101,12 @@ class DefaultNetworkApi(
         }
     }
 
-    override suspend fun getSyncDataInfo(): Result<SyncDataInfo> {
+    override suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo> {
         return runCatching {
             val response = networkClients.authenticatedClient.get(GET_SYNC_INFO_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
             val json = response.bodyAsText()
-            jsonHandler.decodeFromString(json)
+            jsonHandler.decodeFromString<ApiSyncDataInfo>(json)
         }
     }
 

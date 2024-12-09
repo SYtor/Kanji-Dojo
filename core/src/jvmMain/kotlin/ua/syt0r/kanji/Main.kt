@@ -13,15 +13,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
 import ua.syt0r.kanji.core.sync.SyncManager
-import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.di.appModules
 import ua.syt0r.kanji.presentation.KanjiDojoApp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -38,32 +32,7 @@ fun main(args: Array<String>) = application {
     val coroutineScope = rememberCoroutineScope()
 
     Window(
-        onCloseRequest = {
-            if (syncManager.state.value is SyncState.Disabled) {
-                exitApplication()
-                return@Window
-            }
-
-            coroutineScope.launch {
-
-                if (syncManager.state.value !is SyncState.Disabled) {
-
-                    syncManager.state
-                        .onStart { syncManager.forceSync() }
-                        .filter {
-                            it is SyncState.Disabled ||
-                                    it == SyncState.Enabled.UpToDate ||
-                                    it is SyncState.Canceled
-                        }
-                        .take(1)
-                        .collect()
-
-                }
-
-                exitApplication()
-
-            }
-        },
+        onCloseRequest = { exitApplication() },
         state = windowState,
         title = resolveString { appName },
         icon = icon

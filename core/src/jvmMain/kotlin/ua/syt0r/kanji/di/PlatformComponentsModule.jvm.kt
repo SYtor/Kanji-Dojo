@@ -58,7 +58,9 @@ actual val platformComponentsModule: Module = module {
     }
 
     single<UserDataDatabaseManager> {
-        JvmUserDataDatabaseManager()
+        JvmUserDataDatabaseManager(
+            updateLocalDataTimestampUseCase = get()
+        )
     }
 
     factory<PlatformFileHandler> {

@@ -6,7 +6,6 @@ import ua.syt0r.kanji.core.suspended_property.BooleanSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.EnumSuspendedPropertyType.Companion.enumSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.InstantSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.LocalTimeSuspendedPropertyType
-import ua.syt0r.kanji.core.suspended_property.LongSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.StringSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyCreatorScope
@@ -59,8 +58,8 @@ class AppPreferences(
         saveInitialValue = true
     )
 
-    override val localDataTimestamp: SuspendedProperty<Long?> = createNullableProperty(
-        type = LongSuspendedPropertyType,
+    override val localDataTimestamp: SuspendedProperty<Instant?> = createNullableProperty(
+        type = InstantSuspendedPropertyType,
         key = "local_data_timestamp",
         initialValue = { null }
     )

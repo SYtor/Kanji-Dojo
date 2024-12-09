@@ -25,7 +25,7 @@ class SqlDelightVocabPracticeRepository(
     private suspend fun <T> UserDataDatabaseManager.runModifyingTransaction(
         block: PracticeQueries.() -> T
     ): T {
-        val result = runTransaction(block = block)
+        val result = runTransaction(isWritingChanges = true, block = block)
         _changesFlow.emit(Unit)
         return result
     }
@@ -66,7 +66,7 @@ class SqlDelightVocabPracticeRepository(
         deleteVocabDeck(id)
     }
 
-    override suspend fun getDecks(): List<VocabDeck> = databaseManager.runTransaction {
+    override suspend fun getDecks(): List<VocabDeck> = databaseManager.runTransaction(false) {
         getVocabDecks().executeAsList().map { VocabDeck(it.id, it.title, it.position.toInt()) }
     }
 
@@ -95,9 +95,10 @@ class SqlDelightVocabPracticeRepository(
         deleteVocabDeckEntry(wordId, deckId)
     }
 
-    override suspend fun getDeckWords(deckId: Long): List<Long> = databaseManager.runTransaction {
-        getVocabDeckEntries(deckId).executeAsList().map { it.word_id }
-    }
+    override suspend fun getDeckWords(deckId: Long): List<Long> = databaseManager
+        .runTransaction(false) {
+            getVocabDeckEntries(deckId).executeAsList().map { it.word_id }
+        }
 
 }
 
