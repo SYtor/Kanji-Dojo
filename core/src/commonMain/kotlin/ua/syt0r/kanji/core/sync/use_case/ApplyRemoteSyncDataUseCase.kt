@@ -1,17 +1,22 @@
 package ua.syt0r.kanji.core.sync.use_case
 
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncBackupFileManager
-import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import java.io.DataInputStream
 
 interface ApplyRemoteSyncDataUseCase {
-    suspend operator fun invoke(): SyncState
+    suspend operator fun invoke(): ApplySyncResult
+}
+
+sealed interface ApplySyncResult {
+    object Success : ApplySyncResult
+    data class Fail(val issue: ApiRequestIssue) : ApplySyncResult
 }
 
 class DefaultApplyRemoteSyncDataUseCase(
@@ -21,10 +26,10 @@ class DefaultApplyRemoteSyncDataUseCase(
     private val networkApi: NetworkApi
 ) : ApplyRemoteSyncDataUseCase {
 
-    override suspend fun invoke(): SyncState {
+    override suspend fun invoke(): ApplySyncResult {
         Logger.logMethod()
 
-        kotlin.runCatching {
+        val result = runCatching {
             val byteReadChannel = networkApi.getSyncData().getOrThrow()
 
             val inputStream = byteReadChannel.toInputStream()
@@ -40,14 +45,14 @@ class DefaultApplyRemoteSyncDataUseCase(
 
             appPreferences.lastSyncedDataInfoJson.set(infoJson)
 
-            syncBackupFileManager.clean()
-
-            return SyncState.Enabled.UpToDate
+            ApplySyncResult.Success
         }.getOrElse {
-            syncBackupFileManager.clean()
-            return SyncState.Error.Fail(it)
+            ApplySyncResult.Fail(ApiRequestIssue.classify(it))
         }
 
+        syncBackupFileManager.clean()
+
+        return result
     }
 
 }

@@ -16,7 +16,7 @@ class DefaultGetLocalSyncDataInfoUseCase(
         return SyncDataInfo(
             dataId = appPreferences.localDataId.get(),
             dataVersion = UserDataDatabase.Schema.version,
-            dataTimestamp = appPreferences.localDataTimestamp.get()
+            dataTimestamp = appPreferences.localDataTimestamp.get()?.toEpochMilliseconds()
         )
     }
 

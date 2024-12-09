@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import ua.syt0r.kanji.core.backup.BackupRestoreEventsProvider
 import ua.syt0r.kanji.core.mergeSharedFlows
 import ua.syt0r.kanji.core.srs.LetterPracticeType
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
@@ -27,7 +26,7 @@ class SqlDelightLetterPracticeRepository(
         notifyDataChange: Boolean = false,
         block: PracticeQueries.() -> T,
     ): T {
-        val result = databaseManager.runTransaction { block() }
+        val result = databaseManager.runTransaction(notifyDataChange) { block() }
         if (notifyDataChange) _changesFlow.emit(Unit)
         return result
     }

@@ -40,7 +40,7 @@ class SqlDelightReviewHistoryRepository(
 
     override suspend fun addReview(
         item: ReviewHistoryItem
-    ) = userDataDatabaseManager.runTransaction {
+    ) = userDataDatabaseManager.runTransaction(true) {
         item.run {
             upsertReview(
                 key = key,
@@ -57,7 +57,7 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getReviews(
         start: Instant,
         end: Instant
-    ): List<ReviewHistoryItem> = userDataDatabaseManager.runTransaction {
+    ): List<ReviewHistoryItem> = userDataDatabaseManager.runTransaction(false) {
         getReviewHistory(start.toEpochMilliseconds(), end.toEpochMilliseconds())
             .executeAsList()
             .map { it.converted() }
@@ -66,7 +66,7 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getFirstReviewTime(
         key: String,
         practiceType: Long
-    ): Instant? = userDataDatabaseManager.runTransaction {
+    ): Instant? = userDataDatabaseManager.runTransaction(false) {
         getFirstReview(key, practiceType)
             .executeAsOneOrNull()
             ?.converted()
@@ -76,31 +76,30 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getDeckLastReview(
         deckId: Long,
         practiceTypes: List<Long>
-    ): Instant? = userDataDatabaseManager.runTransaction {
+    ): Instant? = userDataDatabaseManager.runTransaction(false) {
         getLastDeckReview(deckId, practiceTypes).executeAsOneOrNull()?.MAX
             ?.let { Instant.fromEpochMilliseconds(it) }
     }
 
-    override suspend fun getTotalReviewsCount(): Long = userDataDatabaseManager.runTransaction {
-        getTotalReviewsCount().executeAsOne()
-    }
+    override suspend fun getTotalReviewsCount(): Long = userDataDatabaseManager
+        .runTransaction(false) { getTotalReviewsCount().executeAsOne() }
 
     override suspend fun getUniqueReviewItemsCount(
         practiceTypes: List<Long>
-    ): Long = userDataDatabaseManager.runTransaction {
+    ): Long = userDataDatabaseManager.runTransaction(false) {
         getUniqueReviewItemsCountForPracticeTypes(practiceTypes).executeAsOne()
     }
 
     override suspend fun getTotalPracticeTime(
         singleReviewDurationLimit: Long
-    ): Duration = userDataDatabaseManager.runTransaction {
+    ): Duration = userDataDatabaseManager.runTransaction(false) {
         getTotalReviewsDuration(singleReviewDurationLimit).executeAsOneOrNull()
             ?.SUM
             ?.milliseconds
             ?: Duration.ZERO
     }
 
-    override suspend fun getStreaks() = userDataDatabaseManager.runTransaction {
+    override suspend fun getStreaks() = userDataDatabaseManager.runTransaction(false) {
         getReviewStreaks().executeAsList()
             .map {
                 StreakData(

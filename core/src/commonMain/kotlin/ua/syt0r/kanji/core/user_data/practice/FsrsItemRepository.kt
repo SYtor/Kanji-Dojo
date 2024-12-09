@@ -54,12 +54,12 @@ class SqlDelightFsrsItemRepository(
 
     override suspend fun update(key: SrsCardKey, card: FsrsCard) {
         getCache()[key] = card
-        userDataDatabaseManager.runTransaction { upsertFsrsCard(covert(key, card)) }
+        userDataDatabaseManager.runTransaction(true) { upsertFsrsCard(covert(key, card)) }
         _updatesFlow.emit(Unit)
     }
 
     private suspend fun getCache(): MutableMap<SrsCardKey, FsrsCard> {
-        return inMemoryCache ?: userDataDatabaseManager.runTransaction {
+        return inMemoryCache ?: userDataDatabaseManager.runTransaction(false) {
             getFsrsCards().executeAsList()
                 .associate { SrsCardKey(it.key, it.practice_type) to it.convert() }
                 .toMutableMap()

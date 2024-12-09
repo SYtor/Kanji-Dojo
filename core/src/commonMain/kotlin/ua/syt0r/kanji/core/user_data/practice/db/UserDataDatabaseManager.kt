@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.practice.UpdateLocalDataTimestampUseCase
 import ua.syt0r.kanji.core.userdata.db.PracticeQueries
 import java.io.File
 import java.io.InputStream
@@ -22,7 +23,10 @@ import kotlin.coroutines.CoroutineContext
 
 interface UserDataDatabaseManager {
 
-    suspend fun <T> runTransaction(block: PracticeQueries.() -> T): T
+    suspend fun <T> runTransaction(
+        isWritingChanges: Boolean,
+        block: PracticeQueries.() -> T
+    ): T
 
     suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
@@ -39,7 +43,8 @@ class UserDatabaseInfo(
 
 abstract class BaseUserDataDatabaseManager(
     private val initContext: CoroutineContext,
-    private val queryContext: CoroutineContext
+    private val queryContext: CoroutineContext,
+    private val updateLocalDataTimestampUseCase: UpdateLocalDataTimestampUseCase
 ) : UserDataDatabaseManager {
 
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
@@ -64,11 +69,14 @@ abstract class BaseUserDataDatabaseManager(
     protected abstract fun getDatabaseFile(): File
 
     override suspend fun <T> runTransaction(
+        isWritingChanges: Boolean,
         block: PracticeQueries.() -> T
     ): T {
         return withContext(queryContext) {
             val queries = waitDatabaseConnection().database.practiceQueries
-            queries.transactionWithResult { queries.block() }
+            val result = queries.transactionWithResult { queries.block() }
+            updateLocalDataTimestampUseCase()
+            result
         }
     }
 

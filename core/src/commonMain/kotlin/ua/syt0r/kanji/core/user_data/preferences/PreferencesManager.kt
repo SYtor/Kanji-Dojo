@@ -98,10 +98,7 @@ class DataStorePreferencesManager(
 
     private suspend fun handleSyncAffectingPropertyUpdate(property: SuspendedProperty<*>) {
         property.onModified
-            .onEach {
-                val time = timeUtils.now().toEpochMilliseconds()
-                appPreferences.localDataTimestamp.set(time)
-            }
+            .onEach { appPreferences.localDataTimestamp.set(timeUtils.now()) }
             .collect()
     }
 

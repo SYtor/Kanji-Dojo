@@ -1,6 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -8,6 +8,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,8 +31,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -58,12 +61,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
+import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
-import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.IndicatorCircle
 
 private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
@@ -73,7 +75,7 @@ private val SponsorIcon: ImageVector = Icons.Outlined.Handshake
 fun HomeScreenUI(
     availableTabs: List<HomeScreenTab>,
     selectedTabState: State<HomeScreenTab>,
-    syncState: State<SyncState>,
+    syncIconState: SyncIconState,
     onTabSelected: (HomeScreenTab) -> Unit,
     onSyncButtonClick: () -> Unit,
     onSponsorButtonClick: () -> Unit,
@@ -101,7 +103,7 @@ fun HomeScreenUI(
                     )
 
                     SyncButton(
-                        state = syncState,
+                        state = syncIconState,
                         onClick = onSyncButtonClick
                     )
                 }
@@ -145,7 +147,7 @@ fun HomeScreenUI(
                     },
                     actions = {
                         SyncButton(
-                            state = syncState,
+                            state = syncIconState,
                             onClick = onSyncButtonClick
                         )
                         IconButton(onClick = onSponsorButtonClick) {
@@ -195,7 +197,7 @@ fun HomeScreenUI(
 
 @Composable
 private fun SyncButton(
-    state: State<SyncState>,
+    state: SyncIconState,
     onClick: () -> Unit
 ) {
 
@@ -207,7 +209,7 @@ private fun SyncButton(
             onClick = onClick
         ) {
 
-            val rotation = rememberSyncIconRotation(state)
+            val rotation = rememberSyncIconRotation(state.loading)
 
             Icon(
                 imageVector = Icons.Default.Sync,
@@ -217,13 +219,39 @@ private fun SyncButton(
 
         }
 
-        AnimatedVisibility(
-            visible = state.value == SyncState.Enabled.PendingUpload,
-            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-            enter = scaleIn(),
-            exit = scaleOut()
+        AnimatedContent(
+            targetState = state.indicator.value,
+            transitionSpec = { scaleIn() togetherWith scaleOut() using snapSizeTransform() },
+            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
         ) {
-            IndicatorCircle(MaterialTheme.extraColorScheme.due)
+            when (it) {
+                SyncIconIndicator.None -> {
+
+                }
+
+                SyncIconIndicator.PendingUpload -> {
+                    IndicatorCircle(MaterialTheme.extraColorScheme.due)
+                }
+
+                SyncIconIndicator.Completed -> {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(10.dp)
+                            .background(MaterialTheme.extraColorScheme.success, CircleShape),
+                        tint = MaterialTheme.colorScheme.surface
+                    )
+                }
+
+                SyncIconIndicator.Canceled -> {
+                    IndicatorCircle(MaterialTheme.colorScheme.surfaceVariant)
+                }
+
+                SyncIconIndicator.Error -> {
+                    IndicatorCircle(MaterialTheme.colorScheme.primary)
+                }
+            }
+
         }
 
     }
@@ -231,9 +259,7 @@ private fun SyncButton(
 }
 
 @Composable
-private fun rememberSyncIconRotation(
-    state: State<SyncState>
-): Animatable<Float, AnimationVector1D> {
+private fun rememberSyncIconRotation(animate: State<Boolean>): Animatable<Float, AnimationVector1D> {
     val rotation = remember { Animatable(360f) }
 
     LaunchedEffect(Unit) {
@@ -248,16 +274,12 @@ private fun rememberSyncIconRotation(
 
         var animateLoopJob: Job? = null
 
-        snapshotFlow { state.value }.collect {
-            when (it) {
-                is SyncState.Loading -> {
-                    shouldLoop = true
-                    val currentJob = animateLoopJob
-                    if (currentJob == null || currentJob.isCompleted)
-                        animateLoopJob = launch { animateLoop() }
-                }
-
-                else -> shouldLoop = false
+        snapshotFlow { animate.value }.collect { shouldAnimate ->
+            shouldLoop = shouldAnimate
+            if (shouldAnimate) {
+                val currentJob = animateLoopJob
+                if (currentJob == null || currentJob.isCompleted)
+                    animateLoopJob = launch { animateLoop() }
             }
         }
     }

@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.home.data
+package ua.syt0r.kanji.presentation.screen.main.screen.home
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QueryStats
@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.text.font.FontWeight
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
@@ -86,3 +87,10 @@ enum class HomeScreenTab(
     }
 
 }
+
+data class SyncIconState(
+    val loading: State<Boolean>,
+    val indicator: State<SyncIconIndicator>
+)
+
+enum class SyncIconIndicator { None, PendingUpload, Completed, Canceled, Error }

@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
-import ua.syt0r.kanji.presentation.screen.main.screen.home.data.HomeScreenTab
 
 @Composable
 actual fun rememberHomeNavigationState(): HomeNavigationState {

@@ -1,18 +1,21 @@
 package ua.syt0r.kanji.core.sync.use_case
 
-import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import ua.syt0r.kanji.core.HttpResponseException
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncBackupFileManager
-import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface UploadSyncDataUseCase {
-    suspend operator fun invoke(): SyncState
+    suspend operator fun invoke(): UploadSyncDataResult
+}
+
+sealed interface UploadSyncDataResult {
+    object Success : UploadSyncDataResult
+    data class Fail(val issue: ApiRequestIssue) : UploadSyncDataResult
 }
 
 class DefaultUploadSyncDataUseCase(
@@ -24,7 +27,7 @@ class DefaultUploadSyncDataUseCase(
     private val json: Json
 ) : UploadSyncDataUseCase {
 
-    override suspend fun invoke(): SyncState = kotlin.runCatching {
+    override suspend fun invoke(): UploadSyncDataResult = kotlin.runCatching {
         Logger.logMethod()
 
         val localSyncDataInfo = getLocalSyncDataInfoUseCase()
@@ -41,26 +44,11 @@ class DefaultUploadSyncDataUseCase(
         syncBackupFileManager.clean()
 
         appPreferences.lastSyncedDataInfoJson.set(infoJson)
-        SyncState.Enabled.UpToDate
+
+        UploadSyncDataResult.Success
     }.getOrElse {
         syncBackupFileManager.clean()
-
-        if (it is HttpResponseException) {
-            when (it.statusCode) {
-                HttpStatusCode.Unauthorized -> {
-                    SyncState.Error.AuthExpired
-                }
-
-                HttpStatusCode.PaymentRequired -> {
-                    SyncState.Error.MissingSubscription
-                }
-
-                else -> SyncState.Error.Fail(it)
-            }
-        } else {
-            SyncState.Error.Fail(it)
-        }
-
+        UploadSyncDataResult.Fail(issue = ApiRequestIssue.classify(it))
     }
 
 }
