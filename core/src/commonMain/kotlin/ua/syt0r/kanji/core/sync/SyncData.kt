@@ -16,7 +16,9 @@ sealed interface SyncFeatureState {
         val state: StateFlow<SyncState>
     }
 
-    object Error : SyncFeatureState
+    data class Error(
+        val issue: ApiRequestIssue
+    ) : SyncFeatureState
 
 }
 
@@ -51,7 +53,6 @@ sealed interface SyncState {
 
     sealed interface Error : SyncState {
         data class Api(val issue: ApiRequestIssue) : Error
-        data class Fail(val throwable: Throwable) : Error
     }
 
 }

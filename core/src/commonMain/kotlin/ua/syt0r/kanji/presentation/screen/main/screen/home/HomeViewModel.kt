@@ -47,7 +47,7 @@ class HomeViewModel(
         return when (this) {
             SyncFeatureState.Disabled -> flowOf(SyncIconData())
             SyncFeatureState.Loading -> flowOf(SyncIconData(true))
-            SyncFeatureState.Error -> flowOf(SyncIconData(false, SyncIconIndicator.Error))
+            is SyncFeatureState.Error -> flowOf(SyncIconData(false, SyncIconIndicator.Error))
             is SyncFeatureState.Enabled -> toIconDataFlow()
         }
     }

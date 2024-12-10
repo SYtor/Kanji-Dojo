@@ -159,7 +159,6 @@ class JvmAccountScreenViewModel(
                     )
 
                     is AccountState.Error -> {
-                        it.throwable.printStackTrace()
                         TODO()
                     }
                 }
