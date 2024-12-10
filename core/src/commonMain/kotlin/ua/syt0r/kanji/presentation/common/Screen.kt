@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ScrollableScreenContainer(
+    contentModifier: Modifier = Modifier,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -25,7 +26,8 @@ fun ScrollableScreenContainer(
             .verticalScroll(rememberScrollState())
             .wrapContentWidth()
             .width(400.dp)
-            .padding(20.dp),
+            .padding(20.dp)
+            .then(contentModifier),
         verticalArrangement = verticalArrangement
     ) {
 

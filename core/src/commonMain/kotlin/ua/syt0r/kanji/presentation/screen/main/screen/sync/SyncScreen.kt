@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.sync
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
 @Composable
@@ -13,7 +14,8 @@ fun SyncScreen(
 
     SyncScreenUI(
         state = viewModel.state.collectAsState(),
-        onUpClick = mainNavigationState::navigateBack
+        onUpClick = mainNavigationState::navigateBack,
+        navigateToAccountScreen = { mainNavigationState.navigate(MainDestination.Account()) }
     )
 
 }
