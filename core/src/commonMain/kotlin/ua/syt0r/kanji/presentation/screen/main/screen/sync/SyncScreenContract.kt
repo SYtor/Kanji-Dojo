@@ -13,11 +13,16 @@ interface SyncScreenContract {
 
         object Loading : ScreenState
 
-        data class Loaded(
-            val isSignedIn: Boolean,
-            val isSubscriptionActive: Boolean,
-            val autoSync: MutableState<Boolean>
+        data class Guide(
+            val isSignedIn: Boolean
         ) : ScreenState
+
+        data class SyncEnabled(
+            val autoSync: MutableState<Boolean>,
+            val lastSyncData: String
+        ) : ScreenState
+
+        object AccountError : ScreenState
 
     }
 

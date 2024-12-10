@@ -5,9 +5,14 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.AccountManager
+import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.SubscriptionInfo
 
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract.AppPreferences
 import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreenContract.ScreenState
@@ -15,7 +20,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreenContract.Sc
 
 class SyncScreenViewModel(
     coroutineScope: CoroutineScope,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val accountManager: AccountManager
 ) : SyncScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -27,17 +33,37 @@ class SyncScreenViewModel(
 
     private suspend fun CoroutineScope.loadData() {
 
-        val autoSync = mutableStateOf(appPreferences.syncEnabled.get())
+        accountManager.state
+            .onEach {
+                _state.value = when (it) {
+                    AccountState.Loading -> ScreenState.Loading
+                    AccountState.LoggedOut -> ScreenState.Guide(
+                        isSignedIn = false
+                    )
 
-        snapshotFlow { autoSync.value }
-            .onEach { appPreferences.syncEnabled.set(it) }
-            .launchIn(this)
+                    is AccountState.LoggedIn -> {
+                        if (it.subscriptionInfo is SubscriptionInfo.Active) {
+                            val autoSync = mutableStateOf(appPreferences.syncEnabled.get())
+                            snapshotFlow { autoSync.value }
+                                .drop(1)
+                                .onEach { appPreferences.syncEnabled.set(it) }
+                                .launchIn(this)
 
-        _state.value = ScreenState.Loaded(
-            isSignedIn = appPreferences.idToken.get() != null,
-            isSubscriptionActive = true,
-            autoSync = autoSync
-        )
+                            ScreenState.SyncEnabled(
+                                autoSync = autoSync,
+                                lastSyncData = "-"
+                            )
+                        } else {
+                            ScreenState.Guide(
+                                isSignedIn = true
+                            )
+                        }
+                    }
+
+                    is AccountState.Error -> ScreenState.AccountError
+                }
+            }
+            .collect()
 
     }
 
