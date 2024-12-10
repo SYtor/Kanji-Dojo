@@ -38,7 +38,7 @@ sealed interface AccountState {
     ) : AccountState
 
     data class Error(
-        val throwable: Throwable
+        val issue: ApiRequestIssue
     ) : AccountState
 
 }
@@ -98,7 +98,7 @@ class DefaultAccountManager(
     override fun refreshUserData() {
         coroutineScope.launch {
             val userInfo = networkApi.getUserInfo().getOrElse {
-                _state.value = AccountState.Error(it)
+                _state.value = AccountState.Error(ApiRequestIssue.classify(it))
                 return@launch
             }
 

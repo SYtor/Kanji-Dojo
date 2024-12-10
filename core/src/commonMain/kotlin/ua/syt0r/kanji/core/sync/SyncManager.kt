@@ -62,7 +62,11 @@ class DefaultSyncManager(
     }
 
     override fun cancel() {
-        syncJob?.cancel()
+        intentHandlingSchedulerScope.launch {
+            syncJob?.cancelAndJoin()
+            val state = _state.value as MutableEnabledSyncFeatureState
+            state.setState(SyncState.Canceled)
+        }
     }
 
     override fun resolveConflict(strategy: SyncConflictResolveStrategy) {
@@ -132,7 +136,7 @@ class DefaultSyncManager(
         return accountManager.state.flatMapLatest { accountState ->
             when (accountState) {
                 AccountState.Loading -> flowOf(SyncFeatureState.Loading)
-                is AccountState.Error -> flowOf(SyncFeatureState.Error)
+                is AccountState.Error -> flowOf(SyncFeatureState.Error(accountState.issue))
                 AccountState.LoggedOut -> flowOf(SyncFeatureState.Disabled)
                 is AccountState.LoggedIn -> when (accountState.subscriptionInfo) {
                     is SubscriptionInfo.Expired,

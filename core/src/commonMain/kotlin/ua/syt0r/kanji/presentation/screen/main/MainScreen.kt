@@ -8,8 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.collectLatest
@@ -21,9 +19,7 @@ import kotlinx.coroutines.flow.onEach
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.sync.SyncState
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
-import ua.syt0r.kanji.core.sync.SyncFeatureState
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
@@ -35,7 +31,7 @@ fun MainScreen(
 
     val viewModel = getMultiplatformViewModel<MainContract.ViewModel>()
 
-    val syncState = viewModel.syncFeatureState.collectAsState()
+    val syncState = viewModel.syncDialogState.collectAsState()
     SyncDialog(
         state = syncState,
         onCancelRequest = viewModel::cancelSync,
@@ -52,23 +48,20 @@ fun MainScreen(
 
 @Composable
 private fun SyncDialog(
-    state: State<SyncFeatureState>,
+    state: State<SyncDialogState>,
     onCancelRequest: () -> Unit,
     resolveConflict: (SyncConflictResolveStrategy) -> Unit
 ) {
 
-    val currentState = remember { derivedStateOf { state.value } }.value
-
     val dialogContent: @Composable ColumnScope.() -> Unit
     val dialogButtons: @Composable RowScope.() -> Unit
 
-    when (currentState) {
-        SyncFeatureState.Disabled,
-        SyncFeatureState.Loading -> return
+    when (val currentState = state.value) {
+        SyncDialogState.Hidden -> return
 
-        SyncFeatureState.Error -> {
+        SyncDialogState.Uploading -> {
             dialogContent = {
-                Text("Error... $currentState")
+                Text("Uploading...")
             }
             dialogButtons = {
                 TextButton(
@@ -77,66 +70,60 @@ private fun SyncDialog(
             }
         }
 
-        is SyncFeatureState.Enabled -> {
-
-            when (val activeState = currentState.state.value) {
-                SyncState.Refreshing,
-                SyncState.Canceled,
-                is SyncState.TrackingChanges -> return
-
-                SyncState.Uploading -> {
-                    dialogContent = {
-                        Text("Uploading...")
-                    }
-                    dialogButtons = {
-                        TextButton(
-                            onClick = onCancelRequest
-                        ) { Text("Cancel") }
-                    }
-                }
-
-                SyncState.Downloading -> {
-                    dialogContent = {
-                        Text("Downloading...")
-                    }
-                    dialogButtons = {
-                        TextButton(
-                            onClick = onCancelRequest
-                        ) { Text("Cancel") }
-                    }
-                }
-
-                is SyncState.Conflict -> {
-                    dialogContent = {
-                        Text("Conflict \n $activeState")
-                    }
-                    dialogButtons = {
-                        TextButton(
-                            onClick = {
-                                resolveConflict(SyncConflictResolveStrategy.UploadLocal)
-                            }
-                        ) { Text("Upload") }
-
-                        TextButton(
-                            onClick = {
-                                resolveConflict(SyncConflictResolveStrategy.DownloadRemote)
-                            }
-                        ) { Text("Download") }
-                    }
-                }
-
-                is SyncState.Error -> {
-                    dialogContent = {
-                        Text("Error... $activeState")
-                    }
-                    dialogButtons = {
-                        TextButton(
-                            onClick = onCancelRequest
-                        ) { Text("Cancel") }
-                    }
-                }
+        SyncDialogState.Downloading -> {
+            dialogContent = {
+                Text("Downloading...")
             }
+            dialogButtons = {
+                TextButton(
+                    onClick = onCancelRequest
+                ) { Text("Cancel") }
+            }
+        }
 
+        is SyncDialogState.Conflict -> {
+            dialogContent = {
+                Text("The data on the server differs from local data\n Server data timestamp: ${currentState.remoteDataTime}\nLast time synced: ${currentState.lastSyncTime}")
+            }
+            dialogButtons = {
+                TextButton(
+                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
+                ) { Text("Upload") }
+
+                TextButton(
+                    onClick = { resolveConflict(SyncConflictResolveStrategy.DownloadRemote) }
+                ) { Text("Download") }
+
+                TextButton(
+                    onClick = onCancelRequest
+                ) { Text("Cancel") }
+            }
+        }
+
+        is SyncDialogState.Error -> {
+            dialogContent = {
+                Text("Error $currentState")
+            }
+            dialogButtons = {
+                TextButton(
+                    onClick = onCancelRequest
+                ) { Text("Cancel") }
+            }
+        }
+
+        SyncDialogState.Unsupported -> {
+            dialogContent = {
+                Text("Your data on the server is newer than current app version supports. Update the app to retrieve your data")
+            }
+            dialogButtons = {
+                TextButton(
+                    onClick = onCancelRequest
+                ) { Text("Cancel") }
+
+                TextButton(
+                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
+                ) { Text("Upload") }
+            }
         }
     }
 
