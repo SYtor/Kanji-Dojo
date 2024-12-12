@@ -8,8 +8,8 @@ import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.CurrentSyncDataVersion
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
-import ua.syt0r.kanji.core.sync.SyncDataInfo
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 
 
 interface RefreshSyncStateUseCase {
@@ -20,14 +20,14 @@ interface RefreshSyncStateUseCase {
 sealed interface SyncStateRefreshResult {
 
     data class NoRemoteData(
-        val localDataInfo: SyncDataInfo
+        val localDataInfo: PreferencesSyncDataInfo
     ) : SyncStateRefreshResult
 
     data class WithRemoteData(
         val diffType: SyncDataDiffType,
-        val localDataInfo: SyncDataInfo,
-        val cachedDataInfo: SyncDataInfo?,
-        val remoteDataInfo: SyncDataInfo
+        val localDataInfo: PreferencesSyncDataInfo,
+        val cachedDataInfo: PreferencesSyncDataInfo?,
+        val remoteDataInfo: PreferencesSyncDataInfo
     ) : SyncStateRefreshResult
 
     data class Error(
@@ -56,15 +56,13 @@ class DefaultRefreshSyncStateUseCase(
             return SyncStateRefreshResult.Error(ApiRequestIssue.classify(it))
         }
 
-        val remoteSyncDataInfo = SyncDataInfo(
+        val remoteSyncDataInfo = PreferencesSyncDataInfo(
             dataId = remoteApiSyncDataInfo.dataId,
             dataVersion = remoteApiSyncDataInfo.dataVersion,
             dataTimestamp = remoteApiSyncDataInfo.dataTimestamp
         )
 
-        val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfoJson.get()?.let {
-            json.decodeFromString<SyncDataInfo>(it)
-        }
+        val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfo.get()
 
         val isRemoteDataSupported = remoteSyncDataInfo.dataVersion <= CurrentSyncDataVersion
         val isRemoteDataChangedSinceLastSync = cachedRemoteSyncDataInfo

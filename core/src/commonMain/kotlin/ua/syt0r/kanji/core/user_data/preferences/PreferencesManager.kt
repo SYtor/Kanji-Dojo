@@ -91,8 +91,7 @@ class DataStorePreferencesManager(
         )
 
         if (enableBackup) _backupProperties.add(property)
-        if (affectSync)
-            coroutineScope.launch { handleSyncAffectingPropertyUpdate(property) }
+        if (affectSync) coroutineScope.launch { handleSyncAffectingPropertyUpdate(property) }
         return property
     }
 

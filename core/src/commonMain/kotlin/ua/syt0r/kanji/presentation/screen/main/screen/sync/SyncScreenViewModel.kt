@@ -1,19 +1,18 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.sync
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
 import ua.syt0r.kanji.core.SubscriptionInfo
-
+import ua.syt0r.kanji.core.toLocalDateTime
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract.AppPreferences
 import ua.syt0r.kanji.presentation.screen.main.screen.sync.SyncScreenContract.ScreenState
 
@@ -31,27 +30,24 @@ class SyncScreenViewModel(
         coroutineScope.launch { loadData() }
     }
 
-    private suspend fun CoroutineScope.loadData() {
-
+    private suspend fun loadData() {
         accountManager.state
-            .onEach {
-                _state.value = when (it) {
+            .onEach { accountState ->
+                _state.value = when (accountState) {
                     AccountState.Loading -> ScreenState.Loading
                     AccountState.LoggedOut -> ScreenState.Guide(
                         isSignedIn = false
                     )
 
                     is AccountState.LoggedIn -> {
-                        if (it.subscriptionInfo is SubscriptionInfo.Active) {
-                            val autoSync = mutableStateOf(appPreferences.syncEnabled.get())
-                            snapshotFlow { autoSync.value }
-                                .drop(1)
-                                .onEach { appPreferences.syncEnabled.set(it) }
-                                .launchIn(this)
-
+                        if (accountState.subscriptionInfo is SubscriptionInfo.Active) {
+                            val syncDataInfo = appPreferences.lastSyncedDataInfo.get()
                             ScreenState.SyncEnabled(
-                                autoSync = autoSync,
-                                lastSyncData = "-"
+                                lastSyncData = syncDataInfo?.dataTimestamp
+                                    ?.let { Instant.fromEpochMilliseconds(it) }
+                                    ?.toLocalDateTime()
+                                    ?.format(LocalDateTime.Formats.ISO)
+                                    ?: "-"
                             )
                         } else {
                             ScreenState.Guide(
@@ -64,7 +60,6 @@ class SyncScreenViewModel(
                 }
             }
             .collect()
-
     }
 
 }

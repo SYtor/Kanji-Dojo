@@ -1,12 +1,12 @@
 package ua.syt0r.kanji.core.sync.use_case
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncBackupFileManager
+import ua.syt0r.kanji.core.toApiType
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface UploadSyncDataUseCase {
@@ -31,19 +31,18 @@ class DefaultUploadSyncDataUseCase(
         Logger.logMethod()
 
         val localSyncDataInfo = getLocalSyncDataInfoUseCase()
-        val infoJson = json.encodeToString(localSyncDataInfo)
 
         val backupFile = syncBackupFileManager.getFile()
         backupManager.performBackup(backupFile)
 
         networkApi.updateSyncData(
-            info = localSyncDataInfo,
+            info = localSyncDataInfo.toApiType(),
             file = syncBackupFileManager.getChannelProvider()
         ).getOrThrow()
 
         syncBackupFileManager.clean()
 
-        appPreferences.lastSyncedDataInfoJson.set(infoJson)
+        appPreferences.lastSyncedDataInfo.set(localSyncDataInfo)
 
         UploadSyncDataResult.Success
     }.getOrElse {

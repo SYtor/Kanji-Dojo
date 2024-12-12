@@ -2,6 +2,7 @@ package ua.syt0r.kanji.core.user_data.preferences
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
+import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 
 
@@ -18,7 +19,7 @@ interface PreferencesContract {
 
         val localDataId: SuspendedProperty<String>
         val localDataTimestamp: SuspendedProperty<Instant?>
-        val lastSyncedDataInfoJson: SuspendedProperty<String?>
+        val lastSyncedDataInfo: SuspendedProperty<PreferencesSyncDataInfo?>
 
         val analyticsEnabled: SuspendedProperty<Boolean>
 
@@ -84,3 +85,10 @@ enum class PreferencesTheme { System, Light, Dark }
 enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }
 enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
 enum class PreferencesVocabReadingPriority { Default, Kanji, Kana }
+
+@Serializable
+data class PreferencesSyncDataInfo(
+    val dataId: String,
+    val dataVersion: Long,
+    val dataTimestamp: Long?
+)

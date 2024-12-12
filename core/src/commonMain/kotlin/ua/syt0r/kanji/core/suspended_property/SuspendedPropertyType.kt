@@ -7,10 +7,13 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.long
+import kotlinx.serialization.serializer
 
 sealed interface SuspendedPropertyType<ExposedType, BackingType> {
 
@@ -98,3 +101,25 @@ object InstantSuspendedPropertyType : SuspendedPropertyType.Wrapper<Instant, Lon
     override fun convertToBacking(value: Instant): Long = value.toEpochMilliseconds()
     override fun convertToExposed(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }
+
+
+inline fun <reified T> jsonPojoSuspendedPropertyType(): JsonPojoSuspendedPropertyType<T> {
+    val json = Json.Default
+    return JsonPojoSuspendedPropertyType(
+        serializer = json.serializersModule.serializer<T>(),
+        json = json
+    )
+}
+
+
+class JsonPojoSuspendedPropertyType<T>(
+    private val serializer: KSerializer<T>,
+    private val json: Json
+) : SuspendedPropertyType.Wrapper<T, String> {
+    override val backingPropertyType: SuspendedPropertyType.Raw<String> =
+        StringSuspendedPropertyType
+
+    override fun convertToBacking(value: T): String = json.encodeToString(serializer, value)
+    override fun convertToExposed(value: String): T = json.decodeFromString(serializer, value)
+}
+

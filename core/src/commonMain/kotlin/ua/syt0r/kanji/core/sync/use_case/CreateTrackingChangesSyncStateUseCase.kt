@@ -6,9 +6,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.serialization.json.Json
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncState
-import ua.syt0r.kanji.core.sync.SyncDataInfo
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface CreateTrackingChangesSyncStateUseCase {
@@ -27,9 +26,8 @@ class DefaultCreateTrackingChangesSyncStateUseCase(
     override suspend fun invoke(
         coroutineScope: CoroutineScope
     ): SyncState.TrackingChanges.WithRemoteData {
-        val lastSyncDataInfoFlow = appPreferences.lastSyncedDataInfoJson.onModified
-            .onStart { emit(appPreferences.lastSyncedDataInfoJson.get()) }
-            .map { it?.let { Json.decodeFromString<SyncDataInfo>(it) } }
+        val lastSyncDataInfoFlow = appPreferences.lastSyncedDataInfo.onModified
+            .onStart { emit(appPreferences.lastSyncedDataInfo.get()) }
 
         val localSyncDataInfoFlow = merge(
             appPreferences.localDataId.onModified,
@@ -44,6 +42,7 @@ class DefaultCreateTrackingChangesSyncStateUseCase(
             lastSyncDataInfoFlow,
             localSyncDataInfoFlow
         ) { lastSyncDataInfo, currentSyncDataInfo ->
+            Logger.d("data change, last[$lastSyncDataInfo] current[$currentSyncDataInfo]")
             lastSyncDataInfo != currentSyncDataInfo
         }.stateIn(coroutineScope)
 

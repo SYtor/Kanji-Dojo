@@ -2,9 +2,9 @@ package ua.syt0r.kanji.core.sync
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 
 sealed interface SyncFeatureState {
 
@@ -46,9 +46,9 @@ sealed interface SyncState {
     object Canceled : SyncState
 
     data class Conflict(
-        val remoteDataInfo: SyncDataInfo,
-        val localDataInfo: SyncDataInfo,
-        val cachedDataInfo: SyncDataInfo?
+        val remoteDataInfo: PreferencesSyncDataInfo,
+        val localDataInfo: PreferencesSyncDataInfo,
+        val cachedDataInfo: PreferencesSyncDataInfo?
     ) : SyncState
 
     sealed interface Error : SyncState {
@@ -75,13 +75,6 @@ sealed interface SyncIntent {
 }
 
 enum class SyncConflictResolveStrategy { UploadLocal, DownloadRemote }
-
-@Serializable
-data class SyncDataInfo(
-    val dataId: String,
-    val dataVersion: Long,
-    val dataTimestamp: Long?
-)
 
 enum class SyncDataDiffType { Equal, LocalNewer, RemoteNewer, Incompatible, RemoteUnsupported }
 
