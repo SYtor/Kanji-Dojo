@@ -75,7 +75,7 @@ abstract class BaseUserDataDatabaseManager(
         return withContext(queryContext) {
             val queries = waitDatabaseConnection().database.practiceQueries
             val result = queries.transactionWithResult { queries.block() }
-            updateLocalDataTimestampUseCase()
+            if (isWritingChanges) updateLocalDataTimestampUseCase()
             result
         }
     }

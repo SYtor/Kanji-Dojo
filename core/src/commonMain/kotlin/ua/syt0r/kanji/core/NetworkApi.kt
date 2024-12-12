@@ -13,6 +13,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.util.network.UnresolvedAddressException
 import io.ktor.utils.io.ByteReadChannel
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -48,12 +49,17 @@ sealed interface ApiRequestIssue {
 
     companion object {
         fun classify(throwable: Throwable): ApiRequestIssue {
-            return if (throwable is HttpResponseException) when (throwable.statusCode) {
-                HttpStatusCode.Unauthorized -> NotAuthenticated
-                HttpStatusCode.PaymentRequired -> NoSubscription
-                else -> Other(throwable)
-            } else {
-                Other(throwable)
+            return when (throwable) {
+                is UnresolvedAddressException -> NoConnection
+                is HttpResponseException -> when (throwable.statusCode) {
+                    HttpStatusCode.Unauthorized -> NotAuthenticated
+                    HttpStatusCode.PaymentRequired -> NoSubscription
+                    else -> Other(throwable)
+                }
+
+                else -> {
+                    Other(throwable)
+                }
             }
         }
     }

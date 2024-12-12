@@ -94,7 +94,7 @@ val flavorModule = module {
     multiplatformViewModel<GooglePlayAccountScreenContract.ViewModel> {
         GooglePlayAccountScreenViewModel(
             coroutineScope = it.component1(),
-            appPreferences = get()
+            accountManager = get()
         )
     }
 

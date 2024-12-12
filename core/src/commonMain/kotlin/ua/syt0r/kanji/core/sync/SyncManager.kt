@@ -13,18 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onSubscription
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.use_case.HandleSyncIntentUseCase
-import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface SyncManager {
     val state: StateFlow<SyncFeatureState>
@@ -36,7 +32,6 @@ interface SyncManager {
 
 class DefaultSyncManager(
     private val accountManager: AccountManager,
-    private val appPreferences: PreferencesContract.AppPreferences,
     private val handleSyncIntentUseCase: HandleSyncIntentUseCase,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SyncManager {
@@ -133,31 +128,19 @@ class DefaultSyncManager(
     }
 
     private fun syncFeatureStateFlow(): Flow<SyncFeatureState> {
-        return accountManager.state.flatMapLatest { accountState ->
+        return accountManager.state.map { accountState ->
             when (accountState) {
-                AccountState.Loading -> flowOf(SyncFeatureState.Loading)
-                is AccountState.Error -> flowOf(SyncFeatureState.Error(accountState.issue))
-                AccountState.LoggedOut -> flowOf(SyncFeatureState.Disabled)
+                AccountState.Loading -> SyncFeatureState.Loading
+                is AccountState.Error -> SyncFeatureState.Error(accountState.issue)
+                AccountState.LoggedOut -> SyncFeatureState.Disabled
                 is AccountState.LoggedIn -> when (accountState.subscriptionInfo) {
                     is SubscriptionInfo.Expired,
-                    SubscriptionInfo.Inactive -> flowOf(SyncFeatureState.Disabled)
+                    SubscriptionInfo.Inactive -> SyncFeatureState.Disabled
 
-                    is SubscriptionInfo.Active -> activeSubscriptionStateFlow()
+                    is SubscriptionInfo.Active -> MutableEnabledSyncFeatureState()
                 }
             }
         }
-    }
-
-    private fun activeSubscriptionStateFlow(): Flow<SyncFeatureState> {
-        return appPreferences.syncEnabled.onModified
-            .onSubscription { emit(appPreferences.syncEnabled.get()) }
-            .map { syncEnabled ->
-                if (syncEnabled) {
-                    MutableEnabledSyncFeatureState()
-                } else {
-                    SyncFeatureState.Disabled
-                }
-            }
     }
 
 }
