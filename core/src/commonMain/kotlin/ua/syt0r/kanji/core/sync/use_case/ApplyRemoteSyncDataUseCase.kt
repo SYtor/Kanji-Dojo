@@ -2,12 +2,15 @@ package ua.syt0r.kanji.core.sync.use_case
 
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import ua.syt0r.kanji.core.ApiRequestIssue
+import ua.syt0r.kanji.core.ApiSyncDataInfo
 import ua.syt0r.kanji.core.NetworkApi
 import ua.syt0r.kanji.core.backup.BackupManager
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncBackupFileManager
+import ua.syt0r.kanji.core.toPreferencesType
 import ua.syt0r.kanji.core.transferToCompat
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.presentation.common.json
 import java.io.DataInputStream
 
 interface ApplyRemoteSyncDataUseCase {
@@ -39,11 +42,14 @@ class DefaultApplyRemoteSyncDataUseCase(
             val infoJson = dataInputStream.readUTF()
             Logger.d("infoLength[$infoLength] infoJson[$infoJson]")
 
+            val syncDataInfo = json.decodeFromString<ApiSyncDataInfo>(infoJson)
+                .toPreferencesType()
+
             inputStream.transferToCompat(syncBackupFileManager.outputStream())
 
             backupManager.restore(syncBackupFileManager.getFile())
 
-            appPreferences.lastSyncedDataInfoJson.set(infoJson)
+            appPreferences.lastSyncedDataInfo.set(syncDataInfo)
 
             ApplySyncResult.Success
         }.getOrElse {

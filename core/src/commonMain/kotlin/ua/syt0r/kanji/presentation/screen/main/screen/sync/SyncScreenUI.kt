@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -80,21 +79,9 @@ fun SyncScreenUI(
             ScrollableScreenContainer {
                 ListItem(
                     modifier = Modifier.clip(MaterialTheme.shapes.medium)
-                        .clickable { screenState.autoSync.run { value = !value } },
-                    headlineContent = { Text("Auto sync") },
-                    supportingContent = { Text("Update remote data when closing the application") },
-                    trailingContent = {
-                        Switch(
-                            checked = screenState.autoSync.value,
-                            onCheckedChange = { screenState.autoSync.value = it }
-                        )
-                    }
-                )
-
-                ListItem(
-                    modifier = Modifier.clip(MaterialTheme.shapes.medium)
                         .clickable { },
                     headlineContent = { Text("Sync now") },
+                    supportingContent = { Text("Last sync time: ${screenState.lastSyncData}") },
                     trailingContent = { Icon(Icons.Default.Refresh, null) }
                 )
             }

@@ -9,6 +9,7 @@ import ua.syt0r.kanji.core.suspended_property.LocalTimeSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.StringSuspendedPropertyType
 import ua.syt0r.kanji.core.suspended_property.SuspendedProperty
 import ua.syt0r.kanji.core.suspended_property.SuspendedPropertyCreatorScope
+import ua.syt0r.kanji.core.suspended_property.jsonPojoSuspendedPropertyType
 import java.util.UUID
 
 class AppPreferences(
@@ -64,8 +65,8 @@ class AppPreferences(
         initialValue = { null }
     )
 
-    override val lastSyncedDataInfoJson: SuspendedProperty<String?> = createNullableProperty(
-        type = StringSuspendedPropertyType,
+    override val lastSyncedDataInfo: SuspendedProperty<PreferencesSyncDataInfo?> = createNullableProperty(
+        type = jsonPojoSuspendedPropertyType(),
         key = "last_synced_data_info_json",
         initialValue = { null }
     )

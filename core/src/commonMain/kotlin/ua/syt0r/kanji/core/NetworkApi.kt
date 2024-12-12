@@ -20,7 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import ua.syt0r.kanji.core.sync.SyncDataInfo
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 
 interface NetworkApi {
 
@@ -28,7 +28,7 @@ interface NetworkApi {
 
     suspend fun getSyncDataInfo(): Result<ApiSyncDataInfo>
     suspend fun getSyncData(): Result<ByteReadChannel>
-    suspend fun updateSyncData(info: SyncDataInfo, file: ChannelProvider): Result<Unit>
+    suspend fun updateSyncData(info: ApiSyncDataInfo, file: ChannelProvider): Result<Unit>
 
     suspend fun postFeedback(data: FeedbackApiData): Result<Unit>
     suspend fun postDonationPurchase(data: DonationPurchaseApiData): Result<Unit>
@@ -75,6 +75,11 @@ data class ApiSyncDataInfo(
     val dataTimestamp: Long?
 )
 
+fun ApiSyncDataInfo.toPreferencesType() =
+    PreferencesSyncDataInfo(dataId, dataVersion, dataTimestamp)
+
+fun PreferencesSyncDataInfo.toApiType() = ApiSyncDataInfo(dataId, dataVersion, dataTimestamp)
+
 data class FeedbackApiData(
     val topic: String,
     val message: String,
@@ -118,7 +123,10 @@ class DefaultNetworkApi(
         }
     }
 
-    override suspend fun updateSyncData(info: SyncDataInfo, file: ChannelProvider): Result<Unit> {
+    override suspend fun updateSyncData(
+        info: ApiSyncDataInfo,
+        file: ChannelProvider
+    ): Result<Unit> {
         return runCatching {
             val infoJson = jsonHandler.encodeToString(info)
 

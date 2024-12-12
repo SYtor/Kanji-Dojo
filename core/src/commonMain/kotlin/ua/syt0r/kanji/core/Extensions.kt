@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.logger.Logger
 import java.io.IOException
 import java.io.InputStream
@@ -77,3 +79,5 @@ fun MutableSharedFlow<*>.launchWhenHasSubscribers(
         .onEach { block() }
         .launchIn(coroutineScope)
 }
+
+fun Instant.toLocalDateTime() = toLocalDateTime(TimeZone.currentSystemDefault())
