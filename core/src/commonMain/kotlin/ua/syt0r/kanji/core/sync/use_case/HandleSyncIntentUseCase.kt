@@ -34,6 +34,11 @@ class DefaultHandleSyncIntentUseCase(
                 val refreshResult = refreshSyncStateUseCase()
                 Logger.d("Refresh sync, refreshResult[$refreshResult]")
 
+                refreshResult.asConflictSyncState()?.let {
+                    emit(it)
+                    return@flow
+                }
+
                 val updatedSyncState = refreshResult.toActiveSyncState(coroutineScope)
                 emit(updatedSyncState)
             }
@@ -56,16 +61,8 @@ class DefaultHandleSyncIntentUseCase(
                     return@flow
                 }
 
-                if (
-                    refreshResult is SyncStateRefreshResult.WithRemoteData &&
-                    refreshResult.diffType == SyncDataDiffType.Incompatible
-                ) {
-                    val updatedState = SyncState.Conflict(
-                        remoteDataInfo = refreshResult.remoteDataInfo,
-                        localDataInfo = refreshResult.localDataInfo,
-                        cachedDataInfo = refreshResult.cachedDataInfo
-                    )
-                    emit(updatedState)
+                refreshResult.asConflictSyncState()?.let {
+                    emit(it)
                     return@flow
                 }
 
@@ -143,6 +140,20 @@ class DefaultHandleSyncIntentUseCase(
             }
 
             is SyncStateRefreshResult.Error -> SyncState.Error.Api(issue)
+        }
+    }
+
+    private fun SyncStateRefreshResult.asConflictSyncState(): SyncState.Conflict? {
+        return takeIf {
+            it is SyncStateRefreshResult.WithRemoteData &&
+                    it.diffType == SyncDataDiffType.Incompatible
+        }?.run {
+            this as SyncStateRefreshResult.WithRemoteData
+            SyncState.Conflict(
+                remoteDataInfo = remoteDataInfo,
+                localDataInfo = localDataInfo,
+                cachedDataInfo = cachedDataInfo
+            )
         }
     }
 

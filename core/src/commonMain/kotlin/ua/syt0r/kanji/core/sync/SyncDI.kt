@@ -19,7 +19,6 @@ fun Module.addSyncDefinitions() {
 
     single<SyncManager> {
         DefaultSyncManager(
-            appPreferences = get(),
             accountManager = get(),
             handleSyncIntentUseCase = get()
         )
