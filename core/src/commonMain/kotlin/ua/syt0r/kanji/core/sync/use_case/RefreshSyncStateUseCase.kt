@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.core.sync.use_case
 
 import io.ktor.http.HttpStatusCode
-import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.HttpResponseException
 import ua.syt0r.kanji.core.NetworkApi
@@ -40,8 +39,7 @@ sealed interface SyncStateRefreshResult {
 class DefaultRefreshSyncStateUseCase(
     private val appPreferences: PreferencesContract.AppPreferences,
     private val getLocalSyncDataInfoUseCase: GetLocalSyncDataInfoUseCase,
-    private val networkApi: NetworkApi,
-    private val json: Json
+    private val networkApi: NetworkApi
 ) : RefreshSyncStateUseCase {
 
     override suspend fun invoke(): SyncStateRefreshResult {

@@ -31,7 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -63,7 +63,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.dashboard_common.IndicatorCircle
@@ -221,30 +220,42 @@ private fun SyncButton(
 
         AnimatedContent(
             targetState = state.indicator.value,
-            transitionSpec = { scaleIn() togetherWith scaleOut() using snapSizeTransform() },
+            transitionSpec = { scaleIn() togetherWith scaleOut() },
             modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
         ) {
             when (it) {
-                SyncIconIndicator.None -> {
-
+                SyncIconIndicator.Disabled,
+                SyncIconIndicator.Conflict -> {
+                    Box(Modifier.size(10.dp))
                 }
 
                 SyncIconIndicator.PendingUpload -> {
                     IndicatorCircle(MaterialTheme.extraColorScheme.due)
                 }
 
-                SyncIconIndicator.Completed -> {
+                SyncIconIndicator.UpToDate -> {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        modifier = Modifier.size(10.dp)
-                            .background(MaterialTheme.extraColorScheme.success, CircleShape),
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(
+                                color = MaterialTheme.extraColorScheme.success,
+                                shape = MaterialTheme.shapes.extraSmall
+                            ),
                         tint = MaterialTheme.colorScheme.surface
                     )
                 }
 
                 SyncIconIndicator.Canceled -> {
-                    IndicatorCircle(MaterialTheme.colorScheme.surfaceVariant)
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                shape = RoundedCornerShape(2.dp)
+                            )
+                    )
                 }
 
                 SyncIconIndicator.Error -> {

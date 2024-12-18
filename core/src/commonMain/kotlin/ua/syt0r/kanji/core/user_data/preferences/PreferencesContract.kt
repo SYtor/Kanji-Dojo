@@ -15,8 +15,6 @@ interface PreferencesContract {
         val userEmail: SuspendedProperty<String?>
         val subscriptionDue: SuspendedProperty<Instant?>
 
-        val syncEnabled: SuspendedProperty<Boolean>
-
         val localDataId: SuspendedProperty<String>
         val localDataTimestamp: SuspendedProperty<Instant?>
         val lastSyncedDataInfo: SuspendedProperty<PreferencesSyncDataInfo?>

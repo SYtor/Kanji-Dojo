@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
@@ -27,6 +28,7 @@ class DefaultHandleSyncIntentUseCase(
     ): Flow<SyncState> {
 
         return when (intent) {
+            SyncIntent.Cancel -> flowOf(SyncState.Canceled)
             SyncIntent.Refresh -> flow {
                 emit(SyncState.Refreshing)
                 Logger.d("Handling refresh intent")
@@ -145,11 +147,11 @@ class DefaultHandleSyncIntentUseCase(
 
     private fun SyncStateRefreshResult.asConflictSyncState(): SyncState.Conflict? {
         return takeIf {
-            it is SyncStateRefreshResult.WithRemoteData &&
-                    it.diffType == SyncDataDiffType.Incompatible
+            it is SyncStateRefreshResult.WithRemoteData && it.diffType != SyncDataDiffType.Equal
         }?.run {
             this as SyncStateRefreshResult.WithRemoteData
             SyncState.Conflict(
+                diffType = diffType,
                 remoteDataInfo = remoteDataInfo,
                 localDataInfo = localDataInfo,
                 cachedDataInfo = cachedDataInfo

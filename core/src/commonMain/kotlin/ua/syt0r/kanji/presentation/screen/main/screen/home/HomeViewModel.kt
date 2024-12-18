@@ -19,11 +19,11 @@ class HomeViewModel(
 
     private data class SyncIconData(
         val isLoading: Boolean = false,
-        val indicator: SyncIconIndicator = SyncIconIndicator.None
+        val indicator: SyncIconIndicator = SyncIconIndicator.Disabled
     )
 
     private val syncLoading = mutableStateOf(false)
-    private val syncIndicator = mutableStateOf(SyncIconIndicator.None)
+    private val syncIndicator = mutableStateOf(SyncIconIndicator.Disabled)
 
     override val syncIconState = SyncIconState(syncLoading, syncIndicator)
 
@@ -40,7 +40,13 @@ class HomeViewModel(
     }
 
     override fun sync() {
-        syncManager.sync()
+        when (val syncState = syncManager.state.value) {
+            SyncFeatureState.Disabled,
+            SyncFeatureState.Loading,
+            is SyncFeatureState.Error -> Unit
+
+            is SyncFeatureState.Enabled -> syncState.sync()
+        }
     }
 
     private fun SyncFeatureState.toIconDataFlow(): Flow<SyncIconData> {
@@ -64,13 +70,13 @@ class HomeViewModel(
                         isLoading = false,
                         indicator = when {
                             uploadAvailable -> SyncIconIndicator.PendingUpload
-                            else -> SyncIconIndicator.Completed
+                            else -> SyncIconIndicator.UpToDate
                         }
                     )
                 }
 
                 SyncState.Canceled -> flowOf(SyncIconData(false, SyncIconIndicator.Canceled))
-                is SyncState.Conflict -> flowOf(SyncIconData(false, SyncIconIndicator.None))
+                is SyncState.Conflict -> flowOf(SyncIconData(false, SyncIconIndicator.Disabled))
                 is SyncState.Error -> flowOf(SyncIconData(false, SyncIconIndicator.Error))
             }
         }
