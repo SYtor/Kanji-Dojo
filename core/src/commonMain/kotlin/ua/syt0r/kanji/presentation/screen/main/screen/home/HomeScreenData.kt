@@ -93,4 +93,11 @@ data class SyncIconState(
     val indicator: State<SyncIconIndicator>
 )
 
-enum class SyncIconIndicator { None, PendingUpload, Completed, Canceled, Error }
+enum class SyncIconIndicator {
+    Disabled,
+    PendingUpload,
+    UpToDate,
+    Canceled,
+    Error,
+    Conflict
+}

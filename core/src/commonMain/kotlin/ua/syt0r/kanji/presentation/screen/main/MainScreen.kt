@@ -1,26 +1,31 @@
 package ua.syt0r.kanji.presentation.screen.main
 
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import org.koin.compose.koinInject
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
-import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 
@@ -30,108 +35,34 @@ fun MainScreen(
 ) {
 
     val viewModel = getMultiplatformViewModel<MainContract.ViewModel>()
+    val navigationState = rememberMainNavigationState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val syncState = viewModel.syncDialogState.collectAsState()
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) {
+        MainNavigation(navigationState)
+    }
+
     SyncDialog(
-        state = syncState,
-        onCancelRequest = viewModel::cancelSync,
+        state = viewModel.syncDialogState.collectAsState(),
+        cancelSync = viewModel::cancelSync,
         resolveConflict = viewModel::resolveConflict
     )
 
-    val navigationState = rememberMainNavigationState()
-    MainNavigation(navigationState)
+    HandleDeepLinksLaunchedEffect(
+        deepLinkHandler = deepLinkHandler,
+        navigationState = navigationState
+    )
 
-    HandleDeepLinksLaunchedEffect(deepLinkHandler, navigationState)
-    HandleScreenReportsLaunchedEffect(navigationState)
+    HandleScreenReportsLaunchedEffect(
+        navigationState = navigationState
+    )
 
-}
-
-@Composable
-private fun SyncDialog(
-    state: State<SyncDialogState>,
-    onCancelRequest: () -> Unit,
-    resolveConflict: (SyncConflictResolveStrategy) -> Unit
-) {
-
-    val dialogContent: @Composable ColumnScope.() -> Unit
-    val dialogButtons: @Composable RowScope.() -> Unit
-
-    when (val currentState = state.value) {
-        SyncDialogState.Hidden -> return
-
-        SyncDialogState.Uploading -> {
-            dialogContent = {
-                Text("Uploading...")
-            }
-            dialogButtons = {
-                TextButton(
-                    onClick = onCancelRequest
-                ) { Text("Cancel") }
-            }
-        }
-
-        SyncDialogState.Downloading -> {
-            dialogContent = {
-                Text("Downloading...")
-            }
-            dialogButtons = {
-                TextButton(
-                    onClick = onCancelRequest
-                ) { Text("Cancel") }
-            }
-        }
-
-        is SyncDialogState.Conflict -> {
-            dialogContent = {
-                Text("The data on the server differs from local data\n Server data timestamp: ${currentState.remoteDataTime}\nLast time synced: ${currentState.lastSyncTime}")
-            }
-            dialogButtons = {
-                TextButton(
-                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
-                ) { Text("Upload") }
-
-                TextButton(
-                    onClick = { resolveConflict(SyncConflictResolveStrategy.DownloadRemote) }
-                ) { Text("Download") }
-
-                TextButton(
-                    onClick = onCancelRequest
-                ) { Text("Cancel") }
-            }
-        }
-
-        is SyncDialogState.Error -> {
-            dialogContent = {
-                Text("Error $currentState")
-            }
-            dialogButtons = {
-                TextButton(
-                    onClick = onCancelRequest
-                ) { Text("Cancel") }
-            }
-        }
-
-        SyncDialogState.Unsupported -> {
-            dialogContent = {
-                Text("Your data on the server is newer than current app version supports. Update the app to retrieve your data")
-            }
-            dialogButtons = {
-                TextButton(
-                    onClick = onCancelRequest
-                ) { Text("Cancel") }
-
-                TextButton(
-                    onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
-                ) { Text("Upload") }
-            }
-        }
-    }
-
-    MultiplatformDialog(
-        onDismissRequest = {},
-        title = { Text(text = "Sync") },
-        content = dialogContent,
-        buttons = dialogButtons
+    HandleSyncErrorSnackbarsLaunchedEffect(
+        snackbarHostState = snackbarHostState,
+        syncDialogState = viewModel.syncDialogState,
+        navigationState = navigationState
     )
 
 }
@@ -185,4 +116,60 @@ private fun HandleScreenReportsLaunchedEffect(navigationState: MainNavigationSta
             .onEach { analyticsManager.setScreen(it) }
             .launchIn(this)
     }
+}
+
+@Composable
+private fun HandleSyncErrorSnackbarsLaunchedEffect(
+    snackbarHostState: SnackbarHostState,
+    syncDialogState: StateFlow<SyncDialogState>,
+    navigationState: MainNavigationState
+) {
+
+    LaunchedEffect(Unit) {
+        val currentDestinationFlow = snapshotFlow { navigationState.currentDestination.value }
+            .filterNotNull()
+
+        syncDialogState.filterIsInstance<SyncDialogState.Error>()
+            .flatMapLatest { currentState ->
+                currentDestinationFlow
+                    .filterNot { destination ->
+                        destination is MainDestination.Account || destination is MainDestination.Sync
+                    }
+                    .take(1)
+                    .map { currentState }
+            }
+            .collectLatest { currentState ->
+                if (currentState.showDialog.value)
+                    return@collectLatest
+
+                val result = snackbarHostState.showSnackbar(
+                    message = currentState.snackbarMessage(),
+                    actionLabel = "Details",
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Long
+                )
+
+                if (result == SnackbarResult.ActionPerformed) {
+                    currentState.showDialog.value = true
+                }
+            }
+    }
+
+}
+
+private fun SyncDialogState.Error.snackbarMessage(): String {
+    val baseMessage = "Sync Error"
+    val extraMessage = when (this) {
+        is SyncDialogState.Error.Api -> {
+            when (issue) {
+                ApiRequestIssue.NoConnection -> "No Connection"
+                ApiRequestIssue.NoSubscription -> "Subscription expired"
+                ApiRequestIssue.NotAuthenticated -> "Sign in data expired"
+                is ApiRequestIssue.Other -> null
+            }
+        }
+
+        is SyncDialogState.Error.Unsupported -> "Remote data unsupported"
+    }
+    return listOfNotNull(baseMessage, extraMessage).joinToString(": ")
 }

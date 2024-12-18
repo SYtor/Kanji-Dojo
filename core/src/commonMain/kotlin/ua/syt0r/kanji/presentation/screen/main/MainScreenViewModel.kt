@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main
 
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +14,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
+import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.core.sync.SyncFeatureState
 import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.sync.SyncState
@@ -31,10 +33,24 @@ class MainScreenViewModel(
             .launchIn(viewModelScope)
     }
 
-    override fun cancelSync() = syncManager.cancel()
+    override fun cancelSync() {
+        when (val syncState = syncManager.state.value) {
+            SyncFeatureState.Disabled,
+            SyncFeatureState.Loading -> Unit
 
-    override fun resolveConflict(syncConflictResolveStrategy: SyncConflictResolveStrategy) {
-        syncManager.resolveConflict(syncConflictResolveStrategy)
+            is SyncFeatureState.Enabled -> syncState.cancel()
+            is SyncFeatureState.Error -> {
+                val error = _syncDialogState.value as? SyncDialogState.Error
+                error?.showDialog?.value = false
+            }
+        }
+    }
+
+    override fun resolveConflict(strategy: SyncConflictResolveStrategy) {
+        when (val syncState = syncManager.state.value) {
+            is SyncFeatureState.Enabled -> syncState.resolveConflict(strategy)
+            else -> Unit
+        }
     }
 
     private fun StateFlow<SyncFeatureState>.toDialogState(): Flow<SyncDialogState> {
@@ -43,7 +59,13 @@ class MainScreenViewModel(
                 SyncFeatureState.Disabled,
                 SyncFeatureState.Loading -> flowOf(SyncDialogState.Hidden)
 
-                is SyncFeatureState.Error -> flowOf(SyncDialogState.Error.Api(syncFeatureState.issue))
+                is SyncFeatureState.Error -> flowOf(
+                    SyncDialogState.Error.Api(
+                        showDialog = mutableStateOf(false),
+                        issue = syncFeatureState.issue
+                    )
+                )
+
                 is SyncFeatureState.Enabled -> syncFeatureState.state.map { syncState ->
                     when (syncState) {
                         SyncState.Refreshing,
@@ -52,16 +74,30 @@ class MainScreenViewModel(
 
                         SyncState.Uploading -> SyncDialogState.Uploading
                         SyncState.Downloading -> SyncDialogState.Downloading
-                        is SyncState.Conflict -> SyncDialogState.Conflict(
-                            remoteDataTime = syncState.remoteDataInfo.dataTimestamp
-                                ?.let { Instant.fromEpochMilliseconds(it) }
-                                ?.toLocalDateTime(TimeZone.currentSystemDefault()),
-                            lastSyncTime = syncState.cachedDataInfo?.dataTimestamp
-                                ?.let { Instant.fromEpochMilliseconds(it) }
-                                ?.toLocalDateTime(TimeZone.currentSystemDefault())
-                        )
+                        is SyncState.Conflict -> {
+                            when (syncState.diffType) {
+                                SyncDataDiffType.RemoteUnsupported -> {
+                                    SyncDialogState.Error.Unsupported(
+                                        showDialog = mutableStateOf(false)
+                                    )
+                                }
 
-                        is SyncState.Error.Api -> SyncDialogState.Error.Api(syncState.issue)
+                                else -> SyncDialogState.Conflict(
+                                    diffType = syncState.diffType,
+                                    remoteDataTime = syncState.remoteDataInfo.dataTimestamp
+                                        ?.let { Instant.fromEpochMilliseconds(it) }
+                                        ?.toLocalDateTime(TimeZone.currentSystemDefault()),
+                                    lastSyncTime = syncState.cachedDataInfo?.dataTimestamp
+                                        ?.let { Instant.fromEpochMilliseconds(it) }
+                                        ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                                )
+                            }
+                        }
+
+                        is SyncState.Error.Api -> SyncDialogState.Error.Api(
+                            showDialog = mutableStateOf(false),
+                            issue = syncState.issue
+                        )
                     }
                 }
             }

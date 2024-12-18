@@ -23,7 +23,7 @@ fun HomeScreenPreview(
             syncIconState = remember {
                 SyncIconState(
                     loading = mutableStateOf(true),
-                    indicator = mutableStateOf(SyncIconIndicator.None)
+                    indicator = mutableStateOf(SyncIconIndicator.Disabled)
                 )
             },
             selectedTabState = HomeScreenTab.values().first().run { rememberUpdatedState(this) },

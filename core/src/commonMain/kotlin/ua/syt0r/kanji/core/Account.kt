@@ -18,6 +18,8 @@ interface AccountManager {
     fun signIn(refreshToken: String, idToken: String)
     fun signOut()
     fun refreshUserData()
+    fun notifyNoSubscription()
+    fun notifyAuthExpired()
 }
 
 sealed interface SubscriptionInfo {
@@ -67,7 +69,7 @@ class DefaultAccountManager(
     override val state: StateFlow<AccountState> = _state
 
     init {
-        _state.launchWhenHasSubscribers(coroutineScope, ::refreshFromLocal)
+        _state.launchWhenHasSubscribers(coroutineScope) { refreshFromLocal() }
     }
 
     override fun signIn(refreshToken: String, idToken: String) {
@@ -113,6 +115,14 @@ class DefaultAccountManager(
                 subscriptionInfo = getSubInfo(userInfo.subscription, subscriptionDue)
             )
         }
+    }
+
+    override fun notifyNoSubscription() {
+
+    }
+
+    override fun notifyAuthExpired() {
+
     }
 
     private fun refreshFromLocal() {

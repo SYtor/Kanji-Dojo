@@ -50,8 +50,7 @@ fun Module.addSyncDefinitions() {
         DefaultRefreshSyncStateUseCase(
             appPreferences = get(),
             getLocalSyncDataInfoUseCase = get(),
-            networkApi = get(),
-            json = Json
+            networkApi = get()
         )
     }
 

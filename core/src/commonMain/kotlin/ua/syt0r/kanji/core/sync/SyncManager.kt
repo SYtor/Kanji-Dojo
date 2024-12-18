@@ -1,33 +1,30 @@
 package ua.syt0r.kanji.core.sync
 
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.sync.use_case.HandleSyncIntentUseCase
 
 interface SyncManager {
     val state: StateFlow<SyncFeatureState>
-    fun refresh()
-    fun sync(): Flow<SyncState>
-    fun cancel()
-    fun resolveConflict(strategy: SyncConflictResolveStrategy)
 }
 
 class DefaultSyncManager(
@@ -36,10 +33,7 @@ class DefaultSyncManager(
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SyncManager {
 
-    private val intentHandlingSchedulerScope = CoroutineScope(dispatcher.limitedParallelism(1))
     private val workerScope = CoroutineScope(dispatcher)
-
-    private var syncJob: Job? = null
 
     private val _state = MutableStateFlow<SyncFeatureState>(SyncFeatureState.Loading)
     override val state: StateFlow<SyncFeatureState> = _state
@@ -48,98 +42,117 @@ class DefaultSyncManager(
         workerScope.launch { handleStateUpdates() }
     }
 
-    override fun refresh() {
-        handleIntent(SyncIntent.Refresh)
-    }
-
-    override fun sync(): Flow<SyncState> {
-        return handleIntent(SyncIntent.Sync)
-    }
-
-    override fun cancel() {
-        intentHandlingSchedulerScope.launch {
-            syncJob?.cancelAndJoin()
-            val state = _state.value as MutableEnabledSyncFeatureState
-            state.setState(SyncState.Canceled)
-        }
-    }
-
-    override fun resolveConflict(strategy: SyncConflictResolveStrategy) {
-        handleIntent(SyncIntent.ResolveConflict(strategy))
-    }
-
     private suspend fun handleStateUpdates() {
         syncFeatureStateFlow().collectLatest { syncFeatureState ->
             Logger.d("syncFeatureState[$syncFeatureState]")
             _state.value = syncFeatureState
+        }
+    }
 
-            if (syncFeatureState is MutableEnabledSyncFeatureState) {
-                syncJob = workerScope.launch {
-                    handleSyncIntentUseCase(workerScope, SyncIntent.Refresh)
-                        .onEach {
-                            Logger.d("syncState[$it]")
-                            syncFeatureState.setState(it)
+    private fun syncFeatureStateFlow(): Flow<SyncFeatureState> {
+        return accountManager.state.transformLatest { accountState ->
+            when (accountState) {
+                AccountState.Loading -> {
+                    emit(SyncFeatureState.Loading)
+                }
+
+                is AccountState.Error -> {
+                    emit(SyncFeatureState.Error(accountState.issue))
+                }
+
+                AccountState.LoggedOut -> {
+                    emit(SyncFeatureState.Disabled)
+                }
+
+                is AccountState.LoggedIn -> when (accountState.subscriptionInfo) {
+                    is SubscriptionInfo.Expired,
+                    SubscriptionInfo.Inactive -> {
+                        emit(SyncFeatureState.Disabled)
+                    }
+
+                    is SubscriptionInfo.Active -> {
+                        coroutineScope {
+                            val enabledState = SyncEnabledState(
+                                coroutineScope = this,
+                                handleSyncIntentUseCase = handleSyncIntentUseCase,
+                                accountManager = accountManager
+                            )
+                            emit(enabledState)
                         }
-                        .collect()
-                    Logger.d("Initial refresh complete")
-                }.also {
-                    try {
-                        it.join()
-                    } catch (e: CancellationException) {
-                        it.cancelAndJoin()
                     }
                 }
             }
         }
     }
 
-    private fun handleIntent(intent: SyncIntent): Flow<SyncState> {
-        val observableStateChannel = Channel<SyncState>(Channel.CONFLATED)
 
-        intentHandlingSchedulerScope.launch {
-            val enabledSyncState = _state.value as MutableEnabledSyncFeatureState
+}
 
-            val currentJob = syncJob
-            currentJob?.cancelAndJoin()
+private class SyncEnabledState(
+    private val coroutineScope: CoroutineScope,
+    private val handleSyncIntentUseCase: HandleSyncIntentUseCase,
+    private val accountManager: AccountManager
+) : SyncFeatureState.Enabled {
 
-            val updateState: suspend (SyncState) -> Unit = {
-                Logger.d("syncState[$it]")
-                enabledSyncState.setState(it)
-                observableStateChannel.send(it)
+    private data class IntentData(
+        val intent: SyncIntent,
+        val result: CompletableDeferred<SyncState>? = null
+    )
+
+    private val intentJobChannel = Channel<IntentData>(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    private val _state = MutableStateFlow<SyncState>(SyncState.Refreshing)
+    override val state: StateFlow<SyncState> = _state
+
+    init {
+        coroutineScope.launch {
+            intentJobChannel.consumeAsFlow().collectLatest {
+                val last = handleSyncIntentUseCase(coroutineScope, it.intent)
+                    .onEach { syncState ->
+                        syncState.updateAppState()
+                        _state.value = syncState
+                    }
+                    .last()
+
+                it.result?.complete(last)
             }
-
-            syncJob = workerScope.launch {
-
-                try {
-                    handleSyncIntentUseCase(workerScope, intent)
-                        .onEach(updateState)
-                        .collect()
-                } catch (e: CancellationException) {
-                    updateState(SyncState.Canceled)
-                }
-
-                observableStateChannel.close()
-
-            }
-
         }
-
-        return observableStateChannel.consumeAsFlow()
+        coroutineScope.launch {
+            intentJobChannel.send(IntentData(SyncIntent.Refresh))
+        }
     }
 
-    private fun syncFeatureStateFlow(): Flow<SyncFeatureState> {
-        return accountManager.state.map { accountState ->
-            when (accountState) {
-                AccountState.Loading -> SyncFeatureState.Loading
-                is AccountState.Error -> SyncFeatureState.Error(accountState.issue)
-                AccountState.LoggedOut -> SyncFeatureState.Disabled
-                is AccountState.LoggedIn -> when (accountState.subscriptionInfo) {
-                    is SubscriptionInfo.Expired,
-                    SubscriptionInfo.Inactive -> SyncFeatureState.Disabled
+    override fun sync(): CompletableDeferred<SyncState> {
+        return handleIntent(SyncIntent.Sync)
+    }
 
-                    is SubscriptionInfo.Active -> MutableEnabledSyncFeatureState()
+    override fun resolveConflict(strategy: SyncConflictResolveStrategy) {
+        handleIntent(SyncIntent.ResolveConflict(strategy))
+    }
+
+    override fun cancel() {
+        handleIntent(SyncIntent.Cancel)
+    }
+
+    private fun handleIntent(intent: SyncIntent): CompletableDeferred<SyncState> {
+        val completableDeferred = CompletableDeferred<SyncState>()
+        coroutineScope.launch { intentJobChannel.send(IntentData(intent, completableDeferred)) }
+        return completableDeferred
+    }
+
+    private fun SyncState.updateAppState() {
+        when (this) {
+            is SyncState.Error.Api -> {
+                when (issue) {
+                    ApiRequestIssue.NotAuthenticated -> accountManager.notifyAuthExpired()
+                    ApiRequestIssue.NoSubscription -> accountManager.notifyNoSubscription()
+                    else -> Unit
                 }
             }
+
+            else -> Unit
         }
     }
 

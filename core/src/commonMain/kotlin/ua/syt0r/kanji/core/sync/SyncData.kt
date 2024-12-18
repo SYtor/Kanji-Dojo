@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core.sync
 
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import ua.syt0r.kanji.core.ApiRequestIssue
@@ -14,6 +15,9 @@ sealed interface SyncFeatureState {
 
     interface Enabled : SyncFeatureState {
         val state: StateFlow<SyncState>
+        fun sync(): CompletableDeferred<SyncState>
+        fun cancel()
+        fun resolveConflict(strategy: SyncConflictResolveStrategy)
     }
 
     data class Error(
@@ -46,6 +50,7 @@ sealed interface SyncState {
     object Canceled : SyncState
 
     data class Conflict(
+        val diffType: SyncDataDiffType,
         val remoteDataInfo: PreferencesSyncDataInfo,
         val localDataInfo: PreferencesSyncDataInfo,
         val cachedDataInfo: PreferencesSyncDataInfo?
@@ -57,21 +62,11 @@ sealed interface SyncState {
 
 }
 
-class MutableEnabledSyncFeatureState : SyncFeatureState.Enabled {
-
-    private val _state = MutableStateFlow<SyncState>(SyncState.Refreshing)
-    override val state: StateFlow<SyncState> = _state
-
-    fun setState(state: SyncState) {
-        _state.value = state
-    }
-
-}
-
 sealed interface SyncIntent {
     object Refresh : SyncIntent
     object Sync : SyncIntent
     data class ResolveConflict(val strategy: SyncConflictResolveStrategy) : SyncIntent
+    object Cancel : SyncIntent
 }
 
 enum class SyncConflictResolveStrategy { UploadLocal, DownloadRemote }

@@ -45,13 +45,6 @@ class AppPreferences(
         enableBackup = false
     )
 
-    override val syncEnabled: SuspendedProperty<Boolean> = createProperty(
-        type = BooleanSuspendedPropertyType,
-        key = "sync_enabled",
-        initialValue = { false },
-        enableBackup = false
-    )
-
     override val localDataId: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "local_data_id",
@@ -65,11 +58,12 @@ class AppPreferences(
         initialValue = { null }
     )
 
-    override val lastSyncedDataInfo: SuspendedProperty<PreferencesSyncDataInfo?> = createNullableProperty(
-        type = jsonPojoSuspendedPropertyType(),
-        key = "last_synced_data_info_json",
-        initialValue = { null }
-    )
+    override val lastSyncedDataInfo: SuspendedProperty<PreferencesSyncDataInfo?> =
+        createNullableProperty(
+            type = jsonPojoSuspendedPropertyType(),
+            key = "last_synced_data_info_json",
+            initialValue = { null }
+        )
 
     override val analyticsEnabled: SuspendedProperty<Boolean> = createProperty(
         type = BooleanSuspendedPropertyType,
