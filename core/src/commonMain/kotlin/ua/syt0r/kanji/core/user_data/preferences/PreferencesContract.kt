@@ -12,8 +12,7 @@ interface PreferencesContract {
 
         val refreshToken: SuspendedProperty<String?>
         val idToken: SuspendedProperty<String?>
-        val userEmail: SuspendedProperty<String?>
-        val subscriptionDue: SuspendedProperty<Instant?>
+        val userInfo: SuspendedProperty<PreferencesUserInfo?>
 
         val localDataId: SuspendedProperty<String>
         val localDataTimestamp: SuspendedProperty<Instant?>
@@ -89,4 +88,12 @@ data class PreferencesSyncDataInfo(
     val dataId: String,
     val dataVersion: Long,
     val dataTimestamp: Long?
+)
+
+
+@Serializable
+data class PreferencesUserInfo(
+    val email: String,
+    val subscriptionDue: Long?,
+    val updateTimestamp: Long
 )

@@ -4,7 +4,7 @@ interface HomeScreenContract {
 
     interface ViewModel {
         val syncIconState: SyncIconState
-        fun sync()
+        fun trySync(): Boolean
     }
 
 }

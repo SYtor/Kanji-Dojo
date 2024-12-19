@@ -52,33 +52,29 @@ class DefaultSyncManager(
     private fun syncFeatureStateFlow(): Flow<SyncFeatureState> {
         return accountManager.state.transformLatest { accountState ->
             when (accountState) {
+                AccountState.LoggedOut,
+                is AccountState.Error -> {
+                    emit(SyncFeatureState.Disabled)
+                }
+
                 AccountState.Loading -> {
                     emit(SyncFeatureState.Loading)
                 }
 
-                is AccountState.Error -> {
-                    emit(SyncFeatureState.Error(accountState.issue))
-                }
-
-                AccountState.LoggedOut -> {
-                    emit(SyncFeatureState.Disabled)
-                }
-
                 is AccountState.LoggedIn -> when (accountState.subscriptionInfo) {
-                    is SubscriptionInfo.Expired,
-                    SubscriptionInfo.Inactive -> {
+                    SubscriptionInfo.Inactive,
+                    is SubscriptionInfo.Expired -> {
                         emit(SyncFeatureState.Disabled)
                     }
 
-                    is SubscriptionInfo.Active -> {
-                        coroutineScope {
-                            val enabledState = SyncEnabledState(
-                                coroutineScope = this,
-                                handleSyncIntentUseCase = handleSyncIntentUseCase,
-                                accountManager = accountManager
-                            )
-                            emit(enabledState)
-                        }
+                    is SubscriptionInfo.Active -> coroutineScope {
+                        val enabledState = SyncEnabledState(
+                            coroutineScope = this,
+                            handleSyncIntentUseCase = handleSyncIntentUseCase,
+                            accountManager = accountManager,
+                            initialStateIssue = accountState.issue
+                        )
+                        emit(enabledState)
                     }
                 }
             }
@@ -91,7 +87,8 @@ class DefaultSyncManager(
 private class SyncEnabledState(
     private val coroutineScope: CoroutineScope,
     private val handleSyncIntentUseCase: HandleSyncIntentUseCase,
-    private val accountManager: AccountManager
+    private val accountManager: AccountManager,
+    initialStateIssue: ApiRequestIssue?
 ) : SyncFeatureState.Enabled {
 
     private data class IntentData(
@@ -103,7 +100,9 @@ private class SyncEnabledState(
         onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
 
-    private val _state = MutableStateFlow<SyncState>(SyncState.Refreshing)
+    private val _state = MutableStateFlow<SyncState>(
+        value = initialStateIssue?.let { SyncState.Error.Api(it) } ?: SyncState.Refreshing
+    )
     override val state: StateFlow<SyncState> = _state
 
     init {
@@ -119,8 +118,8 @@ private class SyncEnabledState(
                 it.result?.complete(last)
             }
         }
-        coroutineScope.launch {
-            intentJobChannel.send(IntentData(SyncIntent.Refresh))
+        if (initialStateIssue == null) {
+            coroutineScope.launch { intentJobChannel.send(IntentData(SyncIntent.Refresh)) }
         }
     }
 

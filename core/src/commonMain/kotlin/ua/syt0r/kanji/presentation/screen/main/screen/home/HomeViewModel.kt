@@ -39,13 +39,16 @@ class HomeViewModel(
 
     }
 
-    override fun sync() {
+    override fun trySync(): Boolean {
         when (val syncState = syncManager.state.value) {
             SyncFeatureState.Disabled,
             SyncFeatureState.Loading,
-            is SyncFeatureState.Error -> Unit
+            is SyncFeatureState.Error -> return false
 
-            is SyncFeatureState.Enabled -> syncState.sync()
+            is SyncFeatureState.Enabled -> {
+                syncState.sync()
+                return true
+            }
         }
     }
 
