@@ -7,11 +7,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.koin.core.module.Module
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesUserInfo
 
 interface AccountManager {
     val state: StateFlow<AccountState>
@@ -22,12 +21,6 @@ interface AccountManager {
     fun notifyAuthExpired()
 }
 
-sealed interface SubscriptionInfo {
-    object Inactive : SubscriptionInfo
-    data class Active(val due: LocalDateTime) : SubscriptionInfo
-    data class Expired(val due: LocalDateTime) : SubscriptionInfo
-}
-
 sealed interface AccountState {
 
     object Loading : AccountState
@@ -36,13 +29,20 @@ sealed interface AccountState {
 
     data class LoggedIn(
         val email: String,
-        val subscriptionInfo: SubscriptionInfo
+        val subscriptionInfo: SubscriptionInfo,
+        val issue: ApiRequestIssue?
     ) : AccountState
 
     data class Error(
         val issue: ApiRequestIssue
     ) : AccountState
 
+}
+
+sealed interface SubscriptionInfo {
+    object Inactive : SubscriptionInfo
+    data class Active(val due: LocalDateTime) : SubscriptionInfo
+    data class Expired(val due: LocalDateTime) : SubscriptionInfo
 }
 
 fun Module.addAccountDefinitions() {
@@ -69,89 +69,87 @@ class DefaultAccountManager(
     override val state: StateFlow<AccountState> = _state
 
     init {
-        _state.launchWhenHasSubscribers(coroutineScope) { refreshFromLocal() }
+        _state.launchWhenHasSubscribers(coroutineScope) { updateStateFromLocal() }
     }
 
     override fun signIn(refreshToken: String, idToken: String) {
         _state.value = AccountState.Loading
         coroutineScope.launch {
-
             appPreferences.refreshToken.set(refreshToken)
             appPreferences.idToken.set(idToken)
-
-            refreshUserData()
-
+            updateStateFromRemote()
         }
-
     }
 
     override fun signOut() {
         _state.value = AccountState.LoggedOut
-        coroutineScope.launch {
-            appPreferences.apply {
-                refreshToken.set(null)
-                idToken.set(null)
-                userEmail.set(null)
-                subscriptionDue.set(null)
-            }
-        }
+        coroutineScope.launch { clearUserData() }
     }
 
     override fun refreshUserData() {
-        coroutineScope.launch {
-            val userInfo = networkApi.getUserInfo().getOrElse {
-                _state.value = AccountState.Error(ApiRequestIssue.classify(it))
-                return@launch
-            }
-
-            val subscriptionDue = userInfo.subscriptionDue
-                ?.let { Instant.fromEpochMilliseconds(it) }
-
-            appPreferences.userEmail.set(userInfo.email)
-            appPreferences.subscriptionDue.set(subscriptionDue)
-
-            _state.value = AccountState.LoggedIn(
-                email = userInfo.email,
-                subscriptionInfo = getSubInfo(userInfo.subscription, subscriptionDue)
-            )
-        }
+        _state.value = AccountState.Loading
+        coroutineScope.launch { updateStateFromRemote() }
     }
 
     override fun notifyNoSubscription() {
-
+        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NoSubscription) }
     }
 
     override fun notifyAuthExpired() {
-
-    }
-
-    private fun refreshFromLocal() {
         coroutineScope.launch {
-            _state.value = appPreferences.run {
-                val email = appPreferences.userEmail.get()
-                val subscriptionDue = appPreferences.subscriptionDue.get()
-
-                if (email == null)
-                    return@run AccountState.LoggedOut
-
-                AccountState.LoggedIn(
-                    email = email,
-                    subscriptionInfo = getSubInfo(true, subscriptionDue) // TODO isActive -> status
-                )
-            }
+            clearUserData()
+            updateStateFromLocal(ApiRequestIssue.NotAuthenticated)
         }
     }
 
-    private fun getSubInfo(isActive: Boolean, due: Instant?): SubscriptionInfo {
-        return when {
-            !isActive -> SubscriptionInfo.Inactive
-            due!! >= timeUtils.now() -> SubscriptionInfo.Active(
-                due = due.toLocalDateTime(TimeZone.currentSystemDefault())
+    private suspend fun updateStateFromRemote() {
+        val apiUserInfo = networkApi.getUserInfo().getOrElse {
+            updateStateFromLocal(ApiRequestIssue.classify(it))
+            return
+        }
+
+        val userInfo = apiUserInfo.toPreferencesType()
+        appPreferences.userInfo.set(userInfo)
+
+        updateStateFromLocal()
+    }
+
+    private suspend fun updateStateFromLocal(issue: ApiRequestIssue? = null) {
+        val userInfo = appPreferences.userInfo.get()
+
+        _state.value = when {
+            userInfo != null -> AccountState.LoggedIn(
+                email = userInfo.email,
+                subscriptionInfo = getSubscriptionInfo(userInfo.subscriptionDue),
+                issue = issue
             )
 
-            else -> SubscriptionInfo.Expired(
-                due = due.toLocalDateTime(TimeZone.currentSystemDefault())
-            )
+            issue != null -> AccountState.Error(issue)
+
+            else -> AccountState.LoggedOut
+        }
+    }
+
+    private fun getSubscriptionInfo(dueMillis: Long?): SubscriptionInfo {
+        val due = dueMillis?.let { Instant.fromEpochMilliseconds(it) }
+        return when {
+            due == null -> SubscriptionInfo.Inactive
+            due >= timeUtils.now() -> SubscriptionInfo.Active(due.toLocalDateTime())
+            else -> SubscriptionInfo.Expired(due.toLocalDateTime())
+        }
+    }
+
+    private fun ApiUserInfo.toPreferencesType(): PreferencesUserInfo = PreferencesUserInfo(
+        email = email,
+        subscriptionDue = subscriptionDue,
+        updateTimestamp = timeUtils.now().toEpochMilliseconds()
+    )
+
+    private suspend fun clearUserData() {
+        appPreferences.apply {
+            refreshToken.set(null)
+            idToken.set(null)
+            userInfo.set(null)
         }
     }
 

@@ -32,12 +32,8 @@ fun HomeScreen(
         syncIconState = viewModel.syncIconState,
         onTabSelected = { homeNavigationState.navigate(it) },
         onSyncButtonClick = {
-            val shouldNavigateToSyncScreen = viewModel.syncIconState.loading.value ||
-                    viewModel.syncIconState.indicator.value == SyncIconIndicator.Disabled
-            when {
-                shouldNavigateToSyncScreen -> mainNavigationState.value.navigate(MainDestination.Sync)
-                else -> viewModel.sync()
-            }
+            val isSyncStarted = viewModel.trySync()
+            if (!isSyncStarted) mainNavigationState.value.navigate(MainDestination.Sync)
         },
         onSponsorButtonClick = { mainNavigationState.value.navigate(MainDestination.Sponsor) }
     ) {

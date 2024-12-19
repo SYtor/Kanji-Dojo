@@ -31,18 +31,11 @@ class AppPreferences(
         enableBackup = false
     )
 
-    override val userEmail: SuspendedProperty<String?> = createNullableProperty(
-        type = StringSuspendedPropertyType,
-        key = "user_email",
-        initialValue = { null },
-        enableBackup = false
-    )
-
-    override val subscriptionDue: SuspendedProperty<Instant?> = createNullableProperty(
-        type = InstantSuspendedPropertyType,
-        key = "subscription_due",
-        initialValue = { null },
-        enableBackup = false
+    override val userInfo: SuspendedProperty<PreferencesUserInfo?> = createNullableProperty(
+        type = jsonPojoSuspendedPropertyType(),
+        key = "user_info",
+        enableBackup = false,
+        initialValue = { null }
     )
 
     override val localDataId: SuspendedProperty<String> = createProperty(
