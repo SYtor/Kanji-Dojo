@@ -29,6 +29,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.rememberUrlHandler
@@ -82,10 +83,17 @@ interface JvmAccountScreenContract {
         object StartingSever : ScreenState
         data class WaitingForSignIn(val serverPort: Int) : ScreenState
         object LoadingUserData : ScreenState
+
         data class Loaded(
             val email: String,
-            val subscriptionInfo: SubscriptionInfo
+            val subscriptionInfo: SubscriptionInfo,
+            val issue: ApiRequestIssue?
         ) : ScreenState
+
+        data class Error(
+            val issue: ApiRequestIssue
+        ) : ScreenState
+
     }
 
 }
@@ -107,7 +115,7 @@ fun AccountScreenUI(
         when (screenState) {
             ScreenState.SignedOut -> {
                 AccountScreenSignedOut(
-                    openLoginWebPage = signIn
+                    startSignIn = signIn
                 )
             }
 
@@ -121,8 +129,17 @@ fun AccountScreenUI(
                 AccountScreenSignedIn(
                     email = screenState.email,
                     subscriptionInfo = screenState.subscriptionInfo,
+                    issue = screenState.issue,
                     refresh = refresh,
-                    signOut = signOut
+                    signOut = signOut,
+                    signIn = signIn
+                )
+            }
+
+            is ScreenState.Error -> {
+                AccountScreenError(
+                    issue = screenState.issue,
+                    startSignIn = signIn
                 )
             }
         }
@@ -155,12 +172,11 @@ class JvmAccountScreenViewModel(
                     AccountState.LoggedOut -> ScreenState.SignedOut
                     is AccountState.LoggedIn -> ScreenState.Loaded(
                         email = it.email,
-                        subscriptionInfo = it.subscriptionInfo
+                        subscriptionInfo = it.subscriptionInfo,
+                        issue = it.issue
                     )
 
-                    is AccountState.Error -> {
-                        TODO()
-                    }
+                    is AccountState.Error -> ScreenState.Error(it.issue)
                 }
             }
             .launchIn(coroutineScope)
@@ -181,8 +197,9 @@ class JvmAccountScreenViewModel(
                 }
 
                 else -> {
-                    signInDataResult.exceptionOrNull()!!.printStackTrace()
-                    TODO()
+                    _state.value = ScreenState.Error(
+                        ApiRequestIssue.Other(signInDataResult.exceptionOrNull()!!)
+                    )
                 }
             }
 

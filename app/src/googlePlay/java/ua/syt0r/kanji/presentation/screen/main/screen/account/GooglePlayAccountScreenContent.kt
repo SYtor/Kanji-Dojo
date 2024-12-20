@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.core.AccountManager
 import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.presentation.common.rememberUrlHandler
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
@@ -53,12 +54,17 @@ interface GooglePlayAccountScreenContract {
         fun refresh()
     }
 
-    interface ScreenState {
-        object Loading : ScreenState
-        object SignedOut : ScreenState
+    sealed interface ScreenState {
+        data object Loading : ScreenState
+        data object SignedOut : ScreenState
         data class SignedIn(
             val email: String,
-            val subscriptionInfo: SubscriptionInfo
+            val subscriptionInfo: SubscriptionInfo,
+            val issue: ApiRequestIssue?
+        ) : ScreenState
+
+        data class Error(
+            val issue: ApiRequestIssue
         ) : ScreenState
     }
 
@@ -81,7 +87,7 @@ fun GooglePlayAccountScreenUI(
         when (screenState) {
             ScreenState.SignedOut -> {
                 AccountScreenSignedOut(
-                    openLoginWebPage = onSignInClick
+                    startSignIn = onSignInClick
                 )
             }
 
@@ -93,8 +99,17 @@ fun GooglePlayAccountScreenUI(
                 AccountScreenSignedIn(
                     email = screenState.email,
                     subscriptionInfo = screenState.subscriptionInfo,
+                    issue = screenState.issue,
                     refresh = refresh,
-                    signOut = onSignOutClick
+                    signOut = onSignOutClick,
+                    signIn = onSignInClick
+                )
+            }
+
+            is ScreenState.Error -> {
+                AccountScreenError(
+                    issue = screenState.issue,
+                    startSignIn = onSignInClick
                 )
             }
         }
@@ -120,10 +135,11 @@ class GooglePlayAccountScreenViewModel(
                     AccountState.LoggedOut -> ScreenState.SignedOut
                     is AccountState.LoggedIn -> ScreenState.SignedIn(
                         email = it.email,
-                        subscriptionInfo = it.subscriptionInfo
+                        subscriptionInfo = it.subscriptionInfo,
+                        issue = it.issue
                     )
 
-                    is AccountState.Error -> TODO()
+                    is AccountState.Error -> ScreenState.Error(it.issue)
                 }
             }
             .launchIn(coroutineScope)
