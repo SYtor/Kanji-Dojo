@@ -62,22 +62,34 @@ class DefaultRefreshSyncStateUseCase(
 
         val cachedRemoteSyncDataInfo = appPreferences.lastSyncedDataInfo.get()
 
-        val isRemoteDataSupported = remoteSyncDataInfo.dataVersion <= CurrentSyncDataVersion
-        val isRemoteDataChangedSinceLastSync = cachedRemoteSyncDataInfo
+        fun isEqual() = remoteSyncDataInfo == localSyncDataInfo
+
+        fun isRemoteNotSupported() = remoteSyncDataInfo.dataVersion > CurrentSyncDataVersion
+
+        fun isRemoteNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId &&
+                cachedRemoteSyncDataInfo == localSyncDataInfo &&
+                run {
+                    val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
+                    val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
+                    remoteTimestamp > localTimestamp
+                }
+
+        fun isRemoteDataChangedSinceLastSync() = cachedRemoteSyncDataInfo
             ?.equals(remoteSyncDataInfo) == false
 
-        val isRemoteDataNewer = run {
+        fun isLocalNewer() = remoteSyncDataInfo.dataId == localSyncDataInfo.dataId && run {
             val remoteTimestamp = remoteSyncDataInfo.dataTimestamp ?: return@run false
-            val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run true
-            remoteTimestamp > localTimestamp
+            val localTimestamp = localSyncDataInfo.dataTimestamp ?: return@run false
+            localTimestamp > remoteTimestamp
         }
 
         val diffType = when {
-            remoteSyncDataInfo == localSyncDataInfo -> SyncDataDiffType.Equal
-            !isRemoteDataSupported -> SyncDataDiffType.RemoteUnsupported
-            isRemoteDataChangedSinceLastSync -> SyncDataDiffType.Incompatible
-            isRemoteDataNewer -> SyncDataDiffType.RemoteNewer
-            else -> SyncDataDiffType.LocalNewer
+            isEqual() -> SyncDataDiffType.Equal
+            isRemoteNotSupported() -> SyncDataDiffType.RemoteUnsupported
+            isRemoteNewer() -> SyncDataDiffType.RemoteNewer
+            isRemoteDataChangedSinceLastSync() -> SyncDataDiffType.Incompatible
+            isLocalNewer() -> SyncDataDiffType.LocalNewer
+            else -> SyncDataDiffType.Incompatible
         }
 
         return SyncStateRefreshResult.WithRemoteData(
