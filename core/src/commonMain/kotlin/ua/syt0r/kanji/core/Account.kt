@@ -96,10 +96,7 @@ class DefaultAccountManager(
     }
 
     override fun notifyAuthExpired() {
-        coroutineScope.launch {
-            clearUserData()
-            updateStateFromLocal(ApiRequestIssue.NotAuthenticated)
-        }
+        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NotAuthenticated) }
     }
 
     private suspend fun updateStateFromRemote() {

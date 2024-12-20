@@ -5,17 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,20 +23,25 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
+import kotlinx.datetime.format.byUnicodePattern
+import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
+import ua.syt0r.kanji.presentation.common.clickable
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +79,7 @@ fun <T> AccountScreenContainer(
 
 @Composable
 fun AccountScreenSignedOut(
-    openLoginWebPage: () -> Unit,
+    startSignIn: () -> Unit
 ) {
 
     ScrollableScreenContainer(
@@ -87,7 +92,7 @@ fun AccountScreenSignedOut(
         )
 
         Button(
-            onClick = openLoginWebPage,
+            onClick = startSignIn,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.onSurface,
@@ -108,73 +113,79 @@ fun AccountScreenLoading() {
 }
 
 private val SubscriptionDateTimeFormat = LocalDateTime.Format {
-    year()
-    chars("-")
-    monthNumber()
-    chars("-")
-    dayOfMonth()
-    chars(" ")
-    hour()
-    chars(":")
-    minute()
+    byUnicodePattern("uuuu/MM/dd HH:mm")
 }
 
 @Composable
 fun AccountScreenSignedIn(
     email: String,
     subscriptionInfo: SubscriptionInfo,
+    issue: ApiRequestIssue?,
     refresh: () -> Unit,
-    signOut: () -> Unit
+    signOut: () -> Unit,
+    signIn: () -> Unit
 ) {
 
     ScrollableScreenContainer(
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
 
+        if (issue != null) {
+            IssueListItem(
+                issue = issue,
+                signIn = signIn,
+                refresh = refresh
+            )
+        }
+
         Column {
             SectionTitleText("E-mail")
-            SectionDataText(email)
+            ListItem(
+                headlineContent = { Text(email) }
+            )
         }
 
         Column {
 
             SectionTitleText("Subscription")
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            val headlineText: String
+            val supportText: String?
 
-
-                val message = when (subscriptionInfo) {
-                    is SubscriptionInfo.Active -> "Active, valid until ${
-                        subscriptionInfo.due.format(SubscriptionDateTimeFormat)
-                    }"
-
-                    is SubscriptionInfo.Expired -> "Expired, valid until ${
-                        subscriptionInfo.due.format(SubscriptionDateTimeFormat)
-                    }"
-
-                    SubscriptionInfo.Inactive -> "Inactive"
+            when (subscriptionInfo) {
+                is SubscriptionInfo.Active -> {
+                    headlineText = "Active"
+                    supportText =
+                        "Valid until ${subscriptionInfo.due.format(SubscriptionDateTimeFormat)}"
                 }
 
-                SectionDataText(
-                    text = message,
-                    modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
-                        .height(IntrinsicSize.Max)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable(onClick = refresh)
-                        .wrapContentSize()
-                ) {
-                    Icon(Icons.Default.Refresh, null)
+                is SubscriptionInfo.Expired -> {
+                    headlineText = "Expired"
+                    supportText =
+                        "Valid until ${subscriptionInfo.due.format(SubscriptionDateTimeFormat)}"
                 }
 
+                SubscriptionInfo.Inactive -> {
+                    headlineText = "Inactive"
+                    supportText = null
+                }
             }
+
+            ListItem(
+                headlineContent = { Text(headlineText) },
+                supportingContent = supportText?.let { { Text(it) } },
+                trailingContent = {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable(onClick = refresh)
+                            .wrapContentSize()
+                    ) {
+                        Icon(Icons.Default.Refresh, null)
+                    }
+                }
+            )
 
         }
 
@@ -197,18 +208,117 @@ fun AccountScreenSignedIn(
 }
 
 @Composable
+fun AccountScreenError(
+    issue: ApiRequestIssue,
+    startSignIn: () -> Unit
+) {
+
+    ScrollableScreenContainer {
+
+        IssueListItem(
+            issue = issue,
+            signIn = startSignIn,
+            refresh = startSignIn
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        InvertedButton(
+            onClick = startSignIn,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Sign in")
+        }
+
+    }
+
+}
+
+@Composable
+private fun InvertedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.onSurface,
+            contentColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        content()
+    }
+}
+
+@Composable
 private fun SectionTitleText(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleMedium
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(horizontal = 16.dp)
     )
 }
 
 @Composable
-private fun SectionDataText(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        modifier = modifier
+private fun IssueListItem(
+    issue: ApiRequestIssue,
+    signIn: () -> Unit,
+    refresh: () -> Unit
+) {
+
+    val title: String
+    val message: String
+    val trailingIcon: ImageVector?
+    val action: (() -> Unit)?
+
+    when (issue) {
+        ApiRequestIssue.NoConnection -> {
+            title = "No Connection"
+            message = "Showing cached data"
+            trailingIcon = null
+            action = null
+        }
+
+        ApiRequestIssue.NotAuthenticated -> {
+            title = "Session Expired"
+            message = "Click to sign in again"
+            trailingIcon = Icons.AutoMirrored.Filled.Login
+            action = signIn
+        }
+
+        ApiRequestIssue.NoSubscription -> {
+            title = "Subscription status outdated"
+            message = "Click to refresh"
+            trailingIcon = Icons.Default.Refresh
+            action = refresh
+        }
+
+        is ApiRequestIssue.Other -> {
+            title = "Error"
+            message = issue.throwable.message ?: "Unknown error"
+            trailingIcon = null
+            action = null
+        }
+    }
+
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = { Text(message) },
+        leadingContent = { Icon(Icons.Default.Info, null) },
+        trailingContent = trailingIcon?.let { { Icon(it, null) } },
+        colors = ListItemDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            headlineColor = MaterialTheme.colorScheme.onSurface,
+            supportingColor = MaterialTheme.colorScheme.onErrorContainer,
+            leadingIconColor = MaterialTheme.colorScheme.onSurface,
+            trailingIconColor = MaterialTheme.colorScheme.onSurface
+        ),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(action)
     )
+
 }
