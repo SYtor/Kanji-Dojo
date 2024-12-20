@@ -47,7 +47,11 @@ fun MainScreen(
     SyncDialog(
         state = viewModel.syncDialogState.collectAsState(),
         cancelSync = viewModel::cancelSync,
-        resolveConflict = viewModel::resolveConflict
+        resolveConflict = viewModel::resolveConflict,
+        navigateToAccount = {
+            viewModel.cancelSync()
+            navigationState.navigate(MainDestination.Account())
+        }
     )
 
     HandleDeepLinksLaunchedEffect(

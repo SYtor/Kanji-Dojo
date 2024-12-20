@@ -4,13 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -27,12 +32,34 @@ expect fun MultiplatformDialog(
     content: @Composable () -> Unit,
 )
 
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MultiplatformDialog(
     onDismissRequest: () -> Unit,
     title: @Composable () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
     buttons: @Composable RowScope.() -> Unit,
+    contentVerticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
+    scrollableContent: Boolean = true,
+    paddedContent: Boolean = true
+) = ExperimentalMultiplatformDialog(
+    onDismissRequest,
+    title,
+    content,
+    buttons,
+    contentVerticalArrangement,
+    scrollableContent,
+    paddedContent
+)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ExperimentalMultiplatformDialog(
+    onDismissRequest: () -> Unit,
+    title: @Composable () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+    buttons: @Composable FlowRowScope.() -> Unit,
     contentVerticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
     scrollableContent: Boolean = true,
     paddedContent: Boolean = true
@@ -68,11 +95,18 @@ fun MultiplatformDialog(
                 content()
             }
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(horizontal = 20.dp)
-                    .align(Alignment.End)
-            ) { buttons() }
+            FlowRow(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                modifier = Modifier
+                    .height(IntrinsicSize.Max)
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                    buttons()
+                }
+            }
 
         }
 
