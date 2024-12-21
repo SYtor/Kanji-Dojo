@@ -18,12 +18,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContr
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenViewModel
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.items.ThemeSettingItem
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
-import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContent
-import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsScreenContract
-import ua.syt0r.kanji.presentation.screen.settings.GooglePlaySettingsViewModel
+import ua.syt0r.kanji.presentation.screen.settings.GooglePlayAnalyticsSettingListItem
 import ua.syt0r.kanji.presentation.screen.sponsor.DefaultGooglePlayPurchaseManager
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlayPurchaseManager
 import ua.syt0r.kanji.presentation.screen.sponsor.GooglePlaySponsorScreenContent
@@ -54,14 +54,18 @@ val flavorModule = module {
 
     single<LetterPracticeScreenContract.Content> { GooglePlayLetterPracticeScreenContent }
 
-    single<SettingsScreenContract.Content> { GooglePlaySettingsScreenContent }
-
-    multiplatformViewModel<GooglePlaySettingsScreenContract.ViewModel> {
-        GooglePlaySettingsViewModel(
-            viewModelScope = it.component1(),
+    factory {
+        GooglePlayAnalyticsSettingListItem(
             appPreferences = get(),
-            analyticsManager = get(),
-            reminderScheduler = get()
+            analyticsManager = get()
+        )
+    }
+
+    factory(settingItemsQualifier) {
+        listOf(
+            get<GooglePlayAnalyticsSettingListItem>(),
+            get<AndroidReminderSettingListItem>(),
+            ThemeSettingItem
         )
     }
 
