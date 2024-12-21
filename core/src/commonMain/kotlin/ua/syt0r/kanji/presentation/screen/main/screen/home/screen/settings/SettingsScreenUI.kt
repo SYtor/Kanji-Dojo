@@ -1,5 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,12 +18,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -29,6 +35,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +51,51 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract.ScreenState
+
+@Composable
+fun SettingsScreenUI(
+    state: State<ScreenState>,
+    onBackupButtonClick: () -> Unit,
+    onAccountButtonClick: () -> Unit,
+    onSyncButtonClick: () -> Unit,
+    onFeedbackButtonClick: () -> Unit,
+    onAboutButtonClick: () -> Unit,
+    loadedContent: @Composable ColumnScope.(ScreenState.Loaded) -> Unit
+) {
+
+    AnimatedContent(
+        state.value,
+        transitionSpec = { fadeIn() togetherWith fadeOut() }
+    ) { screenState ->
+
+        when (screenState) {
+            ScreenState.Loading -> {
+                CircularProgressIndicator(Modifier.fillMaxSize().wrapContentSize())
+            }
+
+            is ScreenState.Loaded -> {
+                SettingsContent {
+
+                    loadedContent(screenState)
+
+                    SettingsBackupButton(onBackupButtonClick)
+
+                    SettingsAccountButton(onAccountButtonClick)
+
+                    SettingsSyncButton(onSyncButtonClick)
+
+                    SettingsFeedbackButton(onFeedbackButtonClick)
+
+                    SettingsAboutButton(onAboutButtonClick)
+
+                }
+            }
+        }
+
+    }
+
+}
 
 @Composable
 fun SettingsContent(

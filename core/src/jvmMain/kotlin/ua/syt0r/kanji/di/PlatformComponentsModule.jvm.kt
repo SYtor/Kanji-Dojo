@@ -26,8 +26,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenCo
 import ua.syt0r.kanji.presentation.screen.main.screen.account.JvmAccountScreenViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.GetCreditLibrariesUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.credits.JvmGetCreditLibrariesUseCase
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.JvmSettingsScreenContent
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.JvmSponsorScreenContent
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
 
@@ -67,7 +65,6 @@ actual val platformComponentsModule: Module = module {
         JvmPlatformFileHandler()
     }
 
-    single<SettingsScreenContract.Content> { JvmSettingsScreenContent }
     single<SponsorScreenContract.Content> { JvmSponsorScreenContent }
     single<AccountScreenContract.Content> { JvmAccountScreenContent }
     multiplatformViewModel<JvmAccountScreenContract.ViewModel> {

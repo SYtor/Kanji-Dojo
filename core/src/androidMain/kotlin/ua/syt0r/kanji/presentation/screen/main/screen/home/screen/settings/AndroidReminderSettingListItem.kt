@@ -26,19 +26,24 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,12 +59,62 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalTime
+import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.notification.ReminderNotificationConfiguration
+import ua.syt0r.kanji.core.notification.ReminderNotificationContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.getBottomLineShape
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
+
+class AndroidReminderSettingListItem(
+    private val appPreferences: PreferencesContract.AppPreferences,
+    private val reminderScheduler: ReminderNotificationContract.Scheduler,
+    private val analyticsManager: AnalyticsManager
+) : SettingsScreenContract.ConfigurableListItem {
+
+    private lateinit var configuration: MutableState<ReminderNotificationConfiguration>
+
+    override suspend fun prepare(coroutineScope: CoroutineScope) {
+        val initialValue = ReminderNotificationConfiguration(
+            enabled = appPreferences.reminderEnabled.get(),
+            time = appPreferences.reminderTime.get()
+        )
+        configuration = mutableStateOf(initialValue)
+
+        snapshotFlow { configuration.value }.drop(1)
+            .onEach { value ->
+                appPreferences.reminderEnabled.set(value.enabled)
+                appPreferences.reminderTime.set(value.time)
+                if (value.enabled) {
+                    reminderScheduler.scheduleNotification(value.time)
+                    analyticsManager.sendEvent("reminder_enabled") {
+                        put("time", value.time.toString())
+                    }
+                } else {
+                    reminderScheduler.unscheduleNotification()
+                    analyticsManager.sendEvent("reminder_disabled")
+                }
+            }
+            .launchIn(coroutineScope)
+    }
+
+    @Composable
+    override fun content(mainNavigationState: MainNavigationState) {
+        SettingsReminderNotification(
+            configuration = configuration.value,
+            onChanged = { configuration.value = it }
+        )
+    }
+
+}
 
 @Composable
 fun SettingsReminderNotification(
@@ -115,6 +170,7 @@ fun SettingsReminderNotification(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("InlinedApi")
 @Composable
 private fun ReminderDialog(
@@ -220,6 +276,8 @@ private fun ReminderDialog(
                     onCheckedChange = { notificationEnabled = !notificationEnabled }
                 )
             }
+
+            TimeInput(state = rememberTimePickerState())
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,

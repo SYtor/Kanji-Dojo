@@ -9,7 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.text.font.FontWeight
-import org.koin.compose.koinInject
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.HomeOutline
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -18,7 +17,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.letters_dashboard.LettersDashboardScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.SettingsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.stats.StatsScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.vocab_dashboard.VocabDashboardScreen
 
@@ -75,10 +74,7 @@ enum class HomeScreenTab(
         analyticsName = "settings",
         iconContent = { Icon(Icons.Outlined.Settings, null) },
         titleResolver = { home.settingsTabLabel },
-        content = {
-            val settingsScreenContent = koinInject<SettingsScreenContract.Content>()
-            settingsScreenContent.Draw(mainNavigationState = it)
-        }
+        content = { SettingsScreen(it) }
     );
 
     companion object {
