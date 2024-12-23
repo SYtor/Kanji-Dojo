@@ -8,8 +8,10 @@ val syncScreenModule = module {
     multiplatformViewModel<SyncScreenContract.ViewModel> {
         SyncScreenViewModel(
             coroutineScope = it.component1(),
+            accountManager = get(),
+            syncManager = get(),
             appPreferences = get(),
-            accountManager = get()
+            getLocalSyncDataInfoUseCase = get()
         )
     }
 

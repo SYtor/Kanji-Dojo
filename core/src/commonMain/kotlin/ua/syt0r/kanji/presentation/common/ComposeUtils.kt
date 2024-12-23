@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.japanese.CharacterClassification
@@ -87,3 +89,5 @@ fun Modifier.clickable(action: (() -> Unit)?): Modifier {
         ?.let { clickable(enabled = true, onClick = action) }
         ?: this
 }
+
+val CommonDateTimeFormat = LocalDateTime.Format { byUnicodePattern("uuuu/MM/dd HH:mm") }
