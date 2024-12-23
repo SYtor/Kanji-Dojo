@@ -5,6 +5,7 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPickerScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 
@@ -21,6 +22,10 @@ fun LettersDashboardScreen(
         navigateToDeckDetails = {
             val configuration = DeckDetailsScreenConfiguration.LetterDeck(it.deckId)
             mainNavigationState.navigate(MainDestination.DeckDetails(configuration))
+        },
+        navigateToDeckEdit = {
+            val configuration = DeckEditScreenConfiguration.LetterDeck.Edit(it.title, it.deckId)
+            mainNavigationState.navigate(MainDestination.DeckEdit(configuration))
         },
         startQuickPractice = { item, practiceType, letters ->
             val destination: MainDestination.LetterPractice = MainDestination.LetterPractice(

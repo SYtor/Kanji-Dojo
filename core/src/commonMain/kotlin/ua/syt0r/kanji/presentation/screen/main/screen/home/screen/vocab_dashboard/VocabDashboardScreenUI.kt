@@ -41,6 +41,7 @@ fun VocabDashboardScreenUI(
     mergeDecks: (DecksMergeRequestData) -> Unit,
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (VocabDeckDashboardItem) -> Unit,
+    navigateToDeckEdit: (VocabDeckDashboardItem) -> Unit,
     startQuickPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit,
     createDeck: () -> Unit
 ) {
@@ -83,6 +84,7 @@ fun VocabDashboardScreenUI(
                                         practiceType = practiceType,
                                         showNewIndicator = screenState.listState.showDailyNewIndicator,
                                         navigateToDetails = navigateToDeckDetails,
+                                        navigateToEdit = navigateToDeckEdit,
                                         navigateToPractice = startQuickPractice
                                     )
                                 }
@@ -125,48 +127,33 @@ private fun DeckDashboardListState.addBrowseItems(
     practiceType: State<ScreenVocabPracticeType>,
     showNewIndicator: Boolean,
     navigateToDetails: (VocabDeckDashboardItem) -> Unit,
+    navigateToEdit: (VocabDeckDashboardItem) -> Unit,
     navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit,
 ) = scope.apply {
 
     items(
         items = items,
         key = { DeckDashboardListMode.Browsing::class.simpleName to it.deckId }
-    ) {
+    ) { item ->
 
-        VocabDeckItem(
-            practiceType = practiceType,
-            item = it as VocabDeckDashboardItem,
+        item as VocabDeckDashboardItem
+
+        val studyProgress = remember {
+            derivedStateOf { item.studyProgress.getValue(practiceType.value) }
+        }
+
+        DeckDashboardListItem(
+            itemKey = item.deckId,
+            title = item.title,
+            elapsedSinceLastReview = item.elapsedSinceLastReview,
             showNewIndicator = showNewIndicator,
-            navigateToDetails = { navigateToDetails(it) },
-            navigateToPractice = navigateToPractice,
+            studyProgress = studyProgress.value,
+            onDetailsClick = { navigateToDetails(item) },
+            onEditClick = { navigateToEdit(item) },
+            navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
         )
 
+
     }
-
-}
-
-
-@Composable
-private fun VocabDeckItem(
-    practiceType: State<ScreenVocabPracticeType>,
-    item: VocabDeckDashboardItem,
-    showNewIndicator: Boolean,
-    navigateToDetails: () -> Unit,
-    navigateToPractice: (VocabDeckDashboardItem, ScreenVocabPracticeType, List<Long>) -> Unit
-) {
-
-    val studyProgress = remember {
-        derivedStateOf { item.studyProgress.getValue(practiceType.value) }
-    }
-
-    DeckDashboardListItem(
-        itemKey = item.deckId,
-        title = item.title,
-        elapsedSinceLastReview = item.elapsedSinceLastReview,
-        showNewIndicator = showNewIndicator,
-        studyProgress = studyProgress.value,
-        onDetailsClick = navigateToDetails,
-        navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
-    )
 
 }

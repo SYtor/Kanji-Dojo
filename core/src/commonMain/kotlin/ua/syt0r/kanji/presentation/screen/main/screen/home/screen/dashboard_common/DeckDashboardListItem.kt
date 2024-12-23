@@ -15,30 +15,36 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ReadMore
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,6 +55,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -70,6 +77,7 @@ fun <T> DeckDashboardListItem(
     showNewIndicator: Boolean,
     studyProgress: DeckStudyProgress<T>,
     onDetailsClick: () -> Unit,
+    onEditClick: () -> Unit,
     navigateToPractice: (List<T>) -> Unit
 ) {
 
@@ -89,17 +97,20 @@ fun <T> DeckDashboardListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             DeckDashboardListItemHeader(
                 title = title,
+                expanded = expanded,
                 elapsedSinceLastReview = elapsedSinceLastReview,
                 onDetailsClick = onDetailsClick,
+                onEditClick = onEditClick,
                 indicatorContent = {
                     PendingReviewsCountIndicator(
                         showNewIndicator = showNewIndicator,
                         new = studyProgress.dailyNew.size,
                         due = studyProgress.dailyDue.size
                     )
-                }
+                },
             )
         }
 
@@ -121,14 +132,30 @@ fun <T> DeckDashboardListItem(
 @Composable
 fun RowScope.DeckDashboardListItemHeader(
     title: String,
+    expanded: Boolean,
     elapsedSinceLastReview: Duration?,
     onDetailsClick: () -> Unit,
+    onEditClick: () -> Unit,
     indicatorContent: @Composable RowScope.() -> Unit
 ) {
 
+    Box(
+        modifier = Modifier
+            .padding(start = 16.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+            .padding(2.dp)
+            .size(20.dp)
+    ) {
+        val rotation = animateFloatAsState(if (expanded) -180f else 0f)
+        Icon(
+            imageVector = Icons.Default.ExpandMore,
+            contentDescription = null,
+            modifier = Modifier.graphicsLayer { rotationZ = rotation.value }
+        )
+    }
+
     Column(
         modifier = Modifier.weight(1f)
-            .padding(start = 16.dp)
             .padding(vertical = 10.dp),
     ) {
 
@@ -148,14 +175,34 @@ fun RowScope.DeckDashboardListItemHeader(
 
     indicatorContent()
 
-    Box(
-        modifier = Modifier
-            .fillMaxHeight()
-            .clickable(onClick = onDetailsClick)
-            .aspectRatio(1f)
-            .wrapContentSize()
+    var showDropdown by remember { mutableStateOf(false) }
+
+    IconButton(
+        onClick = { showDropdown = true }
     ) {
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+
+        Icon(Icons.Default.MoreVert, null)
+
+        DropdownMenu(
+            expanded = showDropdown,
+            onDismissRequest = { showDropdown = false },
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        ) {
+
+            DropdownMenuItem(
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.ReadMore, null) },
+                text = { Text("Details") },
+                onClick = onDetailsClick
+            )
+
+            DropdownMenuItem(
+                leadingIcon = { Icon(Icons.Default.Edit, null) },
+                text = { Text("Edit") },
+                onClick = onEditClick
+            )
+
+        }
+
     }
 
 }
@@ -172,29 +219,49 @@ private fun PendingReviewsCountIndicator(
     if (!showNew && !showDue) return
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.height(IntrinsicSize.Min)
+            .widthIn(30.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small)
+            .padding(8.dp)
+            .wrapContentSize()
     ) {
+
         CompositionLocalProvider(
             LocalTextStyle provides MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
             if (showNew) {
+//                VerticalDivider(color = MaterialTheme.extraColorScheme.new)
+                IndicatorCircle(MaterialTheme.extraColorScheme.new)
                 Text(
                     text = new.toString(),
-                    color = MaterialTheme.extraColorScheme.new
+//                    modifier = Modifier.background(
+//                        MaterialTheme.extraColorScheme.new,
+//                        MaterialTheme.shapes.extraSmall
+//                    )
+//                    color = MaterialTheme.extraColorScheme.new
                 )
             }
-            if (showNew && showDue) VerticalDivider()
+//            if (showNew && showDue) VerticalDivider(color = MaterialTheme.colorScheme.surface)
             if (showDue) {
+//                VerticalDivider(color = MaterialTheme.extraColorScheme.due)
+                IndicatorCircle(MaterialTheme.extraColorScheme.due)
                 Text(
                     text = due.toString(),
-                    color = MaterialTheme.extraColorScheme.due
+//                    modifier = Modifier.background(
+//                        MaterialTheme.extraColorScheme.due,
+//                        MaterialTheme.shapes.extraSmall
+//                    )
+//                    color = MaterialTheme.extraColorScheme.due
                 )
             }
         }
     }
+
 }
 
 @Composable
