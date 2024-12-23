@@ -88,7 +88,7 @@ fun SyncDialog(
                 val (title, message) = when (currentState.diffType) {
                     SyncDataDiffType.RemoteNewer -> "New Data Found" to "Data on the server is newer than your local copy"
                     SyncDataDiffType.Incompatible -> "Data Conflict" to "Both remote and local data were changed since the last sync, result can't be merged"
-                    else -> error("Unexpected diff type for conflict state")
+                    else -> error("Unexpected diffType[${currentState.diffType}] for conflict state")
                 }
                 MessageLayout(
                     title = title,

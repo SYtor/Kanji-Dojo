@@ -147,7 +147,9 @@ class DefaultHandleSyncIntentUseCase(
 
     private fun SyncStateRefreshResult.asConflictSyncState(): SyncState.Conflict? {
         return takeIf {
-            it is SyncStateRefreshResult.WithRemoteData && it.diffType != SyncDataDiffType.Equal
+            it is SyncStateRefreshResult.WithRemoteData && it.diffType !in setOf(
+                SyncDataDiffType.Equal, SyncDataDiffType.LocalNewer
+            )
         }?.run {
             this as SyncStateRefreshResult.WithRemoteData
             SyncState.Conflict(
