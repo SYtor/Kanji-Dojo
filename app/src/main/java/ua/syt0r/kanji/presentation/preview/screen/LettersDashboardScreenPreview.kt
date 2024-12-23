@@ -66,11 +66,12 @@ private fun ScreenPreview(
         Surface {
             LettersDashboardScreenUI(
                 state = rememberUpdatedState(newValue = state),
-                navigateToDeckPicker = {},
-                navigateToDeckDetails = {},
-                startQuickPractice = { _, _, _ -> },
                 mergeDecks = { },
                 sortDecks = { },
+                navigateToDeckDetails = {},
+                navigateToDeckEdit = {},
+                startQuickPractice = { _, _, _ -> },
+                navigateToDeckPicker = {}
             )
         }
     }

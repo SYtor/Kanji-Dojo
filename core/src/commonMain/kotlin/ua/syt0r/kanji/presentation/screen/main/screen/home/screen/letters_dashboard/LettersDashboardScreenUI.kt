@@ -40,6 +40,7 @@ fun LettersDashboardScreenUI(
     mergeDecks: (DecksMergeRequestData) -> Unit,
     sortDecks: (DecksSortRequestData) -> Unit,
     navigateToDeckDetails: (LetterDeckDashboardItem) -> Unit,
+    navigateToDeckEdit: (LetterDeckDashboardItem) -> Unit,
     startQuickPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
     navigateToDeckPicker: () -> Unit
 ) {
@@ -81,6 +82,7 @@ fun LettersDashboardScreenUI(
                                         practiceType = practiceType,
                                         showPendingNewIndicator = screenState.listState.showDailyNewIndicator,
                                         navigateToDetails = navigateToDeckDetails,
+                                        navigateToEdit = navigateToDeckEdit,
                                         navigateToPractice = startQuickPractice
                                     )
                                 }
@@ -126,47 +128,31 @@ private fun DeckDashboardListState.addBrowseItems(
     practiceType: State<ScreenLetterPracticeType>,
     showPendingNewIndicator: Boolean,
     navigateToDetails: (LetterDeckDashboardItem) -> Unit,
+    navigateToEdit: (LetterDeckDashboardItem) -> Unit,
     navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit,
 ) = scope.apply {
 
     items(
         items = items,
         key = { DeckDashboardListMode.Browsing::class.simpleName to it.deckId }
-    ) {
+    ) { item ->
 
-        LetterDeckItem(
-            item = it as LetterDeckDashboardItem,
-            practiceType = practiceType,
-            showPendingNewIndicator = showPendingNewIndicator,
-            navigateToDetails = { navigateToDetails(it) },
-            navigateToPractice = navigateToPractice,
+        item as LetterDeckDashboardItem
+
+        val studyProgress = remember {
+            derivedStateOf { item.studyProgress.getValue(practiceType.value) }
+        }
+
+        DeckDashboardListItem(
+            itemKey = item.deckId,
+            title = item.title,
+            elapsedSinceLastReview = item.elapsedSinceLastReview,
+            showNewIndicator = showPendingNewIndicator,
+            studyProgress = studyProgress.value,
+            onDetailsClick = { navigateToDetails(item) },
+            onEditClick = { navigateToEdit(item) },
+            navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
         )
-
     }
-
-}
-
-@Composable
-private fun LetterDeckItem(
-    item: LetterDeckDashboardItem,
-    practiceType: State<ScreenLetterPracticeType>,
-    showPendingNewIndicator: Boolean,
-    navigateToDetails: () -> Unit,
-    navigateToPractice: (LetterDeckDashboardItem, ScreenLetterPracticeType, List<String>) -> Unit
-) {
-
-    val studyProgress = remember {
-        derivedStateOf { item.studyProgress.getValue(practiceType.value) }
-    }
-
-    DeckDashboardListItem(
-        itemKey = item.deckId,
-        title = item.title,
-        elapsedSinceLastReview = item.elapsedSinceLastReview,
-        showNewIndicator = showPendingNewIndicator,
-        studyProgress = studyProgress.value,
-        onDetailsClick = navigateToDetails,
-        navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
-    )
 
 }
