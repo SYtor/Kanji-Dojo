@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,13 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format
-import kotlinx.datetime.format.byUnicodePattern
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.SubscriptionInfo
+import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
+import ua.syt0r.kanji.presentation.common.InvertedButton
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
 import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.theme.errorColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,10 +112,6 @@ fun AccountScreenLoading() {
     CircularProgressIndicator(Modifier.fillMaxSize().wrapContentSize())
 }
 
-private val SubscriptionDateTimeFormat = LocalDateTime.Format {
-    byUnicodePattern("uuuu/MM/dd HH:mm")
-}
-
 @Composable
 fun AccountScreenSignedIn(
     email: String,
@@ -156,13 +152,13 @@ fun AccountScreenSignedIn(
                 is SubscriptionInfo.Active -> {
                     headlineText = "Active"
                     supportText =
-                        "Valid until ${subscriptionInfo.due.format(SubscriptionDateTimeFormat)}"
+                        "Valid until ${subscriptionInfo.due.format(CommonDateTimeFormat)}"
                 }
 
                 is SubscriptionInfo.Expired -> {
                     headlineText = "Expired"
                     supportText =
-                        "Valid until ${subscriptionInfo.due.format(SubscriptionDateTimeFormat)}"
+                        "Valid until ${subscriptionInfo.due.format(CommonDateTimeFormat)}"
                 }
 
                 SubscriptionInfo.Inactive -> {
@@ -235,25 +231,6 @@ fun AccountScreenError(
 }
 
 @Composable
-private fun InvertedButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onSurface,
-            contentColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        content()
-    }
-}
-
-@Composable
 private fun SectionTitleText(text: String) {
     Text(
         text = text,
@@ -309,13 +286,7 @@ private fun IssueListItem(
         supportingContent = { Text(message) },
         leadingContent = { Icon(Icons.Default.Info, null) },
         trailingContent = trailingIcon?.let { { Icon(it, null) } },
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.errorContainer,
-            headlineColor = MaterialTheme.colorScheme.onSurface,
-            supportingColor = MaterialTheme.colorScheme.onErrorContainer,
-            leadingIconColor = MaterialTheme.colorScheme.onSurface,
-            trailingIconColor = MaterialTheme.colorScheme.onSurface
-        ),
+        colors = ListItemDefaults.errorColors(),
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable(action)

@@ -15,7 +15,8 @@ fun SyncScreen(
     SyncScreenUI(
         state = viewModel.state.collectAsState(),
         onUpClick = mainNavigationState::navigateBack,
-        navigateToAccountScreen = { mainNavigationState.navigate(MainDestination.Account()) }
+        navigateToAccountScreen = { mainNavigationState.navigate(MainDestination.Account()) },
+        sync = viewModel::sync
     )
 
 }

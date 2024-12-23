@@ -13,6 +13,8 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
@@ -191,6 +193,17 @@ fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorSche
         focusedLabelColor = labelColor,
         disabledLabelColor = labelColor,
         cursorColor = onSurface
+    )
+}
+
+@Composable
+fun ListItemDefaults.errorColors(): ListItemColors {
+    return colors(
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        headlineColor = MaterialTheme.colorScheme.onSurface,
+        supportingColor = MaterialTheme.colorScheme.onErrorContainer,
+        leadingIconColor = MaterialTheme.colorScheme.onSurface,
+        trailingIconColor = MaterialTheme.colorScheme.onSurface
     )
 }
 
