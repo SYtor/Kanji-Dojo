@@ -33,7 +33,6 @@ import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.items.ThemeSettingItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier
 
 actual val platformComponentsModule: Module = module {
@@ -125,8 +124,7 @@ actual val platformComponentsModule: Module = module {
 
     factory(settingItemsQualifier) {
         listOf(
-            get<AndroidReminderSettingListItem>(),
-            ThemeSettingItem
+            get<AndroidReminderSettingListItem>()
         )
     }
 

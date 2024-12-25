@@ -13,16 +13,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
@@ -46,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -134,40 +130,21 @@ fun SettingsReminderNotification(
         )
     }
 
-    Row(
-        modifier = Modifier
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(
-                onClick = { shouldShowReminderDialog = true }
-            )
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .widthIn(min = 30.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 10.dp)
-        ) {
-            val strings = resolveString { settings }
-            Text(text = strings.reminderTitle)
-            val message = configuration.run {
-                val statusMessage = if (enabled)
-                    strings.reminderEnabled
-                else strings.reminderDisabled
-                val timeMessage = time.prettyFormatted()
-                listOf(statusMessage, timeMessage).joinToString()
-            }
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
+    val strings = resolveString { settings }
+    val message = configuration.run {
+        val statusMessage = if (enabled)
+            strings.reminderEnabled
+        else strings.reminderDisabled
+        val timeMessage = time.prettyFormatted()
+        listOf(statusMessage, timeMessage).joinToString()
     }
+
+    SettingsTextButton(
+        title = strings.reminderTitle,
+        subtitle = message,
+        onClick = { shouldShowReminderDialog = true }
+    )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

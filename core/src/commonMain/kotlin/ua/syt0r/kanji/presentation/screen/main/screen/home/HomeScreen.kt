@@ -18,9 +18,10 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 @Composable
 fun HomeScreen(
     mainNavigationState: State<MainNavigationState>,
-    homeNavigationState: HomeNavigationState = rememberHomeNavigationState(),
     viewModel: HomeScreenContract.ViewModel = getMultiplatformViewModel(),
 ) {
+
+    val homeNavigationState = rememberHomeNavigationState(viewModel.defaultTab)
 
     val tabContent = movableContentOf {
         HomeNavigationContent(homeNavigationState, mainNavigationState.value)
