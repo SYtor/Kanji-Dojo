@@ -21,10 +21,10 @@ import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
 @Composable
-actual fun rememberHomeNavigationState(): HomeNavigationState {
+actual fun rememberHomeNavigationState(defaultTab: HomeScreenTab): HomeNavigationState {
     val navController = rememberNavController()
 
-    val tabState = rememberSaveable { mutableStateOf(HomeScreenTab.Default) }
+    val tabState = rememberSaveable { mutableStateOf(defaultTab) }
 
     // Caching current tab value because back stack becomes null for a moment after config change
     // and wrong selected tab is displayed
@@ -36,7 +36,7 @@ actual fun rememberHomeNavigationState(): HomeNavigationState {
             .collect()
     }
 
-    return remember { AndroidHomeNavigationState(navController, tabState) }
+    return remember { AndroidHomeNavigationState(defaultTab, navController, tabState) }
 }
 
 private val HomeScreenTab.route: String
@@ -44,6 +44,7 @@ private val HomeScreenTab.route: String
 
 @Stable
 private class AndroidHomeNavigationState(
+    val defaultTab: HomeScreenTab,
     val navHostController: NavHostController,
     tabState: State<HomeScreenTab>
 ) : HomeNavigationState {
@@ -73,7 +74,7 @@ actual fun HomeNavigationContent(
 
     NavHost(
         navController = homeNavigationState.navHostController,
-        startDestination = HomeScreenTab.Default.route,
+        startDestination = homeNavigationState.defaultTab.route,
         modifier = Modifier.fillMaxSize()
     ) {
 

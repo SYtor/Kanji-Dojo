@@ -40,6 +40,8 @@ interface PreferencesContract {
         val reminderEnabled: SuspendedProperty<Boolean>
         val reminderTime: SuspendedProperty<LocalTime>
 
+        val defaultHomeTab: SuspendedProperty<PreferencesDefaultHomeTab>
+
         val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String>
         val tutorialSeen: SuspendedProperty<Boolean>
         val generalDashboardLetterPracticeType: SuspendedProperty<PreferencesLetterPracticeType>
@@ -82,6 +84,7 @@ enum class PreferencesTheme { System, Light, Dark }
 enum class PreferencesLetterPracticeWritingInputMode { Stroke, Character }
 enum class PreferencesVocabPracticeType { Flashcard, ReadingPicker, Writing }
 enum class PreferencesVocabReadingPriority { Default, Kanji, Kana }
+enum class PreferencesDefaultHomeTab { GeneralDashboard, Letters, Vocab }
 
 @Serializable
 data class PreferencesSyncDataInfo(

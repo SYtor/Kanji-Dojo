@@ -8,7 +8,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.Setti
 
 class SettingsScreenViewModel(
     coroutineScope: CoroutineScope,
-    settingItems: List<SettingsScreenContract.ListItem>,
+    defaultSettingItems: List<SettingsScreenContract.ListItem>,
+    customSettingItems: List<SettingsScreenContract.ListItem>,
 ) : SettingsScreenContract.ViewModel {
 
     private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
@@ -17,10 +18,12 @@ class SettingsScreenViewModel(
     init {
         coroutineScope.launch {
 
-            settingItems.filterIsInstance<SettingsScreenContract.ConfigurableListItem>()
+            val combinedItems = customSettingItems.plus(defaultSettingItems)
+
+            combinedItems.filterIsInstance<SettingsScreenContract.ConfigurableListItem>()
                 .forEach { it.prepare(coroutineScope) }
 
-            _state.value = ScreenState.Loaded(settingItems)
+            _state.value = ScreenState.Loaded(combinedItems)
 
         }
     }

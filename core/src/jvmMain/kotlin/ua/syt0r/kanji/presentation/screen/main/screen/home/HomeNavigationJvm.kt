@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
 @Composable
-actual fun rememberHomeNavigationState(): HomeNavigationState {
-    val tabState = rememberSaveable { mutableStateOf<HomeScreenTab>(HomeScreenTab.Default) }
+actual fun rememberHomeNavigationState(defaultTab: HomeScreenTab): HomeNavigationState {
+    val tabState = rememberSaveable { mutableStateOf<HomeScreenTab>(defaultTab) }
     return rememberSaveable { MultiplatformHomeNavigationState(tabState) }
 }
 

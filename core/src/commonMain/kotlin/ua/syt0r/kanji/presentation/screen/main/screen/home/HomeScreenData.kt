@@ -78,8 +78,7 @@ enum class HomeScreenTab(
     );
 
     companion object {
-        val Default = GeneralDashboard
-        val VisibleTabs: List<HomeScreenTab> = HomeScreenTab.values().toList()
+        val VisibleTabs: List<HomeScreenTab> = entries
     }
 
 }

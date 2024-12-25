@@ -12,7 +12,7 @@ interface HomeNavigationState {
 }
 
 @Composable
-expect fun rememberHomeNavigationState(): HomeNavigationState
+expect fun rememberHomeNavigationState(defaultTab: HomeScreenTab): HomeNavigationState
 
 @Composable
 expect fun HomeNavigationContent(

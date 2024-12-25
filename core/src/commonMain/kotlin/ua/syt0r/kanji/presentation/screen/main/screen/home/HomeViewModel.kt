@@ -8,14 +8,26 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.runBlocking
 import ua.syt0r.kanji.core.sync.SyncFeatureState
 import ua.syt0r.kanji.core.sync.SyncManager
 import ua.syt0r.kanji.core.sync.SyncState
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
+import ua.syt0r.kanji.core.user_data.preferences.PreferencesDefaultHomeTab
 
 class HomeViewModel(
     viewModelScope: CoroutineScope,
+    private val appPreferences: PreferencesContract.AppPreferences,
     private val syncManager: SyncManager
 ) : HomeScreenContract.ViewModel {
+
+    override val defaultTab: HomeScreenTab = runBlocking {
+        when (appPreferences.defaultHomeTab.get()) {
+            PreferencesDefaultHomeTab.GeneralDashboard -> HomeScreenTab.GeneralDashboard
+            PreferencesDefaultHomeTab.Letters -> HomeScreenTab.LettersDashboard
+            PreferencesDefaultHomeTab.Vocab -> HomeScreenTab.VocabDashboard
+        }
+    }
 
     private data class SyncIconData(
         val isLoading: Boolean = false,

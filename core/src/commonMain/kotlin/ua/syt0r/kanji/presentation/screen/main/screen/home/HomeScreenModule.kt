@@ -8,6 +8,7 @@ val homeScreenModule = module {
     multiplatformViewModel<HomeScreenContract.ViewModel> { parametersHolder ->
         HomeViewModel(
             viewModelScope = parametersHolder.component1(),
+            appPreferences = get(),
             syncManager = get()
         )
     }

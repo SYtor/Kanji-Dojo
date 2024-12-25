@@ -148,6 +148,13 @@ class AppPreferences(
         affectSync = true
     )
 
+    override val defaultHomeTab: SuspendedProperty<PreferencesDefaultHomeTab> = createProperty(
+        type = enumSuspendedPropertyType(),
+        key = "default_home_tab",
+        affectSync = true,
+        initialValue = { PreferencesDefaultHomeTab.GeneralDashboard }
+    )
+
     override val lastAppVersionWhenChangesDialogShown: SuspendedProperty<String> = createProperty(
         type = StringSuspendedPropertyType,
         key = "last_changes_dialog_version_shown",

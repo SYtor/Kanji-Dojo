@@ -19,7 +19,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountS
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.account.GooglePlayAccountScreenViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
-import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.items.ThemeSettingItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.sponsor.SponsorScreenContract
@@ -64,8 +63,7 @@ val flavorModule = module {
     factory(settingItemsQualifier) {
         listOf(
             get<GooglePlayAnalyticsSettingListItem>(),
-            get<AndroidReminderSettingListItem>(),
-            ThemeSettingItem
+            get<AndroidReminderSettingListItem>()
         )
     }
 
