@@ -1,8 +1,12 @@
 package ua.syt0r.kanji.core.user_data.practice
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -27,46 +31,58 @@ interface FsrsItemRepository {
 class SqlDelightFsrsItemRepository(
     private val userDataDatabaseManager: UserDataDatabaseManager,
     backupRestoreEventsProvider: BackupRestoreEventsProvider,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) : FsrsItemRepository {
+
+    private class RepoData(
+        val cardsMap: MutableMap<SrsCardKey, FsrsCard>
+    )
+
+    private val repoDataState = MutableStateFlow(asyncRepoData())
 
     private val _updatesFlow = MutableSharedFlow<Unit>()
     override val updatesFlow: SharedFlow<Unit> = _updatesFlow
 
-    private var inMemoryCache: MutableMap<SrsCardKey, FsrsCard>? = null
-
     init {
         backupRestoreEventsProvider.onRestoreEventsFlow
             .onEach {
-                inMemoryCache = null
+                resetRepoData()
                 _updatesFlow.emit(Unit)
             }
             .launchIn(coroutineScope)
     }
 
     override suspend fun get(key: SrsCardKey): FsrsCard? {
-        return getCache()[key]
+        return repoDataState.value.await().cardsMap[key]
     }
 
     override suspend fun getAll(): Map<SrsCardKey, FsrsCard> {
-        return getCache()
+        return repoDataState.value.await().cardsMap
     }
 
     override suspend fun update(key: SrsCardKey, card: FsrsCard) {
-        getCache()[key] = card
+        val repoData = repoDataState.value.await()
+        repoData.cardsMap[key] = card
         userDataDatabaseManager.runTransaction(true) { upsertFsrsCard(covert(key, card)) }
         _updatesFlow.emit(Unit)
     }
 
-    private suspend fun getCache(): MutableMap<SrsCardKey, FsrsCard> {
-        return inMemoryCache ?: userDataDatabaseManager.runTransaction(false) {
-            getFsrsCards().executeAsList()
-                .associate { SrsCardKey(it.key, it.practice_type) to it.convert() }
-                .toMutableMap()
-        }.also { inMemoryCache = it }
+    private fun asyncRepoData(): Deferred<RepoData> {
+        return coroutineScope.async(start = CoroutineStart.LAZY) {
+            userDataDatabaseManager.runTransaction(false) {
+                val cardsMap = getFsrsCards().executeAsList()
+                    .associate { SrsCardKey(it.key, it.practice_type) to it.convert() }
+                    .toMutableMap()
+                RepoData(cardsMap)
+            }
+        }
     }
 
-    private val dbValueToSrcCardStatus: Map<Int, FsrsCardStatus> = FsrsCardStatus.values()
+    private fun resetRepoData() {
+        repoDataState.value = asyncRepoData()
+    }
+
+    private val dbValueToSrcCardStatus: Map<Int, FsrsCardStatus> = FsrsCardStatus.entries
         .associateBy { it.ordinal }
 
     private fun covert(key: SrsCardKey, card: FsrsCard): Fsrs_card {

@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.time.TimeUtils
+import ua.syt0r.kanji.core.user_data.practice.Deck
 import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
 import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
@@ -43,7 +44,7 @@ class DefaultLetterSrsManager(
     coroutineScope = coroutineScope
 ), LetterSrsManager {
 
-    override val practiceTypes: List<LetterPracticeType> = LetterPracticeType.values().toList()
+    override val practiceTypes: List<LetterPracticeType> = LetterPracticeType.entries
 
     override suspend fun getDecks(): LetterSrsDecksData {
         return getDecksInternal()
@@ -54,45 +55,47 @@ class DefaultLetterSrsManager(
     }
 
     override suspend fun getDeckDescriptors(): List<LetterSrsDeckDescriptor> {
-        return practiceRepository.getDecks().map {
-            val items = practiceRepository.getDeckCharacters(it.id)
+        return practiceRepository.getDecks().map { getDeckDescriptor(it) }
+    }
 
-            val itemsDataMap = LetterPracticeType.values().associateWith { practiceType ->
-                val itemsData: Map<String, SrsCardData> = items.associateWith { letter ->
-                    val key = practiceType.toSrsKey(letter)
-                    val card = srsItemRepository.get(key)
-                    val firstReview = reviewHistoryRepository.getFirstReviewTime(
-                        key = key.itemKey,
-                        practiceType = practiceType.srsPracticeType.value
-                    )
-                    SrsCardData(
-                        key = key,
-                        card = card,
-                        status = getSrsStatus(card),
-                        lapses = card?.fsrsCard?.lapses ?: 0,
-                        repeats = card?.fsrsCard?.repeats ?: 0,
-                        firstReview = firstReview,
-                        firstReviewSrsDate = firstReview?.toSrsDate(),
-                        lastReview = card?.lastReview,
-                        lastReviewSrsDate = card?.lastReview?.toSrsDate(),
-                        expectedReviewDate = card?.expectedReview?.toSrsDate()
-                    )
-                }
-                PracticeTypeDeckData(itemsData = itemsData)
+    private suspend fun getDeckDescriptor(it: Deck): LetterSrsDeckDescriptor {
+        val items = practiceRepository.getDeckCharacters(it.id)
+
+        val itemsDataMap = LetterPracticeType.entries.associateWith { practiceType ->
+            val itemsData: Map<String, SrsCardData> = items.associateWith { letter ->
+                val key = practiceType.toSrsKey(letter)
+                val card = srsItemRepository.get(key)
+                val firstReview = reviewHistoryRepository.getFirstReviewTime(
+                    key = key.itemKey,
+                    practiceType = practiceType.srsPracticeType.value
+                )
+                SrsCardData(
+                    key = key,
+                    card = card,
+                    status = getSrsStatus(card),
+                    lapses = card?.fsrsCard?.lapses ?: 0,
+                    repeats = card?.fsrsCard?.repeats ?: 0,
+                    firstReview = firstReview,
+                    firstReviewSrsDate = firstReview?.toSrsDate(),
+                    lastReview = card?.lastReview,
+                    lastReviewSrsDate = card?.lastReview?.toSrsDate(),
+                    expectedReviewDate = card?.expectedReview?.toSrsDate()
+                )
             }
-
-            LetterSrsDeckDescriptor(
-                id = it.id,
-                title = it.name,
-                position = it.position,
-                lastReview = reviewHistoryRepository.getDeckLastReview(
-                    deckId = it.id,
-                    practiceTypes = LetterPracticeType.srsPracticeTypeValues
-                ),
-                items = items,
-                itemsData = itemsDataMap
-            )
+            PracticeTypeDeckData(itemsData = itemsData)
         }
+
+        return LetterSrsDeckDescriptor(
+            id = it.id,
+            title = it.name,
+            position = it.position,
+            lastReview = reviewHistoryRepository.getDeckLastReview(
+                deckId = it.id,
+                practiceTypes = LetterPracticeType.srsPracticeTypeValues
+            ),
+            items = items,
+            itemsData = itemsDataMap
+        )
     }
 
     override suspend fun getDeckSortConfiguration(): DeckSortConfiguration {

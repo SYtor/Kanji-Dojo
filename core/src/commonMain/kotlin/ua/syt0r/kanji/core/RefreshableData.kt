@@ -9,17 +9,20 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
+import org.koin.ext.getFullName
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.LifecycleState
+import kotlin.time.measureTime
 
 sealed interface RefreshableData<T> {
     class Loading<T> : RefreshableData<T>
     data class Loaded<T>(val value: T) : RefreshableData<T>
 }
 
-fun <T> refreshableDataFlow(
+inline fun <reified T> refreshableDataFlow(
     dataChangeFlow: SharedFlow<Unit>,
     lifecycleState: StateFlow<LifecycleState>,
-    valueProvider: suspend () -> T
+    noinline valueProvider: suspend () -> T
 ): Flow<RefreshableData<T>> = channelFlow {
 
     val waitForScreenVisibility = suspend {
@@ -30,7 +33,12 @@ fun <T> refreshableDataFlow(
         .collectLatest {
             send(RefreshableData.Loading())
             waitForScreenVisibility()
-            send(RefreshableData.Loaded(valueProvider()))
+
+            val value: T
+            val loadingTime = measureTime { value = valueProvider.invoke() }
+            Logger.d("Loaded ${T::class.qualifiedName} data, loadingTime[$loadingTime]")
+
+            send(RefreshableData.Loaded(value))
         }
 
 }.distinctUntilChanged { old, new ->
