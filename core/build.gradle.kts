@@ -14,7 +14,7 @@ plugins {
 kotlin {
 
     jvm()
-    android()
+    androidTarget()
 
     jvmToolchain(17)
 
@@ -27,6 +27,7 @@ kotlin {
                 api(compose.material3)
                 api(compose.runtime)
                 api(compose.materialIconsExtended)
+                api(compose.components.resources)
 
                 api(libs.koin.core)
                 api(libs.koin.compose)
@@ -82,6 +83,12 @@ kotlin {
             }
         }
     }
+}
+
+compose.resources {
+    generateResClass = always
+    packageOfResClass = "ua.syt0r.kanji"
+    publicResClass = true
 }
 
 sqldelight {

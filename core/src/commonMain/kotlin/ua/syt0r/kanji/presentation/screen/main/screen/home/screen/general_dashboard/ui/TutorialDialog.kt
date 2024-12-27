@@ -43,7 +43,6 @@ import kotlin.math.min
 import kotlin.time.Duration.Companion.days
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TutorialDialog(
     onDismissRequest: () -> Unit
