@@ -10,7 +10,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.time.TimeUtils
+import kotlin.time.measureTime
 
 abstract class SrsManager<ItemType, PracticeType, Deck>(
     deckChangesFlow: SharedFlow<Unit>,
@@ -64,8 +66,13 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
     protected suspend fun getDecksInternal(): SrsDecksData<Deck, PracticeType> {
         cache?.let { return it }
 
-        val deckDescriptors = getDeckDescriptors()
-            .sortedWith(getDecksComparator())
+        val deckDescriptors: List<SrsDeckDescriptor<ItemType, PracticeType>>
+
+        // TODO optimize
+        val descriptorsLoadingTime = measureTime {
+            deckDescriptors = getDeckDescriptors().sortedWith(getDecksComparator())
+        }
+        Logger.d("descriptorsLoadingTime[$descriptorsLoadingTime]")
 
         val cardsMap: Map<SrsCardKey, SrsCardData> = deckDescriptors
             .flatMap { deckDescriptor ->

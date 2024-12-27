@@ -298,7 +298,7 @@ fun GeneralDashboardScreenUI(
             DashboardItemLayout(
                 title = {
                     Text(text = resolveString { generalDashboard.streakTitle })
-                    StreakIndicator(it.currentStreak)
+                    StreakIndicator(it.streakData.currentStreak)
                 },
                 buttonsContent = {
                     Column(
@@ -320,12 +320,12 @@ fun GeneralDashboardScreenUI(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = it.currentStreak.toString(),
+                                text = it.streakData.currentStreak.toString(),
                                 style = MaterialTheme.typography.headlineSmall,
                                 modifier = Modifier.weight(1f)
                             )
 
-                            if (it.currentStreak >= it.longestStreak && it.currentStreak != 0) {
+                            if (it.streakData.currentStreak >= it.streakData.longestStreak && it.streakData.currentStreak != 0) {
                                 Icon(Icons.AutoMirrored.Filled.TrendingUp, null)
                             }
                         }
@@ -348,7 +348,7 @@ fun GeneralDashboardScreenUI(
                         )
 
                         Text(
-                            text = it.longestStreak.toString(),
+                            text = it.streakData.longestStreak.toString(),
                             style = MaterialTheme.typography.headlineSmall
                         )
                     }
@@ -356,7 +356,7 @@ fun GeneralDashboardScreenUI(
                 }
             )
 
-            StreakCalendar(it.streakCalendarData)
+            StreakCalendar(it.streakData.calendarItems)
 
             Spacer(Modifier.height(20.dp))
 

@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashb
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
@@ -23,6 +24,7 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 import ua.syt0r.kanji.presentation.LifecycleState
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.GeneralDashboardScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.LetterDecksData
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.LetterDecksStudyProgress
@@ -62,6 +64,89 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
 
     private suspend fun getLoadedState(): ScreenState.Loaded = withContext(Dispatchers.IO) {
 
+        val deferredLettersData = async { getLetterDecksData() }
+        val deferredVocabData = async { getVocabDecksData() }
+        val deferredStreakData = async { getStreakData() }
+
+        ScreenState.Loaded(
+            showAppVersionChangeHint = mutableStateOf(
+                value = BuildConfig.versionName != preferencesRepository.lastAppVersionWhenChangesDialogShown.get()
+            ),
+            showTutorialHint = mutableStateOf(
+                value = !preferencesRepository.tutorialSeen.get()
+            ),
+            letterDecksData = deferredLettersData.await(),
+            vocabDecksInfo = deferredVocabData.await(),
+            streakData = deferredStreakData.await()
+        )
+    }
+
+    private suspend fun getLetterDecksData(): LetterDecksData {
+        val decksData = letterSrsManager.getDecks()
+        if (decksData.decks.isEmpty()) return LetterDecksData.NoDecks
+
+        val preferencesPracticeType = ScreenLetterPracticeType.from(
+            preferencesRepository.generalDashboardLetterPracticeType.get()
+        )
+
+        return LetterDecksData.Data(
+            practiceType = mutableStateOf(preferencesPracticeType),
+            studyProgressMap = ScreenLetterPracticeType.entries.associateWith { practiceType ->
+                val new = mutableMapOf<String, Long>()
+                val due = mutableMapOf<String, Long>()
+
+                decksData.decks
+                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
+                    .forEach { (deckId, srsProgress) ->
+                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
+                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
+                    }
+
+                val leftover = decksData.dailyProgress
+                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
+
+                LetterDecksStudyProgress(
+                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
+                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
+                )
+            }
+        )
+    }
+
+    private suspend fun getVocabDecksData(): VocabDecksData {
+        val decksData = vocabSrsManager.getDecks()
+        if (decksData.decks.isEmpty()) return VocabDecksData.NoDecks
+
+        val preferencesPracticeType = ScreenVocabPracticeType.from(
+            preferencesRepository.generalDashboardVocabPracticeType.get()
+        )
+
+        return VocabDecksData.Data(
+            practiceType = mutableStateOf(preferencesPracticeType),
+            studyProgressMap = ScreenVocabPracticeType.entries.associateWith { practiceType ->
+                val new = mutableMapOf<Long, Long>()
+                val due = mutableMapOf<Long, Long>()
+
+                decksData.decks
+                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
+                    .forEach { (deckId, srsProgress) ->
+                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
+                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
+                    }
+
+                val leftover = decksData.dailyProgress
+                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
+
+                VocabDecksStudyProgress(
+                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
+                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
+                )
+            }
+        )
+    }
+
+    private suspend fun getStreakData(): GeneralDashboardScreenContract.StreakData {
+
         fun StreakData.includesDate(date: LocalDate): Boolean {
             return date in start..end
         }
@@ -94,82 +179,10 @@ class DefaultSubscribeOnGeneralDashboardScreenDataUseCase(
             currentStreakSearchDates.any { streak.includesDate(it) }
         }
 
-        ScreenState.Loaded(
-            showAppVersionChangeHint = mutableStateOf(
-                value = BuildConfig.versionName != preferencesRepository.lastAppVersionWhenChangesDialogShown.get()
-            ),
-            showTutorialHint = mutableStateOf(
-                value = !preferencesRepository.tutorialSeen.get()
-            ),
-            letterDecksData = getLetterDecksData(),
-            vocabDecksInfo = getVocabDecksData(),
-            streakCalendarData = streakCalendarItems,
+        return GeneralDashboardScreenContract.StreakData(
+            calendarItems = streakCalendarItems,
             currentStreak = currentStreak?.length ?: 0,
             longestStreak = longestStreak?.length ?: 0
-        )
-    }
-
-    private suspend fun getLetterDecksData(): LetterDecksData {
-        val decksData = letterSrsManager.getDecks()
-        if (decksData.decks.isEmpty()) return LetterDecksData.NoDecks
-
-        val preferencesPracticeType = ScreenLetterPracticeType.from(
-            preferencesRepository.generalDashboardLetterPracticeType.get()
-        )
-
-        return LetterDecksData.Data(
-            practiceType = mutableStateOf(preferencesPracticeType),
-            studyProgressMap = ScreenLetterPracticeType.values().associateWith { practiceType ->
-                val new = mutableMapOf<String, Long>()
-                val due = mutableMapOf<String, Long>()
-
-                decksData.decks
-                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
-                    .forEach { (deckId, srsProgress) ->
-                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
-                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
-                    }
-
-                val leftover = decksData.dailyProgress
-                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
-
-                LetterDecksStudyProgress(
-                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
-                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
-                )
-            }
-        )
-    }
-
-    private suspend fun getVocabDecksData(): VocabDecksData {
-        val decksData = vocabSrsManager.getDecks()
-        if (decksData.decks.isEmpty()) return VocabDecksData.NoDecks
-
-        val preferencesPracticeType = ScreenVocabPracticeType.from(
-            preferencesRepository.generalDashboardVocabPracticeType.get()
-        )
-
-        return VocabDecksData.Data(
-            practiceType = mutableStateOf(preferencesPracticeType),
-            studyProgressMap = ScreenVocabPracticeType.values().associateWith { practiceType ->
-                val new = mutableMapOf<Long, Long>()
-                val due = mutableMapOf<Long, Long>()
-
-                decksData.decks
-                    .map { it.id to it.progressMap.getValue(practiceType.dataType) }
-                    .forEach { (deckId, srsProgress) ->
-                        srsProgress.dailyNew.associateWith { deckId }.forEach(new::putIfAbsent)
-                        srsProgress.dailyDue.associateWith { deckId }.forEach(due::putIfAbsent)
-                    }
-
-                val leftover = decksData.dailyProgress
-                    .leftoversByPracticeTypeMap.getValue(practiceType.dataType)
-
-                VocabDecksStudyProgress(
-                    newToDeckIdMap = new.toList().take(leftover.new).toMap(),
-                    dueToDeckIdMap = due.toList().take(leftover.due).toMap()
-                )
-            }
         )
     }
 
