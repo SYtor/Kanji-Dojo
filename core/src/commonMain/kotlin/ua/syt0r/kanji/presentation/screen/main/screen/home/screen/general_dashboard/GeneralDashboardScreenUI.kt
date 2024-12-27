@@ -3,6 +3,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashb
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -28,11 +29,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -41,7 +44,9 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Celebration
+import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -58,24 +63,25 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.painterResource
+import ua.syt0r.kanji.Res
+import ua.syt0r.kanji.discord_outline
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
-import ua.syt0r.kanji.presentation.common.resources.icon.Discord
-import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
-import ua.syt0r.kanji.presentation.common.resources.icon.YouTube
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
@@ -90,6 +96,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashbo
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
+import ua.syt0r.kanji.youtube_outline
 
 @Composable
 fun GeneralDashboardScreenUI(
@@ -115,49 +122,43 @@ fun GeneralDashboardScreenUI(
 
     ScreenLayout(
         state = state,
-        header = {
-
+        staticHeader = {
             HeaderButton(
                 onClick = navigateToDailyLimitConfiguration,
-            ) {
-                Text(resolveString { generalDashboard.buttonDailyLimit })
-                Icon(Icons.Outlined.Settings, null)
-            }
+                text = resolveString { generalDashboard.buttonDailyLimit },
+                icon = { Icon(Icons.Outlined.Settings, null) }
+            )
 
             HeaderButton(
-                onClick = {
-                    showVersionChangeDialog = true
-                    it.showAppVersionChangeHint.value = false
-                }
-            ) {
-                if (it.showAppVersionChangeHint.value) {
-                    IndicatorCircle(
-                        modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp)
-                    )
-                }
-
-                Text(
-                    text = resolveString { generalDashboard.buttonVersionChange },
-                    modifier = Modifier.alignByBaseline()
-                )
-                Icon(Icons.Outlined.Celebration, null)
-            }
+                onClick = { showTutorialDialog = true },
+                text = resolveString { generalDashboard.buttonTutorial },
+                icon = { Icon(Icons.AutoMirrored.Outlined.HelpOutline, null) }
+            )
+        },
+        expandableHeader = {
+            HeaderButton(
+                onClick = { showVersionChangeDialog = true },
+                text = resolveString { generalDashboard.buttonVersionChange },
+                icon = { Icon(Icons.Outlined.Celebration, null) }
+            )
 
             HeaderButton(
-                onClick = {
-                    showTutorialDialog = true
-                    it.showTutorialHint.value = false
-                },
-            ) {
-                if (it.showTutorialHint.value) {
-                    IndicatorCircle(
-                        modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp)
-                    )
-                }
-                Text(resolveString { generalDashboard.buttonTutorial }, Modifier.alignByBaseline())
-                Icon(Icons.AutoMirrored.Outlined.HelpOutline, null)
-            }
+                onClick = {},
+                text = resolveString { "Downloads" },
+                icon = { Icon(Icons.Outlined.Devices, null) }
+            )
 
+            HeaderButton(
+                onClick = discordClick,
+                text = resolveString { "Discord" },
+                icon = { Icon(painterResource(Res.drawable.discord_outline), null) }
+            )
+
+            HeaderButton(
+                onClick = youtubeClick,
+                text = resolveString { "YouTube" },
+                icon = { Icon(painterResource(Res.drawable.youtube_outline), null) }
+            )
         },
         content = {
 
@@ -357,47 +358,28 @@ fun GeneralDashboardScreenUI(
 
             StreakCalendar(it.streakCalendarData)
 
-            Spacer(Modifier.weight(1f))
-
-            Row(
-                modifier = ListContentModifier
-                    .height(IntrinsicSize.Min)
-                    .padding(top = 10.dp, bottom = 20.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
-            ) {
-
-                SocialIconButton(
-                    imageVector = ExtraIcons.YouTube,
-                    onClick = youtubeClick
-                )
-
-                SocialIconButton(
-                    imageVector = ExtraIcons.Discord,
-                    onClick = discordClick
-                )
-
-            }
+            Spacer(Modifier.height(20.dp))
 
         }
+
     )
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScreenLayout(
     state: State<ScreenState>,
-    header: @Composable RowScope.(ScreenState.Loaded) -> Unit,
+    staticHeader: @Composable RowScope.() -> Unit,
+    expandableHeader: @Composable RowScope.() -> Unit,
     content: @Composable ColumnScope.(ScreenState.Loaded) -> Unit
 ) {
 
     AnimatedContent(
         targetState = state.value,
         transitionSpec = { fadeIn() togetherWith fadeOut() using snapSizeTransform() }
-    ) {
+    ) { screenState ->
 
-        when (it) {
+        when (screenState) {
             ScreenState.Loading -> FancyLoading(Modifier.fillMaxSize().wrapContentSize())
             is ScreenState.Loaded -> Column(
                 modifier = Modifier.fillMaxSize()
@@ -405,36 +387,102 @@ private fun ScreenLayout(
                     .wrapContentWidth()
             ) {
 
-                if (LocalOrientation.current == Orientation.Landscape)
+                if (LocalOrientation.current == Orientation.Landscape) {
                     Spacer(Modifier.height(20.dp))
-
-                Column(
-                    modifier = Modifier.width(IntrinsicSize.Max)
-                        .align(Alignment.CenterHorizontally),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    FlowRow(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            space = 4.dp,
-                            alignment = Alignment.CenterHorizontally
-                        )
-                    ) {
-                        header(it)
-                    }
-
-                    HorizontalDivider(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 20.dp)
-                    )
-
                 }
 
-                content(it)
+                HeaderLayout(staticHeader, expandableHeader)
+
+                content(screenState)
 
             }
 
         }
+
+    }
+
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HeaderLayout(
+    staticHeader: @Composable RowScope.() -> Unit,
+    expandableHeader: @Composable RowScope.() -> Unit
+) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth()
+            .padding(horizontal = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        var expanded by rememberSaveable { mutableStateOf(false) }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.width(IntrinsicSize.Max)
+        ) {
+
+            Row(
+                modifier = Modifier.weight(1f, false)
+            ) {
+
+                staticHeader()
+
+            }
+
+            Box(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { expanded = !expanded }
+                    .padding(2.dp)
+                    .requiredSize(20.dp)
+            ) {
+
+                val rotation = animateFloatAsState(if (expanded) -180f else 0f)
+
+                Icon(
+                    imageVector = Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    modifier = Modifier.graphicsLayer { rotationZ = rotation.value }
+                )
+
+            }
+
+        }
+
+        AnimatedContent(
+            targetState = expanded,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            modifier = Modifier.fillMaxWidth()
+        ) { animatedExpanded ->
+
+            if (!animatedExpanded) {
+                Box(Modifier.fillMaxWidth())
+                return@AnimatedContent
+            }
+
+            FlowRow(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                maxItemsInEachRow = 2,
+                modifier = Modifier.width(IntrinsicSize.Max)
+            ) {
+
+                expandableHeader()
+
+            }
+
+        }
+
+        HorizontalDivider(
+            modifier = ListContainerModifier.padding(vertical = 8.dp)
+        )
 
     }
 
@@ -443,22 +491,41 @@ private fun ScreenLayout(
 @Composable
 private fun HeaderButton(
     onClick: () -> Unit,
-    content: @Composable RowScope.() -> Unit
+    indicator: Boolean = false,
+    text: String,
+    icon: @Composable () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+
     Row(
-        modifier = Modifier.clip(ButtonDefaults.textShape)
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
             .padding(ButtonDefaults.TextButtonContentPadding),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        content()
+
+        if (indicator) {
+            IndicatorCircle(modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp))
+        }
+
+        Text(
+            text = text,
+            modifier = Modifier.alignByBaseline()
+        )
+
+        icon()
+
     }
 }
 
-private val ListContentModifier = Modifier.fillMaxWidth()
+private val ListContainerModifier = Modifier
+    .fillMaxWidth()
     .wrapContentWidth()
     .width(400.dp)
+
+private val ListContentModifier = ListContainerModifier
     .padding(horizontal = 20.dp)
 
 @Composable
@@ -629,21 +696,6 @@ fun GeneralDashboardNoDecksButton(
 
 
     }
-}
-
-
-@Composable
-private fun SocialIconButton(imageVector: ImageVector, onClick: () -> Unit) {
-    Icon(
-        imageVector = imageVector,
-        contentDescription = null,
-        modifier = Modifier.aspectRatio(1f, true)
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surface)
-            .clickable(onClick = onClick)
-            .padding(4.dp),
-        tint = MaterialTheme.colorScheme.onSurface
-    )
 }
 
 private val WeekDayLabels = listOf("月", "火", "水", "木", "金", "土", "日")
