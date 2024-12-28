@@ -1,0 +1,33 @@
+<resources>
+
+    <string name="sync_dialog_title">Sync</string>
+    <string name="sync_dialog_button_cancel">Cancel</string>
+    <string name="sync_dialog_button_upload">Upload</string>
+    <string name="sync_dialog_button_download">Download</string>
+    <string name="sync_dialog_button_account">Account</string>
+
+    <string name="sync_dialog_uploading_message">Uploading...</string>
+    <string name="sync_dialog_downloading_message">Downloading...</string>
+
+    <string name="sync_dialog_conflict_remote_newer_title">New Data Found</string>
+    <string name="sync_dialog_conflict_remote_newer_message">Data on the server is newer than your local copy</string>
+
+    <string name="sync_dialog_conflict_incompatible_title">Data Conflict</string>
+    <string name="sync_dialog_conflict_incompatible_message">Both remote and local data were changed since the last sync, result can't be merged</string>
+
+    <string name="sync_dialog_api_no_network_title">No Network</string>
+    <string name="sync_dialog_api_no_network_message">Couldn't establish network connection</string>
+
+    <string name="sync_dialog_api_no_subscription_title">Subscription Expired</string>
+    <string name="sync_dialog_api_no_subscription_message">Your subscription has expired, sync will be disabled</string>
+
+    <string name="sync_dialog_api_not_authenticated_title">Session Expired</string>
+    <string name="sync_dialog_api_not_authenticated_message">Sign in to your account again to continue</string>
+
+    <string name="sync_dialog_api_unexpected_error_title">Unexpected Error</string>
+    <string name="sync_dialog_api_unexpected_error_message">Unknown issue</string>
+
+    <string name="sync_dialog_unsupported_error_title">Data on the server is unsupported</string>
+    <string name="sync_dialog_unsupported_error_message">The data on the server was created using the newer version of the application and is not compatible with the currently installed version. Update the app to retrieve your data or upload your local data to the server</string>
+
+</resources>
