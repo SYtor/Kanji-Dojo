@@ -1,8 +1,8 @@
 [versions]
 
-kotlin = "2.0.20"
+kotlin = "2.0.21"
 kotlinx-serialization = "1.7.3"
-kotlinx-datetime = "0.6.0"
+kotlinx-datetime = "0.6.1"
 
 koin = "4.0.0"
 ktor = "3.0.1"
@@ -12,15 +12,15 @@ aboutlibraries = "11.2.0"
 
 core-ktx = "1.13.1"
 appcompat = "1.7.0"
-lifecycle = "2.8.6"
-navigation-compose = "2.8.3"
+lifecycle = "2.8.7"
+navigation-compose = "2.8.5"
 activity-compose = "1.9.3"
 work-runtime-ktx = "2.9.1"
 datastore-preferences-core = "1.1.1"
 datastore-preferences = "1.1.1"
 media3-exoplayer = "1.4.1"
 
-firebase = "33.5.1"
+firebase = "33.7.0"
 billing = "7.1.1"
 review-ktx = "2.0.2"
 
