@@ -22,7 +22,6 @@ class DefaultPreferencesBackupManager(
     }
 
     override suspend fun importPreferences(jsonObject: JsonObject) {
-        preferencesManager.clear()
         val importedPropertiesMap = jsonObject.entries.associate { it.key to it.value }
         backupPropertiesHolder.backupProperties.forEach { property ->
             val value = importedPropertiesMap[property.key]
