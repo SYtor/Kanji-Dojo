@@ -38,28 +38,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.stringResource
-import ua.syt0r.kanji.Res
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.sync.SyncConflictResolveStrategy
 import ua.syt0r.kanji.core.sync.SyncDataDiffType
 import ua.syt0r.kanji.presentation.common.ExperimentalMultiplatformDialog
-import ua.syt0r.kanji.sync_dialog_api_no_network_message
-import ua.syt0r.kanji.sync_dialog_api_no_network_title
-import ua.syt0r.kanji.sync_dialog_button_account
-import ua.syt0r.kanji.sync_dialog_button_cancel
-import ua.syt0r.kanji.sync_dialog_button_download
-import ua.syt0r.kanji.sync_dialog_button_upload
-import ua.syt0r.kanji.sync_dialog_conflict_incompatible_message
-import ua.syt0r.kanji.sync_dialog_conflict_incompatible_title
-import ua.syt0r.kanji.sync_dialog_conflict_remote_newer_message
-import ua.syt0r.kanji.sync_dialog_conflict_remote_newer_title
-import ua.syt0r.kanji.sync_dialog_downloading_message
-import ua.syt0r.kanji.sync_dialog_title
-import ua.syt0r.kanji.sync_dialog_unsupported_error_message
-import ua.syt0r.kanji.sync_dialog_unsupported_error_title
-import ua.syt0r.kanji.sync_dialog_uploading_message
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -71,6 +54,7 @@ fun SyncDialog(
     navigateToAccount: () -> Unit
 ) {
 
+    val strings = resolveString { syncDialog }
     val dialogContent: @Composable ColumnScope.() -> Unit
     val dialogButtons: @Composable FlowRowScope.() -> Unit
 
@@ -81,12 +65,12 @@ fun SyncDialog(
             dialogContent = {
                 LoadingLayout(
                     imageVector = Icons.Outlined.CloudUpload,
-                    message = stringResource(Res.string.sync_dialog_uploading_message)
+                    message = strings.uploadingMessage
                 )
             }
             dialogButtons = {
                 DialogButton(cancelSync) {
-                    Text(stringResource(Res.string.sync_dialog_button_cancel))
+                    Text(strings.buttonCancel)
                 }
             }
         }
@@ -95,38 +79,38 @@ fun SyncDialog(
             dialogContent = {
                 LoadingLayout(
                     imageVector = Icons.Outlined.CloudDownload,
-                    message = stringResource(Res.string.sync_dialog_downloading_message)
+                    message = strings.downloadingMessage
                 )
             }
             dialogButtons = {
                 DialogButton(cancelSync) {
-                    Text(stringResource(Res.string.sync_dialog_button_cancel))
+                    Text(strings.buttonCancel)
                 }
             }
         }
 
         is SyncDialogState.Conflict -> {
             dialogContent = {
-                val title: StringResource
-                val message: StringResource
+                val title: String
+                val message: String
 
                 when (currentState.diffType) {
                     SyncDataDiffType.RemoteNewer -> {
-                        title = Res.string.sync_dialog_conflict_remote_newer_title
-                        message = Res.string.sync_dialog_conflict_remote_newer_message
+                        title = strings.conflictRemoteNewerTitle
+                        message = strings.conflictRemoteNewerMessage
                     }
 
                     SyncDataDiffType.Incompatible -> {
-                        title = Res.string.sync_dialog_conflict_incompatible_title
-                        message = Res.string.sync_dialog_conflict_incompatible_message
+                        title = strings.conflictIncompatibleTitle
+                        message = strings.conflictIncompatibleMessage
                     }
 
                     else -> error("Unexpected diffType[${currentState.diffType}] for conflict state")
                 }
 
                 MessageLayout(
-                    title = stringResource(title),
-                    message = stringResource(message),
+                    title = title,
+                    message = message,
                     imageVector = Icons.Outlined.CloudSync
                 )
             }
@@ -137,7 +121,7 @@ fun SyncDialog(
                         onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
                     ) {
                         DialogButtonIcon(Icons.Outlined.Upload)
-                        Text(stringResource(Res.string.sync_dialog_button_upload))
+                        Text(strings.buttonUpload)
                     }
                 }
 
@@ -151,11 +135,11 @@ fun SyncDialog(
                         onClick = { resolveConflict(SyncConflictResolveStrategy.DownloadRemote) }
                     ) {
                         DialogButtonIcon(Icons.Outlined.Download)
-                        Text(stringResource(Res.string.sync_dialog_button_download))
+                        Text(strings.buttonDownload)
                     }
                 }
                 DialogButton(cancelSync) {
-                    Text(stringResource(Res.string.sync_dialog_button_cancel))
+                    Text(strings.buttonCancel)
                 }
             }
         }
@@ -169,24 +153,23 @@ fun SyncDialog(
 
                 when (val issue = currentState.issue) {
                     ApiRequestIssue.NoConnection -> {
-                        title = stringResource(Res.string.sync_dialog_api_no_network_title)
-                        message = stringResource(Res.string.sync_dialog_api_no_network_message)
+                        title = strings.errorNoNetworkTitle
+                        message = strings.errorNoNetworkMessage
                     }
 
                     ApiRequestIssue.NoSubscription -> {
-                        title = stringResource(Res.string.sync_dialog_api_no_network_title)
-                        message = stringResource(Res.string.sync_dialog_api_no_network_message)
+                        title = strings.errorNoSubscriptionTitle
+                        message = strings.errorNoSubscriptionMessage
                     }
 
                     ApiRequestIssue.NotAuthenticated -> {
-                        title = stringResource(Res.string.sync_dialog_api_no_network_title)
-                        message = stringResource(Res.string.sync_dialog_api_no_network_message)
+                        title = strings.errorNoNetworkTitle
+                        message = strings.errorNoNetworkMessage
                     }
 
                     is ApiRequestIssue.Other -> {
-                        title = stringResource(Res.string.sync_dialog_api_no_network_title)
-                        message = issue.throwable.message
-                            ?: stringResource(Res.string.sync_dialog_api_no_network_message)
+                        title = strings.errorUnexpectedErrorTitle
+                        message = issue.throwable.message ?: strings.errorUnexpectedErrorMessage
                     }
                 }
 
@@ -201,15 +184,13 @@ fun SyncDialog(
                 when (currentState.issue) {
                     ApiRequestIssue.NoSubscription,
                     ApiRequestIssue.NotAuthenticated -> {
-                        DialogButton(navigateToAccount) {
-                            Text(stringResource(Res.string.sync_dialog_button_account))
-                        }
+                        DialogButton(navigateToAccount) { Text(strings.buttonAccount) }
                     }
 
                     else -> Unit
                 }
                 DialogButton(hideErrorDialog) {
-                    Text(stringResource(Res.string.sync_dialog_button_cancel))
+                    Text(strings.buttonCancel)
                 }
             }
         }
@@ -219,16 +200,16 @@ fun SyncDialog(
             val hideErrorDialog = { currentState.showDialog.value = false }
             dialogContent = {
                 MessageLayout(
-                    title = stringResource(Res.string.sync_dialog_unsupported_error_title),
-                    message = stringResource(Res.string.sync_dialog_unsupported_error_message),
+                    title = strings.errorUnsupportedDataTitle,
+                    message = strings.errorUnsupportedDataMessage,
                 )
             }
             dialogButtons = {
                 DialogButton(
                     onClick = { resolveConflict(SyncConflictResolveStrategy.UploadLocal) }
-                ) { Text(stringResource(Res.string.sync_dialog_button_upload)) }
+                ) { Text(strings.buttonUpload) }
                 DialogButton(hideErrorDialog) {
-                    Text(stringResource(Res.string.sync_dialog_button_cancel))
+                    Text(strings.buttonCancel)
                 }
             }
         }
@@ -236,7 +217,7 @@ fun SyncDialog(
 
     ExperimentalMultiplatformDialog(
         onDismissRequest = {},
-        title = { Text(stringResource(Res.string.sync_dialog_title)) },
+        title = { Text(strings.title) },
         content = dialogContent,
         buttons = dialogButtons
     )

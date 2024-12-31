@@ -69,6 +69,11 @@ interface Strings {
     val backup: BackupStrings
     val feedback: FeedbackStrings
     val sponsor: SponsorStrings
+    val account: AccountScreenStrings
+    val sync: SyncScreenStrings
+
+    val syncDialog: SyncDialogStrings
+    val syncSnackbar: SyncSnackbarStrings
 
     val deckPicker: DeckPickerStrings
     val deckDetails: DeckDetailsStrings
@@ -88,9 +93,12 @@ interface Strings {
 }
 
 interface GeneralDashboardStrings {
-    val buttonDailyLimit: String
-    val buttonVersionChange: String
-    val buttonTutorial: String
+    val headerButtonDailyLimit: String
+    val headerButtonVersionChange: String
+    val headerButtonTutorial: String
+    val headerButtonDownloads: String
+    val headerButtonDiscord: String
+    val headerButtonYoutube: String
 
     val letterDecksTitle: String
     val vocabDecksTitle: String
@@ -104,6 +112,100 @@ interface GeneralDashboardStrings {
     val streakTitle: String
     val currentStreakLabel: String
     val longestStreakLabel: String
+}
+
+interface AccountScreenStrings {
+    val title: String
+
+    val loggedOutMessage: String
+    val signInButton: String
+
+    val emailTitle: String
+    val subscriptionTitle: String
+    val subscriptionStatusInactive: String
+    val subscriptionStatusActive: String
+    val subscriptionStatusExpired: String
+    val subscriptionValidUntilTemplate: String
+    val signOutButton: String
+
+    val issueNoConnectionTitle: String
+    val issueNoConnectionMessage: String
+    val issueSessionExpiredTitle: String
+    val issueSessionExpiredMessage: String
+    val issueSubscriptionOutdatedTitle: String
+    val issueSubscriptionOutdatedMessage: String
+    val issueOtherTitle: String
+    val issueOtherMessageFallback: String
+}
+
+interface SyncScreenStrings {
+    val title: String
+
+    val guideMessage: String
+    val createAccountLabel: String
+    val purchaseSubscriptionLabel: String
+
+    val accountErrorMessage: String
+
+    val statusTitle: String
+    val statusMessageLoading: String
+    val statusMessageDataDiffer: String
+    val statusMessageLocalNewer: String
+    val statusMessageUpToDate: String
+    val statusMessageError: String
+    val statusMessageUploading: String
+    val statusMessageDownloading: String
+    val statusMessageCanceled: String
+
+    val localDataTitle: String
+    val localDataIdTemplate: String
+    val localDataTimestampTemplate: String
+
+    val syncButton: String
+
+    val errorNoConnectionTitle: String
+    val errorNoConnectionMessage: String
+    val errorSessionExpiredTitle: String
+    val errorSessionExpiredMessage: String
+    val errorNoSubscriptionTitle: String
+    val errorNoSubscriptionMessage: String
+    val errorOtherTitle: String
+    val errorOtherMessageFallback: String
+
+}
+
+interface SyncDialogStrings {
+    val title: String
+    val buttonCancel: String
+    val buttonUpload: String
+    val buttonDownload: String
+    val buttonAccount: String
+    val uploadingMessage: String
+    val downloadingMessage: String
+    val conflictRemoteNewerTitle: String
+    val conflictRemoteNewerMessage: String
+    val conflictIncompatibleTitle: String
+    val conflictIncompatibleMessage: String
+    val errorNoNetworkTitle: String
+    val errorNoNetworkMessage: String
+    val errorNoSubscriptionTitle: String
+    val errorNoSubscriptionMessage: String
+    val errorNotAuthenticatedTitle: String
+    val errorNotAuthenticatedMessage: String
+    val errorUnexpectedErrorTitle: String
+    val errorUnexpectedErrorMessage: String
+    val errorUnsupportedDataTitle: String
+    val errorUnsupportedDataMessage: String
+}
+
+interface SyncSnackbarStrings {
+    val errorNoConnection: String
+    val errorNoSubscription: String
+    val errorNotAuthenticated: String
+    val errorDataNotSupported: String
+    val errorMessageTemplate: String
+    val errorMessageNoReason: String
+    val actionButton: String
 }
 
 interface TutorialDialogStrings {

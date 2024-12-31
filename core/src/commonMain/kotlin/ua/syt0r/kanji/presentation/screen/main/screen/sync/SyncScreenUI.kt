@@ -48,6 +48,7 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.InvertedButton
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.errorColors
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
@@ -60,8 +61,10 @@ fun SyncScreenUI(
     state: State<ScreenState>,
     onUpClick: () -> Unit,
     navigateToAccountScreen: () -> Unit,
-    sync: () -> Unit
+    sync: () -> Unit,
 ) {
+
+    val strings = resolveString { this.sync }
 
     ScreenContainer(
         state = state,
@@ -74,18 +77,18 @@ fun SyncScreenUI(
             ) {
 
                 Text(
-                    text = "Automatically upload your data to the cloud and sync your progress between various devices. To enable: ",
+                    text = strings.guideMessage,
                     textAlign = TextAlign.Justify
                 )
 
                 ClickableActionRow(
-                    label = "Create account and sign in",
+                    label = strings.createAccountLabel,
                     isCompleted = false,
                     onClick = navigateToAccountScreen
                 )
 
                 ClickableActionRow(
-                    label = "Purchase subscription (currently available only from Google Play version)",
+                    label = strings.purchaseSubscriptionLabel,
                     isCompleted = false,
                     onClick = navigateToAccountScreen
                 )
@@ -103,7 +106,9 @@ fun SyncScreenUI(
                     SyncErrorListItem(syncState.issue)
                 }
 
-                LocalSyncDataListItem(screenState.localDataState.collectAsState().value)
+                LocalSyncDataListItem(
+                    localData = screenState.localDataState.collectAsState().value
+                )
 
                 Spacer(Modifier.weight(1f))
 
@@ -111,7 +116,7 @@ fun SyncScreenUI(
                     onClick = sync,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Sync now")
+                    Text(strings.syncButton)
                     Icon(Icons.Default.Sync, null)
                 }
 
@@ -119,7 +124,7 @@ fun SyncScreenUI(
         },
         accountError = {
             ScrollableScreenContainer {
-                Text("There's an error with your account")
+                Text(strings.accountErrorMessage)
             }
         }
     )
@@ -140,7 +145,7 @@ private fun ScreenContainer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Sync") },
+                title = { Text(resolveString { sync.title }) },
                 navigationIcon = {
                     IconButton(onUpClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
@@ -189,7 +194,11 @@ private fun ClickableActionRow(
                 modifier = Modifier.size(24.dp)
                     .background(MaterialTheme.extraColorScheme.success, CircleShape)
             ) {
-                Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.surface)
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.surface
+                )
             }
         } else {
             Box(
@@ -211,17 +220,18 @@ private fun ClickableActionRow(
 @Composable
 private fun SyncStatusListItem(syncState: SyncState) {
 
+    val strings = resolveString { sync }
     val statusMessage: String
     val statusIndicator: @Composable () -> Unit
 
     when (syncState) {
         SyncState.Refreshing -> {
-            statusMessage = "Checking server for updates..."
+            statusMessage = strings.statusMessageLoading
             statusIndicator = {}
         }
 
         is SyncState.Conflict -> {
-            statusMessage = "Local and remote data differs"
+            statusMessage = strings.statusMessageDataDiffer
             statusIndicator = {}
         }
 
@@ -229,7 +239,7 @@ private fun SyncStatusListItem(syncState: SyncState) {
             val uploadAvailable = syncState.uploadAvailable.collectAsState().value
             when {
                 uploadAvailable -> {
-                    statusMessage = "Can upload updated data"
+                    statusMessage = strings.statusMessageLocalNewer
                     statusIndicator = {
                         IndicatorCircle(
                             MaterialTheme.extraColorScheme.due,
@@ -239,7 +249,7 @@ private fun SyncStatusListItem(syncState: SyncState) {
                 }
 
                 else -> {
-                    statusMessage = "Up to date with the server"
+                    statusMessage = strings.statusMessageUpToDate
                     statusIndicator = {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -258,22 +268,22 @@ private fun SyncStatusListItem(syncState: SyncState) {
         }
 
         is SyncState.Error.Api -> {
-            statusMessage = "Error"
+            statusMessage = strings.statusMessageError
             statusIndicator = { IndicatorCircle(MaterialTheme.colorScheme.error) }
         }
 
         SyncState.Uploading -> {
-            statusMessage = "Uploading"
+            statusMessage = strings.statusMessageUploading
             statusIndicator = {}
         }
 
         SyncState.Downloading -> {
-            statusMessage = "Downloading"
+            statusMessage = strings.statusMessageDownloading
             statusIndicator = {}
         }
 
         SyncState.Canceled -> {
-            statusMessage = "Canceled, click on sync button to restart"
+            statusMessage = strings.statusMessageCanceled
             statusIndicator = {
                 Box(
                     modifier = Modifier
@@ -288,7 +298,7 @@ private fun SyncStatusListItem(syncState: SyncState) {
     }
 
     ListItem(
-        headlineContent = { Text("Status") },
+        headlineContent = { Text(strings.statusTitle) },
         supportingContent = { Text(statusMessage) },
         trailingContent = statusIndicator
     )
@@ -300,26 +310,27 @@ private fun SyncErrorListItem(issue: ApiRequestIssue) {
 
     val title: String
     val message: String
+    val strings = resolveString { sync }
 
     when (issue) {
         ApiRequestIssue.NoConnection -> {
-            title = "" // todo reuse strings from account screen
-            message = ""
+            title = strings.errorNoConnectionTitle
+            message = strings.errorNoConnectionMessage
         }
 
         ApiRequestIssue.NoSubscription -> {
-            title = ""
-            message = ""
+            title = strings.errorNoSubscriptionTitle
+            message = strings.errorNoSubscriptionMessage
         }
 
         ApiRequestIssue.NotAuthenticated -> {
-            title = ""
-            message = ""
+            title = strings.errorSessionExpiredTitle
+            message = strings.errorSessionExpiredMessage
         }
 
         is ApiRequestIssue.Other -> {
-            title = ""
-            message = ""
+            title = strings.errorOtherTitle
+            message = issue.throwable.message ?: strings.errorOtherMessageFallback
         }
     }
 
@@ -333,16 +344,23 @@ private fun SyncErrorListItem(issue: ApiRequestIssue) {
 }
 
 @Composable
-private fun LocalSyncDataListItem(localData: PreferencesSyncDataInfo) {
+private fun LocalSyncDataListItem(
+    localData: PreferencesSyncDataInfo
+) {
+
+    val strings = resolveString { sync }
 
     ListItem(
         modifier = Modifier.clip(MaterialTheme.shapes.medium),
-        headlineContent = { Text("Current Data") },
+        headlineContent = { Text(strings.localDataTitle) },
         supportingContent = {
 
             Column {
 
-                Text(text = "ID: ${localData.dataId}", overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = strings.localDataIdTemplate.format(localData.dataId),
+                    overflow = TextOverflow.Ellipsis
+                )
 
                 val formattedTimestamp = localData.dataTimestamp
                     ?.let { Instant.fromEpochMilliseconds(it) }
@@ -350,10 +368,11 @@ private fun LocalSyncDataListItem(localData: PreferencesSyncDataInfo) {
                     ?.format(CommonDateTimeFormat)
                     ?: "-"
 
-                Text(text = "Timestamp: $formattedTimestamp")
+                Text(
+                    text = strings.localDataTimestampTemplate.format(formattedTimestamp)
+                )
 
             }
         }
     )
-
 }
