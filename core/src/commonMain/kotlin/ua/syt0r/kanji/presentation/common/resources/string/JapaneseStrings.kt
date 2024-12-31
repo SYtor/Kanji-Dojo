@@ -55,6 +55,14 @@ object JapaneseStrings : Strings {
     override val backup: BackupStrings = JapaneseBackupStrings
     override val feedback: FeedbackStrings = JapaneseFeedbackStrings
     override val sponsor: SponsorStrings = JapaneseSponsorStrings
+    override val account: AccountScreenStrings
+        get() = TODO("Not yet implemented")
+    override val sync: SyncScreenStrings
+        get() = TODO("Not yet implemented")
+    override val syncDialog: SyncDialogStrings
+        get() = TODO("Not yet implemented")
+    override val syncSnackbar: SyncSnackbarStrings
+        get() = TODO("Not yet implemented")
 
     override val deckPicker: DeckPickerStrings = JapaneseDeckPickerStrings
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
@@ -73,9 +81,15 @@ object JapaneseStrings : Strings {
 }
 
 object JapaneseGeneralDashboardStrings : GeneralDashboardStrings {
-    override val buttonDailyLimit: String = "毎日の目標"
-    override val buttonVersionChange: String = "新機能"
-    override val buttonTutorial: String = "チュートリアル"
+    override val headerButtonDailyLimit: String = "毎日の目標"
+    override val headerButtonVersionChange: String = "新機能"
+    override val headerButtonTutorial: String = "チュートリアル"
+    override val headerButtonDownloads: String
+        get() = TODO("Not yet implemented")
+    override val headerButtonDiscord: String
+        get() = TODO("Not yet implemented")
+    override val headerButtonYoutube: String
+        get() = TODO("Not yet implemented")
     override val letterDecksTitle: String = "文字デッキ"
     override val vocabDecksTitle: String = "単語デッキ"
     override val buttonNoDecksTitle: String = "デッキなし"

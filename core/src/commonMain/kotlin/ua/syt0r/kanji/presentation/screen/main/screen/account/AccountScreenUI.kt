@@ -41,6 +41,7 @@ import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.InvertedButton
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
 import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.errorColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 
@@ -55,7 +56,7 @@ fun <T> AccountScreenContainer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Account") },
+                title = { Text(resolveString { account.title }) },
                 navigationIcon = {
                     IconButton(onUpClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
@@ -87,7 +88,7 @@ fun AccountScreenSignedOut(
     ) {
 
         Text(
-            text = "Logged out",
+            text = resolveString { account.loggedOutMessage },
             modifier = Modifier.weight(1f).fillMaxWidth().wrapContentSize()
         )
 
@@ -100,7 +101,7 @@ fun AccountScreenSignedOut(
             ),
             shape = MaterialTheme.shapes.medium
         ) {
-            Text(text = "Sign in")
+            Text(text = resolveString { account.signInButton })
         }
 
     }
@@ -135,7 +136,7 @@ fun AccountScreenSignedIn(
         }
 
         Column {
-            SectionTitleText("E-mail")
+            SectionTitleText(resolveString { account.emailTitle })
             ListItem(
                 headlineContent = { Text(email) }
             )
@@ -143,26 +144,36 @@ fun AccountScreenSignedIn(
 
         Column {
 
-            SectionTitleText("Subscription")
+            SectionTitleText(resolveString { account.subscriptionTitle })
 
             val headlineText: String
             val supportText: String?
 
             when (subscriptionInfo) {
                 is SubscriptionInfo.Active -> {
-                    headlineText = "Active"
-                    supportText =
-                        "Valid until ${subscriptionInfo.due.format(CommonDateTimeFormat)}"
+                    headlineText = resolveString { account.subscriptionStatusActive }
+                    supportText = resolveString {
+                        account.subscriptionValidUntilTemplate.format(
+                            subscriptionInfo.due.format(
+                                CommonDateTimeFormat
+                            )
+                        )
+                    }
                 }
 
                 is SubscriptionInfo.Expired -> {
-                    headlineText = "Expired"
-                    supportText =
-                        "Valid until ${subscriptionInfo.due.format(CommonDateTimeFormat)}"
+                    headlineText = resolveString { account.subscriptionStatusExpired }
+                    supportText = resolveString {
+                        account.subscriptionValidUntilTemplate.format(
+                            subscriptionInfo.due.format(
+                                CommonDateTimeFormat
+                            )
+                        )
+                    }
                 }
 
                 SubscriptionInfo.Inactive -> {
-                    headlineText = "Inactive"
+                    headlineText = resolveString { account.subscriptionStatusInactive }
                     supportText = null
                 }
             }
@@ -196,7 +207,7 @@ fun AccountScreenSignedIn(
             ),
             shape = MaterialTheme.shapes.medium
         ) {
-            Text(text = "Sign out")
+            Text(text = resolveString { account.signOutButton })
         }
 
     }
@@ -223,7 +234,7 @@ fun AccountScreenError(
             onClick = startSignIn,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign in")
+            Text(resolveString { account.signInButton })
         }
 
     }
@@ -253,29 +264,29 @@ private fun IssueListItem(
 
     when (issue) {
         ApiRequestIssue.NoConnection -> {
-            title = "No Connection"
-            message = "Showing cached data"
+            title = resolveString { account.issueNoConnectionTitle }
+            message = resolveString { account.issueNoConnectionMessage }
             trailingIcon = null
             action = null
         }
 
         ApiRequestIssue.NotAuthenticated -> {
-            title = "Session Expired"
-            message = "Click to sign in again"
+            title = resolveString { account.issueSessionExpiredTitle }
+            message = resolveString { account.issueSessionExpiredMessage }
             trailingIcon = Icons.AutoMirrored.Filled.Login
             action = signIn
         }
 
         ApiRequestIssue.NoSubscription -> {
-            title = "Subscription status outdated"
-            message = "Click to refresh"
+            title = resolveString { account.issueSubscriptionOutdatedTitle }
+            message = resolveString { account.issueSubscriptionOutdatedMessage }
             trailingIcon = Icons.Default.Refresh
             action = refresh
         }
 
         is ApiRequestIssue.Other -> {
-            title = "Error"
-            message = issue.throwable.message ?: "Unknown error"
+            title = resolveString { account.issueOtherTitle }
+            message = issue.throwable.message ?: resolveString { account.issueOtherMessageFallback }
             trailingIcon = null
             action = null
         }

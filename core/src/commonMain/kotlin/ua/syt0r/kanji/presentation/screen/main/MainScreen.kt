@@ -26,6 +26,8 @@ import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.common.resources.string.SyncSnackbarStrings
+import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
 
@@ -145,10 +147,10 @@ private fun HandleSyncErrorSnackbarsLaunchedEffect(
             .collectLatest { currentState ->
                 if (currentState.showDialog.value)
                     return@collectLatest
-
+                val strings = getStrings().syncSnackbar
                 val result = snackbarHostState.showSnackbar(
-                    message = currentState.snackbarMessage(),
-                    actionLabel = "Details",
+                    message = currentState.snackbarMessage(strings),
+                    actionLabel = strings.actionButton,
                     withDismissAction = true,
                     duration = SnackbarDuration.Long
                 )
@@ -161,19 +163,21 @@ private fun HandleSyncErrorSnackbarsLaunchedEffect(
 
 }
 
-private fun SyncDialogState.Error.snackbarMessage(): String {
-    val baseMessage = "Sync Error"
+private fun SyncDialogState.Error.snackbarMessage(strings: SyncSnackbarStrings): String {
     val extraMessage = when (this) {
         is SyncDialogState.Error.Api -> {
             when (issue) {
-                ApiRequestIssue.NoConnection -> "No Connection"
-                ApiRequestIssue.NoSubscription -> "Subscription expired"
-                ApiRequestIssue.NotAuthenticated -> "Sign in data expired"
+                ApiRequestIssue.NoConnection -> strings.errorNoConnection
+                ApiRequestIssue.NoSubscription -> strings.errorNoSubscription
+                ApiRequestIssue.NotAuthenticated -> strings.errorNotAuthenticated
                 is ApiRequestIssue.Other -> null
             }
         }
 
-        is SyncDialogState.Error.Unsupported -> "Remote data unsupported"
+        is SyncDialogState.Error.Unsupported -> strings.errorDataNotSupported
     }
-    return listOfNotNull(baseMessage, extraMessage).joinToString(": ")
+    return when {
+        extraMessage != null -> strings.errorMessageTemplate.format(extraMessage)
+        else -> strings.errorMessageNoReason
+    }
 }

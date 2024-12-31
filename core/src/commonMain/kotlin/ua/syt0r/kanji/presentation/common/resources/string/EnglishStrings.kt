@@ -57,6 +57,11 @@ object EnglishStrings : Strings {
     override val feedback: FeedbackStrings = EnglishFeedbackStrings
     override val sponsor: SponsorStrings = EnglishSponsorStrings
 
+    override val account: AccountScreenStrings = EnglishAccountScreenStrings
+    override val sync: SyncScreenStrings = EnglishSyncScreenStrings
+    override val syncDialog: SyncDialogStrings = EnglishSyncDialogStrings
+    override val syncSnackbar: SyncSnackbarStrings = EnglishSyncSnackbarStrings
+
     override val deckPicker: DeckPickerStrings = EnglishDeckPickerStrings
     override val deckEdit: DeckEditStrings = EnglishDeckEditStrings
     override val deckDetails: DeckDetailsStrings = EnglishDeckDetailsStrings
@@ -84,9 +89,12 @@ object EnglishHomeStrings : HomeStrings {
 }
 
 object EnglishGeneralDashboardStrings : GeneralDashboardStrings {
-    override val buttonDailyLimit: String = "Daily Limit"
-    override val buttonVersionChange: String = "What's new"
-    override val buttonTutorial: String = "Tutorial"
+    override val headerButtonDailyLimit: String = "Daily Limit"
+    override val headerButtonVersionChange: String = "What's new"
+    override val headerButtonTutorial: String = "Tutorial"
+    override val headerButtonDownloads: String = "Downloads"
+    override val headerButtonDiscord: String = "Discord"
+    override val headerButtonYoutube: String = "YouTube"
     override val letterDecksTitle: String = "Letter Decks"
     override val vocabDecksTitle: String = "Vocab Decks"
     override val buttonNoDecksTitle: String = "No decks"
@@ -723,4 +731,94 @@ object EnglishReminderNotificationStrings : ReminderNotificationStrings {
     override val message: (Int, Int) -> String = { new, due ->
         "$new new cards and $due due cards to review today"
     }
+}
+
+
+object EnglishAccountScreenStrings : AccountScreenStrings {
+    override val title = "Account"
+    override val loggedOutMessage = "Logged out"
+    override val signInButton = "Sign in"
+    override val signOutButton = "Sign out"
+    override val emailTitle = "E-mail"
+    override val subscriptionTitle = "Subscription"
+    override val subscriptionStatusActive = "Active"
+    override val subscriptionStatusExpired = "Expired"
+    override val subscriptionStatusInactive = "Inactive"
+    override val subscriptionValidUntilTemplate = "Valid until %s"
+    override val issueNoConnectionTitle = "No Connection"
+    override val issueNoConnectionMessage = "Showing cached data"
+    override val issueSessionExpiredTitle = "Session Expired"
+    override val issueSessionExpiredMessage = "Click to sign in again"
+    override val issueSubscriptionOutdatedTitle = "Subscription status outdated"
+    override val issueSubscriptionOutdatedMessage = "Click to refresh"
+    override val issueOtherTitle = "Error"
+    override val issueOtherMessageFallback = "Unknown error"
+}
+
+object EnglishSyncScreenStrings : SyncScreenStrings {
+    override val title = "Sync"
+    override val guideMessage =
+        "Automatically upload your data to the cloud and sync your progress between various devices. To enable: "
+    override val createAccountLabel = "Create account and sign in"
+    override val purchaseSubscriptionLabel =
+        "Purchase subscription (free during testing until further notice)"
+    override val accountErrorMessage: String = "There's an error with your account"
+    override val syncButton = "Sync now"
+    override val statusTitle = "Status"
+    override val statusMessageLoading = "Checking server for updates..."
+    override val statusMessageDataDiffer = "Local and remote data differs"
+    override val statusMessageLocalNewer = "Can upload updated data"
+    override val statusMessageUpToDate = "Up to date with the server"
+    override val statusMessageError = "Error"
+    override val statusMessageUploading = "Uploading"
+    override val statusMessageDownloading = "Downloading"
+    override val statusMessageCanceled = "Canceled, click on sync button to restart"
+    override val localDataTitle = "Local Data"
+    override val localDataIdTemplate = "ID: %s"
+    override val localDataTimestampTemplate = "Timestamp: %s"
+
+    override val errorNoConnectionTitle = "No Connection"
+    override val errorNoConnectionMessage = "Couldn't access the server"
+    override val errorSessionExpiredTitle = "Session Expired"
+    override val errorSessionExpiredMessage = "Click to sign in again"
+    override val errorNoSubscriptionTitle = "Subscription status outdated"
+    override val errorNoSubscriptionMessage = "Click to refresh"
+    override val errorOtherTitle = "Error"
+    override val errorOtherMessageFallback = "Unknown error"
+}
+
+object EnglishSyncDialogStrings : SyncDialogStrings {
+    override val title = "Sync"
+    override val buttonCancel = "Cancel"
+    override val buttonUpload = "Upload"
+    override val buttonDownload = "Download"
+    override val buttonAccount = "Account"
+    override val uploadingMessage = "Uploading..."
+    override val downloadingMessage = "Downloading..."
+    override val conflictRemoteNewerTitle = "New Data Found"
+    override val conflictRemoteNewerMessage = "Data on the server is newer than your local copy"
+    override val conflictIncompatibleTitle = "Data Conflict"
+    override val conflictIncompatibleMessage =
+        "Both remote and local data were changed since the last sync, result can't be merged"
+    override val errorNoNetworkTitle = "No Network"
+    override val errorNoNetworkMessage = "Couldn't establish network connection"
+    override val errorNoSubscriptionTitle = "Subscription Expired"
+    override val errorNoSubscriptionMessage = "Your subscription has expired, sync will be disabled"
+    override val errorNotAuthenticatedTitle = "Session Expired"
+    override val errorNotAuthenticatedMessage = "Sign in to your account again to continue"
+    override val errorUnexpectedErrorTitle = "Unexpected Error"
+    override val errorUnexpectedErrorMessage = "Unknown issue"
+    override val errorUnsupportedDataTitle = "Data on the server is unsupported"
+    override val errorUnsupportedDataMessage =
+        "The data on the server was created using the newer version of the application and is not compatible with the currently installed version. Update the app to retrieve your data or upload your local data to the server"
+}
+
+object EnglishSyncSnackbarStrings : SyncSnackbarStrings {
+    override val errorNoConnection = "No Connection"
+    override val errorNoSubscription = "Subscription expired"
+    override val errorNotAuthenticated = "Sign in data expired"
+    override val errorDataNotSupported = "Remote data unsupported"
+    override val errorMessageTemplate = "Sync Error: %s"
+    override val errorMessageNoReason = "Sync Error"
+    override val actionButton = "Details"
 }
