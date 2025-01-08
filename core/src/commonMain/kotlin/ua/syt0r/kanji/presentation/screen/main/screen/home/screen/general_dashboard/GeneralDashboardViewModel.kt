@@ -4,6 +4,7 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ua.syt0r.kanji.BuildConfig
@@ -44,6 +45,7 @@ class GeneralDashboardViewModel(
 
     private fun ScreenState.Loaded.handleUpdates() {
         snapshotFlow { showAppVersionChangeHint.value }
+            .drop(1)
             .onEach {
                 appPreferences.lastAppVersionWhenChangesDialogShown
                     .set(BuildConfig.versionName)
@@ -51,16 +53,19 @@ class GeneralDashboardViewModel(
             .launchIn(viewModelScope)
 
         snapshotFlow { showTutorialHint.value }
+            .drop(1)
             .onEach { appPreferences.tutorialSeen.set(true) }
             .launchIn(viewModelScope)
 
         if (letterDecksData is LetterDecksData.Data)
             snapshotFlow { letterDecksData.practiceType.value }
+                .drop(1)
                 .onEach { appPreferences.generalDashboardLetterPracticeType.set(it.preferencesType) }
                 .launchIn(viewModelScope)
 
         if (vocabDecksInfo is VocabDecksData.Data)
             snapshotFlow { vocabDecksInfo.practiceType.value }
+                .drop(1)
                 .onEach { appPreferences.generalDashboardVocabPracticeType.set(it.preferencesType) }
                 .launchIn(viewModelScope)
 
