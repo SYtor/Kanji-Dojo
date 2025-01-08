@@ -12,6 +12,8 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -91,3 +93,10 @@ fun Modifier.clickable(action: (() -> Unit)?): Modifier {
 }
 
 val CommonDateTimeFormat = LocalDateTime.Format { byUnicodePattern("uuuu/MM/dd HH:mm") }
+
+fun TextStyle.copyCentered(): TextStyle = copy(
+    lineHeightStyle = LineHeightStyle(
+        LineHeightStyle.Alignment.Center,
+        LineHeightStyle.Trim.Both
+    )
+)

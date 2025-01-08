@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -80,8 +79,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
 import ua.syt0r.kanji.Res
-import ua.syt0r.kanji.discord_outline
+import ua.syt0r.kanji.discord_brands_solid
 import ua.syt0r.kanji.presentation.common.ScreenPracticeType
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.snapSizeTransform
@@ -96,7 +96,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashbo
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui.TutorialDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
-import ua.syt0r.kanji.youtube_outline
+import ua.syt0r.kanji.youtube_brands_solid
 
 @Composable
 fun GeneralDashboardScreenUI(
@@ -106,6 +106,7 @@ fun GeneralDashboardScreenUI(
     navigateToCreateVocabDeck: () -> Unit,
     navigateToLetterPractice: (MainDestination.LetterPractice) -> Unit,
     navigateToVocabPractice: (MainDestination.VocabPractice) -> Unit,
+    downloadsClick: () -> Unit,
     youtubeClick: () -> Unit,
     discordClick: () -> Unit
 ) {
@@ -125,39 +126,47 @@ fun GeneralDashboardScreenUI(
         staticHeader = {
             HeaderButton(
                 onClick = navigateToDailyLimitConfiguration,
-                text = resolveString { generalDashboard.buttonDailyLimit },
+                text = resolveString { generalDashboard.headerButtonDailyLimit },
                 icon = { Icon(Icons.Outlined.Settings, null) }
             )
 
             HeaderButton(
-                onClick = { showTutorialDialog = true },
-                text = resolveString { generalDashboard.buttonTutorial },
+                onClick = {
+                    showTutorialDialog = true
+                    it.showTutorialHint.value = false
+                },
+                indicator = it.showTutorialHint.value,
+                text = resolveString { generalDashboard.headerButtonTutorial },
                 icon = { Icon(Icons.AutoMirrored.Outlined.HelpOutline, null) }
             )
         },
         expandableHeader = {
             HeaderButton(
-                onClick = { showVersionChangeDialog = true },
-                text = resolveString { generalDashboard.buttonVersionChange },
+                onClick = {
+                    showVersionChangeDialog = true
+                    it.showAppVersionChangeHint.value = false
+                },
+                indicator = it.showAppVersionChangeHint.value,
+                text = resolveString { generalDashboard.headerButtonVersionChange },
                 icon = { Icon(Icons.Outlined.Celebration, null) }
             )
 
             HeaderButton(
-                onClick = {},
-                text = resolveString { "Downloads" },
+                onClick = downloadsClick,
+                text = resolveString { generalDashboard.headerButtonDownloads },
                 icon = { Icon(Icons.Outlined.Devices, null) }
             )
 
             HeaderButton(
                 onClick = discordClick,
-                text = resolveString { "Discord" },
-                icon = { Icon(painterResource(Res.drawable.discord_outline), null) }
+                text = resolveString { generalDashboard.headerButtonDiscord },
+                icon = { Icon(painterResource(Res.drawable.discord_brands_solid), null) },
             )
 
             HeaderButton(
                 onClick = youtubeClick,
-                text = resolveString { "YouTube" },
-                icon = { Icon(painterResource(Res.drawable.youtube_outline), null) }
+                text = resolveString { generalDashboard.headerButtonYoutube },
+                icon = { Icon(painterResource(Res.drawable.youtube_brands_solid), null) }
             )
         },
         content = {
@@ -369,8 +378,8 @@ fun GeneralDashboardScreenUI(
 @Composable
 private fun ScreenLayout(
     state: State<ScreenState>,
-    staticHeader: @Composable RowScope.() -> Unit,
-    expandableHeader: @Composable RowScope.() -> Unit,
+    staticHeader: @Composable RowScope.(ScreenState.Loaded) -> Unit,
+    expandableHeader: @Composable RowScope.(ScreenState.Loaded) -> Unit,
     content: @Composable ColumnScope.(ScreenState.Loaded) -> Unit
 ) {
 
@@ -391,7 +400,11 @@ private fun ScreenLayout(
                     Spacer(Modifier.height(20.dp))
                 }
 
-                HeaderLayout(staticHeader, expandableHeader)
+                HeaderLayout(
+                    staticHeader = { staticHeader(screenState) },
+                    expandableHeader = { expandableHeader(screenState) },
+                    expandableIndicator = screenState.showAppVersionChangeHint.value
+                )
 
                 content(screenState)
 
@@ -407,7 +420,8 @@ private fun ScreenLayout(
 @Composable
 private fun HeaderLayout(
     staticHeader: @Composable RowScope.() -> Unit,
-    expandableHeader: @Composable RowScope.() -> Unit
+    expandableHeader: @Composable RowScope.() -> Unit,
+    expandableIndicator: Boolean
 ) {
 
     Column(
@@ -432,6 +446,10 @@ private fun HeaderLayout(
 
                 staticHeader()
 
+            }
+
+            if (expandableIndicator && !expanded) {
+                IndicatorCircle()
             }
 
             Box(
@@ -507,12 +525,12 @@ private fun HeaderButton(
     ) {
 
         if (indicator) {
-            IndicatorCircle(modifier = Modifier.alignBy { it.measuredHeight }.size(10.dp))
+            IndicatorCircle()
         }
 
         Text(
             text = text,
-            modifier = Modifier.alignByBaseline()
+            style = LocalTextStyle.current.copyCentered()
         )
 
         icon()
