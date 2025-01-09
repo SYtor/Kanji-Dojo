@@ -46,7 +46,7 @@ class MainScreenViewModel(
         }
     }
 
-    override fun resolveConflict(strategy: SyncConflictResolveStrategy) {
+    override fun resolveSyncConflict(strategy: SyncConflictResolveStrategy) {
         when (val syncState = syncManager.state.value) {
             is SyncFeatureState.Enabled -> syncState.resolveConflict(strategy)
             else -> Unit

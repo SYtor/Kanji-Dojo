@@ -8,7 +8,7 @@ interface MainContract {
     interface ViewModel {
         val syncDialogState: StateFlow<SyncDialogState>
         fun cancelSync()
-        fun resolveConflict(strategy: SyncConflictResolveStrategy)
+        fun resolveSyncConflict(strategy: SyncConflictResolveStrategy)
     }
 
 }

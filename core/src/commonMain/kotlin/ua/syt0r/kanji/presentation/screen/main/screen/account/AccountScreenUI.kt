@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -295,7 +295,7 @@ private fun IssueListItem(
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(message) },
-        leadingContent = { Icon(Icons.Default.Info, null) },
+        leadingContent = { Icon(Icons.Default.Error, null) },
         trailingContent = trailingIcon?.let { { Icon(it, null) } },
         colors = ListItemDefaults.errorColors(),
         modifier = Modifier

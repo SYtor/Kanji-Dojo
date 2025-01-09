@@ -1,6 +1,9 @@
 package ua.syt0r.kanji.presentation.screen.main
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -16,12 +19,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.ApiRequestIssue
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
@@ -41,7 +42,12 @@ fun MainScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { SyncErrorSnackbar(it) }
+            )
+        }
     ) {
         MainNavigation(navigationState)
     }
@@ -49,7 +55,7 @@ fun MainScreen(
     SyncDialog(
         state = viewModel.syncDialogState.collectAsState(),
         cancelSync = viewModel::cancelSync,
-        resolveConflict = viewModel::resolveConflict,
+        resolveConflict = viewModel::resolveSyncConflict,
         navigateToAccount = {
             viewModel.cancelSync()
             navigationState.navigate(MainDestination.Account())
@@ -132,17 +138,11 @@ private fun HandleSyncErrorSnackbarsLaunchedEffect(
 ) {
 
     LaunchedEffect(Unit) {
-        val currentDestinationFlow = snapshotFlow { navigationState.currentDestination.value }
-            .filterNotNull()
 
         syncDialogState.filterIsInstance<SyncDialogState.Error>()
-            .flatMapLatest { currentState ->
-                currentDestinationFlow
-                    .filterNot { destination ->
-                        destination is MainDestination.Account || destination is MainDestination.Sync
-                    }
-                    .take(1)
-                    .map { currentState }
+            .filterNot { _ ->
+                val destination = navigationState.currentDestination.value
+                destination is MainDestination.Account || destination is MainDestination.Sync
             }
             .collectLatest { currentState ->
                 if (currentState.showDialog.value)
@@ -180,4 +180,17 @@ private fun SyncDialogState.Error.snackbarMessage(strings: SyncSnackbarStrings):
         extraMessage != null -> strings.errorMessageTemplate.format(extraMessage)
         else -> strings.errorMessageNoReason
     }
+}
+
+
+@Composable
+private fun SyncErrorSnackbar(snackbarData: SnackbarData) {
+    Snackbar(
+        snackbarData = snackbarData,
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        actionColor = MaterialTheme.colorScheme.onErrorContainer,
+        actionContentColor = MaterialTheme.colorScheme.onErrorContainer,
+        dismissActionContentColor = MaterialTheme.colorScheme.onErrorContainer
+    )
 }

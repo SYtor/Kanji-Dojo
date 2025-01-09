@@ -145,8 +145,8 @@ private class SyncEnabledState(
         when (this) {
             is SyncState.Error.Api -> {
                 when (issue) {
-                    ApiRequestIssue.NotAuthenticated -> accountManager.notifyAuthExpired()
-                    ApiRequestIssue.NoSubscription -> accountManager.notifyNoSubscription()
+                    ApiRequestIssue.NotAuthenticated -> accountManager.invalidateAuth()
+                    ApiRequestIssue.NoSubscription -> accountManager.invalidateSubscription()
                     else -> Unit
                 }
             }
