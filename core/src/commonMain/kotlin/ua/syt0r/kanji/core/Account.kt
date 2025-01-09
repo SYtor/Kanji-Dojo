@@ -17,15 +17,15 @@ interface AccountManager {
     fun signIn(refreshToken: String, idToken: String)
     fun signOut()
     fun refreshUserData()
-    fun notifyNoSubscription()
-    fun notifyAuthExpired()
+    fun invalidateAuth()
+    fun invalidateSubscription()
 }
 
 sealed interface AccountState {
 
-    object Loading : AccountState
+    data object Loading : AccountState
 
-    object LoggedOut : AccountState
+    data object LoggedOut : AccountState
 
     data class LoggedIn(
         val email: String,
@@ -91,12 +91,15 @@ class DefaultAccountManager(
         coroutineScope.launch { updateStateFromRemote() }
     }
 
-    override fun notifyNoSubscription() {
-        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NoSubscription) }
+    override fun invalidateAuth() {
+        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NotAuthenticated) }
     }
 
-    override fun notifyAuthExpired() {
-        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NotAuthenticated) }
+    override fun invalidateSubscription() {
+        coroutineScope.launch {
+            updateStateFromRemote()
+            // TODO notify subscription expired
+        }
     }
 
     private suspend fun updateStateFromRemote() {

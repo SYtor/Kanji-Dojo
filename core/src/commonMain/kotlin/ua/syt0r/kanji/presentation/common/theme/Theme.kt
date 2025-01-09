@@ -200,10 +200,10 @@ fun TextFieldDefaults.neutralColors(): TextFieldColors = MaterialTheme.colorSche
 fun ListItemDefaults.errorColors(): ListItemColors {
     return colors(
         containerColor = MaterialTheme.colorScheme.errorContainer,
-        headlineColor = MaterialTheme.colorScheme.onSurface,
+        headlineColor = MaterialTheme.colorScheme.onErrorContainer,
         supportingColor = MaterialTheme.colorScheme.onErrorContainer,
-        leadingIconColor = MaterialTheme.colorScheme.onSurface,
-        trailingIconColor = MaterialTheme.colorScheme.onSurface
+        leadingIconColor = MaterialTheme.colorScheme.onErrorContainer,
+        trailingIconColor = MaterialTheme.colorScheme.onErrorContainer
     )
 }
 
