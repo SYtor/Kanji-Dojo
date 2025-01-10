@@ -1,5 +1,6 @@
 package ua.syt0r.kanji.core
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +10,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
-import org.koin.ext.getFullName
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.LifecycleState
 import kotlin.time.measureTime
@@ -22,7 +22,7 @@ sealed interface RefreshableData<T> {
 inline fun <reified T> refreshableDataFlow(
     dataChangeFlow: SharedFlow<Unit>,
     lifecycleState: StateFlow<LifecycleState>,
-    noinline valueProvider: suspend () -> T
+    noinline valueProvider: suspend CoroutineScope.() -> T
 ): Flow<RefreshableData<T>> = channelFlow {
 
     val waitForScreenVisibility = suspend {
@@ -35,7 +35,7 @@ inline fun <reified T> refreshableDataFlow(
             waitForScreenVisibility()
 
             val value: T
-            val loadingTime = measureTime { value = valueProvider.invoke() }
+            val loadingTime = measureTime { value = valueProvider.invoke(this) }
             Logger.d("Loaded ${T::class.qualifiedName} data, loadingTime[$loadingTime]")
 
             send(RefreshableData.Loaded(value))
