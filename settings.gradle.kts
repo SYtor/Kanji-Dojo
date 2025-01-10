@@ -12,7 +12,7 @@ pluginManagement {
         kotlin("plugin.compose") version "2.0.20"
         id("com.android.application") version "8.5.2"
         id("com.android.library") version "8.5.2"
-        id("org.jetbrains.compose") version "1.7.0"
+        id("org.jetbrains.compose") version "1.7.3"
         id("com.google.gms.google-services") version "4.4.2"
         id("com.google.firebase.crashlytics") version "3.0.2"
         id("com.codingfeline.buildkonfig") version "0.13.3"
