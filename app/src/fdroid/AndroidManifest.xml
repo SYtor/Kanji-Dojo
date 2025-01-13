@@ -5,11 +5,22 @@
 
         <activity
             android:name="ua.syt0r.kanji.presentation.screen.main.FdroidMainActivity"
+            android:launchMode="singleInstance"
             android:exported="true">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="kanji-dojo" />
             </intent-filter>
 
         </activity>

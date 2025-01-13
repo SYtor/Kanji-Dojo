@@ -1,0 +1,166 @@
+package ua.syt0r.kanji.presentation.screen.main
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import ua.syt0r.kanji.core.AccountManager
+import ua.syt0r.kanji.core.AccountState
+import ua.syt0r.kanji.core.ApiRequestIssue
+import ua.syt0r.kanji.core.SubscriptionInfo
+import ua.syt0r.kanji.presentation.common.rememberUrlHandler
+import ua.syt0r.kanji.presentation.getMultiplatformViewModel
+import ua.syt0r.kanji.presentation.screen.main.FdroidAccountScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContainer
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenError
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenLoading
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenSignedIn
+import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenSignedOut
+
+object FdroidAccountScreenContent : AccountScreenContract.Content {
+
+    @Composable
+    override fun invoke(
+        state: MainNavigationState,
+        data: AccountScreenContract.ScreenData?
+    ) {
+
+        val viewModel = getMultiplatformViewModel<FdroidAccountScreenContract.ViewModel>()
+        val urlHandler = rememberUrlHandler()
+
+        LaunchedEffect(Unit) {
+            if (data != null) viewModel.signIn(data)
+        }
+
+        FdroidAccountScreenUI(
+            state = viewModel.state.collectAsState(),
+            onUpClick = { state.navigateBack() },
+            onSignInClick = { urlHandler.openInBrowser(AccountScreenContract.DEEP_LINK_AUTH_URL) },
+            onSignOutClick = { viewModel.signOut() },
+            refresh = { viewModel.refresh() }
+        )
+
+    }
+
+}
+
+interface FdroidAccountScreenContract {
+
+    interface ViewModel {
+        val state: StateFlow<ScreenState>
+        fun signIn(data: AccountScreenContract.ScreenData)
+        fun signOut()
+        fun refresh()
+    }
+
+    sealed interface ScreenState {
+        data object Loading : ScreenState
+        data object SignedOut : ScreenState
+        data class SignedIn(
+            val email: String,
+            val subscriptionInfo: SubscriptionInfo,
+            val issue: ApiRequestIssue?
+        ) : ScreenState
+
+        data class Error(
+            val issue: ApiRequestIssue
+        ) : ScreenState
+    }
+
+}
+
+@Composable
+fun FdroidAccountScreenUI(
+    state: State<ScreenState>,
+    onUpClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onSignOutClick: () -> Unit,
+    refresh: () -> Unit
+) {
+
+    AccountScreenContainer(
+        state = state,
+        onUpClick = onUpClick
+    ) { screenState ->
+
+        when (screenState) {
+            ScreenState.SignedOut -> {
+                AccountScreenSignedOut(
+                    startSignIn = onSignInClick
+                )
+            }
+
+            ScreenState.Loading -> {
+                AccountScreenLoading()
+            }
+
+            is ScreenState.SignedIn -> {
+                AccountScreenSignedIn(
+                    email = screenState.email,
+                    subscriptionInfo = screenState.subscriptionInfo,
+                    issue = screenState.issue,
+                    refresh = refresh,
+                    signOut = onSignOutClick,
+                    signIn = onSignInClick
+                )
+            }
+
+            is ScreenState.Error -> {
+                AccountScreenError(
+                    issue = screenState.issue,
+                    startSignIn = onSignInClick
+                )
+            }
+        }
+
+    }
+
+}
+
+class FdroidAccountScreenViewModel(
+    coroutineScope: CoroutineScope,
+    private val accountManager: AccountManager
+) : FdroidAccountScreenContract.ViewModel {
+
+    private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    override val state: StateFlow<ScreenState> = _state
+
+    init {
+
+        accountManager.state
+            .onEach {
+                _state.value = when (it) {
+                    AccountState.Loading -> ScreenState.Loading
+                    AccountState.LoggedOut -> ScreenState.SignedOut
+                    is AccountState.LoggedIn -> ScreenState.SignedIn(
+                        email = it.email,
+                        subscriptionInfo = it.subscriptionInfo,
+                        issue = it.issue
+                    )
+
+                    is AccountState.Error -> ScreenState.Error(it.issue)
+                }
+            }
+            .launchIn(coroutineScope)
+
+    }
+
+    override fun signIn(data: AccountScreenContract.ScreenData) {
+        accountManager.signIn(data.refreshToken, data.idToken)
+    }
+
+    override fun signOut() {
+        accountManager.signOut()
+    }
+
+    override fun refresh() {
+        accountManager.refreshUserData()
+    }
+
+}
