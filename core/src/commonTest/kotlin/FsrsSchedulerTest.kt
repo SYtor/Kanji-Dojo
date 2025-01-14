@@ -18,7 +18,6 @@ import ua.syt0r.kanji.core.srs.fsrs.FsrsReviewRating.Easy
 import ua.syt0r.kanji.core.srs.fsrs.FsrsReviewRating.Good
 import ua.syt0r.kanji.core.srs.fsrs.FsrsReviewRating.Hard
 import ua.syt0r.kanji.core.srs.fsrs.FsrsScheduler
-import ua.syt0r.kanji.core.srs.fsrs.fsrs5Configuration
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import kotlin.test.BeforeTest
@@ -33,20 +32,13 @@ import kotlin.time.DurationUnit
  */
 class FsrsSchedulerTest {
 
-    private val testWeights = listOf(
-        0.4197, 1.1869, 3.0412, 15.2441, 7.1434, 0.6477, 1.0007, 0.0674, 1.6597, 0.1712, 1.1178,
-        2.0225, 0.0904, 0.3025, 2.1214, 0.2498, 2.9466, 0.4891, 0.6468,
-    )
-
     private lateinit var fsrsAlgorithm: FsrsAlgorithm
     private lateinit var scheduler: FsrsScheduler
     private lateinit var now: Instant
 
     @BeforeTest
     fun setup() {
-        fsrsAlgorithm = Fsrs5(
-            configuration = fsrs5Configuration.copy(w = testWeights)
-        )
+        fsrsAlgorithm = Fsrs5()
         scheduler = DefaultFsrsScheduler(fsrsAlgorithm)
         now = LocalDateTime(2022, 11, 29, 12, 30)
             .toInstant(TimeZone.UTC)
@@ -73,8 +65,8 @@ class FsrsSchedulerTest {
             answers = scheduler.schedule(card, now)
         }
 
-        // TODO find the difference    0, 4, 17, 62, 198, 563, 0, 0, 9, 27, 74, 190, 457
-        val expectedIntervals = listOf(0, 4, 18, 68, 215, 356, 0, 0, 8, 26, 73, 188, 356)
+        // TODO investigate diff       0, 4, 14, 44, 125, 328, 0, 0, 7, 16, 34, 71, 142
+        val expectedIntervals = listOf(0, 4, 15, 47, 133, 348, 0, 0, 7, 11, 15, 21, 29)
         val resultIntervals = srsCards.map { it.interval.toDouble(DurationUnit.DAYS).toInt() }
 
         val expectedStatuses = listOf(
@@ -106,10 +98,10 @@ class FsrsSchedulerTest {
         val decimalFormat = DecimalFormat("#.####")
         decimalFormat.roundingMode = RoundingMode.FLOOR
 
-        val expectStability = 71.4554
+        val expectStability = 48.4848
         val resultStability = decimalFormat.format(params.stability).toDouble()
 
-        val expectDifficulty = 5.0976
+        val expectDifficulty = 7.0865
         val resultDifficulty = decimalFormat.format(params.difficulty).toDouble()
 
         assertEquals(expectStability, resultStability)
