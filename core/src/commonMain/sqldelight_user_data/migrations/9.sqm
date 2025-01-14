@@ -1,0 +1,3 @@
+PRAGMA user_version = 10;
+
+UPDATE fsrs_card SET stability = 0.01 WHERE stability < 0.01;

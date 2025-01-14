@@ -50,6 +50,7 @@ class Fsrs5(
     private val decay: Double = configuration.decay
     private val requestRetention = configuration.requestRetention
     private val maxInterval = configuration.maxInterval
+    private val minimalStability = 0.01
 
     override fun updatedParams(
         card: FsrsCard,
@@ -86,6 +87,7 @@ class Fsrs5(
                 }
 
                 val stability = nextStability(card.params, card.status, rating, retrievability)
+                    .coerceAtLeast(minimalStability)
 
                 FsrsCardParams.Existing(
                     difficulty = difficulty,
