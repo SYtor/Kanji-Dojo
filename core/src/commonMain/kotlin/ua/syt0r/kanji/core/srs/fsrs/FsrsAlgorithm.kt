@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import ua.syt0r.kanji.core.srs.fsrs.FsrsReviewRating.Easy
 import kotlin.math.exp
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
@@ -32,8 +33,8 @@ data class FsrsAlgorithmConfiguration(
 
 val fsrs5Configuration = FsrsAlgorithmConfiguration(
     w = listOf(
-        0.4072, 1.1829, 3.1262, 15.4722, 7.2102, 0.5316, 1.0651, 0.0234, 1.616, 0.1544, 1.0824,
-        1.9813, 0.0953, 0.2975, 2.2042, 0.2407, 2.9466, 0.5034, 0.6567
+        0.40255, 1.18385, 3.173, 15.69105, 7.1949, 0.5345, 1.4604, 0.0046, 1.54575, 0.1192, 1.01925,
+        1.9395, 0.11, 0.29605, 2.2698, 0.2315, 2.9898, 0.51655, 0.6621
     ),
     factor = 19.0 / 81,
     decay = -0.5,
@@ -100,7 +101,10 @@ class Fsrs5(
 
     override fun nextInterval(cardParams: FsrsCardParams.Existing): Duration {
         val interval = (9 * cardParams.stability * (1 / requestRetention - 1))
-        return if (interval.isNaN()) maxInterval else interval.days.coerceAtMost(maxInterval)
+        return when {
+            interval.isNaN() -> maxInterval
+            else -> interval.roundToInt().days.coerceIn(1.days, maxInterval)
+        }
     }
 
 
