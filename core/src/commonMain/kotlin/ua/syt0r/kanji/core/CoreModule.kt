@@ -151,7 +151,7 @@ val coreModule = module {
     single<NetworkApi> {
         DefaultNetworkApi(
             networkClients = get(),
-            jsonHandler = get()
+            json = Json { ignoreUnknownKeys = true }
         )
     }
 
