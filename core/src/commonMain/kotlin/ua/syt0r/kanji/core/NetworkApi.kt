@@ -42,9 +42,9 @@ data class HttpResponseException(
 
 sealed interface ApiRequestIssue {
 
-    object NoConnection : ApiRequestIssue
-    object NotAuthenticated : ApiRequestIssue
-    object NoSubscription : ApiRequestIssue
+    data object NoConnection : ApiRequestIssue
+    data object NotAuthenticated : ApiRequestIssue
+    data object NoSubscription : ApiRequestIssue
     data class Other(val throwable: Throwable) : ApiRequestIssue
 
     companion object {
@@ -71,14 +71,14 @@ sealed interface ApiRequestIssue {
 data class ApiUserInfo(
     val email: String,
     val subscription: Boolean,
-    val subscriptionDue: Long?
+    val subscriptionDue: Long? = null
 )
 
 @Serializable
 data class ApiSyncDataInfo(
     val dataId: String,
     val dataVersion: Long,
-    val dataTimestamp: Long?
+    val dataTimestamp: Long? = null
 )
 
 fun ApiSyncDataInfo.toPreferencesType() =
@@ -100,15 +100,15 @@ data class DonationPurchaseApiData(
 
 class DefaultNetworkApi(
     private val networkClients: NetworkClients,
-    private val jsonHandler: Json
+    private val json: Json
 ) : NetworkApi {
 
     override suspend fun getUserInfo(): Result<ApiUserInfo> {
         return runCatching {
             val response = networkClients.authenticatedClient.get(GET_USER_INFO_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-            val json = response.bodyAsText()
-            jsonHandler.decodeFromString(json)
+            val jsonValue = response.bodyAsText()
+            json.decodeFromString(jsonValue)
         }
     }
 
@@ -116,8 +116,8 @@ class DefaultNetworkApi(
         return runCatching {
             val response = networkClients.authenticatedClient.get(GET_SYNC_INFO_URL)
             if (response.status != HttpStatusCode.OK) throw HttpResponseException(response.status)
-            val json = response.bodyAsText()
-            jsonHandler.decodeFromString<ApiSyncDataInfo>(json)
+            val jsonValue = response.bodyAsText()
+            json.decodeFromString<ApiSyncDataInfo>(jsonValue)
         }
     }
 
@@ -134,7 +134,7 @@ class DefaultNetworkApi(
         file: ChannelProvider
     ): Result<Unit> {
         return runCatching {
-            val infoJson = jsonHandler.encodeToString(info)
+            val infoJson = json.encodeToString(info)
 
             val response = networkClients.authenticatedClient.post(UPDATE_SYNC_URL) {
                 val partDataList = formData {
@@ -192,7 +192,7 @@ class DefaultNetworkApi(
 
     private companion object {
 
-        const val BASE = "http://localhost:8080"
+        const val BASE = "https://kanji-dojo.com/api/v2"
 
         const val GET_USER_INFO_URL = "$BASE/user/info"
         const val GET_SYNC_INFO_URL = "$BASE/sync/info"
