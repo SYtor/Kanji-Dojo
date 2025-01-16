@@ -59,14 +59,21 @@ class FsrsSchedulerTest {
             card = answers.get(rating)
             val params = card.params as FsrsCardParams.Existing
             val due = now + card.interval
-            println("%s %f %f %s".format(rating.name, params.difficulty, params.stability, due))
+            println(
+                "%s %f %f %s %s".format(
+                    rating.name,
+                    params.difficulty,
+                    params.stability,
+                    due,
+                    card.status.name
+                )
+            )
             srsCards.add(card)
             now = due
             answers = scheduler.schedule(card, now)
         }
 
-        // TODO investigate diff       0, 4, 14, 44, 125, 328, 0, 0, 7, 16, 34, 71, 142
-        val expectedIntervals = listOf(0, 4, 15, 47, 133, 348, 0, 0, 7, 11, 15, 21, 29)
+        val expectedIntervals = listOf(0, 4, 14, 44, 125, 328, 0, 0, 7, 16, 34, 71, 142)
         val resultIntervals = srsCards.map { it.interval.toDouble(DurationUnit.DAYS).toInt() }
 
         val expectedStatuses = listOf(

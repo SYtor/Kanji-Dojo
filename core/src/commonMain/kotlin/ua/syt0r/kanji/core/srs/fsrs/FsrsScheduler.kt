@@ -80,7 +80,7 @@ class DefaultFsrsScheduler(
                 val tmpGood = card.nextCard(Review, Good, incrementLapses = true)
                 val tmpEasy = card.nextCard(Review, Easy, incrementLapses = true)
 
-                val hardInterval = maxOf(tmpHard.interval, tmpGood.interval)
+                val hardInterval = minOf(tmpHard.interval, tmpGood.interval)
                 val goodInterval = maxOf(tmpGood.interval, hardInterval + 1.days)
                 val easyInterval = maxOf(tmpEasy.interval, goodInterval + 1.days)
 
