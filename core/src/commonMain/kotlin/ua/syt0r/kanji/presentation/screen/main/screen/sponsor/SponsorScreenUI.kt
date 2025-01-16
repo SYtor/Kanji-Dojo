@@ -23,7 +23,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -72,8 +71,7 @@ fun SponsorScreenUI(
 fun ColumnScope.SponsorScreenDefaultContent() {
     Text(
         text = resolveString { appName },
-        style = MaterialTheme.typography.headlineLarge,
-        fontWeight = FontWeight.Bold
+        style = MaterialTheme.typography.headlineLarge
     )
 
     Box(

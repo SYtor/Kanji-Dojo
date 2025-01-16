@@ -50,10 +50,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +77,7 @@ import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FilledTextField
+import kotlin.math.roundToInt
 import kotlin.time.Duration
 
 sealed interface PracticeToolbarState {
@@ -244,24 +245,21 @@ class PracticeConfigurationItemsSelectorState<T>(
     shuffle: Boolean
 ) {
 
-    val selectedCountState = mutableStateOf(itemToDeckIdMap.size)
+    val range = 1f..itemToDeckIdMap.size.toFloat()
 
-    val shuffleEnabled = mutableStateOf(shuffle)
-    val sortedList = mutableStateOf(if (shuffle) itemToDeckIdMap.shuffled() else itemToDeckIdMap)
+    val selectedCountFloatState = mutableStateOf(itemToDeckIdMap.size.toFloat())
+    val selectedCountIntState = derivedStateOf { selectedCountFloatState.value.roundToInt() }
+    val selectedCountTextState = mutableStateOf(selectedCountIntState.value.toString())
+
+    val shuffleState = mutableStateOf(shuffle)
+    val sortedList = mutableStateOf(
+        value = if (shuffle) itemToDeckIdMap.shuffled() else itemToDeckIdMap
+    )
 
     val result: List<Pair<T, Long>>
-        get() = sortedList.value.take(selectedCountState.value)
+        get() = sortedList.value.take(selectedCountIntState.value)
 
 }
-
-@Composable
-fun <T> rememberPracticeConfigurationItemsSelectorState(
-    itemToDeckIdMap: List<Pair<T, Long>>,
-    shuffle: Boolean
-): PracticeConfigurationItemsSelectorState<T> {
-    return remember { PracticeConfigurationItemsSelectorState<T>(itemToDeckIdMap, shuffle) }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -269,20 +267,11 @@ fun <T> PracticeConfigurationItemsSelector(
     state: PracticeConfigurationItemsSelectorState<T>
 ) {
 
-    val range = 1..state.itemToDeckIdMap.size
-
-    var shuffle by state.shuffleEnabled
-    var resultList by state.sortedList
-
-    var selectedCharactersCount by state.selectedCountState
-    var selectedCharactersCountText by rememberSaveable {
-        mutableStateOf(selectedCharactersCount.toString())
-    }
-
     Row(
         modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+
         Text(
             text = resolveString { commonPractice.configurationSelectedItemsLabel },
             style = MaterialTheme.typography.titleMedium,
@@ -290,10 +279,12 @@ fun <T> PracticeConfigurationItemsSelector(
         )
 
         FilledTextField(
-            value = selectedCharactersCountText,
-            onValueChange = {
-                selectedCharactersCountText = it
-                it.toIntOrNull()?.coerceIn(range)?.also { selectedCharactersCount = it }
+            value = state.selectedCountTextState.value,
+            onValueChange = { textValue ->
+                state.selectedCountTextState.value = textValue
+                textValue.toIntOrNull()?.toFloat()
+                    ?.coerceIn(state.range)
+                    ?.also { state.selectedCountFloatState.value = it }
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.widthIn(min = 80.dp).alignByBaseline()
@@ -310,35 +301,33 @@ fun <T> PracticeConfigurationItemsSelector(
 
         Text(text = 1.toString())
 
-        val interactionSource = remember { MutableInteractionSource() }
         val colors = SliderDefaults.colors(
             activeTrackColor = MaterialTheme.colorScheme.surfaceVariant,
-            activeTickColor = MaterialTheme.colorScheme.primary,
             inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+            activeTickColor = MaterialTheme.colorScheme.primary,
             inactiveTickColor = MaterialTheme.colorScheme.primary
         )
 
         Slider(
-            value = selectedCharactersCount.coerceIn(range).toFloat(),
+            value = state.selectedCountFloatState.value,
             onValueChange = {
-                selectedCharactersCount = it.toInt()
-                selectedCharactersCountText = it.toInt().toString()
+                state.selectedCountFloatState.value = it
+                state.selectedCountTextState.value = it.roundToInt().toString()
             },
-            steps = state.itemToDeckIdMap.size,
-            valueRange = 1f..range.last.toFloat(),
+            valueRange = state.range,
             modifier = Modifier.weight(1f),
-            interactionSource = interactionSource,
             track = {
                 SliderDefaults.Track(
                     sliderState = it,
                     thumbTrackGapSize = 2.dp,
                     colors = colors,
+                    drawStopIndicator = {},
                     drawTick = { _, _ -> }
                 )
             },
             thumb = {
                 SliderDefaults.Thumb(
-                    interactionSource,
+                    interactionSource = remember { MutableInteractionSource() },
                     colors = colors,
                     thumbSize = DpSize(6.dp, 30.dp)
                 )
@@ -352,11 +341,13 @@ fun <T> PracticeConfigurationItemsSelector(
     PracticeConfigurationOption(
         title = resolveString { commonPractice.shuffleConfigurationTitle },
         subtitle = resolveString { commonPractice.shuffleConfigurationMessage },
-        checked = shuffle,
-        onChange = {
-            shuffle = it
-            resultList = if (it) state.itemToDeckIdMap.shuffled()
-            else state.itemToDeckIdMap
+        checked = state.shuffleState.value,
+        onChange = { shuffleEnabled ->
+            state.shuffleState.value = shuffleEnabled
+            state.sortedList.value = when {
+                shuffleEnabled -> state.itemToDeckIdMap.shuffled()
+                else -> state.itemToDeckIdMap
+            }
         }
     )
 
@@ -499,7 +490,7 @@ interface DisplayableEnum {
 fun <T> PracticeConfigurationEnumSelector(
     title: String,
     subtitle: String,
-    values: Array<T>,
+    values: List<T>,
     selected: T,
     onSelected: (T) -> Unit
 ) where T : Enum<T>, T : DisplayableEnum {

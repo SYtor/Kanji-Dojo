@@ -244,6 +244,8 @@ fun FlashcardPracticeAnswerButtonsRow(
     }
 }
 
+expect val SrsAnswerButtonTextBlurRadius: Float
+
 @Composable
 fun RowScope.SrsAnswerButton(
     label: String,
@@ -269,7 +271,7 @@ fun RowScope.SrsAnswerButton(
         Text(
             text = label,
             style = MaterialTheme.typography.titleMedium.copy(
-                shadow = Shadow(color = color, blurRadius = 1f)
+                shadow = Shadow(color = color, blurRadius = SrsAnswerButtonTextBlurRadius)
             ),
             color = color
         )

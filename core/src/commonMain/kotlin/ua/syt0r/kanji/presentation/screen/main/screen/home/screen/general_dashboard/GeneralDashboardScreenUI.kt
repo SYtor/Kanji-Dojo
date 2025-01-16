@@ -436,7 +436,7 @@ private fun HeaderLayout(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             modifier = Modifier.width(IntrinsicSize.Max)
         ) {
 
@@ -454,7 +454,6 @@ private fun HeaderLayout(
 
             Box(
                 modifier = Modifier
-                    .padding(start = 12.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clickable { expanded = !expanded }

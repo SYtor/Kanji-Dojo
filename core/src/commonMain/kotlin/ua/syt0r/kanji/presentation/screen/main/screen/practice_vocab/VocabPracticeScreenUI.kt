@@ -167,7 +167,7 @@ private fun ScreenConfiguration(
         PracticeConfigurationEnumSelector(
             title = resolveString { vocabPractice.readingPriorityConfigurationTitle },
             subtitle = resolveString { vocabPractice.readingPriorityConfigurationMessage },
-            values = VocabPracticeReadingPriority.values(),
+            values = VocabPracticeReadingPriority.entries,
             selected = readingPriority,
             onSelected = { readingPriority = it }
         )
