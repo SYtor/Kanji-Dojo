@@ -762,7 +762,7 @@ object JapaneseSyncDialogStrings : SyncDialogStrings {
     override val errorNoNetworkMessage = "ネットワーク接続を確立できませんでした"
     override val errorNoSubscriptionTitle = "サブスクリプションの期限切れ"
     override val errorNoSubscriptionMessage =
-        "サブスクリプションが期限切れです。同期は無効になります"
+        "サブスクリプションの期限が切れました。同期は無効になります。アカウント画面でサブスクリプションの状態を更新してください"
     override val errorNotAuthenticatedTitle = "セッションの有効期限が切れました"
     override val errorNotAuthenticatedMessage = "アカウントに再ログインしてください"
     override val errorUnexpectedErrorTitle = "予期しないエラー"
