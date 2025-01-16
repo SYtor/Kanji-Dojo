@@ -96,7 +96,8 @@ val coreModule = module {
     factory<PreferencesBackupManager> {
         DefaultPreferencesBackupManager(
             preferencesManager = get(),
-            backupPropertiesHolder = get()
+            backupPropertiesHolder = get(),
+            timeUtils = get()
         )
     }
 

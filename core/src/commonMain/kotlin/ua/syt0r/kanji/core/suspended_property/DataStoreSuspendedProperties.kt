@@ -47,7 +47,9 @@ class DataStoreSuspendedProperty<ExposedType, BackingType>(
     override suspend fun backup(): JsonPrimitive = type.backup(get())
 
     override suspend fun restore(value: JsonPrimitive) {
-        internalSet(value = type.convertToBacking(type.restore(value)))
+        val exposedTypeValue = type.restore(value)
+        internalSet(value = type.convertToBacking(exposedTypeValue))
+        _onModifier.emit(exposedTypeValue)
     }
 
 }
@@ -91,8 +93,11 @@ class NullableDataStoreSuspendedProperty<ExposedType, BackingType>(
     }
 
     override suspend fun backup(): JsonPrimitive? = get()?.let(type::backup)
+
     override suspend fun restore(value: JsonPrimitive) {
-        internalSet(value = type.convertToBacking(type.restore(value)))
+        val exposedTypeValue = type.restore(value)
+        internalSet(value = type.convertToBacking(exposedTypeValue))
+        _onModifier.emit(exposedTypeValue)
     }
 
 }

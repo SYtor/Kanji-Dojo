@@ -55,7 +55,8 @@ class AppPreferences(
         createNullableProperty(
             type = jsonPojoSuspendedPropertyType(),
             key = "last_synced_data_info_json",
-            initialValue = { null }
+            initialValue = { null },
+            enableBackup = false
         )
 
     override val analyticsEnabled: SuspendedProperty<Boolean> = createProperty(
