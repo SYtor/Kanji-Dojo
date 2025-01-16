@@ -812,7 +812,7 @@ object EnglishSyncDialogStrings : SyncDialogStrings {
     override val errorNoNetworkTitle = "No Network"
     override val errorNoNetworkMessage = "Couldn't establish network connection"
     override val errorNoSubscriptionTitle = "Subscription Expired"
-    override val errorNoSubscriptionMessage = "Your subscription has expired, sync will be disabled"
+    override val errorNoSubscriptionMessage = "Your subscription has expired, sync will be disabled, refresh your subscription status on the Account screen"
     override val errorNotAuthenticatedTitle = "Session Expired"
     override val errorNotAuthenticatedMessage = "Sign in to your account again to continue"
     override val errorUnexpectedErrorTitle = "Unexpected Error"

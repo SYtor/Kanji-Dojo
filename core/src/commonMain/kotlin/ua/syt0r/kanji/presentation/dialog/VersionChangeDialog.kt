@@ -42,6 +42,18 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.1.4", LocalDate(2025, 1, 17)) {
+                    append(
+                        """
+                        - Added an option to the Settings tab to select the default tab opened when starting the app
+                        - Added controls to calendars on the Stats tab to view stats from the past
+                        - Added new cloud sync feature
+                        - Updated FSRS v5 algorithm with new weights, implemented standard rounding to days and fixed incorrect hard interval in some cases
+                        - Minor UI changes
+                        - Fixed crash when overusing Again button
+                        """.trimIndent()
+                    )
+                }
                 version("2.1.3", LocalDate(2024, 9, 30)) {
                     append(
                         """
