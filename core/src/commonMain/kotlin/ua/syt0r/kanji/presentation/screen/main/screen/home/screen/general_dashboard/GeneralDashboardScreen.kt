@@ -10,7 +10,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 
 private const val DownloadsUrl = "https://kanji-dojo.com/"
 private const val YoutubeChannelUrl = "https://youtube.com/@kanji-dojo"
-private const val DiscordInviteUrl = "https://discord.gg/2Ny6h6pXTY"
+const val DiscordInviteUrl = "https://discord.gg/2Ny6h6pXTY"
 
 @Composable
 fun GeneralDashboardScreen(

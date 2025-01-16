@@ -65,20 +65,21 @@ class DefaultHomeTabSettingItem(
     @Composable
     override fun content(mainNavigationState: MainNavigationState) {
 
+        val label = resolveString { settings.defaultTab }
         var showPicker by rememberSaveable { mutableStateOf(false) }
 
         ListItem(
             modifier = Modifier.clip(MaterialTheme.shapes.medium)
                 .fillMaxWidth()
                 .clickable { showPicker = true },
-            headlineContent = { Text("Default Tab") },
+            headlineContent = { Text(label) },
             supportingContent = { Text(resolveString(configuration.value.titleResolver)) }
         )
 
         if (showPicker) {
             SettingsPreferencePickerDialog(
                 onDismissRequest = { showPicker = false },
-                title = "Default Tab",
+                title = label,
                 options = DisplayableDefaultHomeTab.entries,
                 defaultSelected = configuration.value,
                 onSelected = { configuration.value = it }

@@ -149,7 +149,7 @@ fun SettingsBackupButton(onClick: () -> Unit) {
 @Composable
 fun SettingsAccountButton(onClick: () -> Unit) {
     SettingsTextButton(
-        title = resolveString { "Account" },
+        title = resolveString { settings.account },
         onClick = onClick
     )
 }
@@ -157,7 +157,7 @@ fun SettingsAccountButton(onClick: () -> Unit) {
 @Composable
 fun SettingsSyncButton(onClick: () -> Unit) {
     SettingsTextButton(
-        title = resolveString { "Sync" },
+        title = resolveString { settings.sync },
         onClick = onClick
     )
 }
@@ -236,13 +236,15 @@ fun <T> SettingsPreferencePickerDialog(
             }
         },
         buttons = {
-            TextButton(onDismissRequest) { Text("Cancel") }
+            TextButton(onDismissRequest) {
+                Text(resolveString { settings.pickerDialogCancel })
+            }
             TextButton(
                 onClick = {
                     onSelected(selected)
                     onDismissRequest()
                 }
-            ) { Text("Apply") }
+            ) { Text(resolveString { settings.pickerDialogApply }) }
         }
     )
 

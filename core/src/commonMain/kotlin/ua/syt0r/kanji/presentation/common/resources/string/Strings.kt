@@ -141,9 +141,12 @@ interface AccountScreenStrings {
 interface SyncScreenStrings {
     val title: String
 
+    val guideTitle: String
     val guideMessage: String
-    val createAccountLabel: String
-    val purchaseSubscriptionLabel: String
+    val guideStepAccountTitle: String
+    val guideStepAccountMessage: String
+    val guideStepSubscriptionTitle: String
+    val guideStepSubscriptionMessage: String
 
     val accountErrorMessage: String
 
@@ -355,9 +358,15 @@ interface SettingsStrings {
     val reminderTitle: String
     val reminderEnabled: String
     val reminderDisabled: String
+    val defaultTab: String
     val feedbackTitle: String
+    val account: String
+    val sync: String
     val backupTitle: String
     val aboutTitle: String
+
+    val pickerDialogCancel: String
+    val pickerDialogApply: String
 }
 
 interface ReminderDialogStrings {

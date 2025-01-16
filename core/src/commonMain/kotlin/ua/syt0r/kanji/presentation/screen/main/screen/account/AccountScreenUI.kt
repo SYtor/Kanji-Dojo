@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -124,7 +126,7 @@ fun AccountScreenSignedIn(
 ) {
 
     ScrollableScreenContainer(
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
 
         if (issue != null) {
@@ -136,15 +138,14 @@ fun AccountScreenSignedIn(
         }
 
         Column {
-            SectionTitleText(resolveString { account.emailTitle })
             ListItem(
-                headlineContent = { Text(email) }
+                leadingContent = { Icon(Icons.Default.Email, null) },
+                headlineContent = { Text(resolveString { account.emailTitle }) },
+                supportingContent = { Text(email) }
             )
         }
 
         Column {
-
-            SectionTitleText(resolveString { account.subscriptionTitle })
 
             val headlineText: String
             val supportText: String?
@@ -152,24 +153,24 @@ fun AccountScreenSignedIn(
             when (subscriptionInfo) {
                 is SubscriptionInfo.Active -> {
                     headlineText = resolveString { account.subscriptionStatusActive }
-                    supportText = resolveString {
-                        account.subscriptionValidUntilTemplate.format(
-                            subscriptionInfo.due.format(
-                                CommonDateTimeFormat
-                            )
-                        )
-                    }
+                    supportText = subscriptionInfo.due
+                        ?.format(CommonDateTimeFormat)
+                        ?.let { formattedTime ->
+                            resolveString {
+                                account.subscriptionValidUntilTemplate.format(formattedTime)
+                            }
+                        }
                 }
 
                 is SubscriptionInfo.Expired -> {
                     headlineText = resolveString { account.subscriptionStatusExpired }
-                    supportText = resolveString {
-                        account.subscriptionValidUntilTemplate.format(
-                            subscriptionInfo.due.format(
-                                CommonDateTimeFormat
-                            )
-                        )
-                    }
+                    supportText = subscriptionInfo.due
+                        ?.format(CommonDateTimeFormat)
+                        ?.let { formattedTime ->
+                            resolveString {
+                                account.subscriptionValidUntilTemplate.format(formattedTime)
+                            }
+                        }
                 }
 
                 SubscriptionInfo.Inactive -> {
@@ -179,8 +180,14 @@ fun AccountScreenSignedIn(
             }
 
             ListItem(
-                headlineContent = { Text(headlineText) },
-                supportingContent = supportText?.let { { Text(it) } },
+                leadingContent = { Icon(Icons.Default.CreditCard, null) },
+                headlineContent = { Text(resolveString { account.subscriptionTitle }) },
+                supportingContent = {
+                    Column {
+                        Text(headlineText)
+                        supportText?.let { Text(it) }
+                    }
+                },
                 trailingContent = {
                     Box(
                         modifier = Modifier
@@ -239,15 +246,6 @@ fun AccountScreenError(
 
     }
 
-}
-
-@Composable
-private fun SectionTitleText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
 }
 
 @Composable
