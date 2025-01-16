@@ -63,23 +63,24 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     protected val srsScheduler: SrsScheduler,
     protected val srsItemRepository: SrsItemRepository,
     private val reviewHistoryRepository: ReviewHistoryRepository,
-    private val analyticsManager: AnalyticsManager
+    analyticsManager: AnalyticsManager
 ) : PracticeQueue<State, Descriptor>
         where QueueItem : PracticeQueueItem<QueueItem>,
               SummaryItem : PracticeSummaryItem {
 
     protected open lateinit var queue: MutableList<QueueItem>
+    protected val summaryItems = mutableMapOf<SrsCardKey, SummaryItem>()
 
     protected lateinit var practiceStartInstant: Instant
     private lateinit var currentReviewStartInstant: Instant
-
-    protected val summaryItems = mutableMapOf<SrsCardKey, SummaryItem>()
 
     private val submittedAnswersChannel = Channel<PracticeAnswer>()
 
     private val _state: MutableStateFlow<State> = MutableStateFlow(value = this.getLoadingState())
     override val state: StateFlow<State>
         get() = _state
+
+    private val reviewReporter = PracticeReviewReporter(analyticsManager)
 
     init {
         submittedAnswersChannel.consumeAsFlow()
@@ -143,7 +144,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
 
         srsItemRepository.update(item.srsCardKey, answer.srsAnswer.card)
         saveReviewHistory(item, answer, instant, reviewDuration)
-        reportReview(updatedItem, answer, reviewDuration)
+        reviewReporter.reportReview(updatedItem, answer, reviewDuration)
     }
 
     private suspend fun updateState() {
@@ -212,8 +213,20 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
         reviewHistoryRepository.addReview(item)
     }
 
-    private fun reportReview(
-        item: QueueItem,
+
+    companion object {
+        private const val MIN_QUEUE_POSITION_SHIFT = 3
+        private const val MAX_QUEUE_POSITION_SHIFT = 10
+    }
+
+}
+
+private class PracticeReviewReporter<T : PracticeQueueItem<*>>(
+    private val analyticsManager: AnalyticsManager
+) {
+
+    fun reportReview(
+        item: T,
         answer: PracticeAnswer,
         reviewDuration: Duration
     ) {
@@ -225,11 +238,6 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
             put("repeats", item.srsCard.fsrsCard.repeats)
             put("lapses", item.srsCard.fsrsCard.lapses)
         }
-    }
-
-    companion object {
-        private const val MIN_QUEUE_POSITION_SHIFT = 3
-        private const val MAX_QUEUE_POSITION_SHIFT = 10
     }
 
 }

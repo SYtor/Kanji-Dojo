@@ -70,8 +70,7 @@ fun AboutScreenUI(
             ) {
                 Text(
                     text = resolveString { appName },
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.headlineLarge
                 )
 
                 Text(

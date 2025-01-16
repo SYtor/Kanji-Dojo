@@ -257,13 +257,13 @@ private fun ConfiguringState(
 
                 PracticeConfigurationCharactersPreview(
                     characters = configuration.selectorState.sortedList.value.map { it.first },
-                    selectedCharactersCount = configuration.selectorState.selectedCountState
+                    selectedCharactersCount = configuration.selectorState.selectedCountIntState
                 )
 
                 PracticeConfigurationEnumSelector(
                     title = resolveString { letterPractice.hintStrokesTitle },
                     subtitle = resolveString { letterPractice.hintStrokesMessage },
-                    values = WritingPracticeHintMode.values(),
+                    values = WritingPracticeHintMode.entries,
                     selected = selectedHintMode,
                     onSelected = { selectedHintMode = it }
                 )
@@ -271,7 +271,7 @@ private fun ConfiguringState(
                 PracticeConfigurationEnumSelector(
                     title = resolveString { letterPractice.inputModeTitle },
                     subtitle = resolveString { letterPractice.inputModeMessage },
-                    values = WritingPracticeInputMode.values(),
+                    values = WritingPracticeInputMode.entries,
                     selected = selectedInputMode,
                     onSelected = { selectedInputMode = it }
                 )
@@ -313,7 +313,7 @@ private fun ConfiguringState(
 
                 PracticeConfigurationCharactersPreview(
                     characters = configuration.selectorState.sortedList.value.map { it.first },
-                    selectedCharactersCount = configuration.selectorState.selectedCountState
+                    selectedCharactersCount = configuration.selectorState.selectedCountIntState
                 )
 
                 PracticeConfigurationOption(
