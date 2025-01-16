@@ -55,14 +55,10 @@ object JapaneseStrings : Strings {
     override val backup: BackupStrings = JapaneseBackupStrings
     override val feedback: FeedbackStrings = JapaneseFeedbackStrings
     override val sponsor: SponsorStrings = JapaneseSponsorStrings
-    override val account: AccountScreenStrings
-        get() = TODO("Not yet implemented")
-    override val sync: SyncScreenStrings
-        get() = TODO("Not yet implemented")
-    override val syncDialog: SyncDialogStrings
-        get() = TODO("Not yet implemented")
-    override val syncSnackbar: SyncSnackbarStrings
-        get() = TODO("Not yet implemented")
+    override val account: AccountScreenStrings = JapaneseAccountScreenStrings
+    override val sync: SyncScreenStrings = JapaneseSyncScreenStrings
+    override val syncDialog: SyncDialogStrings = JapaneseSyncDialogStrings
+    override val syncSnackbar: SyncSnackbarStrings = JapaneseSyncSnackbarStrings
 
     override val deckPicker: DeckPickerStrings = JapaneseDeckPickerStrings
     override val deckEdit: DeckEditStrings = JapaneseDeckEditStrings
@@ -84,12 +80,9 @@ object JapaneseGeneralDashboardStrings : GeneralDashboardStrings {
     override val headerButtonDailyLimit: String = "毎日の目標"
     override val headerButtonVersionChange: String = "新機能"
     override val headerButtonTutorial: String = "チュートリアル"
-    override val headerButtonDownloads: String
-        get() = TODO("Not yet implemented") // TODO
-    override val headerButtonDiscord: String
-        get() = TODO("Not yet implemented")
-    override val headerButtonYoutube: String
-        get() = TODO("Not yet implemented")
+    override val headerButtonDownloads: String = "ダウンロード"
+    override val headerButtonDiscord: String = "ディスコード"
+    override val headerButtonYoutube: String = "YouTube"
     override val letterDecksTitle: String = "文字デッキ"
     override val vocabDecksTitle: String = "単語デッキ"
     override val buttonNoDecksTitle: String = "デッキなし"
@@ -288,19 +281,14 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val reminderTitle: String = "リマインダー通知"
     override val reminderEnabled: String = "有効"
     override val reminderDisabled: String = "無効"
-    override val defaultTab: String
-        get() = TODO("Not yet implemented")
+    override val defaultTab: String = "デフォルトのタブ"
     override val feedbackTitle: String = "フィードバック"
-    override val account: String
-        get() = TODO("Not yet implemented")
-    override val sync: String
-        get() = TODO("Not yet implemented")
-    override val backupTitle: String = "バックアップ"
+    override val account: String = "アカウント"
+    override val sync: String = "同期（プレビュー）"
+    override val backupTitle: String = "バックアップと復元"
     override val aboutTitle: String = "このアプリについて"
-    override val pickerDialogCancel: String
-        get() = TODO("Not yet implemented")
-    override val pickerDialogApply: String
-        get() = TODO("Not yet implemented")
+    override val pickerDialogCancel: String = "キャンセル"
+    override val pickerDialogApply: String = "適用"
 }
 
 object JapaneseReminderDialogStrings : ReminderDialogStrings {
@@ -426,8 +414,8 @@ object JapaneseDeckPickerStrings : DeckPickerStrings {
     override val wanikaniItem: (Int) -> String = { "WaniKani レベル$it" }
 
     override val vocabOtherTitle: String = "その他"
-    override val vocabOtherDescription: AnnotatedString = "始めるための基本的なデッキ"
-        .let { AnnotatedString(it) }
+    override val vocabOtherDescription: AnnotatedString =
+        AnnotatedString("始めるための基本的なデッキ")
 
     override val vocabDeckItemWordsCountLabel: (words: Int) -> String = { "${it}語" }
     override val vocabDeckTitleTime: String = "時間"
@@ -697,4 +685,99 @@ object JapaneseReminderNotificationStrings : ReminderNotificationStrings {
     override val message: (Int, Int) -> String = { new, due ->
         "今日は未習うカードが${new}枚、復習するカードが${due}枚あります"
     }
+}
+
+object JapaneseAccountScreenStrings : AccountScreenStrings {
+    override val title = "アカウント"
+    override val loggedOutMessage = "ログインしていません"
+    override val signInButton = "ログイン"
+    override val signOutButton = "ログアウト"
+    override val emailTitle = "メールアドレス"
+    override val subscriptionTitle = "サブスクリプション"
+    override val subscriptionStatusActive = "アクティブ"
+    override val subscriptionStatusExpired = "期限切れ"
+    override val subscriptionStatusInactive = "非アクティブ"
+    override val subscriptionValidUntilTemplate = "有効期限: %s"
+    override val issueNoConnectionTitle = "接続なし"
+    override val issueNoConnectionMessage = "キャッシュされたデータを表示中"
+    override val issueSessionExpiredTitle = "セッションの有効期限が切れました"
+    override val issueSessionExpiredMessage = "再ログインするにはクリックしてください"
+    override val issueSubscriptionOutdatedTitle = "サブスクリプションの状態が古いです"
+    override val issueSubscriptionOutdatedMessage = "更新するにはクリックしてください"
+    override val issueOtherTitle = "エラー"
+    override val issueOtherMessageFallback = "不明なエラー"
+}
+
+object JapaneseSyncScreenStrings : SyncScreenStrings {
+    override val title = "同期（プレビュー）"
+    override val guideTitle: String = "進捗をデバイス間で同期する"
+    override val guideMessage =
+        "データを自動的にクラウドにアップロードし、バックアップとして保存し、すべてのデバイス間で同期を保つ"
+    override val guideStepAccountTitle = "アカウントを作成してログインする"
+    override val guideStepAccountMessage: String = "アカウント画面に移動する"
+    override val guideStepSubscriptionTitle =
+        "サブスクリプションを購入する（プレビュー期間中は無料）"
+    override val guideStepSubscriptionMessage: String =
+        "更新情報はDiscordで確認してください"
+    override val accountErrorMessage: String = "アカウントに問題があります"
+    override val syncButton = "今すぐ同期"
+    override val statusTitle = "ステータス"
+    override val statusMessageLoading = "サーバーの更新を確認中..."
+    override val statusMessageDataDiffer = "ローカルデータとリモートデータが異なります"
+    override val statusMessageLocalNewer = "更新されたデータをアップロードできます"
+    override val statusMessageUpToDate = "サーバーと同期済み"
+    override val statusMessageError = "エラー"
+    override val statusMessageUploading = "アップロード中"
+    override val statusMessageDownloading = "ダウンロード中"
+    override val statusMessageCanceled =
+        "キャンセルされました。再開するには同期ボタンをクリックしてください"
+    override val localDataTitle = "ローカルデータ"
+    override val localDataIdTemplate = "ID: %s"
+    override val localDataTimestampTemplate = "タイムスタンプ: %s"
+
+    override val errorNoConnectionTitle = "接続なし"
+    override val errorNoConnectionMessage = "サーバーにアクセスできませんでした"
+    override val errorSessionExpiredTitle = "セッションの有効期限が切れました"
+    override val errorSessionExpiredMessage = "再ログインするにはクリックしてください"
+    override val errorNoSubscriptionTitle = "サブスクリプションの状態が古いです"
+    override val errorNoSubscriptionMessage = "アカウント画面でサブスクリプションを更新してください"
+    override val errorOtherTitle = "エラー"
+    override val errorOtherMessageFallback = "不明なエラー"
+}
+
+object JapaneseSyncDialogStrings : SyncDialogStrings {
+    override val title = "同期"
+    override val buttonCancel = "キャンセル"
+    override val buttonUpload = "アップロード"
+    override val buttonDownload = "ダウンロード"
+    override val buttonAccount = "アカウント"
+    override val uploadingMessage = "アップロード中..."
+    override val downloadingMessage = "ダウンロード中..."
+    override val conflictRemoteNewerTitle = "新しいデータが見つかりました"
+    override val conflictRemoteNewerMessage = "サーバー上のデータはローカルコピーより新しいです"
+    override val conflictIncompatibleTitle = "データの競合"
+    override val conflictIncompatibleMessage =
+        "リモートとローカルの両方のデータが変更されました。結果をマージできません"
+    override val errorNoNetworkTitle = "ネットワークなし"
+    override val errorNoNetworkMessage = "ネットワーク接続を確立できませんでした"
+    override val errorNoSubscriptionTitle = "サブスクリプションの期限切れ"
+    override val errorNoSubscriptionMessage =
+        "サブスクリプションが期限切れです。同期は無効になります"
+    override val errorNotAuthenticatedTitle = "セッションの有効期限が切れました"
+    override val errorNotAuthenticatedMessage = "アカウントに再ログインしてください"
+    override val errorUnexpectedErrorTitle = "予期しないエラー"
+    override val errorUnexpectedErrorMessage = "不明な問題が発生しました"
+    override val errorUnsupportedDataTitle = "サーバー上のデータはサポートされていません"
+    override val errorUnsupportedDataMessage =
+        "サーバー上のデータはアプリの新しいバージョンで作成されました。現在インストールされているバージョンと互換性がありません。データを取得するにはアプリを更新するか、ローカルデータをサーバーにアップロードしてください"
+}
+
+object JapaneseSyncSnackbarStrings : SyncSnackbarStrings {
+    override val errorNoConnection = "接続なし"
+    override val errorNoSubscription = "サブスクリプションの期限切れ"
+    override val errorNotAuthenticated = "ログインデータの有効期限切れ"
+    override val errorDataNotSupported = "リモートデータがサポートされていません"
+    override val errorMessageTemplate = "同期エラー: %s"
+    override val errorMessageNoReason = "同期エラー"
+    override val actionButton = "詳細"
 }
