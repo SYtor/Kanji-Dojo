@@ -122,9 +122,14 @@ class Fsrs5(
     }
 
     private fun nextDifficulty(difficulty: Double, rating: FsrsReviewRating): Double {
-        val nextDifficulty = difficulty - w[6] * (rating.grade - 3)
+        val deltaDifficulty = -w[6] * (rating.grade - 3)
+        val nextDifficulty = difficulty + linearDamping(deltaDifficulty, difficulty)
         val meanReversion = w[7] * initialDifficulty(Easy) + (1 - w[7]) * nextDifficulty
         return meanReversion.coerceIn(1.0, 10.0)
+    }
+
+    private fun linearDamping(deltaDifficulty: Double, oldDifficulty: Double): Double {
+        return (10.0 - oldDifficulty) * deltaDifficulty / 9.0
     }
 
     private fun nextStability(
