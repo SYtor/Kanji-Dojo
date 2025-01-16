@@ -97,6 +97,6 @@ data class PreferencesSyncDataInfo(
 @Serializable
 data class PreferencesUserInfo(
     val email: String,
-    val subscriptionDue: Long?,
-    val updateTimestamp: Long
+    val subscriptionEnabled: Boolean,
+    val subscriptionDue: Long?
 )

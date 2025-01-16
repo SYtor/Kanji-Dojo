@@ -40,9 +40,9 @@ sealed interface AccountState {
 }
 
 sealed interface SubscriptionInfo {
-    object Inactive : SubscriptionInfo
-    data class Active(val due: LocalDateTime) : SubscriptionInfo
-    data class Expired(val due: LocalDateTime) : SubscriptionInfo
+    data object Inactive : SubscriptionInfo
+    data class Active(val due: LocalDateTime?) : SubscriptionInfo
+    data class Expired(val due: LocalDateTime?) : SubscriptionInfo
 }
 
 fun Module.addAccountDefinitions() {
@@ -96,10 +96,7 @@ class DefaultAccountManager(
     }
 
     override fun invalidateSubscription() {
-        coroutineScope.launch {
-            updateStateFromRemote()
-            // TODO notify subscription expired
-        }
+        coroutineScope.launch { updateStateFromLocal(ApiRequestIssue.NoSubscription) }
     }
 
     private suspend fun updateStateFromRemote() {
@@ -120,7 +117,7 @@ class DefaultAccountManager(
         _state.value = when {
             userInfo != null -> AccountState.LoggedIn(
                 email = userInfo.email,
-                subscriptionInfo = getSubscriptionInfo(userInfo.subscriptionDue),
+                subscriptionInfo = userInfo.getSubscriptionInfo(),
                 issue = issue
             )
 
@@ -130,19 +127,35 @@ class DefaultAccountManager(
         }
     }
 
-    private fun getSubscriptionInfo(dueMillis: Long?): SubscriptionInfo {
-        val due = dueMillis?.let { Instant.fromEpochMilliseconds(it) }
+    private fun PreferencesUserInfo.getSubscriptionInfo(): SubscriptionInfo {
+        val dueInstant = subscriptionDue?.let { Instant.fromEpochMilliseconds(it) }
         return when {
-            due == null -> SubscriptionInfo.Inactive
-            due >= timeUtils.now() -> SubscriptionInfo.Active(due.toLocalDateTime())
-            else -> SubscriptionInfo.Expired(due.toLocalDateTime())
+            !subscriptionEnabled && dueInstant == null -> {
+                SubscriptionInfo.Inactive
+            }
+
+            subscriptionEnabled -> {
+                when {
+                    dueInstant == null || dueInstant >= timeUtils.now() -> {
+                        SubscriptionInfo.Active(dueInstant?.toLocalDateTime())
+                    }
+
+                    else -> {
+                        SubscriptionInfo.Expired(dueInstant.toLocalDateTime())
+                    }
+                }
+            }
+
+            else -> {
+                SubscriptionInfo.Expired(dueInstant?.toLocalDateTime())
+            }
         }
     }
 
     private fun ApiUserInfo.toPreferencesType(): PreferencesUserInfo = PreferencesUserInfo(
         email = email,
-        subscriptionDue = subscriptionDue,
-        updateTimestamp = timeUtils.now().toEpochMilliseconds()
+        subscriptionEnabled = subscription,
+        subscriptionDue = subscriptionDue
     )
 
     private suspend fun clearUserData() {
