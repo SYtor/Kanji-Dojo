@@ -85,7 +85,7 @@ object JapaneseGeneralDashboardStrings : GeneralDashboardStrings {
     override val headerButtonVersionChange: String = "新機能"
     override val headerButtonTutorial: String = "チュートリアル"
     override val headerButtonDownloads: String
-        get() = TODO("Not yet implemented")
+        get() = TODO("Not yet implemented") // TODO
     override val headerButtonDiscord: String
         get() = TODO("Not yet implemented")
     override val headerButtonYoutube: String
@@ -288,9 +288,19 @@ object JapaneseSettingsStrings : SettingsStrings {
     override val reminderTitle: String = "リマインダー通知"
     override val reminderEnabled: String = "有効"
     override val reminderDisabled: String = "無効"
+    override val defaultTab: String
+        get() = TODO("Not yet implemented")
     override val feedbackTitle: String = "フィードバック"
+    override val account: String
+        get() = TODO("Not yet implemented")
+    override val sync: String
+        get() = TODO("Not yet implemented")
     override val backupTitle: String = "バックアップ"
     override val aboutTitle: String = "このアプリについて"
+    override val pickerDialogCancel: String
+        get() = TODO("Not yet implemented")
+    override val pickerDialogApply: String
+        get() = TODO("Not yet implemented")
 }
 
 object JapaneseReminderDialogStrings : ReminderDialogStrings {

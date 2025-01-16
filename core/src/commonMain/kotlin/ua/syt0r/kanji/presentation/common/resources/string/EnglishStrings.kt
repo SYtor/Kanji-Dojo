@@ -288,9 +288,14 @@ object EnglishSettingsStrings : SettingsStrings {
     override val reminderTitle: String = "Reminder Notification"
     override val reminderEnabled: String = "Enabled"
     override val reminderDisabled: String = "Disabled"
+    override val defaultTab: String = "Default Tab"
     override val feedbackTitle: String = "Feedback"
+    override val account: String = "Account"
+    override val sync: String = "Sync (Preview)"
     override val backupTitle: String = "Backup & Restore"
     override val aboutTitle: String = "About"
+    override val pickerDialogCancel: String = "Cancel"
+    override val pickerDialogApply: String = "Apply"
 }
 
 object EnglishReminderDialogStrings : ReminderDialogStrings {
@@ -756,12 +761,16 @@ object EnglishAccountScreenStrings : AccountScreenStrings {
 }
 
 object EnglishSyncScreenStrings : SyncScreenStrings {
-    override val title = "Sync"
+    override val title = "Sync (Preview)"
+    override val guideTitle: String = "Sync Your Progress Across Devices"
     override val guideMessage =
-        "Automatically upload your data to the cloud and sync your progress between various devices. To enable: "
-    override val createAccountLabel = "Create account and sign in"
-    override val purchaseSubscriptionLabel =
-        "Purchase subscription (free during testing until further notice)"
+        "Automatically upload your data to the cloud, keep it as a backup and stay in sync across all your devices"
+    override val guideStepAccountTitle = "Create account and sign in"
+    override val guideStepAccountMessage: String = "Go to account"
+    override val guideStepSubscriptionTitle =
+        "Purchase subscription (free during preview until further notice)"
+    override val guideStepSubscriptionMessage: String =
+        "Follow announcements on Discord for updates"
     override val accountErrorMessage: String = "There's an error with your account"
     override val syncButton = "Sync now"
     override val statusTitle = "Status"
@@ -782,7 +791,7 @@ object EnglishSyncScreenStrings : SyncScreenStrings {
     override val errorSessionExpiredTitle = "Session Expired"
     override val errorSessionExpiredMessage = "Click to sign in again"
     override val errorNoSubscriptionTitle = "Subscription status outdated"
-    override val errorNoSubscriptionMessage = "Click to refresh"
+    override val errorNoSubscriptionMessage = "Update your subscription status on account screen"
     override val errorOtherTitle = "Error"
     override val errorOtherMessageFallback = "Unknown error"
 }

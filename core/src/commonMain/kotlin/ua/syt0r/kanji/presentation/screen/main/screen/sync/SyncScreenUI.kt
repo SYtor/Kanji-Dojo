@@ -3,24 +3,26 @@ package ua.syt0r.kanji.presentation.screen.main.screen.sync
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,9 +35,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,6 +51,8 @@ import ua.syt0r.kanji.core.user_data.preferences.PreferencesSyncDataInfo
 import ua.syt0r.kanji.presentation.common.CommonDateTimeFormat
 import ua.syt0r.kanji.presentation.common.InvertedButton
 import ua.syt0r.kanji.presentation.common.ScrollableScreenContainer
+import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.errorColors
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -61,6 +66,7 @@ fun SyncScreenUI(
     state: State<ScreenState>,
     onUpClick: () -> Unit,
     navigateToAccountScreen: () -> Unit,
+    navigateToDiscord: () -> Unit,
     sync: () -> Unit,
 ) {
 
@@ -73,24 +79,41 @@ fun SyncScreenUI(
         guide = { screenState ->
 
             ScrollableScreenContainer(
-                contentModifier = Modifier.wrapContentHeight()
+                contentModifier = Modifier
             ) {
 
                 Text(
+                    text = strings.guideTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp)
+                )
+
+                Text(
                     text = strings.guideMessage,
-                    textAlign = TextAlign.Justify
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = 16.dp)
                 )
 
-                ClickableActionRow(
-                    label = strings.createAccountLabel,
-                    isCompleted = false,
+                GuideListItem(
+                    position = 1,
+                    headerText = strings.guideStepAccountTitle,
+                    supportText = strings.guideStepAccountTitle,
+                    isCompleted = screenState.isSignedIn,
                     onClick = navigateToAccountScreen
                 )
 
-                ClickableActionRow(
-                    label = strings.purchaseSubscriptionLabel,
+                GuideListItem(
+                    position = 2,
+                    headerText = strings.guideStepSubscriptionTitle,
+                    supportText = strings.guideStepSubscriptionMessage,
                     isCompleted = false,
-                    onClick = navigateToAccountScreen
+                    onClick = navigateToDiscord
                 )
 
             }
@@ -103,7 +126,10 @@ fun SyncScreenUI(
                 SyncStatusListItem(syncState)
 
                 if (syncState is SyncState.Error.Api) {
-                    SyncErrorListItem(syncState.issue)
+                    SyncErrorListItem(
+                        issue = syncState.issue,
+                        navigateToAccountScreen = navigateToAccountScreen
+                    )
                 }
 
                 LocalSyncDataListItem(
@@ -124,7 +150,12 @@ fun SyncScreenUI(
         },
         accountError = {
             ScrollableScreenContainer {
-                Text(strings.accountErrorMessage)
+                ListItem(
+                    leadingContent = { Icon(Icons.Default.Error, null) },
+                    headlineContent = { Text(strings.accountErrorMessage) },
+                    colors = ListItemDefaults.errorColors(),
+                    modifier = Modifier.clip(MaterialTheme.shapes.medium)
+                )
             }
         }
     )
@@ -175,46 +206,50 @@ private fun ScreenContainer(
 }
 
 @Composable
-private fun ClickableActionRow(
-    label: String,
+private fun GuideListItem(
+    position: Int,
     isCompleted: Boolean,
+    headerText: String,
+    supportText: String,
     onClick: () -> Unit,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
+    ListItem(
+        leadingContent = {
+            val textColor: Color
+            val bgColor: Color
+
+            when {
+                isCompleted -> {
+                    textColor = MaterialTheme.colorScheme.onPrimary
+                    bgColor = MaterialTheme.extraColorScheme.success
+                }
+
+                else -> {
+                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    bgColor = MaterialTheme.colorScheme.surfaceVariant
+                }
+            }
+
+            Text(
+                text = position.toString(),
+                color = textColor,
+                style = MaterialTheme.typography.bodyMedium.copyCentered(),
+                modifier = Modifier
+                    .background(bgColor, CircleShape)
+                    .width(IntrinsicSize.Max)
+                    .aspectRatio(1f)
+                    .padding(8.dp)
+                    .wrapContentSize(unbounded = true)
+            )
+        },
+        headlineContent = { Text(headerText) },
+        supportingContent = { Text(supportText) },
+        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .padding(20.dp)
-    ) {
+    )
 
-        if (isCompleted) {
-            Box(
-                modifier = Modifier.size(24.dp)
-                    .background(MaterialTheme.extraColorScheme.success, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.surface
-                )
-            }
-        } else {
-            Box(
-                modifier = Modifier.size(24.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-            )
-        }
-
-        Text(
-            text = label,
-            modifier = Modifier.weight(1f)
-        )
-
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-
-    }
 }
 
 @Composable
@@ -284,20 +319,12 @@ private fun SyncStatusListItem(syncState: SyncState) {
 
         SyncState.Canceled -> {
             statusMessage = strings.statusMessageCanceled
-            statusIndicator = {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                )
-            }
+            statusIndicator = { Icon(Icons.Outlined.Stop, null) }
         }
     }
 
     ListItem(
+        leadingContent = { Icon(Icons.Outlined.Cloud, null) },
         headlineContent = { Text(strings.statusTitle) },
         supportingContent = { Text(statusMessage) },
         trailingContent = statusIndicator
@@ -306,39 +333,58 @@ private fun SyncStatusListItem(syncState: SyncState) {
 
 
 @Composable
-private fun SyncErrorListItem(issue: ApiRequestIssue) {
+private fun SyncErrorListItem(
+    issue: ApiRequestIssue,
+    navigateToAccountScreen: () -> Unit
+) {
+    val strings = resolveString { sync }
 
     val title: String
     val message: String
-    val strings = resolveString { sync }
+    val trailingIcon: ImageVector?
+    val onClick: (() -> Unit)?
 
     when (issue) {
         ApiRequestIssue.NoConnection -> {
             title = strings.errorNoConnectionTitle
             message = strings.errorNoConnectionMessage
+            trailingIcon = null
+            onClick = null
         }
 
         ApiRequestIssue.NoSubscription -> {
             title = strings.errorNoSubscriptionTitle
             message = strings.errorNoSubscriptionMessage
+            trailingIcon = Icons.AutoMirrored.Default.KeyboardArrowRight
+            onClick = navigateToAccountScreen
         }
 
         ApiRequestIssue.NotAuthenticated -> {
             title = strings.errorSessionExpiredTitle
             message = strings.errorSessionExpiredMessage
+            trailingIcon = Icons.AutoMirrored.Default.KeyboardArrowRight
+            onClick = navigateToAccountScreen
         }
 
         is ApiRequestIssue.Other -> {
             title = strings.errorOtherTitle
             message = issue.throwable.message ?: strings.errorOtherMessageFallback
+            trailingIcon = null
+            onClick = null
         }
     }
 
     ListItem(
+        leadingContent = { Icon(Icons.Default.Error, null) },
         headlineContent = { Text(title) },
         supportingContent = { Text(message) },
+        trailingContent = trailingIcon?.let {
+            { Icon(it, null) }
+        },
         colors = ListItemDefaults.errorColors(),
-        modifier = Modifier.clip(MaterialTheme.shapes.medium)
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick)
     )
 
 }
@@ -352,6 +398,7 @@ private fun LocalSyncDataListItem(
 
     ListItem(
         modifier = Modifier.clip(MaterialTheme.shapes.medium),
+        leadingContent = { Icon(Icons.Default.SdStorage, null) },
         headlineContent = { Text(strings.localDataTitle) },
         supportingContent = {
 
@@ -359,7 +406,8 @@ private fun LocalSyncDataListItem(
 
                 Text(
                     text = strings.localDataIdTemplate.format(localData.dataId),
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
 
                 val formattedTimestamp = localData.dataTimestamp
