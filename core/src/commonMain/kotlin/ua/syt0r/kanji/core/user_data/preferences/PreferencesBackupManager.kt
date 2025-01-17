@@ -31,21 +31,27 @@ class DefaultPreferencesBackupManager(
             .associate { it.key to it.value }
             .toMutableMap()
 
-        if (!importedPropertiesMap.containsKey(LOCAL_DATA_ID_KEY)) {
-            importedPropertiesMap[LOCAL_DATA_ID_KEY] = StringSuspendedPropertyType
-                .backup(UUID.randomUUID().toString())
-        }
+        val dataId = importedPropertiesMap[LOCAL_DATA_ID_KEY]
+            ?: StringSuspendedPropertyType.backup(UUID.randomUUID().toString())
 
-        if (!importedPropertiesMap.containsKey(LOCAL_DATA_TIMESTAMP_KEY)) {
-            importedPropertiesMap[LOCAL_DATA_TIMESTAMP_KEY] = InstantSuspendedPropertyType
-                .backup(timeUtils.now())
-        }
+        val dataTimeStamp = importedPropertiesMap[LOCAL_DATA_TIMESTAMP_KEY]
+            ?: InstantSuspendedPropertyType.backup(timeUtils.now())
 
-        backupPropertiesHolder.backupProperties.forEach { property ->
+        importedPropertiesMap.remove(LOCAL_DATA_ID_KEY)
+        importedPropertiesMap.remove(LOCAL_DATA_TIMESTAMP_KEY)
+
+        val keyToPropertyMap = backupPropertiesHolder.backupProperties.associateBy { it.key }
+
+        keyToPropertyMap.forEach { (_, property) ->
             val value = importedPropertiesMap[property.key]
             if (value != null) property.restore(value.jsonPrimitive)
         }
         preferencesManager.migrate()
+
+        // Restoring data related values manually in the end to avoid overwriting them while
+        // importing other properties
+        keyToPropertyMap.getValue(LOCAL_DATA_ID_KEY).restore(dataId.jsonPrimitive)
+        keyToPropertyMap.getValue(LOCAL_DATA_TIMESTAMP_KEY).restore(dataTimeStamp.jsonPrimitive)
     }
 
     companion object {
