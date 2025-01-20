@@ -27,13 +27,13 @@
      inkscape:document-units="mm"
      showgrid="false"
      units="px"
-     inkscape:zoom="5.7157126"
-     inkscape:cx="43.476644"
-     inkscape:cy="63.946532"
+     inkscape:zoom="16"
+     inkscape:cx="49.8125"
+     inkscape:cy="45.03125"
      inkscape:window-width="1920"
-     inkscape:window-height="991"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="73"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer2" />
   <defs
@@ -86,8 +86,9 @@
     <path
        id="path66508"
        style="color:#000000;display:inline;fill:#ffffff;stroke:none;stroke-width:0;stroke-miterlimit:500;stroke-dasharray:none;stroke-opacity:1"
-       d="M 0,0 V 28.575001 H 28.574999 V 0 Z m 14.039473,9.4213494 0.01993,0.0042 c 0.08279,0.016557 0.154773,0.036004 0.223905,0.075509 0.06913,0.039505 0.150206,0.1183231 0.164128,0.229674 0.01392,0.1113507 -0.03889,0.1967728 -0.08914,0.2558916 -0.02396,0.028179 -0.05844,0.048859 -0.08704,0.072887 v 0.493957 h 3.90026 v 2.518548 h -1.210769 l 0.0058,0.0063 -0.549015,0.184056 -2.10482,1.349727 v 0.220235 h 4.110534 v 1.216538 h -4.110533 v 2.223851 c 0,0.258745 -0.06829,0.49041 -0.229674,0.651791 -0.161382,0.161384 -0.393571,0.230199 -0.652315,0.230199 H 12.13658 l -0.320915,-1.217064 h 1.236989 V 16.048858 H 8.6903779 V 14.83232 h 4.3622311 v -1.135785 l 0.584672,0.116935 0.536955,-0.364437 h -3.553654 v -1.217062 h 4.988329 l 0.255892,-0.255892 1.048215,1.048739 v -1.254817 h -6.668933 v 1.385385 H 8.9835006 V 10.553464 H 12.885859 V 9.4218737 Z"
-       inkscape:label="foreground" />
+       d="M 0,0 V 28.575001 H 28.574999 V 0 Z m 14.271288,9.421877 c 0,0 0,0 0,1.131591 h 3.90026 v 2.518548 h -1.210769 l 0.0058,0.0063 -0.549015,0.184056 -2.10482,1.349727 v 0.220235 h 4.110534 v 1.216538 h -4.110533 v 2.223851 c 0,0.258745 -0.06829,0.49041 -0.229674,0.651791 -0.161382,0.161384 -0.393571,0.230199 -0.652315,0.230199 H 12.13658 l -0.320915,-1.217064 h 1.236989 V 16.048858 H 8.6903779 V 14.83232 h 4.3622311 v -1.135785 l 0.584672,0.116935 0.536955,-0.364437 h -3.553654 v -1.217062 h 4.988329 l 0.255892,-0.255892 1.048215,1.048739 v -1.254817 h -6.668933 v 1.385385 H 8.9835006 V 10.553464 H 12.885859 V 9.4218737"
+       inkscape:label="foreground"
+       sodipodi:nodetypes="cccccccccccccccccssscccccccccccccccccccccc" />
     <ellipse
        style="display:inline;opacity:1;fill:#ff5555;fill-opacity:1;stroke:#ff8080;stroke-width:0.449792;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:500;stroke-dasharray:none;stroke-opacity:1"
        id="path71038"

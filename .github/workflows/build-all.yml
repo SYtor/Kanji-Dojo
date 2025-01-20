@@ -56,13 +56,13 @@ jobs:
           cache: gradle
 
       - name: Build
-        run: ./gradlew core:packageUberJarForCurrentOS
+        run: ./gradlew core:packageDistributionForCurrentOS
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: core/build/compose/jars/*.jar
+          path: core/build/compose/binaries/*.msi
           retention-days: 1
 
   build-desktop-mac-intel:

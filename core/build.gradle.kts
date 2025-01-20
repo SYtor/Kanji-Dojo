@@ -138,9 +138,16 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
 
-            packageName = "kanji-dojo"
+            packageName = "Kanji Dojo"
             packageVersion = AppVersion.desktopAppVersion
             modules("jdk.unsupported", "java.sql")
+
+            windows {
+                upgradeUuid = "12c852a8-6e21-41a7-bd47-3bec9ff5c5df"
+                iconFile.set(File("windows_icon.ico"))
+                menu = true
+                shortcut = true
+            }
 
             macOS {
                 bundleID = macOsBundleId
