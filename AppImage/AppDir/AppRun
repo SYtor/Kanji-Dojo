@@ -1,0 +1,5 @@
+#!/bin/sh
+
+APP_DIR="$(dirname "$(readlink -f "${0}")")"
+EXECUTABLE="$APP_DIR/usr/bin/Kanji Dojo"
+exec "$EXECUTABLE" "$@"

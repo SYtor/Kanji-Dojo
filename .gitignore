@@ -96,3 +96,5 @@ lint/tmp/
 *.opus
 
 google-services.json
+
+AppImage/

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Kanji Dojo
+Exec=kanji-dojo
+Icon=Kanji Dojo
+Type=Application
+Categories=Education;
+Terminal=false
+StartupNotify=true
+NoDisplay=false

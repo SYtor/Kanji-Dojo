@@ -154,6 +154,10 @@ compose.desktop {
                 iconFile.set(File("mac_icon.icns"))
             }
 
+            linux {
+                iconFile.set(File("src/jvmMain/resources/icon.png"))
+            }
+
         }
     }
 }

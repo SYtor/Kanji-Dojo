@@ -26,7 +26,9 @@ jobs:
           chmod +x gradlew
           echo $KEYSTORE | base64 --decode > keystore.jks
           ./gradlew app:assembleFdroidRelease
-          ./gradlew core:packageUberJarForCurrentOS
+          ./gradlew :core:createDistributable
+          cd AppImage/
+          ./make.sh
 
       - name: Upload Android Build
         uses: actions/upload-artifact@v4
@@ -39,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: core/build/compose/jars/*.jar
+          path: AppImage/Kanji_Dojo-x86_64.AppImage
           retention-days: 1
 
   build-desktop-windows:
