@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: core/build/compose/binaries/*.msi
+          path: core/build/compose/binaries/main/msi/*.msi
           retention-days: 1
 
   build-desktop-mac-intel:
@@ -84,8 +84,8 @@ jobs:
         run: |
           ./gradlew core:packageDistributionForCurrentOS
           DMG_PATH=$(find ./core/build/compose/binaries/main/dmg -name "*.dmg")
-          NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/kanji-dojo/kanji-dojo-intel/g')
-          mv $DMG_PATH $NEW_DMG_PATH
+          NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/Kanji Dojo/Kanji Dojo-intel/g')
+          mv "$DMG_PATH" "$NEW_DMG_PATH"
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
@@ -112,8 +112,8 @@ jobs:
         run: |
           ./gradlew core:packageDistributionForCurrentOS
           DMG_PATH=$(find ./core/build/compose/binaries/main/dmg -name "*.dmg")
-          NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/kanji-dojo/kanji-dojo-arm/g')
-          mv $DMG_PATH $NEW_DMG_PATH
+          NEW_DMG_PATH=$(echo $DMG_PATH | sed 's/Kanji Dojo/Kanji Dojo-arm/g')
+          mv "$DMG_PATH" "$NEW_DMG_PATH"
 
       - name: Upload Desktop Build
         uses: actions/upload-artifact@v4
