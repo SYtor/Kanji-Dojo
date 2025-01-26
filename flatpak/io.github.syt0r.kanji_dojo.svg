@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="108"
+   height="108"
+   viewBox="0 0 28.574999 28.575001"
+   version="1.1"
+   id="svg30269"
+   sodipodi:docname="inkscape_icon.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:export-filename="C:\Users\Yaroslav\StudioProjects\Kanji-Dojo\assets\google_play_icon.png"
+   inkscape:export-xdpi="455.11111"
+   inkscape:export-ydpi="455.11111"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview30271"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="16"
+     inkscape:cx="49.8125"
+     inkscape:cy="45.03125"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="73"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer2" />
+  <defs
+     id="defs30266">
+    <inkscape:path-effect
+       effect="pts2ellipse"
+       id="path-effect31174"
+       is_visible="true"
+       lpeversion="1"
+       method="circle"
+       gen_arc="false"
+       arc_other="false"
+       slice_arc="false"
+       gen_isometric_frame="false"
+       draw_axes="false"
+       gen_perspective_frame="false"
+       draw_perspective_axes="false"
+       rot_axes="0"
+       draw_ori_path="false" />
+  </defs>
+  <g
+     inkscape:label="background"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <rect
+       style="display:inline;opacity:1;fill:#ff5555;fill-opacity:1;stroke:none;stroke-width:0.132292;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:500;stroke-opacity:1"
+       id="rect43609"
+       width="28.574999"
+       height="28.575001"
+       x="0"
+       y="0"
+       inkscape:label="dark background"
+       sodipodi:insensitive="true" />
+    <rect
+       style="display:inline;opacity:1;fill:#ff8080;fill-opacity:1;stroke:none;stroke-width:0.132553;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:500;stroke-opacity:1"
+       id="rect46958"
+       width="48.364452"
+       height="31.820639"
+       x="-43.524075"
+       y="-29.825762"
+       transform="matrix(-0.58233193,-0.81295112,0.86138236,-0.50795711,0,0)"
+       inkscape:label="light background" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="foreground"
+     style="display:inline">
+    <path
+       id="path66508"
+       style="color:#000000;display:inline;fill:#ffffff;stroke:none;stroke-width:0;stroke-miterlimit:500;stroke-dasharray:none;stroke-opacity:1"
+       d="M 0,0 V 28.575001 H 28.574999 V 0 Z m 14.271288,9.421877 c 0,0 0,0 0,1.131591 h 3.90026 v 2.518548 h -1.210769 l 0.0058,0.0063 -0.549015,0.184056 -2.10482,1.349727 v 0.220235 h 4.110534 v 1.216538 h -4.110533 v 2.223851 c 0,0.258745 -0.06829,0.49041 -0.229674,0.651791 -0.161382,0.161384 -0.393571,0.230199 -0.652315,0.230199 H 12.13658 l -0.320915,-1.217064 h 1.236989 V 16.048858 H 8.6903779 V 14.83232 h 4.3622311 v -1.135785 l 0.584672,0.116935 0.536955,-0.364437 h -3.553654 v -1.217062 h 4.988329 l 0.255892,-0.255892 1.048215,1.048739 v -1.254817 h -6.668933 v 1.385385 H 8.9835006 V 10.553464 H 12.885859 V 9.4218737"
+       inkscape:label="foreground"
+       sodipodi:nodetypes="cccccccccccccccccssscccccccccccccccccccccc" />
+    <ellipse
+       style="display:inline;opacity:1;fill:#ff5555;fill-opacity:1;stroke:#ff8080;stroke-width:0.449792;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:500;stroke-dasharray:none;stroke-opacity:1"
+       id="path71038"
+       cx="19.300114"
+       cy="18.328176"
+       rx="0.73372054"
+       ry="0.7513929"
+       inkscape:label="dot" />
+  </g>
+</svg>
