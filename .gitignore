@@ -98,3 +98,6 @@ lint/tmp/
 google-services.json
 
 AppImage/
+
+# Vscode
+.vscode/
