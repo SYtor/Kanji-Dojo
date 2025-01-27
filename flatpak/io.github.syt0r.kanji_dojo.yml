@@ -1,0 +1,43 @@
+id: io.github.syt0r.kanji_dojo
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+command: kanji-dojo.sh
+finish-args:
+  - --socket=x11
+  - --share=network
+  - --device=dri
+  - --filesystem=xdg-download
+  - --env=PATH=/usr/bin:/app/bin:/app/jre/bin
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+  - name: kanji-dojo-app
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 kanji-dojo.sh /app/bin/kanji-dojo.sh
+      - install -Dm644 io.github.syt0r.kanji_dojo.desktop /app/share/applications/io.github.syt0r.kanji_dojo.desktop
+      - install -Dm644 io.github.syt0r.kanji_dojo.svg  /app/share/icons/io.github.syt0r.kanji_dojo.svg
+      - install -D kanji-dojo-linux-x64.jar /app/bin/kanji-dojo-linux-x64.jar
+    sources:
+      - type: file
+        path: kanji-dojo.sh
+      - type: file
+        path: io.github.syt0r.kanji_dojo.metainfo.xml
+      - type: file
+        path: io.github.syt0r.kanji_dojo.desktop
+      - type: file
+        path: io.github.syt0r.kanji_dojo.svg
+      - type: file
+        url: https://github.com/syt0r/Kanji-Dojo/releases/download/v2.1.4/kanji-dojo-linux-x64-2.1.4.jar
+        sha256: ae28328fee87c1c830b8957c4cbad5f350f39a5271bf085c6bb02768ba43a310
+        dest-filename: kanji-dojo-linux-x64.jar
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/syt0r/Kanji-Dojo/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: '"https://github.com/syt0r/Kanji-Dojo/releases/download/" + $version + "/kanji-dojo-linux-x64-" + $version ".jar"'

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.syt0r.kanji_dojo</id>
+  
+  <name>Kanji Dojo</name>
+  <summary>A multi-platform application for memorizing Japanese language </summary>
+  
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  
+  <description>
+    <p>
+      Practice writing Japanese letters, learn their meanings and related words Features:     Memorize how to write and read kana and kanji     Follow JLPT levels or school grades     Create your own decks to study, more than 6000 characters in total are available     Use SRS reviewing system to avoid forgetting learned information     Search letters and words with built-in dictionary     Study words with flashcards     Available modes to write words and pick correct letter readings     Works offline
+    </p>
+  </description>
+  
+  <launchable type="desktop-id">io.github.syt0r.kanji_dojo.desktop</launchable>
+</component>
