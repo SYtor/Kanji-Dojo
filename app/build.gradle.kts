@@ -80,6 +80,11 @@ android {
         }
     }
 
+    dependenciesInfo {
+        // Removes a signing block with encrypted data for reproducible F-Droid builds
+        includeInApk = false
+    }
+
 }
 
 dependencies {
