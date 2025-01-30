@@ -29,22 +29,32 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.findRootCoordinates
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.core.logger.Logger
+import ua.syt0r.kanji.presentation.common.ItemPositionData
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -133,9 +143,9 @@ fun LetterPracticeWritingInfoSection(
             } + fadeOut()
             enterTransition togetherWith exitTransition using SizeTransform(clip = false)
         }
-    ) { data ->
+    ) { currentSectionData ->
 
-        val scrollStateResetKey = data.run { characterData.character to isStudyMode }
+        val scrollStateResetKey = currentSectionData.run { characterData.character to isStudyMode }
         val scrollState = remember(scrollStateResetKey) { ScrollState(0) }
 
         Column(
@@ -146,12 +156,12 @@ fun LetterPracticeWritingInfoSection(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            when (data.characterData) {
+            when (currentSectionData.characterData) {
                 is LetterPracticeItemData.KanaWritingData -> {
-                    val autoPlay = data.layoutConfiguration.kanaAutoPlay
+                    val autoPlay = currentSectionData.layoutConfiguration.kanaAutoPlay
                     KanaDetails(
-                        details = data.characterData,
-                        isStudyMode = data.isStudyMode,
+                        details = currentSectionData.characterData,
+                        isStudyMode = currentSectionData.isStudyMode,
                         autoPlay = autoPlay,
                         toggleAutoPlay = { autoPlay.value = autoPlay.value.not() },
                         speakKana = speakKana
@@ -159,11 +169,11 @@ fun LetterPracticeWritingInfoSection(
                 }
 
                 is LetterPracticeItemData.KanjiWritingData -> {
-                    val highlightRadicals = data.layoutConfiguration.radicalsHighlight
+                    val highlightRadicals = currentSectionData.layoutConfiguration.radicalsHighlight
                     KanjiDetails(
-                        details = data.characterData,
-                        isStudyMode = data.isStudyMode,
-                        noTranslationsLayout = data.layoutConfiguration.noTranslationsLayout,
+                        details = currentSectionData.characterData,
+                        isStudyMode = currentSectionData.isStudyMode,
+                        noTranslationsLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                         shouldHighlightRadicals = highlightRadicals,
                         toggleRadicalsHighlight = {
                             highlightRadicals.value = highlightRadicals.value.not()
@@ -172,26 +182,38 @@ fun LetterPracticeWritingInfoSection(
                 }
             }
 
-            val expressions = data.characterData
-                .run { if (data.isStudyMode || data.revealCharacter) words else encodedWords }
+            val expressions = currentSectionData.characterData.run {
+                if (currentSectionData.isStudyMode || currentSectionData.revealCharacter) words else encodedWords
+            }
                 .takeIf { it.isNotEmpty() }
 
+            val animatedVocabPos = remember { mutableStateOf<ItemPositionData?>(null) }
             if (expressions != null) {
                 ExpressionsSection(
                     words = expressions,
-                    isNoTranslationLayout = data.layoutConfiguration.noTranslationsLayout,
+                    isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
-                    modifier = Modifier.trackItemPosition { data ->
-                        if (transition.isRunning) return@trackItemPosition
-                        bottomSheetHeight.value = data.heightFromScreenBottom
-                            .takeIf { it > 200.dp }
-                            ?: data.layoutCoordinates
-                                .findRootCoordinates()
-                                .size
-                                .run { height / data.density.density }
-                                .dp
-                    }
+                    modifier = Modifier.trackItemPosition { animatedVocabPos.value = it }
                 )
+            }
+
+            LaunchedEffect(currentSectionData) {
+                val itemPositionData = snapshotFlow { transition.targetState }
+                    .filter { it == currentSectionData }
+                    .flatMapLatest {
+                        snapshotFlow { animatedVocabPos.value }.filterNotNull()
+                    }
+                    .first()
+
+                val vocabSheetHeight = itemPositionData.heightFromScreenBottom
+                    .takeIf { it > 200.dp }
+                    ?: itemPositionData.layoutCoordinates
+                        .findRootCoordinates()
+                        .size
+                        .run { height / itemPositionData.density.density }
+                        .dp
+                Logger.d("changing height to ${vocabSheetHeight.value} ${itemPositionData.layoutCoordinates.positionInParent().y}")
+                bottomSheetHeight.value = vocabSheetHeight
             }
 
             Spacer(modifier = Modifier.height(extraBottomPaddingState.value))
