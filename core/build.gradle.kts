@@ -140,6 +140,7 @@ compose.desktop {
 
             packageName = "Kanji Dojo"
             packageVersion = AppVersion.desktopAppVersion
+            vendor = "syt0r"
             modules("jdk.unsupported", "java.sql")
 
             windows {
