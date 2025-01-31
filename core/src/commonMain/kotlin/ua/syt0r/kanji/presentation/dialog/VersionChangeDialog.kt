@@ -42,6 +42,15 @@ fun VersionChangeDialog(
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth()
             ) {
+                version("2.1.5", LocalDate(2025,1,31)) {
+                    append(
+                        """
+                        - Updated installers for Windows and Linux, now it's not required to have Java installed
+                        - Renamed executable for MacOS, please manually delete the old `kanji-dojo` app, tha app name is `Kanji Dojo` now
+                        - Fixed a sync issue with incorrectly applied timestamp after downloading data from the cloud
+                        """.trimIndent()
+                    )
+                }
                 version("2.1.4", LocalDate(2025, 1, 17)) {
                     append(
                         """

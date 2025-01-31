@@ -3,7 +3,7 @@
   <img src="preview_assets//inkscape_icon.svg" height=120 style="border-radius: 20px;">
 
   # Kanji Dojo
-  ![Version Badge](https://img.shields.io/badge/version-v2.1.4-blue?style=for-the-badge&labelColor=ffffff&color=ff5555)
+  ![Version Badge](https://img.shields.io/badge/version-v2.1.5-blue?style=for-the-badge&labelColor=ffffff&color=ff5555)
 
 </div>
 
@@ -51,17 +51,18 @@ Repository with dictionary data and parsers here: [Kanji-Dojo-Data](https://gith
 1. Available in [F-Droid](https://f-droid.org/en/packages/ua.syt0r.kanji.fdroid/), the same version is published in [GitHub Releases](https://github.com/syt0r/Kanji-Dojo/releases/latest)
 2. [Google Play](https://play.google.com/store/apps/details?id=ua.syt0r.kanji)
 
-### MacOS
+### Desktop
+
+#### Windows
+- Download `.msi` installer from [Github Releases](https://github.com/syt0r/Kanji-Dojo/releases)
+#### Mac
 1. Download `.dmg` installer from [Github Releases](https://github.com/syt0r/Kanji-Dojo/releases) for your platform
-   - `kanji-dojo-arm-*.dmg` for Apple Silicon
-   - `kanji-dojo-intel-*.dmg` for devices with older Intel CPU
+   - `Kanji Dojo-arm-*.dmg` for Apple Silicon
+   - `Kanji Dojo-intel-*.dmg` for devices with older Intel CPU
 2. Install the app
    - Go to `Privacy & Security` screen in system settings and click on `Open Anyway` button under security section for `Kanji Dojo.app`
-
-### Windows & Linux
-1. Install Java 17 or higher for your platform
-2. Download jar from [Github Releases](https://github.com/syt0r/Kanji-Dojo/releases) for your platform
-3. Run downloaded jar with double click or use command ```java -jar <filename>.jar```
+#### Linux
+- Download `.AppImage` executable from [Github Releases](https://github.com/syt0r/Kanji-Dojo/releases)
 
 ## Version comparison
 | Google Play                                                                         | F-Droid | Desktop |
