@@ -22,4 +22,4 @@ pluginManagement {
 }
 
 rootProject.name = "kanji-dojo"
-include(":app", ":core")
+include(":app", ":core", ":mediaGenerator")

@@ -26,6 +26,9 @@ review-ktx = "2.0.1"
 
 build-config = "5.4.0"
 
+javacv-platform = "1.5.11"
+mockk = "1.13.16"
+
 [plugins]
 build-config = { id = "com.github.gmazzo.buildconfig", version.ref="build-config" }
 
@@ -88,6 +91,9 @@ firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx"
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "billing" }
 review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "review-ktx" }
+
+javacv-platform = { module = "org.bytedeco:javacv-platform", version.ref = "javacv-platform" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [bundles]
 firebase-bom = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
