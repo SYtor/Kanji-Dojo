@@ -7,7 +7,9 @@ finish-args:
   - --socket=x11
   - --share=network
   - --device=dri
+  - --socket=pulseaudio
   - --filesystem=xdg-download
+  - --filesystem=~/.local/share/kanji-dojo/
 modules:
   - name: kanji-dojo-app
     buildsystem: simple
