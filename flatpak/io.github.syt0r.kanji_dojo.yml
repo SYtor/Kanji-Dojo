@@ -19,7 +19,7 @@ modules:
       - mv ./squashfs-root/usr/* /app
       - install -Dm755 kanji-dojo.sh /app/bin/kanji-dojo.sh
       - install -Dm644 io.github.syt0r.kanji_dojo.desktop /app/share/applications/io.github.syt0r.kanji_dojo.desktop
-      - install -Dm644 io.github.syt0r.kanji_dojo.png /app/share/icons/hicolor/512x512/apps/io.github.syt0r.kanji_dojo.png
+      - install -Dm644 io.github.syt0r.kanji_dojo.png /app/share/icons/hicolor/256x256/apps/io.github.syt0r.kanji_dojo.png
     sources:
       - type: file
         path: kanji-dojo.sh
