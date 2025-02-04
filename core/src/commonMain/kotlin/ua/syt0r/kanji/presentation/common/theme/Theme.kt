@@ -24,12 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalInspectionMode
-import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.presentation.common.resources.string.LocalStrings
 import ua.syt0r.kanji.presentation.common.resources.string.getStrings
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
-import ua.syt0r.kanji.presentation.common.ui.getOrientation
+import ua.syt0r.kanji.presentation.common.ui.Orientation
 
 private val LightThemeColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -124,14 +122,9 @@ val MaterialTheme.extraColorScheme: ExtraColorsScheme
     get() = LocalExtraColors.current
 
 @Composable
-fun isDarkTheme(): Boolean {
-    return if (LocalInspectionMode.current) isSystemInDarkTheme()
-    else LocalThemeManager.current.isDarkTheme
-}
-
-@Composable
 fun AppTheme(
-    useDarkTheme: Boolean = isDarkTheme(),
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    orientation: Orientation = Orientation.Portrait,
     content: @Composable () -> Unit
 ) {
     val (colors, extraColors) = if (!useDarkTheme) {
@@ -146,7 +139,7 @@ fun AppTheme(
         content = {
             CompositionLocalProvider(
                 LocalExtraColors provides extraColors,
-                LocalOrientation provides getOrientation(),
+                LocalOrientation provides orientation,
                 LocalStrings provides getStrings(),
                 LocalTextSelectionColors provides neutralTextSelectionColors()
             ) {

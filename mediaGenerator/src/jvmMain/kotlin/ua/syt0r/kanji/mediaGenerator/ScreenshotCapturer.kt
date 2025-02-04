@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.first
 import org.koin.compose.koinInject
 import org.koin.core.context.loadKoinModules
 import org.koin.core.context.startKoin
-import ua.syt0r.kanji.LocalWindowState
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
 import ua.syt0r.kanji.di.appModules
@@ -60,12 +59,9 @@ fun ApplicationScope.RecordingAppWindow(
         undecorated = true
     ) {
         CompositionLocalProvider(
-            LocalWindowState provides windowState,
             LocalThemeManager provides koinInject()
         ) {
-            AppTheme(
-                false
-            ) {
+            AppTheme(useDarkTheme = false) {
                 Surface { RecordingBox { content() } }
             }
         }

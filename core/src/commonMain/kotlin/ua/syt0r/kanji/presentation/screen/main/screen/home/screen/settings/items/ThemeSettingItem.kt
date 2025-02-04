@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.launch
-import ua.syt0r.kanji.core.theme_manager.LocalThemeManager
+import ua.syt0r.kanji.core.theme_manager.ThemeManager
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesTheme
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -39,7 +39,9 @@ enum class DisplayableTheme(
 
 }
 
-object ThemeSettingItem : SettingsScreenContract.ListItem {
+class ThemeSettingItem(
+    private val themeManager: ThemeManager
+) : SettingsScreenContract.ListItem {
 
     @Composable
     override fun content(mainNavigationState: MainNavigationState) {
@@ -47,7 +49,6 @@ object ThemeSettingItem : SettingsScreenContract.ListItem {
         val coroutineScope = rememberCoroutineScope()
         var showPicker by rememberSaveable { mutableStateOf(false) }
 
-        val themeManager = LocalThemeManager.current
         val currentTheme = DisplayableTheme.from(themeManager.currentTheme.value)
 
         ListItem(

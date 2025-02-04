@@ -21,17 +21,11 @@ val settingsScreenModule = module {
 
     factory(defaultSettingItemsQualifier) {
         listOf(
-            ThemeSettingItem,
-            get<DefaultHomeTabSettingItem>()
+            ThemeSettingItem(themeManager = get()),
+            DefaultHomeTabSettingItem(appPreferences = get())
         )
     }
 
     factory(settingItemsQualifier) { listOf<SettingsScreenContract.ListItem>() }
-
-    factory {
-        DefaultHomeTabSettingItem(
-            appPreferences = get()
-        )
-    }
 
 }
