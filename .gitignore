@@ -101,3 +101,9 @@ AppImage/
 
 # Vscode
 .vscode/
+
+# Flatpak
+.flatpak-builder
+.flatpak
+repo
+builddir

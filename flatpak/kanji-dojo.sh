@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-
-exec java -jar /app/bin/kanji-dojo-linux-x64.jar
+EXECUTABLE="$APP_DIR/app/bin/Kanji Dojo"
+exec "$EXECUTABLE" "$@"
