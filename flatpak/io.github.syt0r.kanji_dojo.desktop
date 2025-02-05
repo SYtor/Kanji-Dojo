@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Kanji Dojo
-Comment=A multi-platform application for memorizing Japanese language
-Exec=kanji-dojo.sh
-Icon=io.github.syt0r.kanji_dojo
-Terminal=false
-Categories=Education
-Keywords=language;

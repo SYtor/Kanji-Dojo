@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.syt0r.kanji-dojo</id>
+  
+  <name>Kanji Dojo</name>
+  <summary>Japanese language learning app with writing exercises, flashcards and built-in dictionary</summary>
+
+  <launchable type="desktop-id">io.github.syt0r.kanji-dojo.desktop</launchable>
+  
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  
+  <description>
+    <p>Practice writing Japanese letters, learn their meanings and related words</p>
+
+    <p>Features:</p>
+    <ul>
+      <li>Memorize how to write and read kana and kanji</li>
+      <li>Follow JLPT levels or school grades</li>
+      <li>Create your own decks to study, more than 6000 characters in total are available</li>
+      <li>Use SRS reviewing system to avoid forgetting learned information</li>
+      <li>Search letters and words with built-in dictionary</li>
+      <li>Study words with flashcards</li>
+      <li>Available modes to write words and pick correct letter readings</li>
+      <li>Works offline</li>
+    </ul>
+  </description>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#e1e4e6</color>
+    <color type="primary" scheme_preference="dark">#201a1a</color>
+  </branding>
+
+</component>

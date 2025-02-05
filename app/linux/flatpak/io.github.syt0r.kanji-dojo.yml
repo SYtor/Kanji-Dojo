@@ -1,4 +1,4 @@
-id: io.github.syt0r.kanji_dojo
+id: io.github.syt0r.kanji-dojo
 runtime: org.freedesktop.Platform
 runtime-version: '24.08'
 sdk: org.freedesktop.Sdk
@@ -18,17 +18,17 @@ modules:
       - ./Kanji_Dojo-x86_64.AppImage --appimage-extract
       - mv ./squashfs-root/usr/* /app
       - install -Dm755 kanji-dojo.sh /app/bin/kanji-dojo.sh
-      - install -Dm644 io.github.syt0r.kanji_dojo.desktop /app/share/applications/io.github.syt0r.kanji_dojo.desktop
-      - install -Dm644 io.github.syt0r.kanji_dojo.png /app/share/icons/hicolor/256x256/apps/io.github.syt0r.kanji_dojo.png
+      - install -Dm644 io.github.syt0r.kanji-dojo.desktop /app/share/applications/io.github.syt0r.kanji-dojo.desktop
+      - install -Dm644 io.github.syt0r.kanji-dojo.png /app/share/icons/hicolor/256x256/apps/io.github.syt0r.kanji-dojo.png
     sources:
       - type: file
         path: kanji-dojo.sh
       - type: file
-        path: io.github.syt0r.kanji_dojo.metainfo.xml
+        path: io.github.syt0r.kanji-dojo.metainfo.xml
       - type: file
-        path: io.github.syt0r.kanji_dojo.desktop
+        path: io.github.syt0r.kanji-dojo.desktop
       - type: file
-        path: io.github.syt0r.kanji_dojo.png
+        path: io.github.syt0r.kanji-dojo.png
       - type: file
         url: https://github.com/syt0r/Kanji-Dojo/releases/download/v2.1.5/Kanji_Dojo-x86_64.AppImage
         sha256: e82ba51555c3187a46f60e0786a6a2770275f7a5465323a18180b58c58c3bc68

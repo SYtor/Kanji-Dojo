@@ -96,14 +96,4 @@ lint/tmp/
 *.opus
 
 google-services.json
-
-AppImage/
-
-# Vscode
-.vscode/
-
-# Flatpak
-.flatpak-builder
-.flatpak
-repo
-builddir
+app/linux/**
