@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Kanji Dojo
+Comment=Japanese language learning app with writing exercises, flashcards and built-in dictionary
+Exec=kanji-dojo.sh
+Icon=io.github.syt0r.kanji-dojo
+Terminal=false
+Categories=Education
+Keywords=language;

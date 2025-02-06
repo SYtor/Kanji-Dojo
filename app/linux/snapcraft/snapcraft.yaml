@@ -56,7 +56,7 @@ parts:
       cp *.jar $SNAPCRAFT_PART_INSTALL/
   launcher:
     plugin: nil
-    source: snap/local
+    source: snapcraft/local
     override-build: |
       mkdir -p $SNAPCRAFT_PART_INSTALL/
       cp launch-kanji-dojo.sh $SNAPCRAFT_PART_INSTALL/
