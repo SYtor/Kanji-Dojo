@@ -1,34 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>io.github.syt0r.kanji-dojo</id>
-  
-  <name>Kanji Dojo</name>
-  <summary>Japanese language learning app with writing exercises, flashcards and built-in dictionary</summary>
-
-  <launchable type="desktop-id">io.github.syt0r.kanji-dojo.desktop</launchable>
-  
   <metadata_license>MIT</metadata_license>
   <project_license>GPL-3.0-only</project_license>
   
+  <name>Kanji Dojo</name>
+  <summary>Japanese language learning app with writing exercises, flashcards and built-in dictionary</summary>
+  <developer id="ua.syt0r">
+    <name>syt0r</name>
+  </developer>
+  
   <description>
-    <p>Practice writing Japanese letters, learn their meanings and related words</p>
-
+    <p>Learn how to write Japanese letters, memorize their meanings and readings and study supplementary vocabulary</p>
     <p>Features:</p>
     <ul>
-      <li>Memorize how to write and read kana and kanji</li>
+      <li>Learn kana and kanji with writing exercises and flashcards</li>
       <li>Follow JLPT levels or school grades</li>
       <li>Create your own decks to study, more than 6000 characters in total are available</li>
       <li>Use SRS reviewing system to avoid forgetting learned information</li>
       <li>Search letters and words with built-in dictionary</li>
-      <li>Study words with flashcards</li>
+      <li>Memorize words with flashcards and other modes</li>
       <li>Available modes to write words and pick correct letter readings</li>
       <li>Works offline</li>
     </ul>
   </description>
-
+  
+  <launchable type="desktop-id">io.github.syt0r.kanji-dojo.desktop</launchable>
+  
   <branding>
-    <color type="primary" scheme_preference="light">#e1e4e6</color>
-    <color type="primary" scheme_preference="dark">#201a1a</color>
+    <color scheme_preference="light" type="primary">#e1e4e6</color>
+    <color scheme_preference="dark" type="primary">#201a1a</color>
   </branding>
+  
+  <content_rating type="oars-1.1" />
+  
+  <url type="homepage">https://github.com/syt0r/Kanji-Dojo</url>
+  <url type="bugtracker">https://github.com/syt0r/Kanji-Dojo/issues</url>
+  <url type="donation">https://buymeacoffee.com/syt0r</url>
+  <url type="vcs-browser">https://github.com/syt0r/Kanji-Dojo</url>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Use SRS (Spaced Repetition System) for efficient memorization</caption>
+      <image>https://raw.githubusercontent.com/syt0r/Kanji-Dojo/refs/heads/develop/app/linux/flatpak/screenshots/1.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Learn how to write kana and kanji</caption>
+      <image>https://raw.githubusercontent.com/syt0r/Kanji-Dojo/refs/heads/develop/app/linux/flatpak/screenshots/2.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Built-in dictionary with search by radicals</caption>
+      <image>https://raw.githubusercontent.com/syt0r/Kanji-Dojo/refs/heads/develop/app/linux/flatpak/screenshots/3.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Includes various pre-made decks</caption>
+      <image>https://raw.githubusercontent.com/syt0r/Kanji-Dojo/refs/heads/develop/app/linux/flatpak/screenshots/4.png</image>
+    </screenshot>
+  </screenshots>
+  
+  <releases>
+    <release date="2025-01-31" version="2.1.5">
+      <url type="details">https://raw.githubusercontent.com/syt0r/Kanji-Dojo/refs/heads/develop/fastlane/metadata/android/en-US/changelog/2150.txt</url>
+      <description>
+        <ul>
+          <li>Updated installers for Windows and Linux, now it's not required to have Java installed</li>
+          <li>Renamed executable for MacOS, please manually delete the old `kanji-dojo` app, tha app name is `Kanji Dojo` now</li>
+          <li>Fixed a sync issue with incorrectly applied timestamp after downloading data from the cloud</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
 
 </component>
