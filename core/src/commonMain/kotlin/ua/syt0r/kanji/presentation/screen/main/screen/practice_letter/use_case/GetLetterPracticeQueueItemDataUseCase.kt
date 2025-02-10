@@ -3,10 +3,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.ReadingType
-import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
-import ua.syt0r.kanji.core.japanese.getWordWithExtraRomajiReading
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
@@ -31,16 +29,11 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
         val isKana = descriptor.character.first().isKana()
 
         val words: List<JapaneseWord> = when {
-            isKana -> appDataRepository
-                .getKanaWords(
-                    char = descriptor.character,
-                    limit = LetterPracticeScreenContract.WordsLimit + 1
-                )
-                .let { words ->
-                    if (descriptor.romajiReading)
-                        words.map { romajiConverter.getWordWithExtraRomajiReading(it) }
-                    else words
-                }
+            isKana -> appDataRepository.getKanaWords(
+                char = descriptor.character,
+                limit = LetterPracticeScreenContract.WordsLimit + 1
+            )
+            //TODO romaji
 
             else -> appDataRepository.getWordsWithText(
                 text = descriptor.character,
@@ -157,9 +150,8 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
         character: String,
         words: List<JapaneseWord>
     ): List<JapaneseWord> {
-        return words.map { word ->
-            word.copy(readings = word.readings.map { it.withEncodedText(character) })
-        }
+        return words
+        // todo encode
     }
 
 }

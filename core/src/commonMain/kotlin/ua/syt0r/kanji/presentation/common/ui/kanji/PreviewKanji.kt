@@ -3,8 +3,8 @@ package ua.syt0r.kanji.presentation.common.ui.kanji
 import androidx.compose.ui.graphics.Path
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.svg.SvgCommandParser
 import ua.syt0r.kanji.core.svg.SvgPathCreator
 import kotlin.random.Random
@@ -46,29 +46,29 @@ object PreviewKanji {
 
     val WordWithAlternativesSample = JapaneseWord(
         id = 1,
-        readings = listOf(
-            buildFuriganaString { append("人", "にん"); append("間", "げん") },
-            buildFuriganaString { append("人", "にん"); append("間", "げん") }
+        displayReading = VocabReading.Kanji(
+            kanjiReading = "人間",
+            kanaReading = "",
+            furigana = buildFuriganaString {
+                append("人", "にん"); append("間", "げん")
+            }
         ),
-        meanings = listOf("human", "human being", "man")
+        listOf("test"),
+        emptyList()
     )
 
     private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
             id = 1,
-            readings = buildFuriganaString {
-                append("期", "き")
-                append("間", "かん")
-            }.let { listOf(it) },
-            meanings = listOf("period")
-        ),
-        JapaneseWord(
-            id = 1,
-            readings = buildFuriganaString {
-                append("時", "じ")
-                append("間", "かん")
-            }.let { listOf(it) },
-            meanings = listOf("time")
+            displayReading = VocabReading.Kanji(
+                kanjiReading = "期間",
+                kanaReading = "",
+                furigana = buildFuriganaString {
+                    append("期", "き"); append("間", "かん")
+                }
+            ),
+            listOf("test"),
+            emptyList()
         ),
         WordWithAlternativesSample
     )
@@ -78,14 +78,7 @@ object PreviewKanji {
     }
 
     fun randomEncodedWords(number: Int = 10) = randomWords(number).map {
-        it.copy(
-            readings = it.readings.map { reading ->
-                val charToEncode = reading.compounds.filter { it.text.length == 1 }.randomOrNull()
-                    ?.text
-                    ?: reading.compounds.first().text.random().toString()
-                reading.withEncodedText(charToEncode)
-            }
-        )
+        TODO()
     }
 
 }

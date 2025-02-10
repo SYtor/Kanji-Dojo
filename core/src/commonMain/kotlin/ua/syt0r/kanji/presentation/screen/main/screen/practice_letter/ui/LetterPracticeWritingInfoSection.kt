@@ -418,7 +418,7 @@ private fun ExpressionsSection(
                 if (isNoTranslationLayout) {
                     words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
                         FuriganaText(
-                            furiganaString = it.readings.first(),
+                            furiganaString = it.displayReading.furiganaPreview,
                             modifier = Modifier.padding(end = 16.dp)
                         )
                     }

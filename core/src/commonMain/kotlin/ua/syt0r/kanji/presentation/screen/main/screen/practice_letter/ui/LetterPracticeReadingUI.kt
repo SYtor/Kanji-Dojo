@@ -28,8 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
@@ -49,8 +49,7 @@ fun LetterPracticeReadingUI(
     var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToVocabDeck?.let {
         AddWordToDeckDialog(
-            wordId = it.id,
-            wordPreviewReading = it.readings.first().withoutAnnotations(),
+            word = it,
             onDismissRequest = { wordToAddToVocabDeck = null }
         )
     }
@@ -152,11 +151,12 @@ private fun LazyListScope.addWordItems(
             revealed.value -> word.orderedPreview(index)
             else -> word.orderedPreviewWithHiddenMeaning(index)
         }
-        LetterPracticeWordRow(
-            furiganaString = string,
-            clickable = revealed.value,
-            onWordClick = { onWordClick(word) },
-            addWordToDeckClick = { addWordToDeck(word) }
+        //TODO hidden state
+        JapaneseWordUI(
+            index = index,
+            word = word,
+            onClick = { onWordClick(word) }.takeIf { revealed.value },
+            addWordToVocabDeckClick = { addWordToDeck(word) }
         )
     }
 

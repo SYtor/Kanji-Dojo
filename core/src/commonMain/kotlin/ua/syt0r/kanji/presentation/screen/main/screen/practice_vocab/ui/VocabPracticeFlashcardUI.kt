@@ -56,7 +56,7 @@ fun VocabPracticeFlashcardUI(
                 placeSideContentAtStart = false,
                 centerContent = {
                     Text(
-                        text = reviewState.word.meanings.joinToString(),
+                        text = reviewState.word.combinedGlossary(),
                         style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Center,
                         maxLines = 2,

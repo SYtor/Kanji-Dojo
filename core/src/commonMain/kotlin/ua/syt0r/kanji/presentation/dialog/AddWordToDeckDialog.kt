@@ -40,6 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
@@ -48,18 +49,17 @@ import ua.syt0r.kanji.presentation.common.ui.FilledTextField
 
 @Composable
 fun AddWordToDeckDialog(
-    wordId: Long,
-    wordPreviewReading: String,
+    word: JapaneseWord,
     onDismissRequest: () -> Unit
 ) {
 
-    val dialogState = rememberAddWordToDeckDialogState(wordId)
+    val dialogState = rememberAddWordToDeckDialogState(word.id)
     val strings = resolveString { addWordToDeckDialog }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         scrollableContent = false,
-        title = { Text(strings.title(wordPreviewReading)) },
+        title = { Text(strings.title(word.displayReading.textPreview)) },
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,

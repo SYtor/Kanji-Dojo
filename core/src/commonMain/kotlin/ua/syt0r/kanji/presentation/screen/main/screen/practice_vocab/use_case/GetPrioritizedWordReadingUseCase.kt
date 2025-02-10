@@ -17,22 +17,8 @@ class DefaultGetPrioritizedWordReadingUseCase : GetPrioritizedWordReadingUseCase
         word: JapaneseWord,
         priority: VocabPracticeReadingPriority
     ): FuriganaString {
-        return when (priority) {
-            VocabPracticeReadingPriority.Default -> word.readings.first()
-            VocabPracticeReadingPriority.Kanji -> {
-                val readingWithKanji = word.readings.find {
-                    it.compounds.any { it.annotation != null }
-                }
-                readingWithKanji ?: word.readings.first()
-            }
-
-            VocabPracticeReadingPriority.Kana -> {
-                val kanaReading = word.readings.find {
-                    it.compounds.all { it.annotation == null }
-                }
-                kanaReading ?: word.readings.first()
-            }
-        }
+        // todo remove
+        return word.displayReading.furiganaPreview
     }
 
 }

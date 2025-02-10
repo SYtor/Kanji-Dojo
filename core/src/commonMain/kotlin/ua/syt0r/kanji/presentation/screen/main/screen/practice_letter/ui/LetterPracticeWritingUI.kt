@@ -52,7 +52,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LetterPracticeWritingUI(
     layoutConfiguration: LetterPracticeLayoutConfiguration.WritingLayoutConfiguration,

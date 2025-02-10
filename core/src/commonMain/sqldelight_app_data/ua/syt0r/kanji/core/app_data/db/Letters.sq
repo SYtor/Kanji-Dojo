@@ -55,43 +55,6 @@ CREATE TABLE kanji_radical(
     PRIMARY KEY (kanji, radical, start_stroke)
 );
 
-
-CREATE TABLE expression(
-    id INTEGER PRIMARY KEY
-);
-
-CREATE TABLE expression_reading(
-    expression_id   INTEGER NOT NULL,
-    expression      TEXT,
-    kana_expression TEXT,
-    furigana        TEXT,
-    rank            INTEGER    NOT NULL,
-    PRIMARY KEY (expression_id, expression, kana_expression)
-);
-
-CREATE TABLE expression_meaning(
-    expression_id   INTEGER    NOT NULL,
-    meaning         TEXT       NOT NULL,
-    priority        INTEGER    NOT NULL,
-    PRIMARY KEY (expression_id, meaning, priority)
-);
-
-CREATE TABLE expression_classification(
-    expression_id   INTEGER    NOT NULL,
-    classification  TEXT       NOT NULL,
-    PRIMARY KEY (expression_id, classification)
-);
-
-getClassificationsForExpression:
-SELECT classification
-FROM expression_classification
-WHERE expression_id = ?;
-
-getExpressionsWithClassification:
-SELECT expression_id
-FROM expression_classification
-WHERE classification = ?;
-
 getStrokes:
 SELECT stroke_path FROM character_stroke WHERE character = ? ORDER BY stroke_number;
 
@@ -109,42 +72,6 @@ SELECT * FROM kanji_reading WHERE kanji = ?;
 
 getKanjiData:
 SELECT * FROM kanji_data WHERE kanji = ?;
-
-getExpressionMeanings:
-SELECT * FROM expression_meaning WHERE expression_id = ? ORDER BY priority;
-
-getExpressionReadings:
-SELECT * FROM expression_reading WHERE expression_id = ? ORDER BY rank;
-
-getExpressionReadingsOfLength:
-SELECT DISTINCT kana_expression
-FROM expression_reading
-WHERE kana_expression NOT NULL AND LENGTH(kana_expression) = :length
-ORDER BY RANDOM()
-LIMIT :limit;
-
-getExpressionsWithKanaReadingsLike:
-SELECT DISTINCT expression_id
-FROM expression_reading
-WHERE kana_expression LIKE ?
-AND length(kana_expression) > 1
-ORDER BY rank
-LIMIT ?;
-
-getCountOfExpressionsWithText:
-SELECT count(DISTINCT expression_id)
-FROM expression_reading
-WHERE expression LIKE '%' || :text || '%'
-   OR kana_expression LIKE '%' || :text || '%';
-
-getRankedExpressionsWithText:
-SELECT expression_id
-FROM expression_reading
-WHERE expression LIKE '%' || :text || '%'
-   OR kana_expression LIKE '%' || :text || '%'
-GROUP BY expression_id
-ORDER BY min(rank)
-LIMIT :offset, :limit;
 
 getRadicals:
 SELECT * FROM radical;

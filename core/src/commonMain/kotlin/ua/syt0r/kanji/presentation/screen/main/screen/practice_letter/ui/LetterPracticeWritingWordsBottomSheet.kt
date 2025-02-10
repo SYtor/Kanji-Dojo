@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
+import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
@@ -73,8 +73,7 @@ fun LetterPracticeWritingWordsBottomSheet(
     var wordToAddToVocabDeck by remember { mutableStateOf<JapaneseWord?>(null) }
     wordToAddToVocabDeck?.let {
         AddWordToDeckDialog(
-            wordId = it.id,
-            wordPreviewReading = it.readings.first().withoutAnnotations(),
+            word = it,
             onDismissRequest = { wordToAddToVocabDeck = null }
         )
     }
@@ -105,10 +104,10 @@ fun LetterPracticeWritingWordsBottomSheet(
         ) {
 
             itemsIndexed(currentState.words) { index, word ->
-                LetterPracticeWordRow(
-                    furiganaString = word.orderedPreview(index),
-                    onWordClick = { onWordClick(word) },
-                    addWordToDeckClick = { wordToAddToVocabDeck = word }
+                JapaneseWordUI(
+                    index = index,
+                    word = word,
+                    onClick = { onWordClick(word) }
                 )
             }
 

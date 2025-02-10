@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,18 +50,17 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
 import ua.syt0r.kanji.presentation.common.isNearListEnd
 import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
-import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
@@ -289,11 +286,12 @@ private fun LazyListScope.wordsSection(
     }
 
     itemsIndexed(words.items) { index, word ->
-        ExpressionItem(
+        JapaneseWordUI(
             index = index,
             word = word,
-            onFuriganaItemClick = onFuriganaItemClick,
-            onClick = { onWordClick(word) }
+            onClick = { onWordClick(word) },
+            onFuriganaClick = onFuriganaItemClick,
+            addWordToVocabDeckClick = { TODO() }
         )
     }
 
@@ -310,32 +308,3 @@ private fun LazyListScope.wordsSection(
     item { Spacer(modifier = Modifier.height(bottomPaddingState.value)) }
 
 }
-
-@Composable
-private fun ExpressionItem(
-    index: Int,
-    word: JapaneseWord,
-    onFuriganaItemClick: (String) -> Unit,
-    onClick: () -> Unit
-) {
-
-    Row(
-        modifier = Modifier
-            .heightIn(min = 50.dp)
-            .padding(horizontal = 10.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .wrapContentSize(Alignment.CenterStart)
-    ) {
-        ClickableFuriganaText(
-            furiganaString = word.orderedPreview(index),
-            onClick = onFuriganaItemClick,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
-                .padding(horizontal = 10.dp)
-        )
-    }
-
-}
-

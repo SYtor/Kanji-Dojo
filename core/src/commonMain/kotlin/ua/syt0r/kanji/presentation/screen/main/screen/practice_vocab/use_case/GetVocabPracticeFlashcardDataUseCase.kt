@@ -21,7 +21,7 @@ class DefaultGetVocabPracticeFlashcardDataUseCase(
     ): VocabPracticeItemData.Flashcard {
         val word = appDataRepository.getWord(descriptor.wordId)
         val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)
-        val translation = word.meanings.first()
+        val translation = word.combinedGlossary()
 
         return VocabPracticeItemData.Flashcard(
             word = word,

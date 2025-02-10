@@ -1,250 +1,213 @@
 package ua.syt0r.kanji.core.app_data
 
 import kotlinx.coroutines.Deferred
-import kotlinx.serialization.json.Json
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
-import ua.syt0r.kanji.core.app_data.data.FuriganaDBEntity
+import ua.syt0r.kanji.core.app_data.data.FuriganaDBEntityCreator
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.KanjiData
+import ua.syt0r.kanji.core.app_data.data.PartOfSpeech
 import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
+import ua.syt0r.kanji.core.app_data.data.VocabReading
+import ua.syt0r.kanji.core.app_data.data.VocabSense
 import ua.syt0r.kanji.core.app_data.db.AppDataDatabase
-import ua.syt0r.kanji.core.appdata.db.AppDataQueries
-import ua.syt0r.kanji.core.appdata.db.Expression_reading
+import ua.syt0r.kanji.core.appdata.db.LettersQueries
+import ua.syt0r.kanji.core.appdata.db.VocabQueries
 
 class SqlDelightAppDataRepository(
     private val deferredDatabase: Deferred<AppDataDatabase>
 ) : AppDataRepository {
 
-    private suspend fun <T> runTransaction(
-        transactionScope: AppDataQueries.() -> T
+    private suspend fun <T> lettersQuery(
+        transactionScope: LettersQueries.() -> T
     ): T {
-        val queries = deferredDatabase.await().appDataQueries
+        val queries = deferredDatabase.await().lettersQueries
         return queries.transactionWithResult { queries.transactionScope() }
     }
 
-    override suspend fun getStrokes(character: String): List<String> = runTransaction {
+    private suspend fun <T> vocabQuery(
+        transactionScope: VocabQueries.() -> T
+    ): T {
+        val queries = deferredDatabase.await().vocabQueries
+        return queries.transactionWithResult { queries.transactionScope() }
+    }
+
+    override suspend fun getStrokes(character: String): List<String> = lettersQuery {
         getStrokes(character).executeAsList()
     }
 
     override suspend fun getRadicalsInCharacter(
         character: String
-    ): List<CharacterRadical> = runTransaction {
-        getCharacterRadicals(character)
-            .executeAsList()
-            .map {
-                it.run {
-                    CharacterRadical(
-                        character = character,
-                        radical = radical,
-                        startPosition = start_stroke.toInt(),
-                        strokesCount = strokes_count.toInt()
-                    )
-                }
+    ): List<CharacterRadical> = lettersQuery {
+        getCharacterRadicals(character).executeAsList().map {
+            it.run {
+                CharacterRadical(
+                    character = character,
+                    radical = radical,
+                    startPosition = start_stroke.toInt(),
+                    strokesCount = strokes_count.toInt()
+                )
             }
+        }
     }
 
-    override suspend fun getMeanings(kanji: String): List<String> = runTransaction {
+    override suspend fun getMeanings(kanji: String): List<String> = lettersQuery {
         getKanjiMeanings(kanji).executeAsList()
     }
 
     override suspend fun getReadings(
         kanji: String
-    ): Map<String, ReadingType> = runTransaction {
-        getKanjiReadings(kanji)
-            .executeAsList()
-            .associate { readingData ->
-                readingData.reading to ReadingType.values()
-                    .find { it.value == readingData.reading_type }!!
-            }
+    ): Map<String, ReadingType> = lettersQuery {
+        getKanjiReadings(kanji).executeAsList().associate { readingData ->
+            readingData.reading to ReadingType.entries
+                .find { it.value == readingData.reading_type }!!
+        }
     }
 
-    override suspend fun getClassificationsForKanji(kanji: String): List<String> = runTransaction {
+    override suspend fun getClassificationsForKanji(kanji: String): List<String> = lettersQuery {
         getClassificationsForKanji(kanji).executeAsList()
     }
 
     override suspend fun getKanjiForClassification(
         classification: String
-    ): List<String> = runTransaction {
+    ): List<String> = lettersQuery {
         getKanjiWithClassification(classification).executeAsList()
     }
 
     override suspend fun getCharacterReadingsOfLength(
-        length: Int,
-        limit: Int
-    ): List<String> = runTransaction {
-        getExpressionReadingsOfLength(length.toLong(), limit.toLong())
-            .executeAsList()
-            .map { it.kana_expression!! }
+        length: Int, limit: Int
+    ): List<String> = vocabQuery {
+        getVocabKanaReadingsOfLength(length.toLong(), limit.toLong()).executeAsList() // TODO review
     }
 
-    override suspend fun getData(kanji: String): KanjiData? = runTransaction {
+    override suspend fun getData(kanji: String): KanjiData? = lettersQuery {
         getKanjiData(kanji).executeAsOneOrNull()?.run {
             KanjiData(
-                kanji = kanji,
-                frequency = frequency?.toInt(),
-                variantFamily = variantFamily
+                kanji = kanji, frequency = frequency?.toInt(), variantFamily = variantFamily
             )
         }
     }
 
 
-    override suspend fun getWordsWithTextCount(text: String): Int = runTransaction {
-        getCountOfExpressionsWithText(text).executeAsOne().toInt()
+    override suspend fun getWordsWithTextCount(text: String): Int = vocabQuery {
+        getCountOfVocabWithText(text).executeAsOne().toInt()
     }
 
     override suspend fun getWordsWithText(
-        text: String,
-        offset: Int,
-        limit: Int
-    ): List<JapaneseWord> = runTransaction {
-        getRankedExpressionsWithText(text, offset.toLong(), limit.toLong())
+        text: String, offset: Int, limit: Int
+    ): List<JapaneseWord> = vocabQuery {
+        getReadingsOfVocabWithText(text, offset.toLong(), limit.toLong())
             .executeAsList()
-            .map { expressionId ->
-                val readings = getExpressionReadings(expressionId)
-                    .executeAsList()
-                    .map { it.toRankedReading() }
-                    .sortedWith(readingComparator(text))
-                    .map { entity -> entity.toReading() }
-
-                val meanings = getExpressionMeanings(expressionId)
-                    .executeAsList()
-                    .map { it.meaning }
-
-                JapaneseWord(
-                    id = expressionId,
-                    readings = readings,
-                    meanings = meanings
+            .map { element ->
+                getWord(
+                    id = element.entry_id,
+                    kanaReading = element.reading.takeIf { element.isKana == 1L },
+                    kanjiReading = element.reading.takeIf { element.isKana == 0L }
                 )
             }
     }
 
     override suspend fun getKanaWords(
-        char: String,
-        limit: Int
-    ): List<JapaneseWord> = runTransaction {
-        getExpressionsWithKanaReadingsLike("%$char%", limit.toLong())
+        char: String, limit: Int
+    ): List<JapaneseWord> = vocabQuery {
+        getVocabKanaReadingsLike("%$char%", limit.toLong())
             .executeAsList()
-            .map { id ->
-                val readings = getExpressionReadings(id).executeAsList()
-                    .map { it.toRankedReading() }
-                    .sortedWith(readingComparator(char, true))
-                    .map { it.toReading(kanaOnly = true) }
-                    .distinct()
-
-                val meanings = getExpressionMeanings(id)
-                    .executeAsList()
-                    .map { it.meaning }
-
-                JapaneseWord(
-                    id = id,
-                    readings = readings,
-                    meanings = meanings
-                )
-            }
+            .map { getWord(it.entry_id, it.reading, null) }
     }
 
-    override suspend fun getWord(id: Long): JapaneseWord = runTransaction {
-        getWord(id)
+    override suspend fun getWord(id: Long): JapaneseWord = vocabQuery {
+        TODO()
     }
 
-    override suspend fun getWordClassifications(id: Long): List<String> = runTransaction {
-        getClassificationsForExpression(id).executeAsList()
+    override suspend fun getWordClassifications(id: Long): List<String> = lettersQuery {
+        emptyList()
     }
 
     override suspend fun getWordsWithClassification(
         classification: String
-    ): List<Long> = runTransaction {
-        getExpressionsWithClassification(classification).executeAsList()
+    ): List<Long> = lettersQuery {
+        emptyList()
     }
 
-    override suspend fun getRadicals(): List<RadicalData> = runTransaction {
-        getRadicals().executeAsList()
-            .map { RadicalData(it.radical, it.strokesCount.toInt()) }
+    override suspend fun getRadicals(): List<RadicalData> = lettersQuery {
+        getRadicals().executeAsList().map { RadicalData(it.radical, it.strokesCount.toInt()) }
     }
 
     override suspend fun getCharactersWithRadicals(
         radicals: List<String>
-    ): List<String> = runTransaction {
-        getCharsWithRadicals(radicals, radicals.size.toLong())
-            .executeAsList()
+    ): List<String> = lettersQuery {
+        getCharsWithRadicals(radicals, radicals.size.toLong()).executeAsList()
     }
 
     override suspend fun getAllRadicalsInCharactersWithSelectedRadicals(
         radicals: Set<String>
-    ): List<String> = runTransaction {
-        getAllRadicalsInCharactersWithSelectedRadicals(radicals, radicals.size.toLong())
-            .executeAsList()
+    ): List<String> = lettersQuery {
+        getAllRadicalsInCharactersWithSelectedRadicals(
+            radicals,
+            radicals.size.toLong()
+        ).executeAsList()
     }
 
-    private data class RankedReading(
-        val kanjiExpression: String?,
-        val kanaExpression: String?,
-        val rank: Int,
-        val furigana: String?
-    )
-
-    // To make sure that searched reading is the first in the list
-    private fun readingComparator(
-        prioritizedText: String,
-        kanaOnly: Boolean = false
-    ): Comparator<RankedReading> {
-        return compareBy(
-            {
-                val containsText = it.kanjiExpression
-                    ?.takeIf { !kanaOnly }
-                    ?.contains(prioritizedText)
-                    ?: it.kanaExpression?.contains(prioritizedText)
-                    ?: false
-                !containsText
-            },
-            { it.rank }
-        )
-    }
-
-    private fun AppDataQueries.getWord(
+    private fun VocabQueries.getWord(
         id: Long,
-        comparator: Comparator<RankedReading> = compareBy { it.rank },
-        kanaOnly: Boolean = false
+        kanaReading: String?,
+        kanjiReading: String?,
     ): JapaneseWord {
-        val readings = getExpressionReadings(id).executeAsList()
-            .map { it.toRankedReading() }
-            .sortedWith(comparator)
-            .map { it.toReading(kanaOnly = kanaOnly) }
-            .distinct()
 
-        val meanings = getExpressionMeanings(id)
-            .executeAsList()
-            .map { it.meaning }
+        val displayReading: VocabReading
+        val primarySense: VocabSense
+
+        when {
+            kanjiReading != null -> {
+                val kanaReading = kanaReading ?: getVocabKanaElements(id).executeAsList().let {
+                    getVocabRestrictedKanaElements(id, kanjiReading).executeAsList()
+                        .firstOrNull()?.reading
+                        ?: getVocabKanaElements(id).executeAsList().first().reading
+                }
+
+                val furiganaJson = searchFurigana(kanjiReading, kanaReading).executeAsOneOrNull()
+                val furigana = furiganaJson?.let { FuriganaDBEntityCreator.fromJsonString(it) }
+                    ?.map { FuriganaStringCompound(it.text, it.annotation) }
+                    ?.let { FuriganaString(it) }
+                displayReading = VocabReading.Kanji(kanjiReading, kanaReading, furigana)
+
+                val senseRestrictions = getKanjiReadingRestrictedSenses(id, kanjiReading)
+                    .executeAsList()
+                primarySense = getWordSenses(id, senseRestrictions).first()
+            }
+
+            else -> {
+                displayReading = VocabReading.Kana(kanaReading!!)
+                val senseRestrictions = getKanaReadingRestrictedSenses(id, kanaReading)
+                    .executeAsList()
+                primarySense = getWordSenses(id, senseRestrictions).first()
+            }
+        }
 
         return JapaneseWord(
             id = id,
-            readings = readings,
-            meanings = meanings
+            displayReading = displayReading,
+            glossary = primarySense.glossary,
+            partOfSpeechList = primarySense.partOfSpeechList
         )
     }
 
-    private fun Expression_reading.toRankedReading(): RankedReading {
-        return RankedReading(
-            kanjiExpression = expression,
-            kanaExpression = kana_expression,
-            rank = rank.toInt(),
-            furigana = furigana
-        )
-    }
-
-    private fun RankedReading.toReading(
-        kanaOnly: Boolean = false
-    ): FuriganaString {
-        val compounds = furigana
-            ?.takeIf { !kanaOnly || kanaExpression == null }
-            ?.let { Json.decodeFromString<List<FuriganaDBEntity>>(it) }
-            ?.takeIf { it.isNotEmpty() }
-            ?.map { FuriganaStringCompound(it.text, it.annotation) }
-            ?: listOf(FuriganaStringCompound(kanaExpression!!))
-        return FuriganaString(compounds)
+    private fun VocabQueries.getWordSenses(
+        wordId: Long,
+        restrictedSenseIdList: List<Long>
+    ): Sequence<VocabSense> {
+        val isNoRestrictions = restrictedSenseIdList.isEmpty()
+        return getVocabSenses(wordId).executeAsList().asSequence()
+            .filter { isNoRestrictions || restrictedSenseIdList.contains(it) }
+            .map { senseId ->
+                VocabSense(
+                    glossary = getVocabSenseGlosses(senseId).executeAsList(),
+                    partOfSpeechList = getVocabSensePartOfSpeech(senseId).executeAsList()
+                        .mapNotNull { PartOfSpeech.fromJMDictValue(it) }
+                )
+            }
     }
 
 }

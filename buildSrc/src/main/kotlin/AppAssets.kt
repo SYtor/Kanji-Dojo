@@ -10,7 +10,7 @@ data class AssetLocation(
 
 object AppAssets {
 
-    const val AppDataDatabaseVersion = 12
+    const val AppDataDatabaseVersion = 13
     const val AppDataAssetFileName = "kanji-dojo-data-base-v$AppDataDatabaseVersion.sql"
 
     const val KanaVoice1AndroidFileName = "ja-JP-Neural2-B.opus"

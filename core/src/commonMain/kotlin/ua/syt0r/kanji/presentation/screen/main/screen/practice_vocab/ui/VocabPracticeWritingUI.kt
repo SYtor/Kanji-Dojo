@@ -215,7 +215,7 @@ private fun Progress(
             },
             centerContent = {
                 Text(
-                    text = reviewState.word.meanings.first(),
+                    text = reviewState.word.combinedGlossary(),
                     style = MaterialTheme.typography.displaySmall,
                     textAlign = TextAlign.Center
                 )
