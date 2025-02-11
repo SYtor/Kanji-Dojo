@@ -75,7 +75,8 @@ fun JapaneseWordUI(
             bottomContent = {
 
                 Text(
-                    text = word.partOfSpeechList.joinToString { it.name },
+                    text = word.partOfSpeechList.joinToString(),
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )

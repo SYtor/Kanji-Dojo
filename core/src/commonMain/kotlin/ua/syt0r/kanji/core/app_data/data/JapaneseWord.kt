@@ -44,31 +44,15 @@ sealed interface VocabReading {
 @Serializable
 data class VocabSense(
     val glossary: List<String>,
-    val partOfSpeechList: List<PartOfSpeech>
+    val partOfSpeechList: List<String>
 )
-
-enum class PartOfSpeech(
-    jmDictValueRegex: String,
-) {
-
-    Noun("n"),
-    Adjective("adj.*"),
-    Verb("v.*");
-
-    val regex = jmDictValueRegex.toRegex()
-
-    companion object {
-        fun fromJMDictValue(value: String): PartOfSpeech? = entries.find { it.regex.matches(value) }
-    }
-
-}
 
 @Serializable
 data class JapaneseWord(
     val id: Long,
     val displayReading: VocabReading,
     val glossary: List<String>,
-    val partOfSpeechList: List<PartOfSpeech>
+    val partOfSpeechList: List<String>
 ) {
 
     fun preview() = buildFuriganaString {

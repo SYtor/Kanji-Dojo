@@ -7,7 +7,6 @@ import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.FuriganaStringCompound
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.KanjiData
-import ua.syt0r.kanji.core.app_data.data.PartOfSpeech
 import ua.syt0r.kanji.core.app_data.data.RadicalData
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.app_data.data.VocabReading
@@ -204,8 +203,9 @@ class SqlDelightAppDataRepository(
             .map { senseId ->
                 VocabSense(
                     glossary = getVocabSenseGlosses(senseId).executeAsList(),
-                    partOfSpeechList = getVocabSensePartOfSpeech(senseId).executeAsList()
-                        .mapNotNull { PartOfSpeech.fromJMDictValue(it) }
+                    partOfSpeechList = getPartOfSpeechWithDescriptionsForVocabSense(senseId)
+                        .executeAsList()
+                        .map { it.explanation }
                 )
             }
     }

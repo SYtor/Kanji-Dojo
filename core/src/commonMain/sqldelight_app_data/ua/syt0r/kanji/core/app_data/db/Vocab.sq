@@ -141,6 +141,12 @@ CREATE TABLE vocab_sense_example(
     FOREIGN KEY (sense_id) REFERENCES vocab_sense(id) ON DELETE CASCADE
 );
 
+CREATE TABLE vocab_entity(
+    name TEXT NOT NULL,
+    explanation TEXT NOT NULL,
+    PRIMARY KEY(name, explanation)
+);
+
 CREATE TABLE vocab_furigana(
     text TEXT NOT NULL,
     reading TEXT NOT NULL,
@@ -182,6 +188,7 @@ FROM vocab_kana_element
 WHERE reading LIKE ?
 AND length(reading) > 1
 GROUP BY entry_id
+ORDER BY priority IS NULL, priority, entry_id, element_id
 LIMIT ?;
 
 getVocabKanaElements:
@@ -232,10 +239,14 @@ SELECT gloss_text
 FROM vocab_sense_gloss
 WHERE sense_id = ?;
 
-getVocabSensePartOfSpeech:
-SELECT part_of_speech
-FROM vocab_sense_part_of_speech
-WHERE sense_id = ?;
+getPartOfSpeechWithDescriptionsForVocabSense:
+WITH
+    EncodedPartOfSpeech AS (SELECT part_of_speech
+                            FROM vocab_sense_part_of_speech
+                            WHERE sense_id = ?)
+SELECT *
+FROM vocab_entity
+WHERE name IN EncodedPartOfSpeech;
 
 searchFurigana:
 SELECT furigana
