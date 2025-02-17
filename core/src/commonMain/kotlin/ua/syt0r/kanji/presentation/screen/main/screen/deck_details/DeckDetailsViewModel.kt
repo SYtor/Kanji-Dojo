@@ -127,7 +127,7 @@ class DeckDetailsViewModel(
                 val vocabPracticeScreenConfiguration = VocabPracticeScreenConfiguration(
                     wordIdToDeckIdMap = currentVisibleData.items.asSequence()
                         .filter { it.selected.value }
-                        .map { it.word.id }
+                        .map { it.word.cardId }
                         .associateWith { 0 },
                     practiceType = loadedState.configuration.value
                         .let { it as DeckDetailsConfiguration.VocabDeckConfiguration }

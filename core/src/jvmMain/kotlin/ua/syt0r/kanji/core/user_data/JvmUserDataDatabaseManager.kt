@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import ua.syt0r.kanji.core.getUserDataDirectory
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
-import ua.syt0r.kanji.core.user_data.practice.UpdateLocalDataTimestampUseCase
-import ua.syt0r.kanji.core.user_data.practice.db.BaseUserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
+import ua.syt0r.kanji.core.user_data.database.BaseUserDataDatabaseManager
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 

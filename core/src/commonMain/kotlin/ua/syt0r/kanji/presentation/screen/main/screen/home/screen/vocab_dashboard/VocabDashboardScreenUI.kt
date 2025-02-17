@@ -153,7 +153,6 @@ private fun DeckDashboardListState.addBrowseItems(
             navigateToPractice = { navigateToPractice(item, practiceType.value, it) }
         )
 
-
     }
 
 }

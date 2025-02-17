@@ -20,10 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,33 +28,24 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.VocabReading
 import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 
 @Composable
 fun JapaneseWordUI(
     index: Int,
-    word: JapaneseWord,
+    partOfSpeechList: List<String> = emptyList(),
     onClick: (() -> Unit)? = null,
-    onFuriganaClick: ((String) -> Unit)? = null,
     addWordToVocabDeckClick: (() -> Unit)? = null,
-    headline: @Composable () -> Unit = { FuriganaWordHeadline(word, onFuriganaClick) },
+    headline: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    var showAddToVocabDeckDialog by rememberSaveable(index) { mutableStateOf(false) }
-    if (showAddToVocabDeckDialog) {
-        AddWordToDeckDialog(
-            word = word,
-            onDismissRequest = { showAddToVocabDeckDialog = false }
-        )
-    }
-
     Column {
 
-        if (index != 0) HorizontalDivider()
+        if (index != 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp))
 
         JapaneseWordUILayout(
             modifier = modifier.clickable(onClick),
@@ -75,7 +62,7 @@ fun JapaneseWordUI(
             bottomContent = {
 
                 Text(
-                    text = word.partOfSpeechList.joinToString(),
+                    text = partOfSpeechList.joinToString(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -85,7 +72,7 @@ fun JapaneseWordUI(
                     Box(
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.small)
-                            .clickable { showAddToVocabDeckDialog = true }
+                            .clickable(it)
                             .height(30.dp)
                             .padding(6.dp)
                     ) {
@@ -99,6 +86,26 @@ fun JapaneseWordUI(
     }
 
 }
+
+@Composable
+fun JapaneseWordUI(
+    index: Int,
+    word: JapaneseWord,
+    onClick: (() -> Unit)? = null,
+    onFuriganaClick: ((String) -> Unit)? = null,
+    addWordToVocabDeckClick: (() -> Unit)? = null,
+    headline: @Composable () -> Unit = {
+        FuriganaWordHeadline(word.reading, word.combinedGlossary(), onFuriganaClick)
+    },
+    modifier: Modifier = Modifier
+) = JapaneseWordUI(
+    index = index,
+    partOfSpeechList = word.partOfSpeechList,
+    onClick = onClick,
+    addWordToVocabDeckClick = addWordToVocabDeckClick,
+    headline = headline,
+    modifier = modifier
+)
 
 @Composable
 fun JapaneseWordUILayout(
@@ -145,35 +152,60 @@ fun JapaneseWordUILayout(
 }
 
 @Composable
-fun FuriganaWordHeadline(word: JapaneseWord, onFuriganaClick: ((String) -> Unit)?) {
+fun FuriganaWordHeadline(
+    reading: VocabReading,
+    glossary: String,
+    onFuriganaClick: ((String) -> Unit)? = null
+) {
     val furigana = buildFuriganaString {
-        when (val reading = word.displayReading) {
-            is VocabReading.Kana -> {
-                append(reading.reading)
+        when {
+            reading.furigana != null -> {
+                append(reading.furigana)
             }
 
-            is VocabReading.Kanji -> {
-                if (reading.furigana != null) {
-                    append(reading.furigana)
-                } else {
-                    append("${reading.kanjiReading}【${reading.kanaReading}】")
-                }
+            reading.kanjiReading != null -> {
+                append("${reading.kanjiReading}【${reading.kanaReading}】")
+            }
+
+            else -> {
+                append(reading.kanaReading)
             }
         }
         append("・ ")
-        append(word.combinedGlossary())
+        append(glossary)
     }
 
     if (onFuriganaClick != null) ClickableFuriganaText(furigana, onFuriganaClick)
     else FuriganaText(furigana)
 }
 
+
 @Composable
-fun HiddenLetterWordHeadline(word: JapaneseWord, letterToHide: String) {
+fun ConcealedFuriganaWordHeadline(
+    reading: VocabReading
+) {
     val furigana = buildFuriganaString {
-        append(word.displayReading.furiganaPreview.withEncodedText(letterToHide))
+        val furigana = reading.run {
+            furigana ?: buildFuriganaString { append(kanjiReading ?: kanaReading) }
+        }
+        append(furigana.withEmptyFurigana())
+    }
+    FuriganaText(furigana)
+}
+
+@Composable
+fun HiddenLetterWordHeadline(
+    reading: VocabReading,
+    glossary: String,
+    letterToHide: String
+) {
+    val furigana = buildFuriganaString {
+        val furigana = reading.run {
+            furigana ?: buildFuriganaString { append(kanjiReading ?: kanaReading) }
+        }
+        append(furigana.withEncodedText(letterToHide))
         append("・ ")
-        append(word.combinedGlossary())
+        append(glossary)
     }
     FuriganaText(furigana)
 }

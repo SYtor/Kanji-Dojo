@@ -1,11 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case
 
 import ua.syt0r.kanji.core.logger.Logger
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
+import ua.syt0r.kanji.core.user_data.database.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemAction
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditVocabCard
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.LetterDeckEditListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
 
@@ -54,7 +55,7 @@ class DefaultSaveDeckUseCase(
                 vocabPracticeRepository.createDeck(
                     title = title,
                     words = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
-                        .map { it.word.id }
+                        .map { it.card.data }
                 )
             }
 
@@ -62,10 +63,12 @@ class DefaultSaveDeckUseCase(
                 vocabPracticeRepository.updateDeck(
                     id = configuration.vocabDeckId,
                     title = title,
-                    wordsToAdd = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
-                        .map { it.word.id },
-                    wordsToRemove = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Remove)
-                        .map { it.word.id }
+                    cardsToAdd = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
+                        .map { it.card.data },
+                    cardsToRemove = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Remove)
+                        .map { it.card }
+                        .filterIsInstance<DeckEditVocabCard.Existing>()
+                        .map { it.value.cardId }
                 )
             }
         }

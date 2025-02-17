@@ -1,6 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
+import ua.syt0r.kanji.core.VocabCardResolver
 import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
+import ua.syt0r.kanji.core.app_data.data.toFurigana
+import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
@@ -15,21 +20,42 @@ interface GetVocabPracticeWritingDataUseCase {
 }
 
 class DefaultGetVocabPracticeWritingDataUseCase(
-    private val appDataRepository: AppDataRepository,
-    private val getPrioritizedWordReadingUseCase: GetPrioritizedWordReadingUseCase
+    private val vocabCardResolver: VocabCardResolver,
+    private val appDataRepository: AppDataRepository
 ) : GetVocabPracticeWritingDataUseCase {
 
     override suspend fun invoke(
         descriptor: VocabPracticeQueueItemDescriptor.Writing
     ): VocabPracticeItemData.Writing {
-        val word = appDataRepository.getWord(descriptor.wordId)
-        val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)
-
+        val card = vocabCardResolver.resolveUserCard(descriptor.cardId)
         val strokeEvaluator = DefaultKanjiStrokeEvaluator()
 
-        val writerData = reading.compounds.toTypedArray()
-            .map { stringCompound -> stringCompound.text.map { it.toString() } }
-            .flatten()
+        val letters: String
+        val summaryReading: FuriganaString
+
+        when {
+            card.furigana != null -> {
+                letters = card.furigana.withoutAnnotations()
+                summaryReading = card.furigana
+            }
+
+            card.kanjiReading != null -> {
+                letters = card.kanjiReading
+                summaryReading = formattedVocabReading(
+                    kanaReading = card.kanaReading,
+                    kanjiReading = card.kanjiReading,
+                    linebreak = true
+                )
+            }
+
+            else -> {
+                letters = card.kanaReading
+                summaryReading = card.kanaReading.toFurigana()
+            }
+        }
+
+        val writerData = letters
+            .map { it.toString() }
             .map { character ->
                 val strokes = appDataRepository.getStrokes(character)
 
@@ -43,13 +69,13 @@ class DefaultGetVocabPracticeWritingDataUseCase(
                     )
                 }
                 character to characterWriterData
-
             }
 
         return VocabPracticeItemData.Writing(
-            word = word,
-            summaryReading = reading,
-            writerData = writerData
+            meaning = card.glossary.joinToString(),
+            summaryReading = summaryReading,
+            writerData = writerData,
+            vocabReference = null
         )
     }
 

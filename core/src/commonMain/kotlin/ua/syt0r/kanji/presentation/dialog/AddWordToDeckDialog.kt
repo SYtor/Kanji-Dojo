@@ -41,7 +41,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.user_data.practice.VocabPracticeRepository
+import ua.syt0r.kanji.core.user_data.database.VocabCardData
+import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
@@ -53,13 +54,13 @@ fun AddWordToDeckDialog(
     onDismissRequest: () -> Unit
 ) {
 
-    val dialogState = rememberAddWordToDeckDialogState(word.id)
+    val dialogState = rememberAddWordToDeckDialogState(word)
     val strings = resolveString { addWordToDeckDialog }
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
         scrollableContent = false,
-        title = { Text(strings.title(word.displayReading.textPreview)) },
+        title = { Text(strings.title(word.reading.run { kanjiReading ?: kanaReading })) },
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
@@ -207,22 +208,22 @@ private data class AddingDeckInfo(
 )
 
 @Composable
-private fun rememberAddWordToDeckDialogState(wordId: Long): AddWordToDeckDialogState {
-    val coroutineScope = rememberCoroutineScope()
+private fun rememberAddWordToDeckDialogState(word: JapaneseWord): AddWordToDeckDialogState {
     val repository = koinInject<VocabPracticeRepository>()
+    val coroutineScope = rememberCoroutineScope()
     return remember {
         AddWordToDeckDialogState(
-            wordId = wordId,
-            coroutineScope = coroutineScope,
-            repository = repository
+            word = word,
+            repository = repository,
+            coroutineScope = coroutineScope
         )
     }
 }
 
 private class AddWordToDeckDialogState(
-    private val wordId: Long,
+    private val word: JapaneseWord,
+    private val repository: VocabPracticeRepository,
     private val coroutineScope: CoroutineScope,
-    private val repository: VocabPracticeRepository
 ) {
 
     private val _state = mutableStateOf<AddingState>(AddingState.Loading)
@@ -252,14 +253,14 @@ private class AddWordToDeckDialogState(
                     _state.value = AddingState.Saving
                     repository.createDeck(
                         title = currentState.title.value,
-                        words = listOf(wordId)
+                        words = listOf(word.toCardData())
                     )
                 }
 
                 is AddingState.SelectingDeck -> {
                     val deckId = currentState.selectedDeck.value ?: return@launch
                     _state.value = AddingState.Saving
-                    repository.addWord(deckId, wordId)
+                    repository.addCard(deckId, word.toCardData())
                 }
 
                 else -> return@launch
@@ -267,5 +268,12 @@ private class AddWordToDeckDialogState(
             _state.value = AddingState.Completed
         }
     }
+
+    fun JapaneseWord.toCardData() = VocabCardData(
+        kanjiReading = reading.kanjiReading,
+        kanaReading = reading.kanaReading,
+        meaning = combinedGlossary(),
+        dictionaryId = id
+    )
 
 }

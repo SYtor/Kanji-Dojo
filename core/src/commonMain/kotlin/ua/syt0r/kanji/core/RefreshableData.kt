@@ -2,7 +2,6 @@ package ua.syt0r.kanji.core
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -20,7 +19,7 @@ sealed interface RefreshableData<T> {
 }
 
 inline fun <reified T> refreshableDataFlow(
-    dataChangeFlow: SharedFlow<Unit>,
+    dataChangeFlow: Flow<Unit>,
     lifecycleState: StateFlow<LifecycleState>,
     noinline valueProvider: suspend CoroutineScope.() -> T
 ): Flow<RefreshableData<T>> = channelFlow {

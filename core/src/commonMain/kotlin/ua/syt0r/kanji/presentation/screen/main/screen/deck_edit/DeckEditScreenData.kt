@@ -1,11 +1,12 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import kotlinx.serialization.Serializable
+import ua.syt0r.kanji.core.ResolvedVocabCard
 import ua.syt0r.kanji.core.app_data.WordClassification
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
+import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
+import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.use_case.SearchResult
 
@@ -60,19 +61,38 @@ sealed interface DeckEditScreenConfiguration {
 
 sealed interface DeckEditListItem {
     val initialAction: DeckEditItemAction
-    val action: State<DeckEditItemAction>
+    val action: MutableState<DeckEditItemAction>
 }
 
 data class LetterDeckEditListItem(
     val character: String,
     override val initialAction: DeckEditItemAction,
-    override val action: State<DeckEditItemAction>
+    override val action: MutableState<DeckEditItemAction>
 ) : DeckEditListItem
 
+sealed interface DeckEditVocabCard {
+
+    val data: VocabCardData
+    val resolvedCard: ResolvedVocabCard
+
+    data class New(
+        override val data: VocabCardData,
+        override val resolvedCard: ResolvedVocabCard
+    ) : DeckEditVocabCard
+
+    data class Existing(
+        val value: SavedVocabCard,
+        override val resolvedCard: ResolvedVocabCard
+    ) : DeckEditVocabCard {
+        override val data: VocabCardData = value.data
+    }
+
+}
+
 data class VocabDeckEditListItem(
-    val word: JapaneseWord,
+    val card: DeckEditVocabCard,
     override val initialAction: DeckEditItemAction,
-    override val action: State<DeckEditItemAction>
+    override val action: MutableState<DeckEditItemAction>
 ) : DeckEditListItem
 
 enum class DeckEditItemAction { Nothing, Add, Remove }

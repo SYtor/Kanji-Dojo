@@ -1,38 +1,15 @@
-package ua.syt0r.kanji.core.user_data.practice
+package ua.syt0r.kanji.core.user_data.database.sqldelight
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryItem
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
+import ua.syt0r.kanji.core.user_data.database.StreakData
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
 import ua.syt0r.kanji.core.userdata.db.Review_history
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-interface ReviewHistoryRepository {
-    suspend fun addReview(item: ReviewHistoryItem)
-    suspend fun getReviews(start: Instant, end: Instant): List<ReviewHistoryItem>
-    suspend fun getFirstReviewTime(key: String, practiceType: Long): Instant?
-    suspend fun getDeckLastReview(deckId: Long, practiceTypes: List<Long>): Instant?
-    suspend fun getTotalReviewsCount(): Long
-    suspend fun getUniqueReviewItemsCount(practiceTypes: List<Long>): Long
-    suspend fun getTotalPracticeTime(singleReviewDurationLimit: Long): Duration
-    suspend fun getStreaks(): List<StreakData>
-}
-
-data class ReviewHistoryItem(
-    val key: String,
-    val practiceType: Long,
-    val timestamp: Instant,
-    val duration: Duration,
-    val grade: Int,
-    val mistakes: Int,
-    val deckId: Long,
-)
-
-class StreakData(
-    val start: LocalDate,
-    val end: LocalDate,
-    val length: Int
-)
 
 class SqlDelightReviewHistoryRepository(
     private val userDataDatabaseManager: UserDataDatabaseManager
@@ -40,7 +17,7 @@ class SqlDelightReviewHistoryRepository(
 
     override suspend fun addReview(
         item: ReviewHistoryItem
-    ) = userDataDatabaseManager.runTransaction(true) {
+    ) = userDataDatabaseManager.writeTransaction {
         item.run {
             upsertReview(
                 key = key,
@@ -57,7 +34,7 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getReviews(
         start: Instant,
         end: Instant
-    ): List<ReviewHistoryItem> = userDataDatabaseManager.runTransaction(false) {
+    ): List<ReviewHistoryItem> = userDataDatabaseManager.readTransaction {
         getReviewHistory(start.toEpochMilliseconds(), end.toEpochMilliseconds())
             .executeAsList()
             .map { it.converted() }
@@ -66,7 +43,7 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getFirstReviewTime(
         key: String,
         practiceType: Long
-    ): Instant? = userDataDatabaseManager.runTransaction(false) {
+    ): Instant? = userDataDatabaseManager.readTransaction {
         getFirstReview(key, practiceType)
             .executeAsOneOrNull()
             ?.converted()
@@ -76,30 +53,30 @@ class SqlDelightReviewHistoryRepository(
     override suspend fun getDeckLastReview(
         deckId: Long,
         practiceTypes: List<Long>
-    ): Instant? = userDataDatabaseManager.runTransaction(false) {
+    ): Instant? = userDataDatabaseManager.readTransaction {
         getLastDeckReview(deckId, practiceTypes).executeAsOneOrNull()?.MAX
             ?.let { Instant.fromEpochMilliseconds(it) }
     }
 
     override suspend fun getTotalReviewsCount(): Long = userDataDatabaseManager
-        .runTransaction(false) { getTotalReviewsCount().executeAsOne() }
+        .readTransaction { getTotalReviewsCount().executeAsOne() }
 
     override suspend fun getUniqueReviewItemsCount(
         practiceTypes: List<Long>
-    ): Long = userDataDatabaseManager.runTransaction(false) {
+    ): Long = userDataDatabaseManager.readTransaction {
         getUniqueReviewItemsCountForPracticeTypes(practiceTypes).executeAsOne()
     }
 
     override suspend fun getTotalPracticeTime(
         singleReviewDurationLimit: Long
-    ): Duration = userDataDatabaseManager.runTransaction(false) {
+    ): Duration = userDataDatabaseManager.readTransaction {
         getTotalReviewsDuration(singleReviewDurationLimit).executeAsOneOrNull()
             ?.SUM
             ?.milliseconds
             ?: Duration.ZERO
     }
 
-    override suspend fun getStreaks() = userDataDatabaseManager.runTransaction(false) {
+    override suspend fun getStreaks() = userDataDatabaseManager.readTransaction {
         getReviewStreaks().executeAsList()
             .map {
                 StreakData(

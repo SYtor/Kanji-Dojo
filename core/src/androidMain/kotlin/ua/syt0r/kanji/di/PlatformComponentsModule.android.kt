@@ -30,7 +30,7 @@ import ua.syt0r.kanji.core.tts.AndroidKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.AndroidUserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.AndroidReminderSettingListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.settings.settingItemsQualifier

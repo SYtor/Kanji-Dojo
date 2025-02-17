@@ -31,7 +31,7 @@ val letterPracticeScreenModule = module {
     factory<GetLetterPracticeQueueDataUseCase> {
         DefaultGetLetterPracticeQueueDataUseCase(
             practicePreferences = get(),
-            srsItemRepository = get(),
+            srsCardRepository = get(),
             configurationUpdateScope = it.component1()
         )
     }
@@ -53,7 +53,7 @@ val letterPracticeScreenModule = module {
         DefaultLetterPracticeQueue(
             coroutineScope = it.component1(),
             timeUtils = get(),
-            srsItemRepository = get(),
+            srsCardRepository = get(),
             srsScheduler = get(),
             getQueueItemDataUseCase = get(),
             reviewHistoryRepository = get(),

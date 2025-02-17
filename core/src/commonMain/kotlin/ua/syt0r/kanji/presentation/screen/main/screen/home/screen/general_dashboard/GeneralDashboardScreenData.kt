@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashb
 
 import androidx.compose.runtime.MutableState
 import kotlinx.datetime.LocalDate
+import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 

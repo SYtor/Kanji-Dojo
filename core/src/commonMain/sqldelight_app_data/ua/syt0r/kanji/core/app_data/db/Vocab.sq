@@ -164,10 +164,10 @@ CREATE TABLE vocab_imports(
 );
 
 
-getClassificationsForVocab:
-SELECT class
+getVocabImportsForClassificationCount:
+SELECT COUNT(*)
 FROM vocab_imports
-WHERE jmdict_seq = ?;
+WHERE class = ?;
 
 getVocabImportsForClassification:
 SELECT *
@@ -273,3 +273,21 @@ WHERE reading LIKE '%' || :text || '%'
 GROUP BY entry_id
 ORDER BY priority IS NULL, priority, entry_id
 LIMIT :offset, :limit;
+
+findVocabElementsByIdOrReading:
+WITH
+    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
+              FROM vocab_kanji_element
+              WHERE entry_id = :entryId
+                 OR reading = :kanjiReading),
+    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
+             FROM vocab_kana_element
+             WHERE entry_id = :entryId
+                OR reading = :kanaReading),
+    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
+SELECT *
+FROM combined
+GROUP BY entry_id
+ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
+
+

@@ -46,7 +46,7 @@ object PreviewKanji {
 
     val WordWithAlternativesSample = JapaneseWord(
         id = 1,
-        displayReading = VocabReading.Kanji(
+        reading = VocabReading(
             kanjiReading = "人間",
             kanaReading = "",
             furigana = buildFuriganaString {
@@ -60,7 +60,7 @@ object PreviewKanji {
     private val SampleWordsPool = listOf<JapaneseWord>(
         JapaneseWord(
             id = 1,
-            displayReading = VocabReading.Kanji(
+            reading = VocabReading(
                 kanjiReading = "期間",
                 kanaReading = "",
                 furigana = buildFuriganaString {

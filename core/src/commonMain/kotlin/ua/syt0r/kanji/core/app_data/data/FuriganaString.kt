@@ -63,3 +63,5 @@ fun FuriganaString.withEmptyFurigana(): FuriganaString {
 fun FuriganaString.withoutAnnotations(): String {
     return compounds.joinToString("") { it.text }
 }
+
+fun String.toFurigana() = buildFuriganaString { append(this@toFurigana) }

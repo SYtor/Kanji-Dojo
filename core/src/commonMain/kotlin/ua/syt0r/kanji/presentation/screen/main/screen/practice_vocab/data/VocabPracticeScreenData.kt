@@ -4,7 +4,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
@@ -42,7 +41,7 @@ enum class VocabPracticeReadingPriority(
 }
 
 fun PreferencesVocabReadingPriority.toScreenType(): VocabPracticeReadingPriority {
-    return VocabPracticeReadingPriority.values().first { it.repoType == this }
+    return VocabPracticeReadingPriority.entries.first { it.repoType == this }
 }
 
 sealed interface VocabPracticeConfiguration {
@@ -57,14 +56,20 @@ sealed interface VocabPracticeConfiguration {
 
 }
 
+data class VocabReference(
+    val id: Long,
+    val kanjiReading: String,
+    val kanaReading: String
+)
+
 sealed interface VocabReviewState {
 
-    val word: JapaneseWord
+    val meaning: String
+    val vocabReference: VocabReference?
 
     interface Flashcard : VocabReviewState {
         val reading: FuriganaString
         val noFuriganaReading: FuriganaString
-        val meaning: String
         val showMeaningInFront: Boolean
         val showAnswer: State<Boolean>
     }
@@ -115,7 +120,6 @@ data class VocabPracticeReviewState(
 )
 
 data class VocabSummaryItem(
-    val word: JapaneseWord,
     val reading: FuriganaString,
     override val nextInterval: Duration
 ) : PracticeSummaryItem

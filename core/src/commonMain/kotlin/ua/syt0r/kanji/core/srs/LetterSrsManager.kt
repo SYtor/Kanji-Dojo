@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.practice.Deck
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
+import ua.syt0r.kanji.core.user_data.database.LetterDeck
+import ua.syt0r.kanji.core.user_data.database.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract
 
 interface LetterSrsManager {
@@ -31,7 +31,7 @@ data class LetterSrsDeck(
 
 class DefaultLetterSrsManager(
     private val practiceRepository: LetterPracticeRepository,
-    private val srsItemRepository: SrsItemRepository,
+    private val srsCardRepository: SrsCardRepository,
     dailyLimitManager: DailyLimitManager,
     timeUtils: TimeUtils,
     private val appPreferences: PreferencesContract.AppPreferences,
@@ -39,6 +39,7 @@ class DefaultLetterSrsManager(
     coroutineScope: CoroutineScope
 ) : SrsManager<String, LetterPracticeType, LetterSrsDeck>(
     deckChangesFlow = practiceRepository.changesFlow,
+    srsChangesFlow = srsCardRepository.changesFlow,
     dailyLimitManager = dailyLimitManager,
     timeUtils = timeUtils,
     coroutineScope = coroutineScope
@@ -58,13 +59,13 @@ class DefaultLetterSrsManager(
         return practiceRepository.getDecks().map { getDeckDescriptor(it) }
     }
 
-    private suspend fun getDeckDescriptor(it: Deck): LetterSrsDeckDescriptor {
+    private suspend fun getDeckDescriptor(it: LetterDeck): LetterSrsDeckDescriptor {
         val items = practiceRepository.getDeckCharacters(it.id)
 
         val itemsDataMap = LetterPracticeType.entries.associateWith { practiceType ->
             val itemsData: Map<String, SrsCardData> = items.associateWith { letter ->
                 val key = practiceType.toSrsKey(letter)
-                val card = srsItemRepository.get(key)
+                val card = srsCardRepository.get(key)
                 val firstReview = reviewHistoryRepository.getFirstReviewTime(
                     key = key.itemKey,
                     practiceType = practiceType.srsPracticeType.value

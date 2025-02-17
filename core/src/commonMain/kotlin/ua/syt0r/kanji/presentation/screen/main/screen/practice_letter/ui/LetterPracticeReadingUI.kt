@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.presentation.common.ConcealedFuriganaWordHeadline
+import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
@@ -147,14 +149,16 @@ private fun LazyListScope.addWordItems(
     }
 
     itemsIndexed(words) { index, word ->
-        val string = when {
-            revealed.value -> word.orderedPreview(index)
-            else -> word.orderedPreviewWithHiddenMeaning(index)
-        }
-        //TODO hidden state
         JapaneseWordUI(
             index = index,
-            word = word,
+            partOfSpeechList = word.partOfSpeechList,
+            headline = {
+                //TODO verify hidden state
+                when (revealed.value) {
+                    true -> FuriganaWordHeadline(word.reading, word.combinedGlossary())
+                    false -> ConcealedFuriganaWordHeadline(word.reading)
+                }
+            },
             onClick = { onWordClick(word) }.takeIf { revealed.value },
             addWordToVocabDeckClick = { addWordToDeck(word) }
         )

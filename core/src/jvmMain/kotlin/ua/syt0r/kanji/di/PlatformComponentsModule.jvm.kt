@@ -17,7 +17,7 @@ import ua.syt0r.kanji.core.tts.JavaKanaTtsManager
 import ua.syt0r.kanji.core.tts.KanaTtsManager
 import ua.syt0r.kanji.core.tts.Neural2BKanaVoiceData
 import ua.syt0r.kanji.core.user_data.JvmUserDataDatabaseManager
-import ua.syt0r.kanji.core.user_data.practice.db.UserDataDatabaseManager
+import ua.syt0r.kanji.core.user_data.database.UserDataDatabaseManager
 import ua.syt0r.kanji.core.user_data.preferences.DefaultUserPreferencesMigrationManager
 import ua.syt0r.kanji.presentation.multiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.screen.account.AccountScreenContract

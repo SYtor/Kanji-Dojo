@@ -114,10 +114,10 @@ class DefaultGetDeckDetailsVisibleDataUseCase(
 
         return DeckDetailsVisibleData.Vocab(
             items = filteredItems.map { vocabData ->
-                val key = DeckDetailsListItemKey(vocabData.word.id.toString())
+                val key = DeckDetailsListItemKey(vocabData.card.cardId.toString())
                 DeckDetailsListItem.Vocab(
                     key = key,
-                    word = vocabData.word,
+                    word = vocabData.card,
                     statusMap = vocabData.srsStatus,
                     initialSelectionState = selectionStates?.get(key) ?: false
                 )

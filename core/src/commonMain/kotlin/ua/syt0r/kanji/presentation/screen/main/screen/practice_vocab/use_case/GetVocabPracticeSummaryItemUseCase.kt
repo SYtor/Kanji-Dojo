@@ -15,19 +15,16 @@ class DefaultGetVocabPracticeSummaryItemUseCase : GetVocabPracticeSummaryItemUse
     override fun invoke(item: VocabPracticeQueueItem): VocabSummaryItem {
         return when (val state = item.data.getCompleted()) {
             is VocabPracticeItemData.Flashcard -> VocabSummaryItem(
-                word = state.word,
                 reading = state.reading,
                 nextInterval = item.srsCard.interval
             )
 
             is VocabPracticeItemData.Reading -> VocabSummaryItem(
-                word = state.word,
                 reading = state.revealedReading,
                 nextInterval = item.srsCard.interval
             )
 
             is VocabPracticeItemData.Writing -> VocabSummaryItem(
-                word = state.word,
                 reading = state.summaryReading,
                 nextInterval = item.srsCard.interval
             )

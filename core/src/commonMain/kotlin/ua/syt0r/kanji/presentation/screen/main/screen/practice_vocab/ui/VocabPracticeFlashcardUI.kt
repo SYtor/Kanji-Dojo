@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.presentation.common.AutopaddedScrollableColumn
 import ua.syt0r.kanji.presentation.common.ui.CenteredBoxWithSide
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
@@ -28,6 +27,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardP
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 
 @Composable
 fun VocabPracticeFlashcardUI(
@@ -35,7 +35,7 @@ fun VocabPracticeFlashcardUI(
     answers: PracticeAnswers,
     onRevealAnswerClick: () -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
-    onWordClick: (JapaneseWord) -> Unit
+    onWordClick: (VocabReference) -> Unit
 ) {
 
     AutopaddedScrollableColumn(
@@ -56,7 +56,7 @@ fun VocabPracticeFlashcardUI(
                 placeSideContentAtStart = false,
                 centerContent = {
                     Text(
-                        text = reviewState.word.combinedGlossary(),
+                        text = reviewState.meaning,
                         style = MaterialTheme.typography.displaySmall,
                         textAlign = TextAlign.Center,
                         maxLines = 2,
@@ -64,12 +64,15 @@ fun VocabPracticeFlashcardUI(
                     )
                 },
                 sideContent = {
-                    IconButton(
-                        enabled = reviewState.showAnswer.value,
-                        onClick = { onWordClick(reviewState.word) }
-                    ) {
-                        Icon(Icons.Default.ArrowOutward, null)
+                    reviewState.vocabReference?.let {
+                        IconButton(
+                            enabled = reviewState.showAnswer.value,
+                            onClick = { onWordClick(it) }
+                        ) {
+                            Icon(Icons.Default.ArrowOutward, null)
+                        }
                     }
+
                 }
             )
         }

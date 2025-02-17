@@ -20,7 +20,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
                 when (state.practiceType) {
                     ScreenVocabPracticeType.Flashcard -> {
                         VocabPracticeQueueItemDescriptor.Flashcard(
-                            wordId = wordId,
+                            cardId = wordId,
                             deckId = deckId,
                             priority = state.readingPriority.value,
                             translationInFont = state.flashcard.translationInFront.value
@@ -29,7 +29,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
 
                     ScreenVocabPracticeType.ReadingPicker -> {
                         VocabPracticeQueueItemDescriptor.ReadingPicker(
-                            wordId = wordId,
+                            cardId = wordId,
                             deckId = deckId,
                             priority = state.readingPriority.value,
                             showMeaning = state.readingPicker.showMeaning.value
@@ -38,7 +38,7 @@ class DefaultGetVocabPracticeQueueDataUseCase : GetVocabPracticeQueueDataUseCase
 
                     ScreenVocabPracticeType.Writing -> {
                         VocabPracticeQueueItemDescriptor.Writing(
-                            wordId = wordId,
+                            cardId = wordId,
                             deckId = deckId,
                             priority = state.readingPriority.value
                         )

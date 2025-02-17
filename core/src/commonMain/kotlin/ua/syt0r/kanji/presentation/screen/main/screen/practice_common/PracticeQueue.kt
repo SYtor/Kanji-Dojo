@@ -14,11 +14,11 @@ import ua.syt0r.kanji.core.debounceFirst
 import ua.syt0r.kanji.core.srs.SrsAnswers
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
-import ua.syt0r.kanji.core.srs.SrsItemRepository
+import ua.syt0r.kanji.core.srs.SrsCardRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryItem
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryItem
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
 import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -61,7 +61,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
     coroutineScope: CoroutineScope,
     protected val timeUtils: TimeUtils,
     protected val srsScheduler: SrsScheduler,
-    protected val srsItemRepository: SrsItemRepository,
+    protected val srsCardRepository: SrsCardRepository,
     private val reviewHistoryRepository: ReviewHistoryRepository,
     analyticsManager: AnalyticsManager
 ) : PracticeQueue<State, Descriptor>
@@ -142,7 +142,7 @@ abstract class BasePracticeQueue<State, Descriptor, QueueItem, SummaryItem>(
 
         updateState()
 
-        srsItemRepository.update(item.srsCardKey, answer.srsAnswer.card)
+        srsCardRepository.update(item.srsCardKey, answer.srsAnswer.card)
         saveReviewHistory(item, answer, instant, reviewDuration)
         reviewReporter.reportReview(updatedItem, answer, reviewDuration)
     }

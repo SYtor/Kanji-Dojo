@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.toFurigana
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ItemPositionData
@@ -417,14 +418,19 @@ private fun ExpressionsSection(
 
                 if (isNoTranslationLayout) {
                     words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
+                        // TODO hidden kanji, romaji
                         FuriganaText(
-                            furiganaString = it.displayReading.furiganaPreview,
+                            furiganaString = it.reading.run {
+                                furigana ?: kanjiReading?.toFurigana() ?: kanaReading.toFurigana()
+                            },
                             modifier = Modifier.padding(end = 16.dp)
                         )
                     }
                 } else {
                     FuriganaText(
-                        furiganaString = words.first().preview(),
+                        furiganaString = words.first().reading.run {
+                            furigana ?: kanjiReading?.toFurigana() ?: kanaReading.toFurigana()
+                        },
                         modifier = Modifier.padding(end = 16.dp)
                     )
                 }

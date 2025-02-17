@@ -43,7 +43,7 @@ val deckDetailsScreenModule = module {
     factory<SubscribeOnVocabDeckDetailsDataUseCase> {
         DefaultSubscribeOnVocabDeckDetailsDataUseCase(
             vocabSrsManager = get(),
-            appDataRepository = get()
+            vocabPracticeRepository = get()
         )
     }
 

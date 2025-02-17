@@ -21,7 +21,7 @@ fun Module.applySrsDefinitions() {
         DefaultLetterSrsManager(
             dailyLimitManager = get(),
             practiceRepository = get(),
-            srsItemRepository = get(),
+            srsCardRepository = get(),
             reviewHistoryRepository = get(),
             timeUtils = get(),
             appPreferences = get(),
@@ -33,8 +33,8 @@ fun Module.applySrsDefinitions() {
         DefaultGetSrsStatusUseCase(timeUtils = get())
     }
 
-    single<SrsItemRepository> {
-        DefaultSrsItemRepository(fsrsItemRepository = get())
+    single<SrsCardRepository> {
+        DefaultSrsCardRepository(fsrsCardRepository = get())
     }
 
     factory<SrsScheduler> { DefaultSrsScheduler(fsrsScheduler = get()) }
@@ -43,7 +43,7 @@ fun Module.applySrsDefinitions() {
     single<VocabSrsManager> {
         DefaultVocabSrsManager(
             practiceRepository = get(),
-            srsItemRepository = get(),
+            srsCardRepository = get(),
             dailyLimitManager = get(),
             timeUtils = get(),
             appPreferences = get(),

@@ -24,7 +24,6 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.snapToBiggerContainerCrossfadeTransitionSpec
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationEnumSelector
@@ -38,6 +37,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeTo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
@@ -49,6 +49,7 @@ fun VocabPracticeScreenUI(
     onFlashcardAnswerRevealClick: () -> Unit,
     onReadingPickerAnswerSelected: (String) -> Unit,
     onNext: (PracticeAnswer) -> Unit,
+    onWordClick: (VocabReference) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit,
     finishPractice: () -> Unit
@@ -110,6 +111,7 @@ fun VocabPracticeScreenUI(
                         onFlashcardAnswerRevealClick = onFlashcardAnswerRevealClick,
                         onAnswerSelected = onReadingPickerAnswerSelected,
                         onNextClick = onNext,
+                        onWordClick = onWordClick,
                         onFeedbackClick = onFeedback
                     )
                 }
@@ -208,16 +210,9 @@ private fun ScreenReview(
     onFlashcardAnswerRevealClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
+    onWordClick: (VocabReference) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
-
-    var alternativeWordsDialogWord by remember { mutableStateOf<JapaneseWord?>(null) }
-    alternativeWordsDialogWord?.also {
-        AlternativeWordsDialog(
-            word = it,
-            onDismissRequest = { alternativeWordsDialogWord = null }
-        )
-    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -230,7 +225,7 @@ private fun ScreenReview(
                     answers = reviewState.answers,
                     onRevealAnswerClick = onFlashcardAnswerRevealClick,
                     onNextClick = onNextClick,
-                    onWordClick = { alternativeWordsDialogWord = it },
+                    onWordClick = onWordClick,
                 )
             }
 
@@ -238,9 +233,9 @@ private fun ScreenReview(
                 VocabPracticeReadingPickerUI(
                     reviewState = currentState,
                     answers = reviewState.answers,
-                    onWordClick = { alternativeWordsDialogWord = it },
                     onAnswerSelected = onAnswerSelected,
                     onNextClick = onNextClick,
+                    onWordClick = onWordClick,
                     onFeedbackClick = onFeedbackClick
                 )
             }
@@ -250,7 +245,7 @@ private fun ScreenReview(
                     reviewState = currentState,
                     answers = reviewState.answers,
                     answerSelected = onNextClick,
-                    onWordClick = { alternativeWordsDialogWord = it },
+                    onWordClick = onWordClick,
                     onFeedbackClick = onFeedbackClick
                 )
             }

@@ -7,7 +7,7 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.dakutenHiraganaReadings
 import ua.syt0r.kanji.core.japanese.hiraganaReadings
 import ua.syt0r.kanji.core.japanese.hiraganaToKatakana
-import ua.syt0r.kanji.core.user_data.practice.LetterPracticeRepository
+import ua.syt0r.kanji.core.user_data.database.LetterPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
 
 interface LoadDeckEditLetterDataUseCase {

@@ -2,43 +2,33 @@ package ua.syt0r.kanji.core.app_data.data
 
 import kotlinx.serialization.Serializable
 
+
 @Serializable
-sealed interface VocabReading {
+data class VocabReading(
+    val kanjiReading: String?,
+    val kanaReading: String,
+    val furigana: FuriganaString?
+)
 
-    val textPreview: String
-    val furiganaPreview: FuriganaString
-
-    fun appendTo(builder: FuriganaStringBuilder)
-
-    @Serializable
-    data class Kana(val reading: String) : VocabReading {
-
-        override val textPreview: String = reading
-        override val furiganaPreview: FuriganaString = buildFuriganaString { append(textPreview) }
-
-        override fun appendTo(builder: FuriganaStringBuilder) {
-            builder.append(textPreview)
-        }
-
+fun formattedVocabReading(
+    kanaReading: String,
+    kanjiReading: String? = null,
+    furigana: FuriganaString? = null,
+    linebreak: Boolean = false
+): FuriganaString = when {
+    furigana != null -> {
+        furigana
     }
 
-    @Serializable
-    data class Kanji(
-        val kanjiReading: String,
-        val kanaReading: String,
-        val furigana: FuriganaString?
-    ) : VocabReading {
-
-        override val textPreview: String = kanjiReading
-        override val furiganaPreview: FuriganaString =
-            furigana ?: buildFuriganaString { append(kanjiReading) }
-
-        override fun appendTo(builder: FuriganaStringBuilder) {
-            if (furigana != null) builder.append(furigana) else builder.append(textPreview)
-        }
-
+    kanjiReading != null -> buildFuriganaString {
+        append(kanjiReading)
+        if (linebreak) append("\n")
+        append("【${kanaReading}】")
     }
 
+    else -> buildFuriganaString {
+        append(kanaReading)
+    }
 }
 
 @Serializable
@@ -50,28 +40,10 @@ data class VocabSense(
 @Serializable
 data class JapaneseWord(
     val id: Long,
-    val displayReading: VocabReading,
+    val reading: VocabReading,
     val glossary: List<String>,
     val partOfSpeechList: List<String>
 ) {
-
-    fun preview() = buildFuriganaString {
-        displayReading.appendTo(this)
-        append(" ")
-        append(glossary.joinToString())
-    }
-
-    fun orderedPreview(index: Int) = buildFuriganaString {
-        append("${index + 1}. ")
-        displayReading.appendTo(this)
-        append(" - ")
-        append(glossary.joinToString())
-    }
-
-    fun orderedPreviewWithHiddenMeaning(index: Int) = buildFuriganaString {
-        append("${index + 1}. ")
-        append(displayReading.textPreview)
-    }
 
     fun combinedGlossary(): String {
         return glossary.joinToString()

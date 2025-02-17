@@ -1,6 +1,5 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +27,6 @@ class DeckEditViewModel(
 
     private lateinit var configuration: DeckEditScreenConfiguration
 
-    private val itemActions = mutableMapOf<Any, MutableState<DeckEditItemAction>>()
     private val deckTitle = mutableStateOf("")
     private val wasDeckEdited = mutableStateOf(false)
 
@@ -82,9 +80,11 @@ class DeckEditViewModel(
                         title = deckTitle,
                         confirmExit = wasDeckEdited,
                         list = vocabData.words.map {
-                            val mutableAction = mutableStateOf(defaultListItemAction)
-                            itemActions[it.id] = mutableAction
-                            VocabDeckEditListItem(it, defaultListItemAction, mutableAction)
+                            VocabDeckEditListItem(
+                                card = it,
+                                initialAction = defaultListItemAction,
+                                action = mutableStateOf(defaultListItemAction)
+                            )
                         }
                     )
                     _state.value = vocabDeckEditingState
@@ -113,22 +113,21 @@ class DeckEditViewModel(
         searchResult: SearchResult,
         defaultAction: DeckEditItemAction
     ) {
+        val currentCharactersSet = letterEditingState.getCurrentList()
+            .map { it.character }
+            .toSet()
+
         val newListItems = searchResult.detectedCharacter
-            .filter { !itemActions.containsKey(it) }
+            .filter { !currentCharactersSet.contains(it) }
             .map {
                 val mutableAction = mutableStateOf(defaultAction)
-                itemActions[it] = mutableAction
                 LetterDeckEditListItem(it, defaultAction, mutableAction)
             }
         letterEditingState.listState.value = letterEditingState.listState.value.plus(newListItems)
     }
 
     override fun toggleRemoval(item: DeckEditListItem) {
-        val mutableAction = when (item) {
-            is LetterDeckEditListItem -> itemActions.getValue(item.character)
-            is VocabDeckEditListItem -> itemActions.getValue(item.word.id)
-        }
-        mutableAction.value = when (mutableAction.value) {
+        item.action.value = when (item.action.value) {
             DeckEditItemAction.Remove -> item.initialAction
             DeckEditItemAction.Add,
             DeckEditItemAction.Nothing -> DeckEditItemAction.Remove

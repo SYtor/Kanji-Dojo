@@ -25,6 +25,7 @@ val deckEditScreenModule = module {
     factory<LoadDeckEditVocabDataUseCase> {
         DefaultLoadDeckEditVocabDataUseCase(
             practiceRepository = get(),
+            vocabCardResolver = get(),
             appDataRepository = get()
         )
     }

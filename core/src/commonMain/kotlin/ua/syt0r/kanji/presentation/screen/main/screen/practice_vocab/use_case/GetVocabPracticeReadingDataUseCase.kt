@@ -1,6 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.use_case
 
+import ua.syt0r.kanji.core.VocabCardResolver
 import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.data.FuriganaString
+import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
+import ua.syt0r.kanji.core.app_data.data.toFurigana
 import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
@@ -12,28 +17,48 @@ interface GetVocabPracticeReadingDataUseCase {
 }
 
 class DefaultGetVocabPracticeReadingDataUseCase(
+    private val vocabCardResolver: VocabCardResolver,
     private val appDataRepository: AppDataRepository,
-    private val getPrioritizedWordReadingUseCase: GetPrioritizedWordReadingUseCase
 ) : GetVocabPracticeReadingDataUseCase {
 
     override suspend fun invoke(
         descriptor: VocabPracticeQueueItemDescriptor.ReadingPicker
     ): VocabPracticeItemData.Reading {
-        val word = appDataRepository.getWord(descriptor.wordId)
-        val reading = getPrioritizedWordReadingUseCase(word, descriptor.priority)
+        val card = vocabCardResolver.resolveUserCard(descriptor.cardId)
 
-        val containsKanji = reading.compounds.any { it.annotation != null }
+        val revealedReading: FuriganaString
+        val hiddenReading: FuriganaString
 
-        val (questionCharacter, correctAnswer) = when {
-            containsKanji -> {
-                reading.compounds
+        val question: String
+        val correctAnswer: String
+
+        var forceShowMeaning = false
+
+        when {
+            card.furigana != null -> {
+                revealedReading = card.furigana
+                val testCompound = revealedReading.compounds
                     .filter { it.annotation != null }
                     .random()
-                    .let { it.text to it.annotation!! }
+                question = testCompound.text
+                correctAnswer = testCompound.annotation!!
+                hiddenReading = revealedReading.withEncodedText(correctAnswer)
+            }
+
+            card.kanjiReading != null -> {
+                revealedReading = formattedVocabReading(card.kanaReading, card.kanjiReading)
+                hiddenReading = buildFuriganaString { append(card.kanjiReading) }
+                question = card.kanaReading
+                correctAnswer = card.kanaReading
             }
 
             else -> {
-                reading.compounds.random().text.random().toString().let { it to it }
+                val letter = card.kanaReading.random().toString()
+                question = letter
+                correctAnswer = letter
+                revealedReading = card.kanaReading.toFurigana()
+                hiddenReading = revealedReading.withEncodedText(letter)
+                forceShowMeaning = card.kanaReading.length == 1
             }
         }
 
@@ -44,13 +69,14 @@ class DefaultGetVocabPracticeReadingDataUseCase(
             .shuffled()
 
         return VocabPracticeItemData.Reading(
-            word = word,
-            questionCharacter = questionCharacter,
-            revealedReading = reading,
-            hiddenReading = reading.withEncodedText(correctAnswer),
+            question = question,
+            revealedReading = revealedReading,
+            hiddenReading = hiddenReading,
+            meaning = card.glossary.joinToString(),
             answers = answers,
             correctAnswer = correctAnswer,
-            showMeaning = descriptor.showMeaning || !containsKanji
+            showMeaning = descriptor.showMeaning || forceShowMeaning,
+            vocabReference = null
         )
     }
 

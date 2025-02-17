@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.user_data.practice.db
+package ua.syt0r.kanji.core.user_data.database
 
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
@@ -7,26 +7,33 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ua.syt0r.kanji.core.readUserVersion
 import ua.syt0r.kanji.core.transferToCompat
+import ua.syt0r.kanji.core.user_data.database.migration.UserDataDatabaseMigrationAfter3
+import ua.syt0r.kanji.core.user_data.database.migration.UserDataDatabaseMigrationAfter4
+import ua.syt0r.kanji.core.user_data.database.migration.UserDataDatabaseMigrationAfter8
+import ua.syt0r.kanji.core.user_data.database.use_case.UpdateLocalDataTimestampUseCase
 import ua.syt0r.kanji.core.user_data.db.UserDataDatabase
-import ua.syt0r.kanji.core.user_data.practice.UpdateLocalDataTimestampUseCase
-import ua.syt0r.kanji.core.userdata.db.PracticeQueries
+import ua.syt0r.kanji.core.userdata.db.UserDataQueries
 import java.io.File
 import java.io.InputStream
 import kotlin.coroutines.CoroutineContext
 
-interface UserDataDatabaseManager {
+interface UserDataDatabaseTransactionLauncherScope {
+    suspend fun <T> readTransaction(block: UserDataQueries.() -> T): T
+    suspend fun <T> writeTransaction(block: UserDataQueries.() -> T): T
+}
 
-    suspend fun <T> runTransaction(
-        isWritingChanges: Boolean,
-        block: PracticeQueries.() -> T
-    ): T
+interface UserDataDatabaseManager : UserDataDatabaseTransactionLauncherScope {
+
+    val databaseChangeEvents: SharedFlow<Unit>
 
     suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
@@ -36,16 +43,15 @@ interface UserDataDatabaseManager {
 
 }
 
-class UserDatabaseInfo(
-    val version: Long,
-    val file: File
-)
 
 abstract class BaseUserDataDatabaseManager(
     private val initContext: CoroutineContext,
     private val queryContext: CoroutineContext,
     private val updateLocalDataTimestampUseCase: UpdateLocalDataTimestampUseCase
 ) : UserDataDatabaseManager {
+
+    private val _databaseChangeEvents = MutableSharedFlow<Unit>()
+    override val databaseChangeEvents: SharedFlow<Unit> = _databaseChangeEvents
 
     private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined)
 
@@ -68,17 +74,11 @@ abstract class BaseUserDataDatabaseManager(
 
     protected abstract fun getDatabaseFile(): File
 
-    override suspend fun <T> runTransaction(
-        isWritingChanges: Boolean,
-        block: PracticeQueries.() -> T
-    ): T {
-        return withContext(queryContext) {
-            val queries = waitDatabaseConnection().database.practiceQueries
-            val result = queries.transactionWithResult { queries.block() }
-            if (isWritingChanges) updateLocalDataTimestampUseCase()
-            result
-        }
-    }
+    override suspend fun <T> readTransaction(block: UserDataQueries.() -> T): T =
+        runTransaction(false, block)
+
+    override suspend fun <T> writeTransaction(block: UserDataQueries.() -> T): T =
+        runTransaction(true, block)
 
     override suspend fun doWithSuspendedConnection(
         scope: suspend (info: UserDatabaseInfo) -> Unit
@@ -95,6 +95,19 @@ abstract class BaseUserDataDatabaseManager(
             val databaseFile = getDatabaseFile()
             databaseFile.delete()
             inputStream.use { it.transferToCompat(databaseFile.outputStream()) }
+        }
+        _databaseChangeEvents.emit(Unit)
+    }
+
+    private suspend fun <T> runTransaction(
+        isWritingChanges: Boolean,
+        block: UserDataQueries.() -> T
+    ): T {
+        return withContext(queryContext) {
+            val queries = waitDatabaseConnection().database.userDataQueries
+            val result = queries.transactionWithResult { queries.block() }
+            if (isWritingChanges) updateLocalDataTimestampUseCase()
+            result
         }
     }
 

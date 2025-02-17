@@ -468,7 +468,7 @@ object EnglishDeckEditStrings : DeckEditStrings {
     override val editingModeDetailsTitle: String = "Details"
     override val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
-            append("Save deck by clicking on the button below. To add more words use ")
+            append("To add a word from dictionary use ")
             appendInlineContent(it)
             append(" icon on search screen, during writing reviews and other places in the app")
         }
@@ -812,7 +812,8 @@ object EnglishSyncDialogStrings : SyncDialogStrings {
     override val errorNoNetworkTitle = "No Network"
     override val errorNoNetworkMessage = "Couldn't establish network connection"
     override val errorNoSubscriptionTitle = "Subscription Expired"
-    override val errorNoSubscriptionMessage = "Your subscription has expired, sync will be disabled, refresh your subscription status on the Account screen"
+    override val errorNoSubscriptionMessage =
+        "Your subscription has expired, sync will be disabled, refresh your subscription status on the Account screen"
     override val errorNotAuthenticatedTitle = "Session Expired"
     override val errorNotAuthenticatedMessage = "Sign in to your account again to continue"
     override val errorUnexpectedErrorTitle = "Unexpected Error"

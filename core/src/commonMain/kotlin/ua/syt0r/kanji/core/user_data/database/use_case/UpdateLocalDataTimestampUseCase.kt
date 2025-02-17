@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.core.user_data.practice
+package ua.syt0r.kanji.core.user_data.database.use_case
 
 import ua.syt0r.kanji.core.time.TimeUtils
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesContract

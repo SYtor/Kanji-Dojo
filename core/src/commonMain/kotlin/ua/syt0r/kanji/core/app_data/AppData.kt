@@ -29,6 +29,10 @@ interface AppDataRepository {
     suspend fun getCharacterReadingsOfLength(length: Int, limit: Int): List<String>
     suspend fun getData(kanji: String): KanjiData?
 
+    suspend fun getRadicals(): List<RadicalData>
+    suspend fun getCharactersWithRadicals(radicals: List<String>): List<String>
+    suspend fun getAllRadicalsInCharactersWithSelectedRadicals(radicals: Set<String>): List<String>
+
     suspend fun getWordsWithTextCount(text: String): Int
     suspend fun getWordsWithText(
         text: String,
@@ -36,14 +40,15 @@ interface AppDataRepository {
         limit: Int = Int.MAX_VALUE
     ): List<JapaneseWord>
 
-    suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
-    suspend fun getWord(id: Long): JapaneseWord
-    suspend fun getWordClassifications(id: Long): List<String>
-    suspend fun getWordsWithClassification(classification: String): List<Long>
+    suspend fun findWords(
+        id: Long?,
+        kanjiReading: String?,
+        kanaReading: String?
+    ): List<JapaneseWord>
 
-    suspend fun getRadicals(): List<RadicalData>
-    suspend fun getCharactersWithRadicals(radicals: List<String>): List<String>
-    suspend fun getAllRadicalsInCharactersWithSelectedRadicals(radicals: Set<String>): List<String>
+    suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getWordsWithClassificationCount(classification: String): Int
+    suspend fun getWordsWithClassification(classification: String): List<JapaneseWord>
 
 }
 

@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryItem
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryItem
 import kotlin.time.Duration
 
 

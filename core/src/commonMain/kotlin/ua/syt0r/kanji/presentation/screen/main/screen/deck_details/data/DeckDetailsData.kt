@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsItemStatus
+import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 
@@ -72,7 +72,7 @@ sealed interface DeckDetailsItemData {
     ) : DeckDetailsItemData
 
     data class VocabData(
-        val word: JapaneseWord,
+        val card: SavedVocabCard,
         val positionInPractice: Int,
         val srsStatus: Map<ScreenVocabPracticeType, SrsItemStatus>
     ) : DeckDetailsItemData
@@ -119,7 +119,7 @@ sealed interface DeckDetailsListItem {
 
     data class Vocab(
         override val key: DeckDetailsListItemKey,
-        val word: JapaneseWord,
+        val word: SavedVocabCard,
         val statusMap: Map<ScreenVocabPracticeType, SrsItemStatus>,
         val initialSelectionState: Boolean
     ) : DeckDetailsListItem {

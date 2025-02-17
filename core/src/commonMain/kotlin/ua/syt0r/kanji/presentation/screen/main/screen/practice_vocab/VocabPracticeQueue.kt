@@ -5,10 +5,10 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
-import ua.syt0r.kanji.core.srs.SrsItemRepository
+import ua.syt0r.kanji.core.srs.SrsCardRepository
 import ua.syt0r.kanji.core.srs.SrsScheduler
 import ua.syt0r.kanji.core.time.TimeUtils
-import ua.syt0r.kanji.core.user_data.practice.ReviewHistoryRepository
+import ua.syt0r.kanji.core.user_data.database.ReviewHistoryRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.BasePracticeQueue
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeQueue
@@ -29,7 +29,7 @@ private typealias BaseVocabPracticeQueue =
 class DefaultVocabPracticeQueue(
     private val coroutineScope: CoroutineScope,
     timeUtils: TimeUtils,
-    srsItemRepository: SrsItemRepository,
+    srsCardRepository: SrsCardRepository,
     srsScheduler: SrsScheduler,
     private val getFlashcardReviewStateUseCase: GetVocabPracticeFlashcardDataUseCase,
     private val getReadingReviewStateUseCase: GetVocabPracticeReadingDataUseCase,
@@ -40,18 +40,18 @@ class DefaultVocabPracticeQueue(
 ) : BaseVocabPracticeQueue(
     coroutineScope = coroutineScope,
     timeUtils = timeUtils,
-    srsItemRepository = srsItemRepository,
+    srsCardRepository = srsCardRepository,
     reviewHistoryRepository = reviewHistoryRepository,
     srsScheduler = srsScheduler,
     analyticsManager = analyticsManager
 ), VocabPracticeQueue {
 
     override suspend fun VocabPracticeQueueItemDescriptor.toQueueItem(): VocabPracticeQueueItem {
-        val srsCardKey = practiceType.dataType.toSrsKey(wordId)
+        val srsCardKey = practiceType.dataType.toSrsKey(cardId)
         return VocabPracticeQueueItem(
             descriptor = this,
             srsCardKey = srsCardKey,
-            srsCard = srsItemRepository.get(srsCardKey) ?: srsScheduler.newCard(),
+            srsCard = srsCardRepository.get(srsCardKey) ?: srsScheduler.newCard(),
             deckId = deckId,
             repeats = 0,
             totalMistakes = 0,

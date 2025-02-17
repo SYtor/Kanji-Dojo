@@ -67,9 +67,12 @@ CREATE TABLE IF NOT EXISTS vocab_deck (
 );
 
 CREATE TABLE IF NOT EXISTS vocab_deck_entry (
-    word_id INTEGER NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     deck_id INTEGER NOT NULL,
-    PRIMARY KEY(word_id, deck_id),
+    kanji_reading TEXT,
+    kana_reading TEXT,
+    meaning TEXT,
+    word_id INTEGER,
     FOREIGN KEY(deck_id) REFERENCES vocab_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 
@@ -87,10 +90,11 @@ updateVocabDeckPosition:
 UPDATE vocab_deck SET position=? WHERE id=?;
 
 insertVocabDeckEntry:
-INSERT OR IGNORE INTO vocab_deck_entry(word_id, deck_id) VALUES (?, ?);
+INSERT OR IGNORE INTO vocab_deck_entry(deck_id, kanji_reading, kana_reading, meaning, word_id)
+VALUES (?, ?, ?, ?, ?);
 
 deleteVocabDeckEntry:
-DELETE FROM vocab_deck_entry WHERE word_id = ? AND deck_id = ?;
+DELETE FROM vocab_deck_entry WHERE id = ?;
 
 migrateVocabDeckEntries:
 UPDATE OR REPLACE vocab_deck_entry
@@ -100,8 +104,12 @@ WHERE deck_id IN :deckIdToMigrate;
 getVocabDecks:
 SELECT * FROM vocab_deck;
 
+getVocabDeckEntryIds:
+SELECT id FROM vocab_deck_entry WHERE deck_id = :deckId;
+
 getVocabDeckEntries:
-SELECT * FROM vocab_deck_entry WHERE deck_id = :deckId;
+SELECT * FROM vocab_deck_entry;
+
 
 ------- FSRS -------
 

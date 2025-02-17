@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Path
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
@@ -21,7 +20,7 @@ import kotlin.time.Duration
 
 sealed interface VocabPracticeQueueState {
 
-    object Loading : VocabPracticeQueueState
+    data object Loading : VocabPracticeQueueState
 
     data class Review(
         val state: MutableVocabReviewState,
@@ -58,12 +57,12 @@ data class VocabPracticeQueueItem(
 
 sealed interface VocabPracticeQueueItemDescriptor {
 
-    val wordId: Long
+    val cardId: Long
     val practiceType: ScreenVocabPracticeType
     val deckId: Long
 
     data class Flashcard(
-        override val wordId: Long,
+        override val cardId: Long,
         override val deckId: Long,
         val priority: VocabPracticeReadingPriority,
         val translationInFont: Boolean
@@ -72,7 +71,7 @@ sealed interface VocabPracticeQueueItemDescriptor {
     }
 
     data class ReadingPicker(
-        override val wordId: Long,
+        override val cardId: Long,
         override val deckId: Long,
         val priority: VocabPracticeReadingPriority,
         val showMeaning: Boolean
@@ -81,7 +80,7 @@ sealed interface VocabPracticeQueueItemDescriptor {
     }
 
     data class Writing(
-        override val wordId: Long,
+        override val cardId: Long,
         override val deckId: Long,
         val priority: VocabPracticeReadingPriority
     ) : VocabPracticeQueueItemDescriptor {
@@ -102,53 +101,60 @@ sealed interface VocabPracticeItemData {
     fun toReviewState(coroutineScope: CoroutineScope): MutableVocabReviewState
 
     data class Flashcard(
-        val word: JapaneseWord,
         val reading: FuriganaString,
-        val noFuriganaReading: FuriganaString,
+        val hiddenReading: FuriganaString,
         val meaning: String,
         val showMeaningInFront: Boolean,
+        val vocabReference: VocabReference?
     ) : VocabPracticeItemData {
 
         override fun toReviewState(
             coroutineScope: CoroutineScope
         ) = MutableVocabReviewState.Flashcard(
-            word, reading, noFuriganaReading, meaning, showMeaningInFront
+            reading,
+            hiddenReading,
+            meaning,
+            showMeaningInFront,
+            vocabReference
         )
 
     }
 
     data class Reading(
-        val word: JapaneseWord,
-        val questionCharacter: String,
+        val question: String,
         val revealedReading: FuriganaString,
         val hiddenReading: FuriganaString,
+        val meaning: String,
         val answers: List<String>,
         val correctAnswer: String,
         val showMeaning: Boolean,
+        val vocabReference: VocabReference?,
     ) : VocabPracticeItemData {
         override fun toReviewState(
             coroutineScope: CoroutineScope
         ) = MutableVocabReviewState.Reading(
-            word,
-            questionCharacter,
+            question,
             revealedReading,
             hiddenReading,
+            meaning,
             answers,
             correctAnswer,
-            showMeaning
+            showMeaning,
+            vocabReference
         )
     }
 
     data class Writing(
-        val word: JapaneseWord,
+        val meaning: String,
         val summaryReading: FuriganaString,
-        val writerData: List<Pair<String, CharacterWriterData?>>
+        val writerData: List<Pair<String, CharacterWriterData?>>,
+        val vocabReference: VocabReference?
     ) : VocabPracticeItemData {
 
         override fun toReviewState(
             coroutineScope: CoroutineScope
         ) = MutableVocabReviewState.Writing(
-            word = word,
+            meaning = meaning,
             summaryReading = summaryReading,
             charactersData = writerData.map { (character, writerData) ->
                 if (writerData == null)
@@ -166,7 +172,8 @@ sealed interface VocabPracticeItemData {
                         )
                     }
                 )
-            }
+            },
+            vocabReference = vocabReference
         )
 
     }
@@ -177,16 +184,14 @@ sealed interface VocabPracticeItemData {
 sealed interface MutableVocabReviewState {
 
     val asImmutable: VocabReviewState
-
-    val word: JapaneseWord
     val summaryReading: FuriganaString
 
     class Flashcard(
-        override val word: JapaneseWord,
         override val reading: FuriganaString,
         override val noFuriganaReading: FuriganaString,
         override val meaning: String,
         override val showMeaningInFront: Boolean,
+        override val vocabReference: VocabReference?,
     ) : MutableVocabReviewState, VocabReviewState.Flashcard {
 
         override val showAnswer: MutableState<Boolean> = mutableStateOf(false)
@@ -197,13 +202,14 @@ sealed interface MutableVocabReviewState {
     }
 
     class Reading(
-        override val word: JapaneseWord,
         override val questionCharacter: String,
         val revealedReading: FuriganaString,
         hiddenReading: FuriganaString,
+        override val meaning: String,
         override val answers: List<String>,
         override val correctAnswer: String,
         override val showMeaning: Boolean,
+        override val vocabReference: VocabReference?,
     ) : MutableVocabReviewState, VocabReviewState.Reading {
 
         override val asImmutable: VocabReviewState.Reading = this
@@ -215,9 +221,10 @@ sealed interface MutableVocabReviewState {
     }
 
     class Writing(
-        override val word: JapaneseWord,
         override val summaryReading: FuriganaString,
         override val charactersData: List<VocabCharacterWritingData>,
+        override val meaning: String,
+        override val vocabReference: VocabReference?,
     ) : MutableVocabReviewState, VocabReviewState.Writing {
         override val asImmutable: VocabReviewState.Writing = this
         override val selected: MutableState<VocabCharacterWritingData> = mutableStateOf(

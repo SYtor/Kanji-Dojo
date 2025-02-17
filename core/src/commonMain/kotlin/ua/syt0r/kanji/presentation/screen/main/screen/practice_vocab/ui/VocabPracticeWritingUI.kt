@@ -70,13 +70,14 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 
 @Composable
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
     answers: PracticeAnswers,
     answerSelected: (PracticeAnswer) -> Unit,
-    onWordClick: (JapaneseWord) -> Unit,
+    onWordClick: (VocabReference) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -192,7 +193,7 @@ fun VocabPracticeWritingUI(
 private fun Progress(
     reviewState: VocabReviewState.Writing,
     revealAnswer: State<Boolean>,
-    onWordClick: (JapaneseWord) -> Unit,
+    onWordClick: (VocabReference) -> Unit,
     modifier: Modifier,
 ) {
 
@@ -205,21 +206,24 @@ private fun Progress(
         CenteredBoxWithSide(
             modifier = Modifier,
             placeSideContentAtStart = false,
-            sideContent = {
-                IconButton(
-                    enabled = revealAnswer.value,
-                    onClick = { onWordClick(reviewState.word) }
-                ) {
-                    Icon(Icons.Default.ArrowOutward, null)
-                }
-            },
             centerContent = {
                 Text(
-                    text = reviewState.word.combinedGlossary(),
+                    text = reviewState.meaning,
                     style = MaterialTheme.typography.displaySmall,
                     textAlign = TextAlign.Center
                 )
-            }
+            },
+            sideContent = {
+                reviewState.vocabReference?.let {
+                    IconButton(
+                        enabled = revealAnswer.value,
+                        onClick = { onWordClick(it) }
+                    ) {
+                        Icon(Icons.Default.ArrowOutward, null)
+                    }
+                }
+
+            },
         )
 
         val lazyListState = rememberLazyListState()

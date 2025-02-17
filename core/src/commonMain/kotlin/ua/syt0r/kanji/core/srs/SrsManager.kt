@@ -16,6 +16,7 @@ import kotlin.time.measureTime
 
 abstract class SrsManager<ItemType, PracticeType, Deck>(
     deckChangesFlow: SharedFlow<Unit>,
+    srsChangesFlow: SharedFlow<Unit>,
     private val dailyLimitManager: DailyLimitManager,
     private val timeUtils: TimeUtils,
     coroutineScope: CoroutineScope
@@ -31,7 +32,11 @@ abstract class SrsManager<ItemType, PracticeType, Deck>(
     val dataChangeFlow: SharedFlow<Unit> = _dataChangeFlow
 
     init {
-        merge(deckChangesFlow, dailyLimitManager.changesFlow)
+        merge(
+            deckChangesFlow,
+            srsChangesFlow,
+            dailyLimitManager.changesFlow
+        )
             .onEach {
                 cache = null
                 _dataChangeFlow.emit(Unit)
