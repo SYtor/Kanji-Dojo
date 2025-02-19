@@ -6,7 +6,6 @@ import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditItemAction
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
-import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditVocabCard
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.LetterDeckEditListItem
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditListItem
 
@@ -64,11 +63,15 @@ class DefaultSaveDeckUseCase(
                     id = configuration.vocabDeckId,
                     title = title,
                     cardsToAdd = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
-                        .map { it.card.data },
+                        .map { it.card.modifiedData.value ?: it.card.data },
+                    cardsToUpdate = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Nothing)
+                        .mapNotNull {
+                            it.card.savedVocabCard?.copy(
+                                data = it.card.modifiedData.value ?: return@mapNotNull null
+                            )
+                        },
                     cardsToRemove = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Remove)
-                        .map { it.card }
-                        .filterIsInstance<DeckEditVocabCard.Existing>()
-                        .map { it.value.cardId }
+                        .mapNotNull { it.card.savedVocabCard?.cardId }
                 )
             }
         }

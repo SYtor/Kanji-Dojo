@@ -159,6 +159,7 @@ CREATE TABLE vocab_imports(
     kanji TEXT,
     kana TEXT NOT NULL,
     definition TEXT NOT NULL,
+    priority INTEGER,
     class TEXT NOT NULL,
     PRIMARY KEY (jmdict_seq, kanji, kana, class)
 );
@@ -172,7 +173,8 @@ WHERE class = ?;
 getVocabImportsForClassification:
 SELECT *
 FROM vocab_imports
-WHERE class = ?;
+WHERE class = ?
+ORDER BY priority IS NULL, priority;
 
 
 getVocabKanaReadingsOfLength:
@@ -212,6 +214,45 @@ WITH
 SELECT *
 FROM vocab_kana_element
 WHERE element_id IN restrictedElements;
+
+getVocabKanjiElementsWithDetails:
+WITH
+    KanjiReadings AS (SELECT * FROM vocab_kanji_element WHERE entry_id = :wordId),
+    KanjiElements AS (SELECT element_id FROM KanjiReadings),
+    KanjiInformations AS (SELECT * FROM vocab_kanji_information WHERE element_id IN KanjiElements),
+    KanjiPriorities AS (SELECT * FROM vocab_kanji_priority WHERE element_id IN KanjiElements)
+SELECT KanjiReadings.element_id,
+       KanjiReadings.reading,
+       KanjiReadings.priority,
+       group_concat(KanjiInformations.information, :delimiter) AS informations,
+       group_concat(KanjiPriorities.priority, :delimiter)      AS priorities
+FROM KanjiReadings
+         LEFT JOIN KanjiInformations ON KanjiReadings.element_id = KanjiInformations.element_id
+         LEFT JOIN KanjiPriorities ON KanjiReadings.element_id = KanjiPriorities.priority
+GROUP BY KanjiReadings.element_id
+ORDER BY KanjiReadings.priority IS NULL, KanjiReadings.priority;
+
+
+getVocabKanaElementsWithDetails:
+WITH
+    KanaReadings AS (SELECT * FROM vocab_kana_element WHERE entry_id = :wordId),
+    KanaElements AS (SELECT element_id FROM KanaReadings),
+    KanaRestrictions AS (SELECT * FROM vocab_kana_restriction WHERE element_id IN KanaElements),
+    KanaInformations AS (SELECT * FROM vocab_kana_information WHERE element_id IN KanaElements),
+    KanaPriorities AS (SELECT * FROM vocab_kana_priority WHERE element_id IN KanaElements)
+SELECT KanaReadings.element_id,
+       KanaReadings.reading,
+       group_concat(KanaInformations.information, :delimiter)      AS informations,
+       group_concat(KanaPriorities.priority, :delimiter)           AS priorities,
+       KanaReadings.no_kanji,
+       group_concat(KanaRestrictions.restricted_kanji, :delimiter) AS restricted_kanji
+FROM KanaReadings
+         LEFT JOIN KanaInformations ON KanaReadings.element_id = KanaInformations.element_id
+         LEFT JOIN KanaPriorities ON KanaReadings.element_id = KanaPriorities.element_id
+         LEFT JOIN KanaRestrictions ON KanaReadings.element_id = KanaRestrictions.element_id
+WHERE KanaReadings.element_id IN KanaElements
+GROUP BY KanaReadings.element_id
+ORDER BY KanaReadings.priority IS NULL, KanaReadings.priority;
 
 getVocabSenses:
 SELECT id
@@ -289,5 +330,41 @@ SELECT *
 FROM combined
 GROUP BY entry_id
 ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
+
+getVocabElementsById:
+WITH
+    kanji AS (SELECT entry_id, element_id, reading, priority, 0 AS isKana
+              FROM vocab_kanji_element
+              WHERE entry_id = :entryId),
+    kana AS (SELECT entry_id, element_id, reading, priority, 1 AS isKana
+             FROM vocab_kana_element
+             WHERE entry_id = :entryId),
+    combined AS (SELECT * FROM kanji UNION SELECT * FROM kana)
+SELECT *
+FROM combined
+ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
+
+getVocabSensesWithDetails:
+WITH
+    Senses AS (SELECT id FROM vocab_sense WHERE entry_id = :wordId),
+    KanjiRestrictions AS (SELECT * FROM vocab_sense_kanji_restriction WHERE sense_id IN Senses),
+    KanaRestrictions AS (SELECT * FROM vocab_sense_kana_restriction WHERE sense_id IN Senses),
+    Glosses AS (SELECT * FROM vocab_sense_gloss WHERE sense_id IN Senses),
+    Pos AS (SELECT * FROM vocab_sense_part_of_speech WHERE sense_id IN Senses),
+    Informations AS (SELECT * FROM vocab_sense_information WHERE sense_id IN Senses)
+SELECT id,
+       group_concat(KanjiRestrictions.reading, :delimiter) AS kanji_restrictions,
+       group_concat(KanaRestrictions.reading, :delimiter)  AS kana_restrictions,
+       group_concat(Glosses.gloss_text, :delimiter)        AS glosses,
+       group_concat(Pos.part_of_speech, :delimiter)        AS pos,
+       group_concat(Informations.information, :delimiter)  AS info
+FROM Senses
+         LEFT JOIN KanjiRestrictions ON Senses.id = KanjiRestrictions.sense_id
+         LEFT JOIN KanaRestrictions ON Senses.id = KanaRestrictions.sense_id
+         LEFT JOIN Glosses ON Senses.id = Glosses.sense_id
+         LEFT JOIN Pos ON Senses.id = Pos.sense_id
+         LEFT JOIN Informations ON Senses.id = Informations.sense_id
+GROUP BY id;
+
 
 

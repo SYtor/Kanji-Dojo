@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
+import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
@@ -162,7 +162,9 @@ private fun WordItem(
         )
 
         FuriganaText(
-            furiganaString = buildFuriganaString { append(vocab.word.toString()) }, //TODO
+            furiganaString = vocab.word.data.run {
+                formattedVocabReading(kanaReading, kanjiReading)
+            },
             modifier = Modifier.weight(1f)
                 .padding(horizontal = 8.dp, vertical = 4.dp)
         )

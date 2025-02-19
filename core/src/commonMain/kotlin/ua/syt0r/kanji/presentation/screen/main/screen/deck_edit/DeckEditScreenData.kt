@@ -1,8 +1,8 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.Serializable
-import ua.syt0r.kanji.core.ResolvedVocabCard
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
@@ -21,7 +21,7 @@ sealed interface DeckEditScreenConfiguration {
     sealed interface LetterDeck : DeckEditScreenConfiguration {
 
         @Serializable
-        object CreateNew : LetterDeck
+        data object CreateNew : LetterDeck
 
         @Serializable
         data class CreateDerived(
@@ -41,7 +41,7 @@ sealed interface DeckEditScreenConfiguration {
     sealed interface VocabDeck : DeckEditScreenConfiguration {
 
         @Serializable
-        object CreateNew : VocabDeck
+        data object CreateNew : VocabDeck
 
         @Serializable
         data class CreateDerived(
@@ -70,23 +70,13 @@ data class LetterDeckEditListItem(
     override val action: MutableState<DeckEditItemAction>
 ) : DeckEditListItem
 
-sealed interface DeckEditVocabCard {
 
-    val data: VocabCardData
-    val resolvedCard: ResolvedVocabCard
-
-    data class New(
-        override val data: VocabCardData,
-        override val resolvedCard: ResolvedVocabCard
-    ) : DeckEditVocabCard
-
-    data class Existing(
-        val value: SavedVocabCard,
-        override val resolvedCard: ResolvedVocabCard
-    ) : DeckEditVocabCard {
-        override val data: VocabCardData = value.data
-    }
-
+data class DeckEditVocabCard(
+    val data: VocabCardData,
+    val savedVocabCard: SavedVocabCard?,
+    val meaning: String
+) {
+    val modifiedData: MutableState<VocabCardData?> = mutableStateOf(null)
 }
 
 data class VocabDeckEditListItem(

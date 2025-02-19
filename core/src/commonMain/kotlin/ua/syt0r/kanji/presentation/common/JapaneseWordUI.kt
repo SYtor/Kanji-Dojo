@@ -8,11 +8,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -45,26 +42,11 @@ fun JapaneseWordUI(
 
     Column {
 
-        if (index != 0) HorizontalDivider(Modifier.padding(horizontal = 12.dp))
-
         JapaneseWordUILayout(
             modifier = modifier.clickable(onClick),
             topContent = {
                 Text(
                     text = "${index + 1}",
-                    modifier = Modifier
-                        .padding(horizontal = 6.dp)
-                        .sizeIn(minWidth = 20.dp)
-                        .wrapContentSize()
-                )
-            },
-            middleContent = { headline() },
-            bottomContent = {
-
-                Text(
-                    text = partOfSpeechList.joinToString(),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -79,7 +61,15 @@ fun JapaneseWordUI(
                         Icon(Icons.Default.Add, null)
                     }
                 }
-
+            },
+            middleContent = { headline() },
+            bottomContent = {
+                Text(
+                    text = partOfSpeechList.joinToString(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
             }
         )
 
@@ -115,13 +105,13 @@ fun JapaneseWordUILayout(
     bottomContent: @Composable RowScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier = modifier.padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 16.dp)
     ) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.Start)
         ) {
             CompositionLocalProvider(
                 LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant,

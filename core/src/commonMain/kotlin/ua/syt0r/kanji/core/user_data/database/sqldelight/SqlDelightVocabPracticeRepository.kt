@@ -64,10 +64,19 @@ class SqlDelightVocabPracticeRepository(
         id: Long,
         title: String,
         cardsToAdd: List<VocabCardData>,
+        cardsToUpdate: List<SavedVocabCard>,
         cardsToRemove: List<Long>
     ) = writeTransaction {
         updateVocabDeckTitle(title, id)
         cardsToAdd.forEach { insert(id, it) }
+        cardsToUpdate.forEach {
+            updateVocabDeckEntry(
+                it.data.kanjiReading,
+                it.data.kanaReading,
+                it.data.meaning,
+                it.cardId
+            )
+        }
         cardsToRemove.forEach { deleteVocabDeckEntry(it) }
     }
 

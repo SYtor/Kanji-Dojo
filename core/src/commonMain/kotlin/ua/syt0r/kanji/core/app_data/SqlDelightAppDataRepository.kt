@@ -2,6 +2,9 @@ package ua.syt0r.kanji.core.app_data
 
 import kotlinx.coroutines.Deferred
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
+import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
+import ua.syt0r.kanji.core.app_data.data.DetailedVocabReading
+import ua.syt0r.kanji.core.app_data.data.DetailedVocabSense
 import ua.syt0r.kanji.core.app_data.data.FuriganaDBEntityCreator
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.app_data.data.FuriganaStringCompound
@@ -152,6 +155,81 @@ class SqlDelightAppDataRepository(
         getVocabKanaReadingsLike("%$char%", limit.toLong())
             .executeAsList()
             .map { getWord(it.entry_id, it.reading, null) }
+    }
+
+    private val delimiter = "|||"
+    private val infoIrregularKanji = "iK"
+    private val infoIrregularKana = "ik"
+
+    override suspend fun getDetailedWord(id: Long): DetailedJapaneseWord = vocabQuery {
+        val senseElements = getVocabSensesWithDetails(id, delimiter).executeAsList()
+
+        val kanjiElements = getVocabKanjiElementsWithDetails(id, delimiter).executeAsList()
+        val kanaElements = getVocabKanaElementsWithDetails(id, delimiter).executeAsList()
+
+        val kanjiReadings = kanjiElements.flatMap { kanjiElement ->
+            val matchingKanaElements = kanaElements.filter { kanaElement ->
+                val restrictedKanji = kanaElement.restricted_kanji?.split(delimiter) ?: emptyList()
+                restrictedKanji.isEmpty() || restrictedKanji.contains(kanjiElement.reading)
+            }
+
+            val infoList = kanjiElement.informations?.split(delimiter)?.toSet() ?: emptySet()
+
+            matchingKanaElements.map { kanaElement ->
+                val kanji = kanjiElement.reading
+                val kana = kanaElement.reading
+                DetailedVocabReading(
+                    kanji = kanji,
+                    kana = kana,
+                    furigana = searchFurigana(kanji, kana).executeAsOneOrNull()?.parseDBFurigana(),
+                    irregular = infoList.contains(infoIrregularKanji),
+                    rare = false,
+                    outdated = false
+                )
+            }
+        }
+
+        val kanaReadings = kanaElements.map {
+            DetailedVocabReading(
+                kanji = null,
+                kana = it.reading,
+                furigana = null,
+                irregular = false,
+                rare = false,
+                outdated = false
+            )
+        }
+
+        val senseList = senseElements.map {
+            val senseKanjiRestrictions = it.kanji_restrictions?.split(delimiter)
+                ?.toSet()
+                ?: emptySet()
+
+            val senseKanjiReadings = when {
+                senseKanjiRestrictions.isEmpty() -> kanjiReadings
+                else -> kanaReadings.filter { senseKanjiRestrictions.contains(it.kanji) }
+            }
+
+            val senseKanaRestrictions = it.kana_restrictions?.split(delimiter)
+                ?.toSet()
+                ?: emptySet()
+
+            val senseKanaReadings = when {
+                senseKanaRestrictions.isEmpty() -> kanaReadings
+                else -> kanaReadings.filter { senseKanaRestrictions.contains(it.kana) }
+            }
+
+            DetailedVocabSense(
+                glossary = it.glosses?.split(delimiter) ?: emptyList(),
+                partOfSpeechList = it.pos?.split(delimiter) ?: emptyList(),
+                readings = senseKanjiReadings + senseKanaReadings
+            )
+        }
+
+        DetailedJapaneseWord(
+            id = id,
+            senseList = senseList
+        )
     }
 
     override suspend fun getWordsWithClassificationCount(classification: String): Int = vocabQuery {

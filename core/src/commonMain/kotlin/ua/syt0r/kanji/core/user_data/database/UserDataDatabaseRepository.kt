@@ -38,6 +38,7 @@ interface VocabPracticeRepository : ObservableRepository {
         id: Long,
         title: String,
         cardsToAdd: List<VocabCardData>,
+        cardsToUpdate: List<SavedVocabCard>,
         cardsToRemove: List<Long>
     )
 

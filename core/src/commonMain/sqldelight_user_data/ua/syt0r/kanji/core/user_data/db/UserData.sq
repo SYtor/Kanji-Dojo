@@ -93,6 +93,9 @@ insertVocabDeckEntry:
 INSERT OR IGNORE INTO vocab_deck_entry(deck_id, kanji_reading, kana_reading, meaning, word_id)
 VALUES (?, ?, ?, ?, ?);
 
+updateVocabDeckEntry:
+UPDATE vocab_deck_entry SET kanji_reading=?, kana_reading=?, meaning=? WHERE id=?;
+
 deleteVocabDeckEntry:
 DELETE FROM vocab_deck_entry WHERE id = ?;
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.serialization.Serializable
 import ua.syt0r.kanji.BuildConfig
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
+import ua.syt0r.kanji.core.app_data.data.DetailedJapaneseWord
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.KanjiData
 import ua.syt0r.kanji.core.app_data.data.RadicalData
@@ -47,6 +48,8 @@ interface AppDataRepository {
     ): List<JapaneseWord>
 
     suspend fun getKanaWords(char: String, limit: Int = Int.MAX_VALUE): List<JapaneseWord>
+    suspend fun getDetailedWord(id: Long): DetailedJapaneseWord
+
     suspend fun getWordsWithClassificationCount(classification: String): Int
     suspend fun getWordsWithClassification(classification: String): List<JapaneseWord>
 

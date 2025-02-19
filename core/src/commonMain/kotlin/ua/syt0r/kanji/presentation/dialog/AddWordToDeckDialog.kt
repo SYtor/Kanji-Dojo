@@ -10,13 +10,10 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,12 +56,11 @@ fun AddWordToDeckDialog(
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        scrollableContent = false,
         title = { Text(strings.title(word.reading.run { kanjiReading ?: kanaReading })) },
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
-                modifier = Modifier.fillMaxWidth().weight(1f, false)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 DialogContent(
                     state = it,
@@ -108,10 +104,7 @@ private fun DialogContent(
         }
 
         is AddingState.SelectingDeck -> {
-            Column(
-                modifier = Modifier.heightIn(max = 300.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
+            Column {
                 Box(
                     modifier = Modifier.fillMaxWidth()
                         .clip(MaterialTheme.shapes.small)

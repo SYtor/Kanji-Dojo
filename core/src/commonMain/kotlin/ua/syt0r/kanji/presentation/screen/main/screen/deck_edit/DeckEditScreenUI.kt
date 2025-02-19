@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -198,6 +199,11 @@ fun DeckEditScreenUI(
 
 }
 
+private data class ToolbarButtonsState(
+    val showVocabReadingSwapButton: Boolean,
+    val showDeckDeleteButton: Boolean
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Toolbar(
@@ -230,16 +236,24 @@ private fun Toolbar(
             }
         },
         actions = {
-            val shouldShowDeleteButton = remember {
+            val toolbarButtonsState by remember {
                 derivedStateOf {
-                    configuration is DeckEditScreenConfiguration.EditExisting &&
-                            state.value is ScreenState.Loaded
+                    val isLoaded = state.value is ScreenState.Loaded
+                    ToolbarButtonsState(
+                        showVocabReadingSwapButton = isLoaded &&
+                                configuration is DeckEditScreenConfiguration.VocabDeck,
+                        showDeckDeleteButton = isLoaded &&
+                                configuration is DeckEditScreenConfiguration.EditExisting
+                    )
                 }
             }
-            if (shouldShowDeleteButton.value) {
-                IconButton(
-                    onClick = onDeleteClick
-                ) {
+            if (toolbarButtonsState.showVocabReadingSwapButton) {
+                IconButton(onClick = { TODO() }) {
+                    Icon(Icons.Default.PublishedWithChanges, null)
+                }
+            }
+            if (toolbarButtonsState.showDeckDeleteButton) {
+                IconButton(onDeleteClick) {
                     Icon(Icons.Default.Delete, null)
                 }
             }

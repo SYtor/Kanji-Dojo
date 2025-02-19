@@ -1,5 +1,7 @@
 package ua.syt0r.kanji.presentation.common
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,12 +11,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +43,6 @@ fun MultiplatformDialog(
     content: @Composable ColumnScope.() -> Unit,
     buttons: @Composable RowScope.() -> Unit,
     contentVerticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
-    scrollableContent: Boolean = true,
     paddedContent: Boolean = true
 ) = ExperimentalMultiplatformDialog(
     onDismissRequest,
@@ -49,7 +50,6 @@ fun MultiplatformDialog(
     content,
     buttons,
     contentVerticalArrangement,
-    scrollableContent,
     paddedContent
 )
 
@@ -61,7 +61,6 @@ fun ExperimentalMultiplatformDialog(
     content: @Composable ColumnScope.() -> Unit,
     buttons: @Composable FlowRowScope.() -> Unit,
     contentVerticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(0.dp),
-    scrollableContent: Boolean = true,
     paddedContent: Boolean = true
 ) {
 
@@ -70,14 +69,16 @@ fun ExperimentalMultiplatformDialog(
     ) {
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
-                .let { if (scrollableContent) it.verticalScroll(rememberScrollState()) else it }
+                .animateContentSize()
+                .height(IntrinsicSize.Max)
                 .padding(top = 20.dp, bottom = 10.dp)
         ) {
 
             Box(
-                modifier = Modifier.padding(horizontal = 20.dp)
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 12.dp)
             ) {
                 CompositionLocalProvider(
                     LocalTextStyle provides MaterialTheme.typography.titleLarge
@@ -86,14 +87,38 @@ fun ExperimentalMultiplatformDialog(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            val contentScrollState = rememberScrollState()
+
+            val visibleDividerColor = MaterialTheme.colorScheme.outlineVariant
+            val hiddenDividerColor = MaterialTheme.colorScheme.surface
+
+            val topDividerColor = animateColorAsState(
+                targetValue = when {
+                    contentScrollState.canScrollBackward -> visibleDividerColor
+                    else -> hiddenDividerColor
+                }
+            )
+
+            HorizontalDivider(color = topDividerColor.value)
 
             Column(
-                modifier = Modifier.padding(horizontal = if (paddedContent) 20.dp else 0.dp),
+                modifier = Modifier
+                    .padding(horizontal = if (paddedContent) 20.dp else 0.dp)
+                    .weight(1f)
+                    .verticalScroll(contentScrollState),
                 verticalArrangement = contentVerticalArrangement
             ) {
                 content()
             }
+
+            val bottomDividerColor = animateColorAsState(
+                targetValue = when {
+                    contentScrollState.canScrollForward -> visibleDividerColor
+                    else -> hiddenDividerColor
+                }
+            )
+
+            HorizontalDivider(color = bottomDividerColor.value)
 
             FlowRow(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -102,6 +127,7 @@ fun ExperimentalMultiplatformDialog(
                     .height(IntrinsicSize.Max)
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
+                    .padding(top = 8.dp)
             ) {
                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
                     buttons()

@@ -44,19 +44,17 @@ class DefaultLoadDeckEditVocabDataUseCase(
                     title = configuration.title,
                     words = appDataRepository.getWordsWithClassification(classificationValue)
                         .map {
+                            val meaning = it.combinedGlossary()
                             val cardData = VocabCardData(
                                 kanjiReading = it.reading.kanjiReading,
                                 kanaReading = it.reading.kanaReading,
-                                meaning = it.combinedGlossary(),
+                                meaning = meaning,
                                 dictionaryId = it.id
                             )
-                            DeckEditVocabCard.New(
+                            DeckEditVocabCard(
                                 data = cardData,
-                                resolvedCard = vocabCardResolver.resolveDictionaryCard(
-                                    dictionaryId = it.id,
-                                    kanjiReading = it.reading.kanjiReading,
-                                    kanaReading = it.reading.kanaReading
-                                )
+                                savedVocabCard = null,
+                                meaning = meaning
                             )
                         }
                 )
@@ -69,9 +67,20 @@ class DefaultLoadDeckEditVocabDataUseCase(
                     words = practiceRepository.getCardIdList(configuration.vocabDeckId)
                         .map {
                             val savedCard = cards.getValue(it)
-                            DeckEditVocabCard.Existing(
-                                value = savedCard,
-                                resolvedCard = vocabCardResolver.resolveUserCard(savedCard.cardId)
+                            val cardData = savedCard.data
+                            val meaning = savedCard.data.meaning
+                                ?: vocabCardResolver
+                                    .resolveDictionaryCard(
+                                        dictionaryId = cardData.dictionaryId,
+                                        kanjiReading = cardData.kanjiReading,
+                                        kanaReading = cardData.kanaReading
+                                    )
+                                    .glossary
+                                    .joinToString()
+                            DeckEditVocabCard(
+                                data = savedCard.data,
+                                savedVocabCard = savedCard,
+                                meaning = meaning
                             )
                         }
                 )
