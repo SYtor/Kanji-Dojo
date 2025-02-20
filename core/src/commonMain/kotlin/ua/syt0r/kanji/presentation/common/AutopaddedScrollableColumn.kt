@@ -63,6 +63,12 @@ fun rememberExtraListSpacerState(): ExtraListSpacerState {
 }
 
 
+fun Modifier.trackList(state: ExtraListSpacerState): Modifier =
+    onGloballyPositioned { state.updateList(it) }
+
+fun Modifier.trackOverlay(state: ExtraListSpacerState): Modifier =
+    onGloballyPositioned { state.updateOverlay(it) }
+
 class ExtraListSpacerState {
 
     private val listCoordinatesState = mutableStateOf<LayoutCoordinates?>(null)

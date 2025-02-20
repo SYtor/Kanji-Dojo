@@ -66,7 +66,7 @@ object JapaneseStrings : Strings {
     override val commonPractice: CommonPracticeStrings = JapaneseCommonPracticeStrings
     override val letterPractice: LetterPracticeStrings = JapaneseLetterPracticeStrings
     override val vocabPractice: VocabPracticeStrings = JapaneseVocabPracticeStrings
-    override val kanjiInfo: KanjiInfoStrings = JapaneseKanjiInfoStrings
+    override val info: InfoScreenStrings = JapaneseInfoScreenStrings
 
     override val urlPickerMessage: String = "開く"
     override val urlPickerErrorMessage: String = "ブラウザーが見つかりません"
@@ -643,7 +643,7 @@ object JapaneseVocabPracticeStrings : VocabPracticeStrings {
     override val detailsButton: String = "詳細"
 }
 
-object JapaneseKanjiInfoStrings : KanjiInfoStrings {
+object JapaneseInfoScreenStrings : InfoScreenStrings {
     override val strokesMessage: (count: Int) -> AnnotatedString = {
         buildAnnotatedString {
             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("${it}画") }

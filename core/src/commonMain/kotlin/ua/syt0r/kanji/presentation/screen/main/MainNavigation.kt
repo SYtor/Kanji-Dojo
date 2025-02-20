@@ -22,7 +22,8 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_picker.data.DeckPicke
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.HomeScreen
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreen
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreen
@@ -183,16 +184,16 @@ interface MainDestination {
     }
 
     @Serializable
-    data class KanjiInfo(
-        val character: String
+    data class Info(
+        val data: InfoScreenData
     ) : MainDestination {
 
-        override val analyticsName: String = "kanji_info"
+        override val analyticsName: String = "info"
 
         @Composable
         override fun Content(state: MainNavigationState) {
-            KanjiInfoScreen(
-                kanji = character,
+            InfoScreen(
+                screenData = data,
                 mainNavigationState = state
             )
         }
@@ -339,7 +340,7 @@ val defaultMainDestinations: List<MainDestinationConfiguration<*>> = listOf(
     MainDestination.DeckDetails::class.configuration(),
     MainDestination.DeckEdit::class.configuration(),
     MainDestination.Feedback::class.configuration(),
-    MainDestination.KanjiInfo::class.configuration(),
+    MainDestination.Info::class.configuration(),
     MainDestination.LetterPractice::class.configuration(),
     MainDestination.VocabPractice::class.configuration(),
     MainDestination.Account::class.configuration(),

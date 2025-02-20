@@ -1,7 +1,7 @@
 package ua.syt0r.kanji.presentation.common
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.Saver
@@ -65,10 +65,10 @@ fun CharacterClassification.Kana.resolveString(): String {
 
 expect val ExcludeNavigationGesturesModifier: Modifier
 
-fun LazyListState.isNearListEnd(eligibleItemsFromEnd: Int): Boolean = layoutInfo.run {
+fun LazyListLayoutInfo.isNearListEnd(triggerDistance: Int): Boolean {
     val lastVisibleItemIndex = visibleItemsInfo.lastOrNull()?.index ?: Int.MAX_VALUE
-    val thresholdItemIndex = totalItemsCount - eligibleItemsFromEnd - 1
-    lastVisibleItemIndex >= thresholdItemIndex
+    val thresholdItemIndex = totalItemsCount - triggerDistance - 1
+    return lastVisibleItemIndex >= thresholdItemIndex
 }
 
 

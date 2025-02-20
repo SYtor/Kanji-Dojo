@@ -68,7 +68,7 @@ object EnglishStrings : Strings {
     override val commonPractice: CommonPracticeStrings = EnglishCommonPracticeStrings
     override val letterPractice: LetterPracticeStrings = EnglishLetterPracticeStrings
     override val vocabPractice: VocabPracticeStrings = EnglishVocabPracticeStrings
-    override val kanjiInfo: KanjiInfoStrings = EnglishKanjiInfoStrings
+    override val info: InfoScreenStrings = EnglishInfoScreenStrings
 
     override val urlPickerMessage: String = "Open With"
     override val urlPickerErrorMessage: String = "Web browser not found"
@@ -692,7 +692,7 @@ private fun StringBuilder.appendIfNot0(number: Long, text: (Long) -> String) {
     if (number != 0L) append(text(number))
 }
 
-object EnglishKanjiInfoStrings : KanjiInfoStrings {
+object EnglishInfoScreenStrings : InfoScreenStrings {
     override val strokesMessage: (count: Int) -> AnnotatedString = {
         buildAnnotatedString {
             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(it.toString()) }

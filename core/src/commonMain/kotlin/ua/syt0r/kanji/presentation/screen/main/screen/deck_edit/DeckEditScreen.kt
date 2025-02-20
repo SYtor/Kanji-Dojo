@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 
 @Composable
 fun DeckEditScreen(
@@ -24,7 +25,10 @@ fun DeckEditScreen(
         navigateBack = { mainNavigationState.navigateBack() },
         submitSearch = { viewModel.searchCharacters(it) },
         dismissSearchResult = { viewModel.dismissSearchResult() },
-        onCharacterInfoClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
+        onCharacterInfoClick = {
+            val screenData = InfoScreenData.Letter(it)
+            mainNavigationState.navigate(MainDestination.Info(screenData))
+        },
         toggleRemoval = { viewModel.toggleRemoval(it) },
         saveChanges = { viewModel.saveDeck() },
         deleteDeck = { viewModel.deleteDeck() },

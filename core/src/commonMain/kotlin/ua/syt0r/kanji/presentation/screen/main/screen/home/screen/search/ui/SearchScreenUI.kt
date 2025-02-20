@@ -27,7 +27,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
@@ -64,6 +63,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
@@ -71,17 +71,14 @@ import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.CollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.isNearListEnd
-import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
-import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.SearchScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.data.RadicalSearchState
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreenUI(
     state: State<ScreenState>,
@@ -171,24 +168,11 @@ fun SearchScreenUI(
                 }
             }
 
-            var selectedWord by rememberSaveable(stateSaver = jsonSaver()) {
-                mutableStateOf<JapaneseWord?>(null)
-            }
-
-            selectedWord?.also {
-                AlternativeWordsDialog(
-                    word = it,
-                    onDismissRequest = { selectedWord = null },
-                    onFuriganaClick = onCharacterClick,
-                    onFeedbackClick = { onWordFeedback(it) }
-                )
-            }
-
             ListContent(
                 screenState = state.value,
                 searchContainerState = searchContainerState,
                 onCharacterClick = onCharacterClick,
-                onWordClick = { selectedWord = it },
+                onWordClick = { TODO() },
                 onScrolledToEnd = onScrolledToEnd
             )
 
@@ -281,9 +265,8 @@ private fun ListContent(
 
     if (canLoadMoreWords.value) {
         LaunchedEffect(Unit) {
-            snapshotFlow {
-                listState.isNearListEnd(SearchScreenContract.LoadMoreWordsFromEndThreshold)
-            }
+            snapshotFlow { listState.layoutInfo }
+                .map { it.isNearListEnd(SearchScreenContract.LoadMoreWordsFromEndThreshold) }
                 .filter { it }
                 .collect { onScrolledToEnd() }
         }

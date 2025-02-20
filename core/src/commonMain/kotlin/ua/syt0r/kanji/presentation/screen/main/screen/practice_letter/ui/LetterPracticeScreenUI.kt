@@ -55,11 +55,9 @@ import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
-import ua.syt0r.kanji.presentation.common.jsonSaver
 import ua.syt0r.kanji.presentation.common.resolveString
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
-import ua.syt0r.kanji.presentation.dialog.AlternativeWordsDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationCharactersPreview
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeConfigurationContainer
@@ -113,18 +111,6 @@ fun LetterPracticeScreenUI(
         MultiplatformBackHandler { showEarlyFinishDialog = true }
     }
 
-    var selectedWordForAlternativeDialog by rememberSaveable(stateSaver = jsonSaver()) {
-        mutableStateOf<JapaneseWord?>(null)
-    }
-
-    selectedWordForAlternativeDialog?.let {
-        AlternativeWordsDialog(
-            word = it,
-            onDismissRequest = { selectedWordForAlternativeDialog = null },
-            onFeedbackClick = { navigateToWordFeedback(it) }
-        )
-    }
-
     ScreenLayout(
         state = state,
         toolbar = {
@@ -150,7 +136,7 @@ fun LetterPracticeScreenUI(
                 reviewState = it.reviewState,
                 onNextClick = onNextClick,
                 speakKana = speakKana,
-                onWordClick = { selectedWordForAlternativeDialog = it }
+                onWordClick = { TODO() }
             )
         },
         summary = {

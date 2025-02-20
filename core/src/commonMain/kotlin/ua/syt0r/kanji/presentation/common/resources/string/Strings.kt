@@ -83,7 +83,7 @@ interface Strings {
     val letterPractice: LetterPracticeStrings
     val vocabPractice: VocabPracticeStrings
 
-    val kanjiInfo: KanjiInfoStrings
+    val info: InfoScreenStrings
 
     val urlPickerMessage: String
     val urlPickerErrorMessage: String
@@ -641,7 +641,7 @@ interface VocabPracticeStrings {
 
 }
 
-interface KanjiInfoStrings {
+interface InfoScreenStrings {
     val strokesMessage: (count: Int) -> AnnotatedString
     val clipboardCopyMessage: String
     val radicalsSectionTitle: (count: Int) -> String

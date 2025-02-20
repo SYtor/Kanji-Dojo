@@ -1,7 +1,6 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.use_case
+package ua.syt0r.kanji.presentation.screen.main.screen.info.use_case
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
@@ -10,30 +9,35 @@ import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
-import ua.syt0r.kanji.presentation.common.PaginatableJapaneseWordList
+import ua.syt0r.kanji.presentation.common.paginateable
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalDetails
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSectionData
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 
-class KanjiInfoLoadDataUseCase(
+class LetterInfoLoadDataUseCase(
     private val appDataRepository: AppDataRepository,
     private val characterClassifier: CharacterClassifier,
     private val analyticsManager: AnalyticsManager
-) : KanjiInfoScreenContract.LoadDataUseCase {
+) : InfoScreenContract.LoadDataUseCase {
 
     companion object {
         private const val NoStrokesErrorMessage = "No strokes found"
     }
 
-    override suspend fun load(character: String): ScreenState {
+    override suspend fun load(
+        character: String,
+        coroutineScope: CoroutineScope
+    ): ScreenState {
         return kotlin.runCatching {
             val char = character.first()
-            when {
-                char.isKana() -> getKana(character)
-                else -> getKanji(character)
+            val data = when {
+                char.isKana() -> getKana(character, coroutineScope)
+                else -> getKanji(character, coroutineScope)
             }
+            ScreenState.Loaded.Letter(data)
         }.getOrElse {
             analyticsManager.sendEvent("kanji_info_loading_error") {
                 put("message", it.message ?: "No message")
@@ -42,18 +46,24 @@ class KanjiInfoLoadDataUseCase(
         }
     }
 
-    private suspend fun getKana(character: String): ScreenState.Loaded.Kana {
+    private suspend fun getKana(
+        character: String,
+        coroutineScope: CoroutineScope
+    ): LetterInfoData.Kana {
         val kanaInfo = getKanaInfo(character.first())
-        return ScreenState.Loaded.Kana(
+        return LetterInfoData.Kana(
             character = character,
             strokes = getStrokes(character),
-            words = getWords(character),
             kanaSystem = kanaInfo.classification,
-            reading = kanaInfo.reading
+            reading = kanaInfo.reading,
+            vocab = getVocabPaginateable(character, coroutineScope)
         )
     }
 
-    private suspend fun getKanji(character: String): ScreenState.Loaded.Kanji {
+    private suspend fun getKanji(
+        character: String,
+        coroutineScope: CoroutineScope
+    ): LetterInfoData.Kanji {
         val kanjiData = appDataRepository.getData(character)
 
         val readings = appDataRepository.getReadings(character)
@@ -62,7 +72,6 @@ class KanjiInfoLoadDataUseCase(
         val kunReadings = readings.filter { it.value == ReadingType.KUN }
             .map { it.key }
 
-
         val classifications = characterClassifier.get(character)
         val strokes = getStrokes(character)
         val radicals = getRadicals(character).sortedWith(
@@ -70,10 +79,9 @@ class KanjiInfoLoadDataUseCase(
                 .thenByDescending { it.strokesCount }
         )
 
-        return ScreenState.Loaded.Kanji(
+        return LetterInfoData.Kanji(
             character = character,
             strokes = strokes,
-            words = getWords(character),
             meanings = appDataRepository.getMeanings(character),
             on = onReadings,
             kun = kunReadings,
@@ -94,7 +102,8 @@ class KanjiInfoLoadDataUseCase(
                     )
                 }
             ),
-            displayRadicals = radicals.map { it.radical }.distinct()
+            displayRadicals = radicals.map { it.radical }.distinct(),
+            vocab = getVocabPaginateable(character, coroutineScope)
         )
     }
 
@@ -106,16 +115,19 @@ class KanjiInfoLoadDataUseCase(
         .getRadicalsInCharacter(character)
         .sortedBy { it.strokesCount }
 
-    private suspend fun getWords(character: String): MutableState<PaginatableJapaneseWordList> {
-        val totalWordsCount = appDataRepository.getWordsWithTextCount(character)
-        val initialList = appDataRepository.getWordsWithText(
-            text = character,
-            limit = KanjiInfoScreenContract.InitiallyLoadedWordsAmount
-        )
-        return PaginatableJapaneseWordList(
-            totalCount = totalWordsCount,
-            items = initialList
-        ).let { mutableStateOf(it) }
-    }
+    private suspend fun getVocabPaginateable(
+        letter: String,
+        coroutineScope: CoroutineScope
+    ) = paginateable(
+        coroutineScope = coroutineScope,
+        limit = appDataRepository.getWordsWithTextCount(letter),
+        load = { offset ->
+            appDataRepository.getWordsWithText(
+                text = letter,
+                offset = offset,
+                limit = InfoScreenContract.VocabListPageCount
+            )
+        }
+    )
 
 }

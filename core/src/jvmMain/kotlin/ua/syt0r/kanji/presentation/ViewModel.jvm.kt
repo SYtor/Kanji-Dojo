@@ -14,14 +14,18 @@ import org.koin.core.parameter.emptyParametersHolder
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.Qualifier
 import org.koin.core.scope.Scope
+import ua.syt0r.kanji.core.logger.Logger
 
 @Composable
-actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
+actual inline fun <reified T> platformGetMultiplatformViewModel(args: Array<out Any>): T {
     /***
      * Using custom coroutine scope instead of remember one since it can leave composition when
      * navigating so view model will have canceled scope after returning to the screen
      */
-    return saveableKoinInject<T> { parametersOf(CoroutineScope(Dispatchers.Unconfined)) }
+    return saveableKoinInject<T> {
+        val scope = CoroutineScope(Dispatchers.Unconfined)
+        parametersOf(scope, *args)
+    }
 }
 
 actual inline fun <reified T> Module.platformMultiplatformViewModel(
@@ -36,6 +40,7 @@ inline fun <reified T> saveableKoinInject(
     scope: Scope = currentKoinScope(),
     noinline parameters: ParametersDefinition? = null,
 ): T {
+    Logger.d(scope.toString())
     // This will always refer to the latest parameters
     val currentParameters by rememberUpdatedState(parameters)
 

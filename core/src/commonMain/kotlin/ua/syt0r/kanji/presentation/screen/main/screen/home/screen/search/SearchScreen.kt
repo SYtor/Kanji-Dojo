@@ -7,6 +7,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui.SearchScreenUI
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 
 @Composable
 fun SearchScreen(
@@ -20,7 +21,10 @@ fun SearchScreen(
         onSubmitInput = { viewModel.search(it) },
         onRadicalsSectionExpanded = { viewModel.loadRadicalsData() },
         onRadicalsSelected = { viewModel.radicalsSearch(it) },
-        onCharacterClick = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
+        onCharacterClick = {
+            val screenData = InfoScreenData.Letter(it)
+            mainNavigationState.navigate(MainDestination.Info(screenData))
+        },
         onScrolledToEnd = { viewModel.loadMoreWords() },
         onWordFeedback = {
             val feedbackTopic = FeedbackTopic.Expression(it.id, FeedbackScreen.Search)

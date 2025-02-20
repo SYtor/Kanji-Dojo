@@ -9,6 +9,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.DeckEditScreenConfiguration
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 
 @Composable
 fun DeckDetailsScreen(
@@ -42,7 +43,9 @@ fun DeckDetailsScreen(
             }
             mainNavigationState.navigate(MainDestination.DeckEdit(deckEditConfiguration))
         },
-        navigateToCharacterDetails = { mainNavigationState.navigate(MainDestination.KanjiInfo(it)) },
+        navigateToCharacterDetails = {
+            val screenData = InfoScreenData.Letter(it)
+            mainNavigationState.navigate(MainDestination.Info(screenData)) },
         startGroupReview = { group ->
             val configuration = viewModel.getPracticeConfiguration(group)
             mainNavigationState.navigate(configuration)

@@ -44,7 +44,7 @@ fun KanjiRadicalsSection(
     ) {
 
         Text(
-            text = resolveString { kanjiInfo.radicalsSectionTitle(state.radicals.size) },
+            text = resolveString { info.radicalsSectionTitle(state.radicals.size) },
             style = MaterialTheme.typography.titleLarge
         )
 

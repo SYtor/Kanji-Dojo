@@ -31,13 +31,18 @@ actual inline fun <reified T> Module.platformMultiplatformViewModel(
 
     viewModel<AndroidViewModelWrapper<T>>(
         qualifier = named<T>()
-    ) {
-        AndroidViewModelWrapper { coroutineScope -> get { parametersOf(coroutineScope) } }
+    ) { params ->
+        AndroidViewModelWrapper { coroutineScope ->
+            get { parametersOf(coroutineScope, *params.values.toTypedArray()) }
+        }
     }
 
 }
 
 @Composable
-actual inline fun <reified T> platformGetMultiplatformViewModel(): T {
-    return koinViewModel<AndroidViewModelWrapper<T>>(qualifier = named<T>()).viewModel
+actual inline fun <reified T> platformGetMultiplatformViewModel(args: Array<out Any>): T {
+    return koinViewModel<AndroidViewModelWrapper<T>>(
+        qualifier = named<T>(),
+        parameters = { parametersOf(*args) }
+    ).viewModel
 }

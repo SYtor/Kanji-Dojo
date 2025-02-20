@@ -21,8 +21,8 @@ interface LifecycleAwareViewModel {
 }
 
 @Composable
-inline fun <reified T> getMultiplatformViewModel(): T {
-    val viewModel: T = platformGetMultiplatformViewModel()
+inline fun <reified T> getMultiplatformViewModel(vararg args: Any): T {
+    val viewModel: T = platformGetMultiplatformViewModel(args)
 
     if (viewModel is LifecycleAwareViewModel) {
         DisposableEffect(Unit) {
@@ -37,4 +37,4 @@ inline fun <reified T> getMultiplatformViewModel(): T {
 }
 
 @Composable
-expect inline fun <reified T> platformGetMultiplatformViewModel(): T
+expect inline fun <reified T> platformGetMultiplatformViewModel(args: Array<out Any>): T

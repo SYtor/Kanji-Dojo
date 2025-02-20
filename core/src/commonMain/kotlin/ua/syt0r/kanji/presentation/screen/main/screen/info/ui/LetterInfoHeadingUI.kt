@@ -1,4 +1,4 @@
-package ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.ui
+package ua.syt0r.kanji.presentation.screen.main.screen.info.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,27 +27,27 @@ import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSection
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiReadingsContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.kanji_info.KanjiInfoScreenContract.ScreenState
+import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 
 @Composable
-fun KanjiInfoCharacterInfoSection(
-    screenState: ScreenState.Loaded,
+fun LetterInfoHeadingUI(
+    letterData: LetterInfoData,
     onCopyButtonClick: () -> Unit,
     onRadicalClick: (String) -> Unit
 ) {
 
-    when (screenState) {
-        is ScreenState.Loaded.Kana -> {
+    when (letterData) {
+        is LetterInfoData.Kana -> {
             KanaInfo(
-                screenState = screenState,
+                data = letterData,
                 onCopyButtonClick = onCopyButtonClick,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             )
         }
 
-        is ScreenState.Loaded.Kanji -> {
+        is LetterInfoData.Kanji -> {
             KanjiInfo(
-                screenState = screenState,
+                data = letterData,
                 onCopyButtonClick = onCopyButtonClick,
                 onRadicalClick = onRadicalClick,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
@@ -59,7 +59,7 @@ fun KanjiInfoCharacterInfoSection(
 
 @Composable
 private fun KanaInfo(
-    screenState: ScreenState.Loaded.Kana,
+    data: LetterInfoData.Kana,
     onCopyButtonClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -72,7 +72,7 @@ private fun KanaInfo(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            AnimatableCharacter(screenState.strokes)
+            AnimatableCharacter(data.strokes)
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -80,17 +80,17 @@ private fun KanaInfo(
             ) {
 
                 Text(
-                    text = screenState.kanaSystem.resolveString(),
+                    text = data.kanaSystem.resolveString(),
                     style = MaterialTheme.typography.headlineSmall
                 )
 
-                val readings = screenState.reading.let {
+                val readings = data.reading.let {
                     if (it.alternative != null) listOf(it.nihonShiki) + it.alternative
                     else listOf(it.nihonShiki)
                 }
 
                 Text(
-                    text = resolveString { kanjiInfo.romajiMessage(readings) },
+                    text = resolveString { info.romajiMessage(readings) },
                     style = MaterialTheme.typography.headlineSmall
                 )
 
@@ -110,7 +110,7 @@ private fun KanaInfo(
 
 @Composable
 private fun KanjiInfo(
-    screenState: ScreenState.Loaded.Kanji,
+    data: LetterInfoData.Kanji,
     onCopyButtonClick: () -> Unit,
     onRadicalClick: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -125,29 +125,29 @@ private fun KanjiInfo(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            AnimatableCharacter(strokes = screenState.strokes)
+            AnimatableCharacter(strokes = data.strokes)
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
 
-                screenState.grade?.let {
+                data.grade?.let {
                     Text(
-                        text = resolveString { kanjiInfo.gradeMessage(it) },
+                        text = resolveString { info.gradeMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
 
-                screenState.jlptLevel?.let {
+                data.jlptLevel?.let {
                     Text(
-                        text = resolveString { kanjiInfo.jlptMessage(it) },
+                        text = resolveString { info.jlptMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
 
-                screenState.frequency?.let {
+                data.frequency?.let {
                     Text(
-                        text = resolveString { kanjiInfo.frequencyMessage(it) },
+                        text = resolveString { info.frequencyMessage(it) },
                         style = MaterialTheme.typography.titleSmall
                     )
                 }
@@ -163,21 +163,21 @@ private fun KanjiInfo(
 
         }
 
-        if (screenState.meanings.isNotEmpty()) {
+        if (data.meanings.isNotEmpty()) {
             Text(
-                text = screenState.meanings.joinToString(),
+                text = data.meanings.joinToString(),
                 style = MaterialTheme.typography.headlineSmall
             )
         }
 
         KanjiReadingsContainer(
-            on = screenState.on,
-            kun = screenState.kun,
+            on = data.on,
+            kun = data.kun,
             modifier = Modifier.fillMaxWidth()
         )
 
         KanjiRadicalsSection(
-            state = screenState.radicalsSectionData,
+            state = data.radicalsSectionData,
             onRadicalClick = onRadicalClick
         )
 
@@ -209,7 +209,7 @@ private fun AnimatableCharacter(strokes: List<Path>) {
         }
 
         Text(
-            text = resolveString { kanjiInfo.strokesMessage(strokes.size) },
+            text = resolveString { info.strokesMessage(strokes.size) },
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .padding(top = 4.dp)

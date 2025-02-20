@@ -4,6 +4,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
@@ -25,7 +26,7 @@ fun MultiplatformMainNavigation(
         targetState = state.currentDestination.value
     ) { destination ->
         state.stateHolder.SaveableStateProvider(destination.toString()) {
-            destination.Content(state)
+            key(destination) { destination.Content(state) }
         }
     }
 
