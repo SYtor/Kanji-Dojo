@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS vocab_deck_entry (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     deck_id INTEGER NOT NULL,
     kanji_reading TEXT,
-    kana_reading TEXT,
+    kana_reading TEXT NOT NULL,
     meaning TEXT,
     word_id INTEGER,
     FOREIGN KEY(deck_id) REFERENCES vocab_deck(id) ON UPDATE NO ACTION ON DELETE CASCADE

@@ -19,12 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
@@ -83,7 +80,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetail
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsToolbar
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui.DeckDetailsVocabUI
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DeckDetailsScreenUI(
     state: State<ScreenState>,
@@ -513,9 +509,8 @@ fun DeckDetailsConfigurationRow(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth()
-            .wrapContentWidth()
-            .width(400.dp)
+        modifier = Modifier
+            .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
@@ -523,7 +518,7 @@ fun DeckDetailsConfigurationRow(
         FilterChip(
             selected = true,
             onClick = {
-                val practiceTypes = ScreenVocabPracticeType.values()
+                val practiceTypes = ScreenVocabPracticeType.entries
                 val newPracticeTypeOrdinal =
                     (configuration.practiceType.ordinal + 1) % practiceTypes.size
                 val newPracticeType = practiceTypes[newPracticeTypeOrdinal]

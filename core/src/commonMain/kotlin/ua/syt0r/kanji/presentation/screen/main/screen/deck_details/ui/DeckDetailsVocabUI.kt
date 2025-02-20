@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_details.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +14,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,19 +27,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
+import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
+import ua.syt0r.kanji.presentation.common.clickable
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonUnchecked
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsConfigurationRow
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
@@ -89,8 +90,10 @@ fun DeckDetailsVocabUI(
             )
         }
 
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(360.dp),
             modifier = Modifier.fillMaxSize()
+                .padding(horizontal = 20.dp)
                 .nestedScroll(collapsibleConfigurationContainerState.nestedScrollConnection)
         ) {
 
@@ -110,7 +113,7 @@ fun DeckDetailsVocabUI(
                         if (selectionMode) {
                             toggleItemSelection(vocab)
                         } else {
-
+                            TODO()
                         }
                     },
                     modifier = Modifier
@@ -136,48 +139,53 @@ private fun WordItem(
     modifier: Modifier = Modifier,
 ) {
 
-    val srsIndicatorColor = when (vocab.statusMap.getValue(practiceType)) {
-        SrsItemStatus.New -> MaterialTheme.extraColorScheme.new
-        SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
-        SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
-    }
-
-    Row(
-        modifier = modifier.height(IntrinsicSize.Max)
-            .fillMaxWidth()
-            .wrapContentWidth()
-            .widthIn(max = 400.dp)
-            .padding(horizontal = 20.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Box(
-            modifier = Modifier.width(6.dp)
-                .fillMaxHeight()
-                .background(srsIndicatorColor, MaterialTheme.shapes.small)
-        )
-
-        FuriganaText(
-            furiganaString = vocab.word.data.run {
-                formattedVocabReading(kanaReading, kanjiReading)
-            },
-            modifier = Modifier.weight(1f)
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-        )
-
-        if (selectionMode) {
-            Icon(
-                imageVector = if (vocab.selected.value) ExtraIcons.RadioButtonChecked
-                else ExtraIcons.RadioButtonUnchecked,
-                contentDescription = null,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-
-    }
+    ListItem(
+        leadingContent = {
+            val srsIndicatorColor = when (vocab.statusMap.getValue(practiceType)) {
+                SrsItemStatus.New -> MaterialTheme.extraColorScheme.new
+                SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
+                SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
+            }
+            Row(
+                modifier = Modifier
+                    .height(IntrinsicSize.Max)
+                    .widthIn(24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxHeight()
+                        .width(4.dp)
+                        .background(srsIndicatorColor, MaterialTheme.shapes.small)
+                )
+                Text(
+                    text = (listIndex + 1).toString(),
+                    style = MaterialTheme.typography.bodyMedium.copyCentered(),
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+            }
+        },
+        headlineContent = {
+            val text = vocab.word.data
+                .run { formattedVocabStringReading(kanaReading, kanjiReading) }
+            Text(text)
+        },
+        supportingContent = {
+            Text(vocab.word.data.meaning ?: "Dic meaning")
+        },
+        trailingContent = {
+            if (selectionMode) {
+                Icon(
+                    imageVector = if (vocab.selected.value) ExtraIcons.RadioButtonChecked
+                    else ExtraIcons.RadioButtonUnchecked,
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        },
+        modifier = modifier
+            .clip(MaterialTheme.shapes.large)
+            .clickable(onClick)
+    )
 
 }

@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
@@ -61,11 +61,11 @@ fun VocabDeckEditingUI(
     Column(
         modifier = Modifier.fillMaxWidth()
             .wrapContentWidth()
-            .width(400.dp)
             .padding(horizontal = 20.dp)
     ) {
 
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(400.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)

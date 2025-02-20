@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -247,11 +246,6 @@ private fun Toolbar(
                     )
                 }
             }
-            if (toolbarButtonsState.showVocabReadingSwapButton) {
-                IconButton(onClick = { TODO() }) {
-                    Icon(Icons.Default.PublishedWithChanges, null)
-                }
-            }
             if (toolbarButtonsState.showDeckDeleteButton) {
                 IconButton(onDeleteClick) {
                     Icon(Icons.Default.Delete, null)
@@ -278,14 +272,6 @@ private fun LoadedState(
             title = screenState.title,
             onConfirm = onSaveConfirmed,
             onDismissRequest = { showTitleInputDialog = false }
-        )
-    }
-
-    var unknownEnteredCharacters: List<String> by remember { mutableStateOf(emptyList()) }
-    if (unknownEnteredCharacters.isNotEmpty()) {
-        DeckEditUnknownCharactersDialog(
-            characters = unknownEnteredCharacters,
-            onDismissRequest = { unknownEnteredCharacters = emptyList() }
         )
     }
 

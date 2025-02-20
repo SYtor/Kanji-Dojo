@@ -102,8 +102,8 @@ class SqlDelightVocabPracticeRepository(
                 deckId = it.deck_id,
                 data = VocabCardData(
                     it.kanji_reading,
-                    it.kana_reading!!, // TODO remove nullable?
-                    it.meaning!!,
+                    it.kana_reading,
+                    it.meaning,
                     it.word_id!!
                 )
             )

@@ -19,7 +19,7 @@ interface DeckEditScreenContract {
 
     sealed interface ScreenState {
 
-        object Loading : ScreenState
+        data object Loading : ScreenState
 
         sealed interface Loaded : ScreenState {
             val title: MutableState<String>
@@ -38,11 +38,11 @@ interface DeckEditScreenContract {
 
         interface VocabDeckEditing : Loaded {
             val list: List<VocabDeckEditListItem>
-            override fun getCurrentList(): List<DeckEditListItem> = list
+            override fun getCurrentList(): List<VocabDeckEditListItem> = list
         }
 
-        object SavingChanges : ScreenState
-        object Deleting : ScreenState
+        data object SavingChanges : ScreenState
+        data object Deleting : ScreenState
 
         data class Completed(val wasDeleted: Boolean) : ScreenState
 
