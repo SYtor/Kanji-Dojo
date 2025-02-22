@@ -53,7 +53,19 @@ interface AppDataRepository {
     suspend fun getWordsWithClassificationCount(classification: String): Int
     suspend fun getWordsWithClassification(classification: String): List<JapaneseWord>
 
+    suspend fun getSentencesWithTextCount(text: String): Int
+    suspend fun getSentencesWithText(
+        text: String,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE
+    ): List<Sentence>
+
 }
+
+data class Sentence(
+    val value: String,
+    val translation: String
+)
 
 @Serializable
 sealed interface WordClassification {

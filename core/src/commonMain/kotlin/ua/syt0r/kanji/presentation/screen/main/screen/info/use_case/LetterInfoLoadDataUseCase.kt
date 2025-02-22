@@ -3,12 +3,14 @@ package ua.syt0r.kanji.presentation.screen.main.screen.info.use_case
 import kotlinx.coroutines.CoroutineScope
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.core.app_data.AppDataRepository
+import ua.syt0r.kanji.core.app_data.Sentence
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassifier
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
+import ua.syt0r.kanji.presentation.common.Paginateable
 import ua.syt0r.kanji.presentation.common.paginateable
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalDetails
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSectionData
@@ -56,7 +58,8 @@ class LetterInfoLoadDataUseCase(
             strokes = getStrokes(character),
             kanaSystem = kanaInfo.classification,
             reading = kanaInfo.reading,
-            vocab = getVocabPaginateable(character, coroutineScope)
+            vocab = getPaginateableVocab(character, coroutineScope),
+            sentences = getPaginateableSentences(character, coroutineScope)
         )
     }
 
@@ -103,7 +106,8 @@ class LetterInfoLoadDataUseCase(
                 }
             ),
             displayRadicals = radicals.map { it.radical }.distinct(),
-            vocab = getVocabPaginateable(character, coroutineScope)
+            vocab = getPaginateableVocab(character, coroutineScope),
+            sentences = getPaginateableSentences(character, coroutineScope)
         )
     }
 
@@ -115,7 +119,7 @@ class LetterInfoLoadDataUseCase(
         .getRadicalsInCharacter(character)
         .sortedBy { it.strokesCount }
 
-    private suspend fun getVocabPaginateable(
+    private suspend fun getPaginateableVocab(
         letter: String,
         coroutineScope: CoroutineScope
     ) = paginateable(
@@ -124,6 +128,21 @@ class LetterInfoLoadDataUseCase(
         load = { offset ->
             appDataRepository.getWordsWithText(
                 text = letter,
+                offset = offset,
+                limit = InfoScreenContract.VocabListPageCount
+            )
+        }
+    )
+
+    private suspend fun getPaginateableSentences(
+        character: String,
+        coroutineScope: CoroutineScope
+    ): Paginateable<Sentence> = paginateable(
+        coroutineScope,
+        limit = appDataRepository.getSentencesWithTextCount(character),
+        load = { offset ->
+            appDataRepository.getSentencesWithText(
+                text = character,
                 offset = offset,
                 limit = InfoScreenContract.VocabListPageCount
             )

@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main.screen.info
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -10,6 +9,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,7 +21,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,10 +41,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import ua.syt0r.kanji.core.app_data.Sentence
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.presentation.common.ExpandButton
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.PaginateableState
@@ -61,7 +62,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.info.ui.LetterInfoUI
 fun InfoScreenUI(
     state: State<ScreenState>,
     onUpButtonClick: () -> Unit,
-    onCopyButtonClick: () -> Unit,
     onFuriganaClick: (String) -> Unit,
     onWordClick: (JapaneseWord) -> Unit
 ) {
@@ -80,20 +80,10 @@ fun InfoScreenUI(
         },
         letter = { data, listState, listSpacerState ->
 
-            val clipboardCopyMessage = resolveString { info.clipboardCopyMessage }
             LetterInfoUI(
                 letterData = data,
                 listState = listState,
                 listSpacerState = listSpacerState,
-                onCopyButtonClick = {
-//                    onCopyButtonClick()
-//                    coroutineScope.launch {
-//                        snackbarHostState.showSnackbar(
-//                            clipboardCopyMessage,
-//                            withDismissAction = true
-//                        )
-//                    }
-                },
                 onFuriganaClick = onFuriganaClick,
                 onWordClick = onWordClick
             )
@@ -192,25 +182,9 @@ private fun <T> LazyListScope.expandableSection(
     item: @Composable (Int, T) -> Unit
 ) {
 
-    val toggleExpanded = { expanded.value = expanded.value.not() }
 
     stickyHeader {
-        ListItem(
-            headlineContent = {
-                header()
-            },
-            trailingContent = {
-                val rotation = animateFloatAsState(if (expanded.value) 180f else 0f)
-                IconButton(toggleExpanded) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        modifier = Modifier.graphicsLayer { rotationZ = rotation.value })
-                }
-            },
-            modifier = Modifier
-                .clickable(toggleExpanded)
-        )
+        ExpandableSectionHeader(expanded, header)
     }
 
     if (expanded.value) {
@@ -229,6 +203,28 @@ private fun <T> LazyListScope.expandableSection(
 
     }
 
+}
+
+@Composable
+fun ExpandableSectionHeader(
+    expanded: MutableState<Boolean>,
+    header: @Composable () -> Unit
+) {
+    val toggleExpanded = { expanded.value = expanded.value.not() }
+
+    ListItem(
+        headlineContent = {
+            header()
+        },
+        leadingContent = {
+            ExpandButton(
+                expanded = expanded.value,
+                onClick = toggleExpanded
+            )
+        },
+        modifier = Modifier
+            .clickable(toggleExpanded)
+    )
 }
 
 fun LazyListScope.expandableInfoVocabSection(
@@ -257,5 +253,52 @@ fun LazyListScope.expandableInfoVocabSection(
             )
         }
     )
+
+}
+
+fun LazyListScope.expandableInfoSentenceSection(
+    expanded: MutableState<Boolean>,
+    paginateable: PaginateableState<Sentence>
+) {
+
+    expandableSection(
+        expanded = expanded,
+        paginateable = paginateable,
+        header = { Text("Sentences (${paginateable.total})") },
+        item = { index, sentence ->
+            ListItem(
+                leadingContent = {
+                    Text(
+                        text = (index + 1).toString(),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                },
+                headlineContent = { Text(sentence.value) },
+                supportingContent = { Text(sentence.translation) }
+            )
+        }
+    )
+
+}
+
+@Composable
+fun InfoScreenExpandableSection(
+    expanded: MutableState<Boolean>,
+    header: @Composable () -> Unit,
+    expandedContent: @Composable() (ColumnScope.() -> Unit)
+) {
+
+    Column {
+
+        ExpandableSectionHeader(
+            expanded = expanded,
+            header = header
+        )
+
+        if (!expanded.value) return@Column
+
+        expandedContent()
+
+    }
 
 }

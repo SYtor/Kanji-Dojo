@@ -366,5 +366,13 @@ FROM Senses
          LEFT JOIN Informations ON Senses.id = Informations.sense_id
 GROUP BY id;
 
+getSenseExamplesWithTextCount:
+SELECT COUNT(*)
+FROM vocab_sense_example
+WHERE sentence LIKE '%' || :text || '%';
 
-
+getSenseExamplesWithText:
+SELECT sentence, translation
+FROM vocab_sense_example
+WHERE sentence LIKE '%' || :text || '%'
+LIMIT :offset, :limit;

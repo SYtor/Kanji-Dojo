@@ -2,6 +2,7 @@ package ua.syt0r.kanji.presentation.screen.main.screen.info
 
 import androidx.compose.ui.graphics.Path
 import kotlinx.serialization.Serializable
+import ua.syt0r.kanji.core.app_data.Sentence
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.japanese.KanaReading
@@ -37,6 +38,7 @@ sealed interface LetterInfoData {
     val strokes: List<Path>
 
     val vocab: Paginateable<JapaneseWord>
+    val sentences: Paginateable<Sentence>
 
     data class Kana(
         override val character: String,
@@ -44,6 +46,7 @@ sealed interface LetterInfoData {
         val kanaSystem: CharacterClassification.Kana,
         val reading: KanaReading,
         override val vocab: Paginateable<JapaneseWord>,
+        override val sentences: Paginateable<Sentence>
     ) : LetterInfoData
 
     data class Kanji(
@@ -58,6 +61,7 @@ sealed interface LetterInfoData {
         val radicalsSectionData: KanjiRadicalsSectionData,
         val displayRadicals: List<String>,
         override val vocab: Paginateable<JapaneseWord>,
+        override val sentences: Paginateable<Sentence>
     ) : LetterInfoData
 
 }

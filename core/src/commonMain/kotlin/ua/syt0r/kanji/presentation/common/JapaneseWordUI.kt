@@ -40,40 +40,36 @@ fun JapaneseWordUI(
     modifier: Modifier = Modifier
 ) {
 
-    Column {
+    JapaneseWordUILayout(
+        modifier = modifier.clickable(onClick),
+        topContent = {
+            Text(
+                text = "${index + 1}",
+                modifier = Modifier.weight(1f)
+            )
 
-        JapaneseWordUILayout(
-            modifier = modifier.clickable(onClick),
-            topContent = {
-                Text(
-                    text = "${index + 1}",
-                    modifier = Modifier.weight(1f)
-                )
-
-                addWordToVocabDeckClick?.let {
-                    Box(
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable(it)
-                            .height(30.dp)
-                            .padding(6.dp)
-                    ) {
-                        Icon(Icons.Default.Add, null)
-                    }
+            addWordToVocabDeckClick?.let {
+                Box(
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(it)
+                        .height(30.dp)
+                        .padding(6.dp)
+                ) {
+                    Icon(Icons.Default.Add, null)
                 }
-            },
-            middleContent = { headline() },
-            bottomContent = {
-                Text(
-                    text = partOfSpeechList.joinToString(),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
             }
-        )
-
-    }
+        },
+        middleContent = { headline() },
+        bottomContent = {
+            Text(
+                text = partOfSpeechList.joinToString(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    )
 
 }
 
@@ -105,7 +101,9 @@ fun JapaneseWordUILayout(
     bottomContent: @Composable RowScope.() -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(horizontal = 16.dp).padding(top = 8.dp, bottom = 16.dp)
+        modifier = modifier
+            .padding(horizontal = 20.dp)
+            .padding(top = 8.dp, bottom = 16.dp)
     ) {
 
         Row(

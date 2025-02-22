@@ -157,6 +157,20 @@ class SqlDelightAppDataRepository(
             .map { getWord(it.entry_id, it.reading, null) }
     }
 
+    override suspend fun getSentencesWithTextCount(text: String): Int = vocabQuery {
+        getSenseExamplesWithTextCount(text).executeAsOne().toInt()
+    }
+
+    override suspend fun getSentencesWithText(
+        text: String,
+        offset: Int,
+        limit: Int
+    ): List<Sentence> = vocabQuery {
+        getSenseExamplesWithText(text = text, offset = offset.toLong(), limit = limit.toLong())
+            .executeAsList()
+            .map { Sentence(it.sentence, it.translation) }
+    }
+
     private val delimiter = "|||"
     private val infoIrregularKanji = "iK"
     private val infoIrregularKana = "ik"
