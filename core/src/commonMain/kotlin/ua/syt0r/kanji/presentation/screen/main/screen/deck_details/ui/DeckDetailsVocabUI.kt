@@ -54,6 +54,7 @@ fun DeckDetailsVocabUI(
     extraListSpacerState: ExtraListSpacerState,
     onConfigurationUpdate: (DeckDetailsConfiguration.VocabDeckConfiguration) -> Unit,
     toggleItemSelection: (DeckDetailsListItem.Vocab) -> Unit,
+    onCardClick: (DeckDetailsListItem.Vocab) -> Unit
 ) {
 
     if (visibleData.items.isEmpty()) {
@@ -113,7 +114,7 @@ fun DeckDetailsVocabUI(
                         if (selectionMode) {
                             toggleItemSelection(vocab)
                         } else {
-                            TODO()
+                            onCardClick(vocab)
                         }
                     },
                     modifier = Modifier
@@ -171,7 +172,7 @@ private fun WordItem(
             Text(text)
         },
         supportingContent = {
-            Text(vocab.word.data.meaning ?: "Dic meaning")
+            Text(vocab.word.data.meaning ?: "Dic meaning") // TODO
         },
         trailingContent = {
             if (selectionMode) {

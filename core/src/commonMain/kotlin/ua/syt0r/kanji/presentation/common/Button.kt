@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 
@@ -43,12 +44,13 @@ fun InvertedButton(
 @Composable
 fun ExpandButton(
     expanded: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
     Box(
         modifier = Modifier
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(color)
             .clickable(onClick = onClick)
             .padding(2.dp)
             .requiredSize(20.dp)

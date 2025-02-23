@@ -8,6 +8,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
 import ua.syt0r.kanji.presentation.screen.main.screen.home.screen.search.ui.SearchScreenUI
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
+import ua.syt0r.kanji.presentation.screen.main.screen.info.toInfoScreenData
 
 @Composable
 fun SearchScreen(
@@ -23,6 +24,10 @@ fun SearchScreen(
         onRadicalsSelected = { viewModel.radicalsSearch(it) },
         onCharacterClick = {
             val screenData = InfoScreenData.Letter(it)
+            mainNavigationState.navigate(MainDestination.Info(screenData))
+        },
+        onWordClick = {
+            val screenData = it.toInfoScreenData()
             mainNavigationState.navigate(MainDestination.Info(screenData))
         },
         onScrolledToEnd = { viewModel.loadMoreWords() },

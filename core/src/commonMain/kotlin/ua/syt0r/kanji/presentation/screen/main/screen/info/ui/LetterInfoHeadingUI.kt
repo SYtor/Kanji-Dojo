@@ -28,11 +28,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -50,107 +48,65 @@ import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.kanji.AnimatedKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiBackground
-import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalUI
-import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalsSectionData
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiReadingsContainer
-import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenExpandableSection
 import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LetterInfoHeadingUI(
-    letterData: LetterInfoData,
-    onRadicalClick: (String) -> Unit
-) {
-
-    val clipboardManager = LocalClipboardManager.current
-    val onCopyButtonClick = { clipboardManager.setText(AnnotatedString(letterData.character)) }
-
-    when (letterData) {
-        is LetterInfoData.Kana -> {
-            KanaInfo(
-                data = letterData,
-                onCopyButtonClick = onCopyButtonClick,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        is LetterInfoData.Kanji -> {
-            Column {
-                KanjiInfo(
-                    data = letterData,
-                    onCopyButtonClick = onCopyButtonClick,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
-                )
-
-                val radicalsExpanded = rememberSaveable { mutableStateOf(true) }
-
-                ExpandableKanjiRadicalsSection(
-                    expanded = radicalsExpanded,
-                    data = letterData.radicalsSectionData,
-                    onRadicalClick = onRadicalClick
-                )
-            }
-        }
-    }
-
-}
-
-@Composable
-private fun KanaInfo(
-    data: LetterInfoData.Kana,
-    onCopyButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun LetterInfoKanaHeading(data: LetterInfoData.Kana) {
 
     Column(
-        modifier = modifier
+        modifier = Modifier.fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp)
     ) {
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             AnimatableCharacter(data.strokes)
 
-            Column(
+            FlowRow(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-
-                Text(
-                    text = data.kanaSystem.resolveString(),
-                    style = MaterialTheme.typography.headlineSmall
-                )
 
                 val readings = data.reading.let {
                     if (it.alternative != null) listOf(it.nihonShiki) + it.alternative
                     else listOf(it.nihonShiki)
                 }
 
-                Text(
-                    text = resolveString { info.romajiMessage(readings) },
-                    style = MaterialTheme.typography.headlineSmall
+                val messages = listOf(
+                    data.kanaSystem.resolveString(),
+                    resolveString { info.romajiMessage(readings) }
                 )
 
-                CopyButton(onCopyButtonClick, Modifier.align(Alignment.End))
+                Text(
+                    text = messages.joinToString("\n"),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall
+                )
+
+                CopyButton(data.character)
 
             }
 
         }
+
     }
 
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun KanjiInfo(
-    data: LetterInfoData.Kanji,
-    onCopyButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun LetterInfoKanjiHeading(data: LetterInfoData.Kanji) {
 
     Column(
-        modifier = modifier.padding(horizontal = 20.dp),
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
@@ -179,9 +135,7 @@ private fun KanjiInfo(
 
             }
 
-            CopyButton(
-                onCopyButtonClick = onCopyButtonClick
-            )
+            CopyButton(data.character)
 
         }
 
@@ -241,10 +195,11 @@ private const val CopyAnimationDuration = 800L
 
 @Composable
 private fun CopyButton(
-    onCopyButtonClick: () -> Unit,
+    copyData: String,
     modifier: Modifier = Modifier
 ) {
 
+    val clipboardManager = LocalClipboardManager.current
     var copying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -258,7 +213,7 @@ private fun CopyButton(
 
     IconButton(
         onClick = {
-            onCopyButtonClick()
+            clipboardManager.setText(AnnotatedString(copyData))
             copying = true
         },
         modifier = modifier
@@ -279,29 +234,5 @@ private fun CopyButton(
             else Icon(ExtraIcons.Copy, null)
         }
     }
-
-}
-
-
-@Composable
-private fun ExpandableKanjiRadicalsSection(
-    expanded: MutableState<Boolean>,
-    data: KanjiRadicalsSectionData,
-    onRadicalClick: (String) -> Unit,
-) {
-
-    InfoScreenExpandableSection(
-        expanded = expanded,
-        header = { Text("Radicals (${data.radicals.size})") },
-        expandedContent = {
-            data.radicals.forEach {
-                KanjiRadicalUI(
-                    strokes = data.strokes,
-                    radicalDetails = it,
-                    onRadicalClick = onRadicalClick
-                )
-            }
-        }
-    )
 
 }

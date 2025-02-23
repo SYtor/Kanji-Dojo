@@ -347,24 +347,39 @@ ORDER BY entry_id = :entryId DESC, priority IS NULL, priority;
 getVocabSensesWithDetails:
 WITH
     Senses AS (SELECT id FROM vocab_sense WHERE entry_id = :wordId),
-    KanjiRestrictions AS (SELECT * FROM vocab_sense_kanji_restriction WHERE sense_id IN Senses),
-    KanaRestrictions AS (SELECT * FROM vocab_sense_kana_restriction WHERE sense_id IN Senses),
-    Glosses AS (SELECT * FROM vocab_sense_gloss WHERE sense_id IN Senses),
-    Pos AS (SELECT * FROM vocab_sense_part_of_speech WHERE sense_id IN Senses),
-    Informations AS (SELECT * FROM vocab_sense_information WHERE sense_id IN Senses)
-SELECT id,
-       group_concat(KanjiRestrictions.reading, :delimiter) AS kanji_restrictions,
-       group_concat(KanaRestrictions.reading, :delimiter)  AS kana_restrictions,
-       group_concat(Glosses.gloss_text, :delimiter)        AS glosses,
-       group_concat(Pos.part_of_speech, :delimiter)        AS pos,
-       group_concat(Informations.information, :delimiter)  AS info
+    KanjiRestrictions AS (SELECT sense_id, GROUP_CONCAT(reading, :delimiter) AS kanji_restrictions
+                          FROM vocab_sense_kanji_restriction
+                          WHERE sense_id IN Senses
+                          GROUP BY sense_id),
+    KanaRestrictions AS (SELECT sense_id, GROUP_CONCAT(reading, :delimiter) AS kana_restrictions
+                         FROM vocab_sense_kana_restriction
+                         WHERE sense_id IN Senses
+                         GROUP BY sense_id),
+    Glosses AS (SELECT sense_id, GROUP_CONCAT(gloss_text, :delimiter) AS glosses
+                FROM vocab_sense_gloss
+                WHERE sense_id IN Senses
+                GROUP BY sense_id),
+    Pos AS (SELECT sense_id, GROUP_CONCAT(explanation, :delimiter) AS pos
+            FROM vocab_sense_part_of_speech
+            INNER JOIN vocab_entity ON part_of_speech = name
+            WHERE sense_id IN Senses
+            GROUP BY sense_id),
+    Informations AS (SELECT sense_id, GROUP_CONCAT(information, :delimiter) AS info
+                     FROM vocab_sense_information
+                     WHERE sense_id IN Senses
+                     GROUP BY sense_id)
+SELECT Senses.id,
+       KanjiRestrictions.kanji_restrictions,
+       KanaRestrictions.kana_restrictions,
+       Glosses.glosses,
+       Pos.pos,
+       Informations.info
 FROM Senses
          LEFT JOIN KanjiRestrictions ON Senses.id = KanjiRestrictions.sense_id
          LEFT JOIN KanaRestrictions ON Senses.id = KanaRestrictions.sense_id
          LEFT JOIN Glosses ON Senses.id = Glosses.sense_id
          LEFT JOIN Pos ON Senses.id = Pos.sense_id
-         LEFT JOIN Informations ON Senses.id = Informations.sense_id
-GROUP BY id;
+         LEFT JOIN Informations ON Senses.id = Informations.sense_id;
 
 getSenseExamplesWithTextCount:
 SELECT COUNT(*)

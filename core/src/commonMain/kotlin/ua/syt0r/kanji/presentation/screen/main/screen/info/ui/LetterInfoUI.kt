@@ -1,16 +1,14 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.info.ui
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,10 +22,13 @@ import ua.syt0r.kanji.presentation.common.collectAsState
 import ua.syt0r.kanji.presentation.common.trackList
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
+import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiRadicalUI
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
-import ua.syt0r.kanji.presentation.screen.main.screen.info.expandableInfoSentenceSection
-import ua.syt0r.kanji.presentation.screen.main.screen.info.expandableInfoVocabSection
+import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSentenceSection
+import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableVocabSection
+import ua.syt0r.kanji.presentation.screen.main.screen.info.infoScreenExpandableSection
 
 @Composable
 fun LetterInfoUI(
@@ -49,8 +50,49 @@ fun LetterInfoUI(
         letterData.sentences to sentencesExpanded
     )
 
+    val letterHeading: LazyListScope.(LetterInfoData) -> Unit
+
+    when (letterData) {
+        is LetterInfoData.Kana -> letterHeading = {
+            item {
+                LetterInfoKanaHeading(
+                    data = letterData,
+                )
+            }
+        }
+
+
+        is LetterInfoData.Kanji -> {
+            val radicalsExpanded = rememberSaveable { mutableStateOf(true) }
+            letterHeading = {
+                item {
+                    LetterInfoKanjiHeading(
+                        data = letterData
+                    )
+                }
+                val radicalsData = letterData.radicalsSectionData
+                infoScreenExpandableSection(
+                    headerText = "Radicals",
+                    headerCount = radicalsData.radicals.size,
+                    expanded = radicalsExpanded,
+                    expandedContent = {
+                        items(radicalsData.radicals) {
+                            KanjiRadicalUI(
+                                strokes = radicalsData.strokes,
+                                radicalDetails = it,
+                                onRadicalClick = onFuriganaClick
+                            )
+                        }
+
+                    }
+                )
+            }
+        }
+    }
+
     PaginationLoadLaunchedEffect(
         listState = listState,
+        prefetchDistance = InfoScreenContract.VocabListPrefetchDistance,
         loadMore = {
             val loadMoreTargetData = paginateableData
                 .find { (paginateable, isExpandedState) ->
@@ -70,15 +112,6 @@ fun LetterInfoUI(
         )
     }
 
-    val headingContent = remember(letterData) {
-        movableContentOf {
-            LetterInfoHeadingUI(
-                letterData = letterData,
-                onRadicalClick = onFuriganaClick
-            )
-        }
-    }
-
     if (LocalOrientation.current == Orientation.Portrait) {
 
         LazyColumn(
@@ -86,9 +119,9 @@ fun LetterInfoUI(
             modifier = Modifier.trackList(listSpacerState)
         ) {
 
-            item { headingContent() }
+            letterHeading(letterData)
 
-            expandableInfoVocabSection(
+            infoScreenExpandableVocabSection(
                 expanded = vocabExpanded,
                 paginateable = vocab,
                 onWordClick = onWordClick,
@@ -96,7 +129,7 @@ fun LetterInfoUI(
                 addWordToVocabDeckClick = { wordToAddToDeck = it }
             )
 
-            expandableInfoSentenceSection(
+            infoScreenExpandableSentenceSection(
                 expanded = sentencesExpanded,
                 paginateable = sentences
             )
@@ -112,14 +145,13 @@ fun LetterInfoUI(
                 .trackList(listSpacerState)
         ) {
 
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
             ) {
-                headingContent()
-                listSpacerState.ExtraSpacer()
+                letterHeading(letterData)
+                listSpacerState.ExtraSpacer(this)
             }
 
             LazyColumn(
@@ -129,7 +161,7 @@ fun LetterInfoUI(
                     .fillMaxHeight()
             ) {
 
-                expandableInfoVocabSection(
+                infoScreenExpandableVocabSection(
                     expanded = vocabExpanded,
                     paginateable = vocab,
                     onWordClick = onWordClick,
@@ -137,7 +169,7 @@ fun LetterInfoUI(
                     addWordToVocabDeckClick = { wordToAddToDeck = it }
                 )
 
-                expandableInfoSentenceSection(
+                infoScreenExpandableSentenceSection(
                     expanded = sentencesExpanded,
                     paginateable = sentences
                 )

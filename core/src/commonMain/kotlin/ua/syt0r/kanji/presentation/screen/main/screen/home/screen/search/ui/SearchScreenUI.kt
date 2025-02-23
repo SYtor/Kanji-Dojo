@@ -87,6 +87,7 @@ fun SearchScreenUI(
     onRadicalsSectionExpanded: () -> Unit,
     onRadicalsSelected: (Set<String>) -> Unit,
     onCharacterClick: (String) -> Unit,
+    onWordClick: (JapaneseWord) -> Unit,
     onScrolledToEnd: () -> Unit,
     onWordFeedback: (JapaneseWord) -> Unit
 ) {
@@ -172,7 +173,7 @@ fun SearchScreenUI(
                 screenState = state.value,
                 searchContainerState = searchContainerState,
                 onCharacterClick = onCharacterClick,
-                onWordClick = { TODO() },
+                onWordClick = onWordClick,
                 onScrolledToEnd = onScrolledToEnd
             )
 

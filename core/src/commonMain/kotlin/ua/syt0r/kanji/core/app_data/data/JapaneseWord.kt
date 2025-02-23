@@ -37,11 +37,13 @@ fun formattedVocabStringReading(
 ): String = when {
     kanjiReading != null -> buildString {
         append(kanjiReading)
-        append("【${kanaReading}】")
+        append(formattedKanaReading(kanaReading))
     }
 
     else -> kanaReading
 }
+
+fun formattedKanaReading(reading: String) = "【${reading}】"
 
 @Serializable
 data class VocabSense(

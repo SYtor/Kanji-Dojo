@@ -86,6 +86,7 @@ fun DeckDetailsScreenUI(
     navigateUp: () -> Unit,
     navigateToDeckEdit: () -> Unit,
     navigateToCharacterDetails: (String) -> Unit,
+    navigateToCardDetails: (DeckDetailsListItem.Vocab) -> Unit,
     startGroupReview: (DeckDetailsListItem.Group) -> Unit,
     startMultiselectReview: () -> Unit,
 ) {
@@ -153,6 +154,7 @@ fun DeckDetailsScreenUI(
             ScreenContent(
                 state = state,
                 navigateToCharacterDetails = navigateToCharacterDetails,
+                onCardClick = navigateToCardDetails,
                 showGroupSheet = {
                     coroutineScope.launch { bottomSheetState.show() }
                 },
@@ -178,6 +180,7 @@ fun DeckDetailsScreenUI(
 private fun ScreenContent(
     state: State<ScreenState>,
     navigateToCharacterDetails: (String) -> Unit,
+    onCardClick: (DeckDetailsListItem.Vocab) -> Unit,
     showGroupSheet: () -> Unit,
     startMultiselectReview: () -> Unit,
     showNoSelectionMessage: () -> Unit,
@@ -204,7 +207,8 @@ private fun ScreenContent(
                     extraListSpacerState = extraListSpacerState,
                     onCharacterClick = navigateToCharacterDetails,
                     showGroupSheet = showGroupSheet,
-                    toggleItemSelection = { it.selected.run { value = !value } }
+                    toggleItemSelection = { it.selected.run { value = !value } },
+                    onCardClick = onCardClick
                 )
 
                 if (screenState.isSelectionModeEnabled.value) {
@@ -253,6 +257,7 @@ private fun ScreenLoadedState(
     onCharacterClick: (String) -> Unit,
     showGroupSheet: () -> Unit,
     toggleItemSelection: (DeckDetailsListItem) -> Unit,
+    onCardClick: (DeckDetailsListItem.Vocab) -> Unit
 ) {
 
     Box(
@@ -302,7 +307,8 @@ private fun ScreenLoadedState(
                         visibleData = visibleData,
                         extraListSpacerState = extraListSpacerState,
                         onConfigurationUpdate = { screenState.configuration.value = it },
-                        toggleItemSelection = toggleItemSelection
+                        toggleItemSelection = toggleItemSelection,
+                        onCardClick = onCardClick
                     )
                 }
             }

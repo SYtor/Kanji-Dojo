@@ -18,7 +18,7 @@ private fun Preview(
         InfoScreenUI(
             state = rememberUpdatedState(state),
             onUpButtonClick = {},
-            onFuriganaClick = {},
+            onLetterClick = {},
             onWordClick = {}
         )
     }

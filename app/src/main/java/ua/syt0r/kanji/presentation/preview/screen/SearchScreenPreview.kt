@@ -22,6 +22,7 @@ private fun GenericPreview(
             onRadicalsSectionExpanded = {},
             onRadicalsSelected = {},
             onCharacterClick = {},
+            onWordClick = {},
             onScrolledToEnd = {},
             onWordFeedback = {}
         )

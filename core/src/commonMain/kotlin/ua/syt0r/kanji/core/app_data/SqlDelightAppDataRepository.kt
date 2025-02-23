@@ -130,22 +130,62 @@ class SqlDelightAppDataRepository(
             }
     }
 
+    override suspend fun getWord(
+        id: Long,
+        kanjiReading: String?,
+        kanaReading: String
+    ): JapaneseWord = vocabQuery {
+        getWord(
+            id = id,
+            kanaReading = kanaReading,
+            kanjiReading = kanjiReading
+        )
+    }
+
     override suspend fun findWords(
         id: Long?,
         kanjiReading: String?,
         kanaReading: String?
     ): List<JapaneseWord> = vocabQuery {
-        findVocabElementsByIdOrReading(
+        val elements = findVocabElementsByIdOrReading(
             entryId = id ?: -1,
-            kanjiReading = kanaReading ?: "",
+            kanjiReading = kanjiReading ?: "",
             kanaReading = kanaReading ?: ""
         ).executeAsList()
-            .map { element ->
-                getWord(
-                    id = element.entry_id,
-                    kanaReading = element.reading.takeIf { element.isKana == 1L },
-                    kanjiReading = element.reading.takeIf { element.isKana == 0L }
-                )
+
+        elements.groupBy { it.entry_id }
+            .filter { id == null || id == it.key }
+            .mapNotNull { (wordId, elements) ->
+
+                when {
+                    kanjiReading != null && kanaReading != null -> {
+                        getWord(
+                            id = wordId,
+                            kanaReading = kanaReading,
+                            kanjiReading = kanjiReading
+                        )
+                    }
+
+                    kanjiReading == null && kanaReading == null -> {
+                        val element = elements.minByOrNull { it.priority ?: Long.MAX_VALUE }!!
+                        getWord(
+                            id = wordId,
+                            kanaReading = element.reading.takeIf { element.isKana == 1L },
+                            kanjiReading = element.reading.takeIf { element.isKana == 0L }
+                        )
+                    }
+
+                    else -> {
+                        val element = elements
+                            .sortedBy { it.priority ?: Long.MAX_VALUE }
+                            .first { it.reading == kanjiReading || it.reading == kanaReading }
+                        getWord(
+                            id = wordId,
+                            kanaReading = element.reading.takeIf { element.isKana == 1L },
+                            kanjiReading = element.reading.takeIf { element.isKana == 0L }
+                        )
+                    }
+                }
             }
     }
 

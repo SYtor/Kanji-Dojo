@@ -169,7 +169,7 @@ fun ButtonDefaults.neutralButtonColors(): ButtonColors {
 fun ButtonDefaults.neutralTextButtonColors(): ButtonColors {
     return MaterialTheme.colorScheme.run {
         textButtonColors(
-            contentColor = onSurfaceVariant
+            contentColor = onSurface
         )
     }
 }

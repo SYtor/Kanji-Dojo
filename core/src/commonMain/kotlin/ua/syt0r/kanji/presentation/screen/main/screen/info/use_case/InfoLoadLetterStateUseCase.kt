@@ -19,17 +19,17 @@ import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract
 import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.info.LetterInfoData
 
-class LetterInfoLoadDataUseCase(
+class InfoLoadLetterStateUseCase(
     private val appDataRepository: AppDataRepository,
     private val characterClassifier: CharacterClassifier,
     private val analyticsManager: AnalyticsManager
-) : InfoScreenContract.LoadDataUseCase {
+) : InfoScreenContract.LoadLetterStateUseCase {
 
     companion object {
         private const val NoStrokesErrorMessage = "No strokes found"
     }
 
-    override suspend fun load(
+    override suspend operator fun invoke(
         character: String,
         coroutineScope: CoroutineScope
     ): ScreenState {
@@ -129,7 +129,7 @@ class LetterInfoLoadDataUseCase(
             appDataRepository.getWordsWithText(
                 text = letter,
                 offset = offset,
-                limit = InfoScreenContract.VocabListPageCount
+                limit = InfoScreenContract.VocabListPageItemsCount
             )
         }
     )
@@ -144,7 +144,7 @@ class LetterInfoLoadDataUseCase(
             appDataRepository.getSentencesWithText(
                 text = character,
                 offset = offset,
-                limit = InfoScreenContract.VocabListPageCount
+                limit = InfoScreenContract.VocabListPageItemsCount
             )
         }
     )

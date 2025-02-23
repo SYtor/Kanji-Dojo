@@ -2,14 +2,12 @@ package ua.syt0r.kanji.presentation.screen.main.screen.info
 
 import androidx.compose.runtime.State
 import kotlinx.coroutines.CoroutineScope
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 
 interface InfoScreenContract {
 
     companion object {
-        const val VocabListInitialCount: Int = 50
-        const val VocabListPageCount: Int = 50
-        const val VocabListPrefetchDistance: Int = 20
+        const val VocabListPageItemsCount: Int = 50
+        const val VocabListPrefetchDistance: Int = 50
     }
 
     interface ViewModel {
@@ -28,16 +26,23 @@ interface InfoScreenContract {
                 val data: LetterInfoData
             ) : Loaded
 
+            data class Vocab(
+                val data: VocabInfoData
+            ) : Loaded
+
         }
 
     }
 
-    interface LoadDataUseCase {
-        suspend fun load(character: String, coroutineScope: CoroutineScope): ScreenState
+    interface LoadLetterStateUseCase {
+        suspend operator fun invoke(character: String, coroutineScope: CoroutineScope): ScreenState
     }
 
-    interface LoadCharacterWordsUseCase {
-        suspend fun load(character: String, offset: Int, limit: Int): List<JapaneseWord>
+    interface LoadVocabStateUseCase {
+        suspend operator fun invoke(
+            data: InfoScreenData.Vocab,
+            coroutineScope: CoroutineScope
+        ): ScreenState
     }
 
 }
