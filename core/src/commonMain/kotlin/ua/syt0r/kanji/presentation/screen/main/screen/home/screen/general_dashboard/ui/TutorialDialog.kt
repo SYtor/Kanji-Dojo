@@ -1,7 +1,6 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.home.screen.general_dashboard.ui
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -153,7 +154,7 @@ fun TutorialDialog(
 
                 GeneralDashboardNoDecksButton(
                     onClick = {},
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.height(IntrinsicSize.Max).fillMaxWidth()
                 )
 
                 Text(
@@ -176,31 +177,45 @@ fun TutorialDialog(
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = strings.title) },
-        paddedContent = false,
         content = {
-            val pagerState = rememberPagerState { pages.size }
-            HorizontalPager(
-                state = pagerState,
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.heightIn(200.dp).animateContentSize()
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 20.dp, bottom = 10.dp)
+                    .heightIn(max = 500.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val page = pages[it]
-                Box(
-                    Modifier.padding(horizontal = 20.dp)
-                ) {
-                    page.content()
-                }
-            }
-            PagerIndicator(pagerState)
 
-        },
-        buttons = {}
+                Text(
+                    text = strings.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+
+                val pagerState = rememberPagerState { pages.size }
+                HorizontalPager(
+                    state = pagerState,
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .animateContentSize()
+                        .heightIn(200.dp)
+                ) { pageIndex ->
+                    val page = pages[pageIndex]
+                    Box(
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    ) {
+                        page.content()
+                    }
+                }
+
+                PagerIndicator(pagerState)
+
+            }
+        }
     )
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PagerIndicator(pagerState: PagerState) {
 
