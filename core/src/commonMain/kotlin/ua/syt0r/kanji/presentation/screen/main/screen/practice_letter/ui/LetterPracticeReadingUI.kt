@@ -28,16 +28,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.formattedFurigana
+import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
+import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
 import ua.syt0r.kanji.core.japanese.KanaReading
-import ua.syt0r.kanji.presentation.common.ConcealedFuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardPracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
 
 @Composable
@@ -130,7 +134,7 @@ fun LetterPracticeReadingUI(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.addWordItems(
-    words: List<JapaneseWord>,
+    words: List<LetterPracticeExampleWord>,
     revealed: MutableState<Boolean>,
     onWordClick: (JapaneseWord) -> Unit,
     addWordToDeck: (JapaneseWord) -> Unit
@@ -151,19 +155,44 @@ private fun LazyListScope.addWordItems(
     itemsIndexed(words) { index, word ->
         JapaneseWordUI(
             index = index,
-            partOfSpeechList = word.partOfSpeechList,
-            headline = {
-                //TODO verify hidden state
-                when (revealed.value) {
-                    true -> FuriganaWordHeadline(word.reading, word.combinedGlossary())
-                    false -> ConcealedFuriganaWordHeadline(word.reading)
-                }
-            },
-            onClick = { onWordClick(word) }.takeIf { revealed.value },
-            addWordToVocabDeckClick = { addWordToDeck(word) }
+            headline = { VocabExampleHeader(word, revealed.value) },
+            onClick = { onWordClick(word.word) }.takeIf { revealed.value },
+            addWordToVocabDeckClick = { addWordToDeck(word.word) }
         )
     }
 
     item { Spacer(modifier = Modifier.height(20.dp)) }
 
+}
+
+@Composable
+private fun VocabExampleHeader(
+    word: LetterPracticeExampleWord,
+    revealed: Boolean
+) {
+    when {
+        revealed && word.romaji != null -> {
+            Text(
+                text = formattedVocabDefinition(word.romaji, word.word.combinedGlossary())
+            )
+        }
+
+        revealed && word.romaji == null -> {
+            FuriganaWordHeadline(
+                reading = word.word.reading,
+                glossary = word.word.combinedGlossary()
+            )
+        }
+
+        word.romaji != null -> {
+            Text(word.romaji)
+        }
+
+        else -> {
+            val reading = word.word.reading
+                .formattedFurigana()
+                .withEmptyFurigana()
+            FuriganaText(reading)
+        }
+    }
 }

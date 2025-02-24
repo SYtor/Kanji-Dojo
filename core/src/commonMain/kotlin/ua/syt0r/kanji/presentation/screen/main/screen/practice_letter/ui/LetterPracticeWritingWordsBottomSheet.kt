@@ -31,11 +31,14 @@ import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
 
 
 data class BottomSheetStateData(
-    val words: List<JapaneseWord>
+    val letter: String,
+    val reveal: Boolean,
+    val words: List<LetterPracticeExampleWord>
 )
 
 @Composable
@@ -49,15 +52,14 @@ fun State<LetterPracticeReviewState.Writing>.asWordsBottomSheetState(): State<Bo
             val revealCharacter = writerState.progress
                 .value !is CharacterWritingProgress.Writing
 
-            val words = if (isStudyMode || revealCharacter) {
-                currentState.itemData.words
-            } else {
-                currentState.itemData.encodedWords
-            }
+            val limitedWords = currentState.itemData.words
+                .take(LetterPracticeScreenContract.WordsLimit)
 
-            val limitedWords = words.take(LetterPracticeScreenContract.WordsLimit)
-
-            BottomSheetStateData(words = limitedWords)
+            BottomSheetStateData(
+                letter = writerState.character,
+                reveal = isStudyMode || revealCharacter,
+                words = limitedWords
+            )
         }
     }
 }
@@ -93,7 +95,7 @@ fun LetterPracticeWritingWordsBottomSheet(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        val currentState = state.value
+        val currentState by state
         val listState = remember(currentState) { LazyListState(0) }
 
         LazyColumn(
@@ -106,8 +108,15 @@ fun LetterPracticeWritingWordsBottomSheet(
             itemsIndexed(currentState.words) { index, word ->
                 JapaneseWordUI(
                     index = index,
-                    word = word,
-                    onClick = { onWordClick(word) }
+                    word = word.word,
+                    headline = {
+                        WritingPracticeVocabHeadline(
+                            word = word,
+                            reveal = currentState.reveal,
+                            letter = currentState.letter
+                        )
+                    },
+                    onClick = { onWordClick(word.word) }.takeIf { currentState.reveal }
                 )
             }
 

@@ -24,9 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.VocabReading
-import ua.syt0r.kanji.core.app_data.data.buildFuriganaString
-import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
-import ua.syt0r.kanji.core.app_data.data.withEncodedText
+import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
 import ua.syt0r.kanji.presentation.common.ui.ClickableFuriganaText
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 
@@ -145,55 +143,7 @@ fun FuriganaWordHeadline(
     glossary: String,
     onFuriganaClick: ((String) -> Unit)? = null
 ) {
-    val furigana = buildFuriganaString {
-        when {
-            reading.furigana != null -> {
-                append(reading.furigana)
-            }
-
-            reading.kanjiReading != null -> {
-                append("${reading.kanjiReading}【${reading.kanaReading}】")
-            }
-
-            else -> {
-                append(reading.kanaReading)
-            }
-        }
-        append("・ ")
-        append(glossary)
-    }
-
+    val furigana = formattedVocabDefinition(reading, glossary)
     if (onFuriganaClick != null) ClickableFuriganaText(furigana, onFuriganaClick)
     else FuriganaText(furigana)
-}
-
-
-@Composable
-fun ConcealedFuriganaWordHeadline(
-    reading: VocabReading
-) {
-    val furigana = buildFuriganaString {
-        val furigana = reading.run {
-            furigana ?: buildFuriganaString { append(kanjiReading ?: kanaReading) }
-        }
-        append(furigana.withEmptyFurigana())
-    }
-    FuriganaText(furigana)
-}
-
-@Composable
-fun HiddenLetterWordHeadline(
-    reading: VocabReading,
-    glossary: String,
-    letterToHide: String
-) {
-    val furigana = buildFuriganaString {
-        val furigana = reading.run {
-            furigana ?: buildFuriganaString { append(kanjiReading ?: kanaReading) }
-        }
-        append(furigana.withEncodedText(letterToHide))
-        append("・ ")
-        append(glossary)
-    }
-    FuriganaText(furigana)
 }

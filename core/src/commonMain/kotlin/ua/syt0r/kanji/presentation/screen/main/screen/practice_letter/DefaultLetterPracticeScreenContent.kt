@@ -6,6 +6,7 @@ import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreen
 import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackTopic
+import ua.syt0r.kanji.presentation.screen.main.screen.info.toInfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.ui.LetterPracticeScreenUI
 
@@ -31,8 +32,12 @@ object DefaultLetterPracticeScreenContent : LetterPracticeScreenContract.Content
                 mainNavigationState.navigate(destination)
             },
             onConfigured = { viewModel.configure() },
-            onNextClick = { viewModel.submitAnswer(it) },
             speakKana = { viewModel.speakKana(it) },
+            onNextClick = { viewModel.submitAnswer(it) },
+            onWordClick = {
+                val destination = MainDestination.Info(it.toInfoScreenData())
+                mainNavigationState.navigate(destination)
+            },
             finishPractice = { viewModel.finishPractice() },
             onPracticeCompleted = { mainNavigationState.navigateBack() },
         )

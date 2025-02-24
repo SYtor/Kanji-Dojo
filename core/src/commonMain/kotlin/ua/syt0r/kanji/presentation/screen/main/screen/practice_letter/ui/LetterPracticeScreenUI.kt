@@ -86,6 +86,7 @@ fun LetterPracticeScreenUI(
     onConfigured: () -> Unit,
     speakKana: (KanaReading) -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
+    onWordClick: (JapaneseWord) -> Unit,
     finishPractice: () -> Unit,
     onPracticeCompleted: () -> Unit
 ) {
@@ -136,7 +137,7 @@ fun LetterPracticeScreenUI(
                 reviewState = it.reviewState,
                 onNextClick = onNextClick,
                 speakKana = speakKana,
-                onWordClick = { TODO() }
+                onWordClick = onWordClick
             )
         },
         summary = {

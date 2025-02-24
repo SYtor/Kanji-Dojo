@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,10 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
+import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.japanese.KanaReading
+import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.MultiplatformBackHandler
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
+import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Material3BottomSheetScaffold
 import ua.syt0r.kanji.presentation.common.ui.Orientation
@@ -49,6 +52,7 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswerButtonsContainer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswerButtonsRow
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
 
@@ -284,6 +288,32 @@ private fun AnswerButtons(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WritingPracticeVocabHeadline(
+    word: LetterPracticeExampleWord,
+    reveal: Boolean,
+    letter: String
+) {
+    when {
+        word.romaji != null -> {
+            Text(formattedVocabDefinition(word.romaji, word.word.combinedGlossary()))
+        }
+
+        reveal -> {
+            FuriganaWordHeadline(
+                reading = word.word.reading,
+                glossary = word.word.combinedGlossary()
+            )
+        }
+
+        else -> {
+            val text = formattedVocabDefinition(word.word.reading, word.word.combinedGlossary())
+                .withEncodedText(letter)
+            FuriganaText(text)
         }
     }
 }

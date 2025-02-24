@@ -144,26 +144,24 @@ interface LetterPracticeItemData {
 
     sealed interface WritingData : LetterPracticeItemData {
         val strokes: List<Path>
-        val encodedWords: List<JapaneseWord>
     }
 
     sealed interface ReadingData : LetterPracticeItemData
 
     val character: String
-    val words: List<JapaneseWord>
+    val words: List<LetterPracticeExampleWord>
 
     data class KanaWritingData(
         override val character: String,
         override val strokes: List<Path>,
-        override val words: List<JapaneseWord>,
-        override val encodedWords: List<JapaneseWord>,
+        override val words: List<LetterPracticeExampleWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
     ) : WritingData, KanaData
 
     data class KanaReadingData(
         override val character: String,
-        override val words: List<JapaneseWord>,
+        override val words: List<LetterPracticeExampleWord>,
         override val kanaSystem: CharacterClassification.Kana,
         override val reading: KanaReading
     ) : ReadingData, KanaData
@@ -171,8 +169,7 @@ interface LetterPracticeItemData {
     data class KanjiWritingData(
         override val character: String,
         override val strokes: List<Path>,
-        override val words: List<JapaneseWord>,
-        override val encodedWords: List<JapaneseWord>,
+        override val words: List<LetterPracticeExampleWord>,
         override val radicals: List<CharacterRadical>,
         override val on: List<String>,
         override val kun: List<String>,
@@ -182,7 +179,7 @@ interface LetterPracticeItemData {
 
     data class KanjiReadingData(
         override val character: String,
-        override val words: List<JapaneseWord>,
+        override val words: List<LetterPracticeExampleWord>,
         override val radicals: List<CharacterRadical>,
         override val on: List<String>,
         override val kun: List<String>,
@@ -191,3 +188,8 @@ interface LetterPracticeItemData {
     ) : ReadingData, KanjiData
 
 }
+
+data class LetterPracticeExampleWord(
+    val word: JapaneseWord,
+    val romaji: String?
+)

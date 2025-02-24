@@ -1,13 +1,13 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.use_case
 
 import ua.syt0r.kanji.core.app_data.AppDataRepository
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
 import ua.syt0r.kanji.core.app_data.data.ReadingType
 import ua.syt0r.kanji.core.japanese.RomajiConverter
 import ua.syt0r.kanji.core.japanese.getKanaInfo
 import ua.syt0r.kanji.core.japanese.isKana
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.LetterPracticeScreenContract
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeQueueItemDescriptor
 
@@ -28,30 +28,34 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
 
         val isKana = descriptor.character.first().isKana()
 
-        val words: List<JapaneseWord> = when {
-            isKana -> appDataRepository.getKanaWords(
-                char = descriptor.character,
-                limit = LetterPracticeScreenContract.WordsLimit + 1
-            )
-            //TODO romaji
+        val words: List<LetterPracticeExampleWord> = when {
+            isKana -> {
+                appDataRepository.getKanaWords(
+                    char = descriptor.character,
+                    limit = LetterPracticeScreenContract.WordsLimit + 1
+                ).map {
+                    LetterPracticeExampleWord(
+                        word = it,
+                        romaji = when {
+                            descriptor.romajiReading -> romajiConverter.toRomaji(it.reading.kanaReading)
+                            else -> null
+                        }
+                    )
+                }
+            }
 
             else -> appDataRepository.getWordsWithText(
                 text = descriptor.character,
                 limit = LetterPracticeScreenContract.WordsLimit + 1
-            )
+            ).map { LetterPracticeExampleWord(it, null) }
         }
 
         return when (descriptor) {
             is LetterPracticeQueueItemDescriptor.Writing -> {
-                val encodedWords = encodeWords(
-                    character = descriptor.character,
-                    words = words
-                )
                 getWritingItemData(
                     character = descriptor.character,
                     isKana = isKana,
-                    words = words,
-                    encodedWords = encodedWords
+                    words = words
                 )
             }
 
@@ -68,8 +72,7 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
     private suspend fun getWritingItemData(
         character: String,
         isKana: Boolean,
-        words: List<JapaneseWord>,
-        encodedWords: List<JapaneseWord>
+        words: List<LetterPracticeExampleWord>
     ): LetterPracticeItemData {
         val strokes = parseKanjiStrokes(appDataRepository.getStrokes(character))
         return when {
@@ -80,7 +83,6 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                     character = character,
                     strokes = strokes,
                     words = words,
-                    encodedWords = encodedWords,
                     kanaSystem = kanaInfo.classification,
                     reading = kanaInfo.reading
                 )
@@ -93,7 +95,6 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                     strokes = strokes,
                     radicals = appDataRepository.getRadicalsInCharacter(character),
                     words = words,
-                    encodedWords = encodedWords,
                     on = readings.filter { it.value == ReadingType.ON }
                         .keys
                         .toList(),
@@ -112,7 +113,7 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
     private suspend fun getReadingItemData(
         character: String,
         isKana: Boolean,
-        words: List<JapaneseWord>
+        words: List<LetterPracticeExampleWord>
     ): LetterPracticeItemData.ReadingData {
         return when {
             isKana -> {
@@ -144,14 +145,6 @@ class DefaultGetLetterPracticeQueueItemDataUseCase(
                 )
             }
         }
-    }
-
-    private fun encodeWords(
-        character: String,
-        words: List<JapaneseWord>
-    ): List<JapaneseWord> {
-        return words
-        // todo encode
     }
 
 }

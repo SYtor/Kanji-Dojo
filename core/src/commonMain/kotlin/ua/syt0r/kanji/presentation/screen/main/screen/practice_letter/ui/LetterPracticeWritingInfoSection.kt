@@ -14,6 +14,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,21 +53,21 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import ua.syt0r.kanji.core.app_data.data.CharacterRadical
-import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.toFurigana
+import ua.syt0r.kanji.core.app_data.data.formattedFurigana
+import ua.syt0r.kanji.core.app_data.data.withEncodedText
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.core.logger.Logger
 import ua.syt0r.kanji.presentation.common.ItemPositionData
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.trackItemPosition
 import ua.syt0r.kanji.presentation.common.ui.FuriganaText
-import ua.syt0r.kanji.presentation.common.ui.MostlySingleLineEliminateOverflowRow
 import ua.syt0r.kanji.presentation.common.ui.kanji.Kanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.KanjiReadingsContainer
 import ua.syt0r.kanji.presentation.common.ui.kanji.RadicalKanji
 import ua.syt0r.kanji.presentation.common.ui.kanji.getColoredKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWritingProgress
+import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeExampleWord
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeLayoutConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeReviewState
@@ -183,14 +185,13 @@ fun LetterPracticeWritingInfoSection(
                 }
             }
 
-            val expressions = currentSectionData.characterData.run {
-                if (currentSectionData.isStudyMode || currentSectionData.revealCharacter) words else encodedWords
-            }
-                .takeIf { it.isNotEmpty() }
+            val expressions = currentSectionData.characterData.words
 
             val animatedVocabPos = remember { mutableStateOf<ItemPositionData?>(null) }
-            if (expressions != null) {
+            if (expressions.isNotEmpty()) {
                 ExpressionsSection(
+                    letter = currentSectionData.characterData.character,
+                    reveal = state.value.run { revealCharacter || isStudyMode },
                     words = expressions,
                     isNoTranslationLayout = currentSectionData.layoutConfiguration.noTranslationsLayout,
                     onClick = onExpressionsClick,
@@ -385,9 +386,12 @@ private fun KanjiMeanings(
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ExpressionsSection(
-    words: List<JapaneseWord>,
+    letter: String,
+    reveal: Boolean,
+    words: List<LetterPracticeExampleWord>,
     isNoTranslationLayout: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -409,29 +413,29 @@ private fun ExpressionsSection(
 
         Row(verticalAlignment = Alignment.Bottom) {
 
-            MostlySingleLineEliminateOverflowRow(
+            FlowRow(
                 modifier = Modifier
                     .weight(1f)
                     .padding(bottom = 16.dp, top = 4.dp),
-                verticalAlignment = Alignment.Bottom
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                maxLines = 1
             ) {
-
                 if (isNoTranslationLayout) {
-                    words.take(NoTranslationLayoutPreviewWordsLimit).forEach {
-                        // TODO hidden kanji, romaji
-                        FuriganaText(
-                            furiganaString = it.reading.run {
-                                furigana ?: kanjiReading?.toFurigana() ?: kanaReading.toFurigana()
-                            },
-                            modifier = Modifier.padding(end = 16.dp)
-                        )
+                    words.take(NoTranslationLayoutPreviewWordsLimit).forEach { exampleWord ->
+                        when {
+                            exampleWord.romaji != null -> Text(exampleWord.romaji)
+                            else -> {
+                                val string = exampleWord.word.reading.formattedFurigana()
+                                    .let { if (reveal) it else it.withEncodedText(letter) }
+                                FuriganaText(string)
+                            }
+                        }
                     }
                 } else {
-                    FuriganaText(
-                        furiganaString = words.first().reading.run {
-                            furigana ?: kanjiReading?.toFurigana() ?: kanaReading.toFurigana()
-                        },
-                        modifier = Modifier.padding(end = 16.dp)
+                    WritingPracticeVocabHeadline(
+                        word = words.first(),
+                        reveal = reveal,
+                        letter = letter
                     )
                 }
 

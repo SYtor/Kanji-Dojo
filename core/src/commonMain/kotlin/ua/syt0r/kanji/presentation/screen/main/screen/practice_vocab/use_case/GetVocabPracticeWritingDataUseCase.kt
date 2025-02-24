@@ -43,8 +43,7 @@ class DefaultGetVocabPracticeWritingDataUseCase(
                 letters = card.kanjiReading
                 summaryReading = formattedVocabReading(
                     kanaReading = card.kanaReading,
-                    kanjiReading = card.kanjiReading,
-                    linebreak = true
+                    kanjiReading = card.kanjiReading
                 )
             }
 

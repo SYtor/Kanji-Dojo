@@ -10,41 +10,6 @@ data class VocabReading(
     val furigana: FuriganaString?
 )
 
-fun formattedVocabReading(
-    kanaReading: String,
-    kanjiReading: String? = null,
-    furigana: FuriganaString? = null,
-    linebreak: Boolean = false
-): FuriganaString = when {
-    furigana != null -> {
-        furigana
-    }
-
-    kanjiReading != null -> buildFuriganaString {
-        append(kanjiReading)
-        if (linebreak) append("\n")
-        append("【${kanaReading}】")
-    }
-
-    else -> buildFuriganaString {
-        append(kanaReading)
-    }
-}
-
-fun formattedVocabStringReading(
-    kanaReading: String,
-    kanjiReading: String? = null,
-): String = when {
-    kanjiReading != null -> buildString {
-        append(kanjiReading)
-        append(formattedKanaReading(kanaReading))
-    }
-
-    else -> kanaReading
-}
-
-fun formattedKanaReading(reading: String) = "【${reading}】"
-
 @Serializable
 data class VocabSense(
     val glossary: List<String>,
@@ -84,3 +49,53 @@ data class DetailedJapaneseWord(
     val id: Long,
     val senseList: List<DetailedVocabSense>
 )
+
+fun VocabReading.formattedFurigana(): FuriganaString =
+    formattedVocabReading(kanaReading, kanjiReading, furigana)
+
+fun formattedKanaReading(reading: String): String = "【${reading}】"
+
+fun formattedVocabReading(
+    kanaReading: String,
+    kanjiReading: String? = null,
+    furigana: FuriganaString? = null
+): FuriganaString = when {
+    furigana != null -> {
+        furigana
+    }
+
+    kanjiReading != null -> buildFuriganaString {
+        append(kanjiReading)
+        append(formattedKanaReading(kanaReading))
+    }
+
+    else -> buildFuriganaString {
+        append(kanaReading)
+    }
+}
+
+fun formattedVocabStringReading(
+    kanaReading: String,
+    kanjiReading: String? = null,
+): String = when {
+    kanjiReading != null -> buildString {
+        append(kanjiReading)
+        append(formattedKanaReading(kanaReading))
+    }
+
+    else -> kanaReading
+}
+
+private const val DefinitionDividerSymbol = "・"
+
+fun formattedVocabDefinition(reading: FuriganaString, glossary: String) = buildFuriganaString {
+    append(reading)
+    append("$DefinitionDividerSymbol ")
+    append(glossary)
+}
+
+fun formattedVocabDefinition(reading: VocabReading, glossary: String) =
+    formattedVocabDefinition(reading.formattedFurigana(), glossary)
+
+fun formattedVocabDefinition(reading: String, glossary: String) =
+    "$reading$DefinitionDividerSymbol$glossary"
