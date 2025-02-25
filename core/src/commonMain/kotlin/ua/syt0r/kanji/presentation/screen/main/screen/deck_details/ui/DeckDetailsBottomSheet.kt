@@ -137,7 +137,6 @@ fun DeckDetailsBottomSheet(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PracticeGroupDetails(
     practiceType: ScreenLetterPracticeType,
@@ -146,7 +145,8 @@ private fun PracticeGroupDetails(
     onStartClick: () -> Unit = {},
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         Row(
@@ -162,73 +162,25 @@ private fun PracticeGroupDetails(
                 style = MaterialTheme.typography.titleLarge.copyCentered(),
             )
 
-            var hintDropdownShown by remember { mutableStateOf(false) }
-
-            val dotColor = group.reviewState.toColor()
-            CompositionLocalProvider(
-                LocalRippleConfiguration provides RippleConfiguration(dotColor)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .clip(CircleShape)
-                        .clickable { hintDropdownShown = true }
-                        .fillMaxHeight()
-                        .padding(horizontal = 16.dp)
-                ) {
-
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(CircleShape)
-                            .background(dotColor)
-                            .align(Alignment.Center)
-                    )
-
-                    DropdownMenu(
-                        expanded = hintDropdownShown,
-                        onDismissRequest = { hintDropdownShown = false },
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Text(
-                            text = resolveString {
-                                when (group.reviewState) {
-                                    SrsItemStatus.Done -> {
-                                        reviewStateDone
-                                    }
-
-                                    SrsItemStatus.Review -> {
-                                        reviewStateDue
-                                    }
-
-                                    SrsItemStatus.New -> {
-                                        reviewStateNew
-                                    }
-                                }
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
-                    }
-                }
-            }
+            LetterGroupSrsIndicator(group.summary.state)
 
         }
 
-        Text(
-            text = resolveString {
-                deckDetails.firstTimeReviewMessage(group.summary.firstReviewDate)
-            },
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
+        Column {
+            Text(
+                text = resolveString {
+                    deckDetails.firstTimeReviewMessage(group.summary.firstReviewDate)
+                },
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
 
-        Text(
-            text = resolveString {
-                deckDetails.lastTimeReviewMessage(group.summary.lastReviewDate)
-            },
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                text = resolveString {
+                    deckDetails.lastTimeReviewMessage(group.summary.lastReviewDate)
+                },
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
 
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -254,25 +206,77 @@ private fun PracticeGroupDetails(
 
         }
 
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+        FilledTonalButton(
+            onClick = onStartClick,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp),
+            shape = MaterialTheme.shapes.medium
         ) {
-
-            FilledTonalButton(
-                onClick = onStartClick,
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                ),
-                modifier = Modifier.weight(1f).padding(vertical = 6.dp),
-                shape = MaterialTheme.shapes.medium
-            ) {
-                Text(text = resolveString { deckDetails.groupDetailsButton })
-            }
-
+            Text(text = resolveString { deckDetails.groupDetailsButton })
         }
 
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LetterGroupSrsIndicator(state: SrsItemStatus) {
+
+    var hintDropdownShown by remember { mutableStateOf(false) }
+
+    val dotColor = state.toColor()
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides RippleConfiguration(dotColor)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .clip(CircleShape)
+                .clickable { hintDropdownShown = true }
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp)
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
+                    .align(Alignment.Center)
+            )
+
+            DropdownMenu(
+                expanded = hintDropdownShown,
+                onDismissRequest = { hintDropdownShown = false },
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Text(
+                    text = resolveString {
+                        when (state) {
+                            SrsItemStatus.Done -> {
+                                reviewStateDone
+                            }
+
+                            SrsItemStatus.Review -> {
+                                reviewStateDue
+                            }
+
+                            SrsItemStatus.New -> {
+                                reviewStateNew
+                            }
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
     }
 
 }

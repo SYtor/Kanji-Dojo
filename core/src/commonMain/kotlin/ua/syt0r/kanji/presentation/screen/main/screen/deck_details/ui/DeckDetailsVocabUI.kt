@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
@@ -142,7 +141,7 @@ private fun WordItem(
 
     ListItem(
         leadingContent = {
-            val srsIndicatorColor = when (vocab.statusMap.getValue(practiceType)) {
+            val srsIndicatorColor = when (vocab.data.srsStatus.getValue(practiceType)) {
                 SrsItemStatus.New -> MaterialTheme.extraColorScheme.new
                 SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
                 SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
@@ -166,14 +165,8 @@ private fun WordItem(
                 )
             }
         },
-        headlineContent = {
-            val text = vocab.word.data
-                .run { formattedVocabStringReading(kanaReading, kanjiReading) }
-            Text(text)
-        },
-        supportingContent = {
-            Text(vocab.word.data.meaning ?: "Dic meaning") // TODO
-        },
+        headlineContent = { Text(vocab.data.reading) },
+        supportingContent = { Text(vocab.data.meaning) },
         trailingContent = {
             if (selectionMode) {
                 Icon(

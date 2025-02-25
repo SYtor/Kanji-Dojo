@@ -69,11 +69,23 @@ class VocabSenseGroup(
     val wordId: Long,
     val senseList: List<Sense>
 ) {
+
     data class Sense(
         val glossary: List<String>,
         val kanjiRestrictions: List<String>,
         val kanaRestrictions: List<String>
     )
+
+    fun getMatchingSense(kanjiReading: String?, kanaReading: String): Sense {
+        return senseList.first {
+            val kanjiCheck = it.kanjiRestrictions.isEmpty() ||
+                    it.kanjiRestrictions.contains(kanjiReading)
+            val kanaCheck = it.kanaRestrictions.isEmpty() ||
+                    it.kanaRestrictions.contains(kanaReading)
+            kanjiCheck && kanaCheck
+        }
+    }
+
 }
 
 data class Sentence(

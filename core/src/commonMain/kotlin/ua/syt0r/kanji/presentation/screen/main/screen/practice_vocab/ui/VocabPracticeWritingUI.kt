@@ -70,14 +70,13 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabCharacterWritingData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 
 @Composable
 fun VocabPracticeWritingUI(
     reviewState: VocabReviewState.Writing,
     answers: PracticeAnswers,
     answerSelected: (PracticeAnswer) -> Unit,
-    onWordClick: (VocabReference) -> Unit,
+    onInfoClick: () -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -144,7 +143,7 @@ fun VocabPracticeWritingUI(
 
                     Progress(
                         reviewState = reviewState,
-                        onWordClick = onWordClick,
+                        onInfoClick = onInfoClick,
                         revealAnswer = revealAnswer,
                         modifier = Modifier.fillMaxSize().padding(20.dp)
                     )
@@ -157,7 +156,7 @@ fun VocabPracticeWritingUI(
 
                     Progress(
                         reviewState = reviewState,
-                        onWordClick = onWordClick,
+                        onInfoClick = onInfoClick,
                         revealAnswer = revealAnswer,
                         modifier = Modifier.weight(1f)
                             .fillMaxHeight()
@@ -193,7 +192,7 @@ fun VocabPracticeWritingUI(
 private fun Progress(
     reviewState: VocabReviewState.Writing,
     revealAnswer: State<Boolean>,
-    onWordClick: (VocabReference) -> Unit,
+    onInfoClick: () -> Unit,
     modifier: Modifier,
 ) {
 
@@ -214,15 +213,12 @@ private fun Progress(
                 )
             },
             sideContent = {
-                reviewState.vocabReference?.let {
-                    IconButton(
-                        enabled = revealAnswer.value,
-                        onClick = { onWordClick(it) }
-                    ) {
-                        Icon(Icons.Default.ArrowOutward, null)
-                    }
+                IconButton(
+                    enabled = revealAnswer.value,
+                    onClick = onInfoClick
+                ) {
+                    Icon(Icons.Default.ArrowOutward, null)
                 }
-
             },
         )
 

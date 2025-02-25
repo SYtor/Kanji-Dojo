@@ -2,7 +2,6 @@ package ua.syt0r.kanji.presentation.screen.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import org.koin.compose.koinInject
@@ -61,9 +60,7 @@ interface MainDestination {
 
         @Composable
         override fun Content(state: MainNavigationState) {
-            HomeScreen(
-                mainNavigationState = rememberUpdatedState(state)
-            )
+            HomeScreen(mainNavigationState = state)
         }
 
     }

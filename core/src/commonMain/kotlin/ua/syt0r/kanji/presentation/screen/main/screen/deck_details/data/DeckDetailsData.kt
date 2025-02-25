@@ -72,6 +72,8 @@ sealed interface DeckDetailsItemData {
     ) : DeckDetailsItemData
 
     data class VocabData(
+        val reading: String,
+        val meaning: String,
         val card: SavedVocabCard,
         val positionInPractice: Int,
         val srsStatus: Map<ScreenVocabPracticeType, SrsItemStatus>
@@ -119,8 +121,7 @@ sealed interface DeckDetailsListItem {
 
     data class Vocab(
         override val key: DeckDetailsListItemKey,
-        val word: SavedVocabCard,
-        val statusMap: Map<ScreenVocabPracticeType, SrsItemStatus>,
+        val data: DeckDetailsItemData.VocabData,
         val initialSelectionState: Boolean
     ) : DeckDetailsListItem {
         override val selected: MutableState<Boolean> = mutableStateOf(initialSelectionState)

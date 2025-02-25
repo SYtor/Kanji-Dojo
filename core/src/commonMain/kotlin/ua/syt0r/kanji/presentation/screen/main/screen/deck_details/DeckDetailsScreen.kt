@@ -48,17 +48,17 @@ fun DeckDetailsScreen(
             mainNavigationState.navigate(MainDestination.Info(screenData))
         },
         navigateToCardDetails = {
-            val screenData = it.word.data
+            val screenData = it.data.card.data
                 .run { InfoScreenData.Vocab(dictionaryId, kanjiReading, kanaReading) }
             mainNavigationState.navigate(MainDestination.Info(screenData))
         },
         startGroupReview = { group ->
-            val configuration = viewModel.getPracticeConfiguration(group)
-            mainNavigationState.navigate(configuration)
+            val reviewConfiguration = viewModel.getPracticeConfiguration(group)
+            mainNavigationState.navigate(reviewConfiguration)
         },
         startMultiselectReview = {
-            val configuration = viewModel.getMultiselectPracticeConfiguration()
-            mainNavigationState.navigate(configuration)
+            val reviewConfiguration = viewModel.getMultiselectPracticeConfiguration()
+            mainNavigationState.navigate(reviewConfiguration)
         }
     )
 

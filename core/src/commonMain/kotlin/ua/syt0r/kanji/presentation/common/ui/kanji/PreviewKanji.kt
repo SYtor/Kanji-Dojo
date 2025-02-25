@@ -77,8 +77,4 @@ object PreviewKanji {
         SampleWordsPool[it % SampleWordsPool.size]
     }
 
-    fun randomEncodedWords(number: Int = 10) = randomWords(number).map {
-        TODO()
-    }
-
 }

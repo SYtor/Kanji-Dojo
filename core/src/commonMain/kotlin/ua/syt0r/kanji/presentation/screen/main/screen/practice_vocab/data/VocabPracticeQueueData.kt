@@ -10,6 +10,7 @@ import ua.syt0r.kanji.core.srs.SrsCard
 import ua.syt0r.kanji.core.srs.SrsCardKey
 import ua.syt0r.kanji.core.stroke_evaluator.KanjiStrokeEvaluator
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DefaultCharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
@@ -105,7 +106,7 @@ sealed interface VocabPracticeItemData {
         val hiddenReading: FuriganaString,
         val meaning: String,
         val showMeaningInFront: Boolean,
-        val vocabReference: VocabReference?
+        val vocabReference: InfoScreenData.Vocab
     ) : VocabPracticeItemData {
 
         override fun toReviewState(
@@ -128,7 +129,7 @@ sealed interface VocabPracticeItemData {
         val answers: List<String>,
         val correctAnswer: String,
         val showMeaning: Boolean,
-        val vocabReference: VocabReference?,
+        val vocabReference: InfoScreenData.Vocab,
     ) : VocabPracticeItemData {
         override fun toReviewState(
             coroutineScope: CoroutineScope
@@ -148,7 +149,7 @@ sealed interface VocabPracticeItemData {
         val meaning: String,
         val summaryReading: FuriganaString,
         val writerData: List<Pair<String, CharacterWriterData?>>,
-        val vocabReference: VocabReference?
+        val vocabReference: InfoScreenData.Vocab
     ) : VocabPracticeItemData {
 
         override fun toReviewState(
@@ -191,7 +192,7 @@ sealed interface MutableVocabReviewState {
         override val noFuriganaReading: FuriganaString,
         override val meaning: String,
         override val showMeaningInFront: Boolean,
-        override val vocabReference: VocabReference?,
+        override val vocabReference: InfoScreenData.Vocab,
     ) : MutableVocabReviewState, VocabReviewState.Flashcard {
 
         override val showAnswer: MutableState<Boolean> = mutableStateOf(false)
@@ -209,7 +210,7 @@ sealed interface MutableVocabReviewState {
         override val answers: List<String>,
         override val correctAnswer: String,
         override val showMeaning: Boolean,
-        override val vocabReference: VocabReference?,
+        override val vocabReference: InfoScreenData.Vocab,
     ) : MutableVocabReviewState, VocabReviewState.Reading {
 
         override val asImmutable: VocabReviewState.Reading = this
@@ -224,7 +225,7 @@ sealed interface MutableVocabReviewState {
         override val summaryReading: FuriganaString,
         override val charactersData: List<VocabCharacterWritingData>,
         override val meaning: String,
-        override val vocabReference: VocabReference?,
+        override val vocabReference: InfoScreenData.Vocab,
     ) : MutableVocabReviewState, VocabReviewState.Writing {
         override val asImmutable: VocabReviewState.Writing = this
         override val selected: MutableState<VocabCharacterWritingData> = mutableStateOf(

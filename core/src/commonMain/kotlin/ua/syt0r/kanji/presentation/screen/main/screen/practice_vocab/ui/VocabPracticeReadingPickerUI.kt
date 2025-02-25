@@ -41,13 +41,12 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAn
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.SelectedReadingAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 
 @Composable
 fun VocabPracticeReadingPickerUI(
     reviewState: VocabReviewState.Reading,
     answers: PracticeAnswers,
-    onWordClick: (VocabReference) -> Unit,
+    onInfoClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
@@ -80,15 +79,12 @@ fun VocabPracticeReadingPickerUI(
                     )
                 },
                 sideContent = {
-                    reviewState.vocabReference?.let {
-                        IconButton(
-                            enabled = selectedAnswer != null,
-                            onClick = { onWordClick(it) }
-                        ) {
-                            Icon(Icons.Default.ArrowOutward, null)
-                        }
+                    IconButton(
+                        enabled = selectedAnswer != null,
+                        onClick = onInfoClick
+                    ) {
+                        Icon(Icons.Default.ArrowOutward, null)
                     }
-
                 }
             )
         }

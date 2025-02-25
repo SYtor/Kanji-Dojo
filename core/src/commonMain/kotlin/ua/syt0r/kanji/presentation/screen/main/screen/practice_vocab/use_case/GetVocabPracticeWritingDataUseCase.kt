@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
 import ua.syt0r.kanji.core.app_data.data.toFurigana
 import ua.syt0r.kanji.core.app_data.data.withoutAnnotations
 import ua.syt0r.kanji.core.stroke_evaluator.DefaultKanjiStrokeEvaluator
+import ua.syt0r.kanji.core.toInfoScreenData
 import ua.syt0r.kanji.presentation.common.ui.kanji.parseKanjiStrokes
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.CharacterWriterData
@@ -74,7 +75,7 @@ class DefaultGetVocabPracticeWritingDataUseCase(
             meaning = card.glossary.joinToString(),
             summaryReading = summaryReading,
             writerData = writerData,
-            vocabReference = null
+            vocabReference = card.toInfoScreenData()
         )
     }
 

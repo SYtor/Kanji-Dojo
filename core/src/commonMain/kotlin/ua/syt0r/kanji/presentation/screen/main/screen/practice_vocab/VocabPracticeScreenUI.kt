@@ -37,7 +37,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeTo
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.VocabPracticeScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeReadingPriority
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeFlashcardUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeReadingPickerUI
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.ui.VocabPracticeWritingUI
@@ -49,7 +48,7 @@ fun VocabPracticeScreenUI(
     onFlashcardAnswerRevealClick: () -> Unit,
     onReadingPickerAnswerSelected: (String) -> Unit,
     onNext: (PracticeAnswer) -> Unit,
-    onWordClick: (VocabReference) -> Unit,
+    onInfoClick: (VocabReviewState) -> Unit,
     onFeedback: (JapaneseWord) -> Unit,
     navigateBack: () -> Unit,
     finishPractice: () -> Unit
@@ -111,7 +110,7 @@ fun VocabPracticeScreenUI(
                         onFlashcardAnswerRevealClick = onFlashcardAnswerRevealClick,
                         onAnswerSelected = onReadingPickerAnswerSelected,
                         onNextClick = onNext,
-                        onWordClick = onWordClick,
+                        onInfoClick = onInfoClick,
                         onFeedbackClick = onFeedback
                     )
                 }
@@ -210,7 +209,7 @@ private fun ScreenReview(
     onFlashcardAnswerRevealClick: () -> Unit,
     onAnswerSelected: (String) -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
-    onWordClick: (VocabReference) -> Unit,
+    onInfoClick: (VocabReviewState) -> Unit,
     onFeedbackClick: (JapaneseWord) -> Unit
 ) {
 
@@ -225,7 +224,7 @@ private fun ScreenReview(
                     answers = reviewState.answers,
                     onRevealAnswerClick = onFlashcardAnswerRevealClick,
                     onNextClick = onNextClick,
-                    onWordClick = onWordClick,
+                    onInfoClick = { onInfoClick(currentState) },
                 )
             }
 
@@ -235,7 +234,7 @@ private fun ScreenReview(
                     answers = reviewState.answers,
                     onAnswerSelected = onAnswerSelected,
                     onNextClick = onNextClick,
-                    onWordClick = onWordClick,
+                    onInfoClick = { onInfoClick(currentState) },
                     onFeedbackClick = onFeedbackClick
                 )
             }
@@ -245,7 +244,7 @@ private fun ScreenReview(
                     reviewState = currentState,
                     answers = reviewState.answers,
                     answerSelected = onNextClick,
-                    onWordClick = onWordClick,
+                    onInfoClick = { onInfoClick(currentState) },
                     onFeedbackClick = onFeedbackClick
                 )
             }

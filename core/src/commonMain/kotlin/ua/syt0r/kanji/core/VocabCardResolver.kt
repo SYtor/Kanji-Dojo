@@ -11,6 +11,7 @@ import ua.syt0r.kanji.core.app_data.AppDataRepository
 import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 
 data class ResolvedVocabCard(
     val dictionaryId: Long?,
@@ -20,6 +21,9 @@ data class ResolvedVocabCard(
     val glossary: List<String>,
     val pos: List<String>
 )
+
+fun ResolvedVocabCard.toInfoScreenData() =
+    InfoScreenData.Vocab(dictionaryId, kanjiReading, kanaReading)
 
 class VocabCardResolver(
     private val vocabPracticeRepository: VocabPracticeRepository,

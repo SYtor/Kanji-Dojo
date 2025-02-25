@@ -12,6 +12,7 @@ import ua.syt0r.kanji.core.RefreshableData
 import ua.syt0r.kanji.core.analytics.AnalyticsManager
 import ua.syt0r.kanji.presentation.LifecycleAwareViewModel
 import ua.syt0r.kanji.presentation.LifecycleState
+import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
@@ -24,7 +25,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.GetD
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.SubscribeOnVocabDeckDetailsDataUseCase
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.use_case.UpdateDeckDetailsConfigurationUseCase
-import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_letter.data.LetterPracticeScreenConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeScreenConfiguration
 
@@ -127,7 +127,7 @@ class DeckDetailsViewModel(
                 val vocabPracticeScreenConfiguration = VocabPracticeScreenConfiguration(
                     wordIdToDeckIdMap = currentVisibleData.items.asSequence()
                         .filter { it.selected.value }
-                        .map { it.word.cardId }
+                        .map { it.data.card.cardId }
                         .associateWith { 0 },
                     practiceType = loadedState.configuration.value
                         .let { it as DeckDetailsConfiguration.VocabDeckConfiguration }

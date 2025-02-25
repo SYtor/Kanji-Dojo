@@ -7,6 +7,7 @@ import ua.syt0r.kanji.core.app_data.data.FuriganaString
 import ua.syt0r.kanji.core.user_data.preferences.PreferencesVocabReadingPriority
 import ua.syt0r.kanji.presentation.common.ScreenVocabPracticeType
 import ua.syt0r.kanji.presentation.common.resources.string.StringResolveScope
+import ua.syt0r.kanji.presentation.screen.main.screen.info.InfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.CharacterWriterState
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.DisplayableEnum
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
@@ -56,16 +57,10 @@ sealed interface VocabPracticeConfiguration {
 
 }
 
-data class VocabReference(
-    val id: Long,
-    val kanjiReading: String,
-    val kanaReading: String
-)
-
 sealed interface VocabReviewState {
 
     val meaning: String
-    val vocabReference: VocabReference?
+    val vocabReference: InfoScreenData.Vocab
 
     interface Flashcard : VocabReviewState {
         val reading: FuriganaString

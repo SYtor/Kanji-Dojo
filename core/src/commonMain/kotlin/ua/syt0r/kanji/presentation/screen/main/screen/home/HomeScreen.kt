@@ -2,8 +2,8 @@ package ua.syt0r.kanji.presentation.screen.main.screen.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -14,17 +14,16 @@ import ua.syt0r.kanji.presentation.getMultiplatformViewModel
 import ua.syt0r.kanji.presentation.screen.main.MainDestination
 import ua.syt0r.kanji.presentation.screen.main.MainNavigationState
 
-// TODO With compose 1.5 HomeNavigationContent inside of movableContentOf flickers when passing MainNavigationState directly without State wrapper even with class marked as immutable. Make prettier later
 @Composable
 fun HomeScreen(
-    mainNavigationState: State<MainNavigationState>,
+    mainNavigationState: MainNavigationState,
     viewModel: HomeScreenContract.ViewModel = getMultiplatformViewModel(),
 ) {
 
     val homeNavigationState = rememberHomeNavigationState(viewModel.defaultTab)
 
-    val tabContent = movableContentOf {
-        HomeNavigationContent(homeNavigationState, mainNavigationState.value)
+    val tabContent = remember {
+        movableContentOf { HomeNavigationContent(homeNavigationState, mainNavigationState) }
     }
 
     HomeScreenUI(
@@ -34,9 +33,9 @@ fun HomeScreen(
         onTabSelected = { homeNavigationState.navigate(it) },
         onSyncButtonClick = {
             val isSyncStarted = viewModel.trySync()
-            if (!isSyncStarted) mainNavigationState.value.navigate(MainDestination.Sync)
+            if (!isSyncStarted) mainNavigationState.navigate(MainDestination.Sync)
         },
-        onSponsorButtonClick = { mainNavigationState.value.navigate(MainDestination.Sponsor) }
+        onSponsorButtonClick = { mainNavigationState.navigate(MainDestination.Sponsor) }
     ) {
 
         tabContent()

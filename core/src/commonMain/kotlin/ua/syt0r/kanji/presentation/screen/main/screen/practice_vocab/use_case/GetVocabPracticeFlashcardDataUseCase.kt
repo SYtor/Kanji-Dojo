@@ -4,6 +4,7 @@ import ua.syt0r.kanji.core.VocabCardResolver
 import ua.syt0r.kanji.core.app_data.data.formattedVocabReading
 import ua.syt0r.kanji.core.app_data.data.toFurigana
 import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
+import ua.syt0r.kanji.core.toInfoScreenData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeItemData
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabPracticeQueueItemDescriptor
 
@@ -21,7 +22,8 @@ class DefaultGetVocabPracticeFlashcardDataUseCase(
         descriptor: VocabPracticeQueueItemDescriptor.Flashcard
     ): VocabPracticeItemData.Flashcard {
         val card = vocabCardResolver.resolveUserCard(descriptor.cardId)
-        val revealedReading = card.run { formattedVocabReading(kanaReading, kanjiReading, furigana) }
+        val revealedReading =
+            card.run { formattedVocabReading(kanaReading, kanjiReading, furigana) }
         val hiddenReading = card.furigana?.withEmptyFurigana()
             ?: card.kanjiReading?.toFurigana()
             ?: card.kanaReading.toFurigana()
@@ -30,7 +32,7 @@ class DefaultGetVocabPracticeFlashcardDataUseCase(
             hiddenReading = hiddenReading,
             meaning = card.glossary.joinToString(),
             showMeaningInFront = descriptor.translationInFont,
-            vocabReference = null
+            vocabReference = card.toInfoScreenData()
         )
     }
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.presentation.common.CollapsibleContainer
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.ExtraSpacer
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.rememberCollapsibleContainerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
@@ -162,12 +163,9 @@ private fun WordItem(
                     group.items.joinToString("") { it.character }
                 )
             },
+            style = MaterialTheme.typography.bodyLarge.copyCentered(),
             maxLines = 1,
-            modifier = Modifier
-                .weight(1f)
-                // TODO check when new font api is stable, currently LineHeightStyle.Alignment.Center
-                //  with disabled font paddings doesn't help
-                .padding(bottom = 1.dp),
+            modifier = Modifier.weight(1f),
             overflow = TextOverflow.Ellipsis,
         )
 

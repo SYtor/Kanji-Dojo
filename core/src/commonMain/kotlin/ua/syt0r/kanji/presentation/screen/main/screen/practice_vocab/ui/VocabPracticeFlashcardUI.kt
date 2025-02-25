@@ -27,7 +27,6 @@ import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.FlashcardP
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswer
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_common.PracticeAnswers
 import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReviewState
-import ua.syt0r.kanji.presentation.screen.main.screen.practice_vocab.data.VocabReference
 
 @Composable
 fun VocabPracticeFlashcardUI(
@@ -35,7 +34,7 @@ fun VocabPracticeFlashcardUI(
     answers: PracticeAnswers,
     onRevealAnswerClick: () -> Unit,
     onNextClick: (PracticeAnswer) -> Unit,
-    onWordClick: (VocabReference) -> Unit
+    onInfoClick: () -> Unit
 ) {
 
     AutopaddedScrollableColumn(
@@ -64,15 +63,12 @@ fun VocabPracticeFlashcardUI(
                     )
                 },
                 sideContent = {
-                    reviewState.vocabReference?.let {
-                        IconButton(
-                            enabled = reviewState.showAnswer.value,
-                            onClick = { onWordClick(it) }
-                        ) {
-                            Icon(Icons.Default.ArrowOutward, null)
-                        }
+                    IconButton(
+                        enabled = reviewState.showAnswer.value,
+                        onClick = onInfoClick
+                    ) {
+                        Icon(Icons.Default.ArrowOutward, null)
                     }
-
                 }
             )
         }
