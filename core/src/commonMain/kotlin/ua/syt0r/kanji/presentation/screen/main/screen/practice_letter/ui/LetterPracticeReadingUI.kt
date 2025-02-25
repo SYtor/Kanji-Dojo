@@ -28,14 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
-import ua.syt0r.kanji.core.app_data.data.formattedFurigana
 import ua.syt0r.kanji.core.app_data.data.formattedVocabDefinition
-import ua.syt0r.kanji.core.app_data.data.withEmptyFurigana
 import ua.syt0r.kanji.core.japanese.KanaReading
 import ua.syt0r.kanji.presentation.common.FuriganaWordHeadline
 import ua.syt0r.kanji.presentation.common.JapaneseWordUI
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 import ua.syt0r.kanji.presentation.common.ui.LocalOrientation
 import ua.syt0r.kanji.presentation.common.ui.Orientation
 import ua.syt0r.kanji.presentation.dialog.AddWordToDeckDialog
@@ -157,7 +154,7 @@ private fun LazyListScope.addWordItems(
             index = index,
             headline = { VocabExampleHeader(word, revealed.value) },
             onClick = { onWordClick(word.word) }.takeIf { revealed.value },
-            addWordToVocabDeckClick = { addWordToDeck(word.word) }
+            addWordToVocabDeckClick = { addWordToDeck(word.word) }.takeIf { revealed.value }
         )
     }
 
@@ -189,10 +186,8 @@ private fun VocabExampleHeader(
         }
 
         else -> {
-            val reading = word.word.reading
-                .formattedFurigana()
-                .withEmptyFurigana()
-            FuriganaText(reading)
+            val reading = word.word.reading.run { kanjiReading ?: kanaReading }
+            Text(reading)
         }
     }
 }

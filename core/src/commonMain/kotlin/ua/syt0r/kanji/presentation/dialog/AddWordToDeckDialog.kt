@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import ua.syt0r.kanji.core.app_data.data.JapaneseWord
+import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.core.user_data.database.VocabCardData
 import ua.syt0r.kanji.core.user_data.database.VocabPracticeRepository
 import ua.syt0r.kanji.presentation.common.MultiplatformDialog
@@ -56,7 +57,10 @@ fun AddWordToDeckDialog(
 
     MultiplatformDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(strings.title(word.reading.run { kanjiReading ?: kanaReading })) },
+        title = {
+            val label = word.reading.run { formattedVocabStringReading(kanaReading, kanjiReading) }
+            Text(strings.title(label))
+        },
         content = {
             AnimatedContent(
                 targetState = dialogState.state.value,
@@ -105,28 +109,32 @@ private fun DialogContent(
 
         is AddingState.SelectingDeck -> {
             Column {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .clip(MaterialTheme.shapes.small)
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            text = resolveString { addWordToDeckDialog.createDeckButton },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth()
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.medium)
                         .clickable(onClick = createNewDeck)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = resolveString { addWordToDeckDialog.createDeckButton })
-                }
+                )
                 state.decks.forEach { deck ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable { state.selectedDeck.value = deck.id }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(deck.title, Modifier.weight(1f))
-                        if (deck.id == state.selectedDeck.value)
-                            Icon(Icons.Default.Check, null)
-                    }
+                    ListItem(
+                        headlineContent = { Text(deck.title) },
+                        trailingContent = {
+                            if (deck.id == state.selectedDeck.value)
+                                Icon(Icons.Default.Check, null)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium)
+                            .clickable { state.selectedDeck.value = deck.id },
+                    )
                 }
             }
         }

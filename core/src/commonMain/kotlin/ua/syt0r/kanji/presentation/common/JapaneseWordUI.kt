@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +33,71 @@ import ua.syt0r.kanji.presentation.common.ui.FuriganaText
 @Composable
 fun JapaneseWordUI(
     index: Int,
+    onClick: (() -> Unit)? = null,
+    addWordToVocabDeckClick: (() -> Unit)? = null,
+    headline: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    val trailingContent: @Composable (() -> Unit)?
+
+    if (addWordToVocabDeckClick != null) {
+        trailingContent = {
+            IconButton(
+                onClick = addWordToVocabDeckClick
+            ) {
+                Icon(Icons.Default.Add, null)
+            }
+        }
+    } else {
+        trailingContent = null
+    }
+
+    ListItem(
+        modifier = modifier
+//            .clip(MaterialTheme.shapes.large)
+            .clickable(onClick),
+        leadingContent = { Text((index + 1).toString()) },
+        headlineContent = headline,
+        trailingContent = trailingContent
+    )
+
+}
+
+@Composable
+fun JapaneseWordUI(
+    index: Int,
+    word: JapaneseWord,
+    onClick: (() -> Unit)? = null,
+    onFuriganaClick: ((String) -> Unit)? = null,
+    addWordToVocabDeckClick: (() -> Unit)? = null,
+    headline: @Composable () -> Unit = {
+        FuriganaWordHeadline(word.reading, word.combinedGlossary(), onFuriganaClick)
+    },
+    modifier: Modifier = Modifier
+) = JapaneseWordUI(
+    index = index,
+    onClick = onClick,
+    addWordToVocabDeckClick = addWordToVocabDeckClick,
+    headline = headline,
+    modifier = modifier
+)
+
+@Composable
+fun FuriganaWordHeadline(
+    reading: VocabReading,
+    glossary: String,
+    onFuriganaClick: ((String) -> Unit)? = null
+) {
+    val furigana = formattedVocabDefinition(reading, glossary)
+    if (onFuriganaClick != null) ClickableFuriganaText(furigana, onFuriganaClick)
+    else FuriganaText(furigana)
+}
+
+
+@Composable
+fun NewStyleJapaneseWordUI(
+    index: Int,
     partOfSpeechList: List<String> = emptyList(),
     onClick: (() -> Unit)? = null,
     addWordToVocabDeckClick: (() -> Unit)? = null,
@@ -38,7 +105,7 @@ fun JapaneseWordUI(
     modifier: Modifier = Modifier
 ) {
 
-    JapaneseWordUILayout(
+    NewStyleLayout(
         modifier = modifier.clickable(onClick),
         topContent = {
             Text(
@@ -72,27 +139,7 @@ fun JapaneseWordUI(
 }
 
 @Composable
-fun JapaneseWordUI(
-    index: Int,
-    word: JapaneseWord,
-    onClick: (() -> Unit)? = null,
-    onFuriganaClick: ((String) -> Unit)? = null,
-    addWordToVocabDeckClick: (() -> Unit)? = null,
-    headline: @Composable () -> Unit = {
-        FuriganaWordHeadline(word.reading, word.combinedGlossary(), onFuriganaClick)
-    },
-    modifier: Modifier = Modifier
-) = JapaneseWordUI(
-    index = index,
-    partOfSpeechList = word.partOfSpeechList,
-    onClick = onClick,
-    addWordToVocabDeckClick = addWordToVocabDeckClick,
-    headline = headline,
-    modifier = modifier
-)
-
-@Composable
-fun JapaneseWordUILayout(
+private fun NewStyleLayout(
     modifier: Modifier,
     topContent: @Composable RowScope.() -> Unit,
     middleContent: @Composable RowScope.() -> Unit,
@@ -135,15 +182,4 @@ fun JapaneseWordUILayout(
         }
 
     }
-}
-
-@Composable
-fun FuriganaWordHeadline(
-    reading: VocabReading,
-    glossary: String,
-    onFuriganaClick: ((String) -> Unit)? = null
-) {
-    val furigana = formattedVocabDefinition(reading, glossary)
-    if (onFuriganaClick != null) ClickableFuriganaText(furigana, onFuriganaClick)
-    else FuriganaText(furigana)
 }

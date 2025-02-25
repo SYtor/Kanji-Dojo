@@ -116,7 +116,10 @@ fun LetterPracticeWritingWordsBottomSheet(
                             letter = currentState.letter
                         )
                     },
-                    onClick = { onWordClick(word.word) }.takeIf { currentState.reveal }
+                    onClick = { onWordClick(word.word) }
+                        .takeIf { currentState.reveal },
+                    addWordToVocabDeckClick = { wordToAddToVocabDeck = word.word }
+                        .takeIf { currentState.reveal }
                 )
             }
 
