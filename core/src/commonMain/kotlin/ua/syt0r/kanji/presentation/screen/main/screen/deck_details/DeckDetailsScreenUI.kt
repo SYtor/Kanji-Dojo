@@ -8,9 +8,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.ZeroCornerSize
@@ -47,7 +45,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -63,9 +60,9 @@ import ua.syt0r.kanji.presentation.common.rememberExtraListSpacerState
 import ua.syt0r.kanji.presentation.common.resources.icon.ExtraIcons
 import ua.syt0r.kanji.presentation.common.resources.icon.RadioButtonChecked
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
-import ua.syt0r.kanji.presentation.common.textDp
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.ui.FancyLoading
+import ua.syt0r.kanji.presentation.common.ui.kanji.ClickableLetter
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsConfiguration
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.data.DeckDetailsListItem
@@ -320,10 +317,12 @@ private fun ScreenLoadedState(
 }
 
 @Composable
-fun SrsItemStatus.toColor(): Color = when (this) {
+fun SrsItemStatus.toColor(
+    newColor: Color = MaterialTheme.colorScheme.surfaceVariant
+): Color = when (this) {
     SrsItemStatus.Done -> MaterialTheme.extraColorScheme.success
     SrsItemStatus.Review -> MaterialTheme.extraColorScheme.due
-    else -> MaterialTheme.colorScheme.surfaceVariant
+    SrsItemStatus.New -> newColor
 }
 
 @Composable
@@ -549,17 +548,17 @@ fun DeckDetailsCharacterBox(
     character: String,
     srsStatus: SrsItemStatus,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    constraintOrientation: Orientation = Orientation.Horizontal
 ) {
-    Text(
-        text = character,
-        fontSize = 32.textDp,
-        modifier = modifier.size(60.dp)
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(2.dp, srsStatus.toColor(), MaterialTheme.shapes.medium)
-            .clickable(onClick = onClick)
-            .wrapContentSize()
+    ClickableLetter(
+        letter = character,
+        onClick = { onClick() },
+        aspectRatioConstraintOrientation = constraintOrientation,
+        modifier = Modifier.border(
+            width = 2.dp,
+            color = srsStatus.toColor(newColor = Color.Transparent),
+            shape = MaterialTheme.shapes.small
+        )
     )
 }
 

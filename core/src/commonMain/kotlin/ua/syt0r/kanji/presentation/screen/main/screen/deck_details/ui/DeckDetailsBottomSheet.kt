@@ -5,6 +5,8 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -48,6 +50,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import ua.syt0r.kanji.core.srs.SrsItemStatus
 import ua.syt0r.kanji.presentation.common.ScreenLetterPracticeType
+import ua.syt0r.kanji.presentation.common.copyCentered
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsCharacterBox
 import ua.syt0r.kanji.presentation.screen.main.screen.deck_details.DeckDetailsScreenContract.ScreenState
@@ -156,8 +159,7 @@ private fun PracticeGroupDetails(
 
             Text(
                 text = resolveString { deckDetails.detailsGroupTitle(group.index) },
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 1.dp) // TODO text alignment api
+                style = MaterialTheme.typography.titleLarge.copyCentered(),
             )
 
             var hintDropdownShown by remember { mutableStateOf(false) }
@@ -229,7 +231,8 @@ private fun PracticeGroupDetails(
         Spacer(modifier = Modifier.height(20.dp))
 
         LazyRow(
-            modifier = Modifier.fillMaxWidth().height(65.dp),
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
             item { Spacer(Modifier.width(20.dp)) }
@@ -241,13 +244,13 @@ private fun PracticeGroupDetails(
                 DeckDetailsCharacterBox(
                     character = it.character,
                     srsStatus = srsStatus,
-                    onClick = { onCharacterClick(it.character) },
-                    modifier = Modifier.padding(end = 12.dp)
+                    constraintOrientation = Orientation.Vertical,
+                    onClick = { onCharacterClick(it.character) }
                 )
 
             }
 
-            item { Spacer(Modifier.width(8.dp)) }
+            item { Spacer(Modifier.width(20.dp)) }
 
         }
 
