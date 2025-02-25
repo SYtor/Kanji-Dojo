@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,7 +33,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,12 +42,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import ua.syt0r.kanji.presentation.common.resources.string.FeedbackStrings
 import ua.syt0r.kanji.presentation.common.resources.string.resolveString
 import ua.syt0r.kanji.presentation.common.theme.extraColorScheme
 import ua.syt0r.kanji.presentation.common.theme.neutralButtonColors
 import ua.syt0r.kanji.presentation.common.theme.neutralColors
-import ua.syt0r.kanji.presentation.screen.main.screen.feedback.FeedbackScreenContract.ScreenState
 
 private const val MaxFeedbackMessageLength = 400
 
@@ -55,7 +55,8 @@ private const val MaxFeedbackMessageLength = 400
 @Composable
 fun FeedbackScreenUI(
     feedbackTopic: FeedbackTopic,
-    screenState: ScreenState,
+    feedbackState: State<FeedbackState>,
+    errorFlow: Flow<String?>,
     navigateBack: () -> Unit,
     submitFeedback: (FeedbackScreenSubmitData) -> Unit
 ) {
@@ -65,7 +66,7 @@ fun FeedbackScreenUI(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        screenState.errorFlow.collect {
+        errorFlow.collect {
             snackbarHostState.showSnackbar(
                 message = strings.errorMessage(it),
                 withDismissAction = true,
@@ -100,7 +101,7 @@ fun FeedbackScreenUI(
     ) { paddingValues ->
 
         AnimatedContent(
-            targetState = screenState.feedbackState.collectAsState().value,
+            targetState = feedbackState.value,
             transitionSpec = { fadeIn() togetherWith fadeOut() },
             contentKey = { it == FeedbackState.Completed }
         ) { feedbackState ->
@@ -194,7 +195,7 @@ fun FeedbackScreenUI(
                         text = strings.button,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
-                    Icon(Icons.Default.Send, null)
+                    Icon(Icons.AutoMirrored.Filled.Send, null)
                 }
 
             }
