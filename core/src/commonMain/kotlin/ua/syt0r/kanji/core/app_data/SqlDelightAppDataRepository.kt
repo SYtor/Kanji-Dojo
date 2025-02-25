@@ -211,23 +211,38 @@ class SqlDelightAppDataRepository(
             .map { Sentence(it.sentence, it.translation) }
     }
 
-    private val delimiter = "|||"
-    private val infoIrregularKanji = "iK"
-    private val infoIrregularKana = "ik"
+    override suspend fun getWordSenses(idList: Set<Long>): List<VocabSenseGroup> = vocabQuery {
+        getVocabSensesWithDetails(idList, DELIMITER).executeAsList()
+            .groupBy { it.entry_id }
+            .map { (wordId, senseItems) ->
+                VocabSenseGroup(
+                    wordId = wordId,
+                    senseList = senseItems.map {
+                        VocabSenseGroup.Sense(
+                            glossary = it.glosses!!.split(DELIMITER),
+                            kanjiRestrictions = it.kanji_restrictions
+                                ?.split(DELIMITER) ?: emptyList(),
+                            kanaRestrictions = it.kana_restrictions
+                                ?.split(DELIMITER) ?: emptyList()
+                        )
+                    }
+                )
+            }
+    }
 
     override suspend fun getDetailedWord(id: Long): DetailedJapaneseWord = vocabQuery {
-        val senseElements = getVocabSensesWithDetails(id, delimiter).executeAsList()
+        val senseElements = getVocabSensesWithDetails(listOf(id), DELIMITER).executeAsList()
 
-        val kanjiElements = getVocabKanjiElementsWithDetails(id, delimiter).executeAsList()
-        val kanaElements = getVocabKanaElementsWithDetails(id, delimiter).executeAsList()
+        val kanjiElements = getVocabKanjiElementsWithDetails(id, DELIMITER).executeAsList()
+        val kanaElements = getVocabKanaElementsWithDetails(id, DELIMITER).executeAsList()
 
         val kanjiReadings = kanjiElements.flatMap { kanjiElement ->
             val matchingKanaElements = kanaElements.filter { kanaElement ->
-                val restrictedKanji = kanaElement.restricted_kanji?.split(delimiter) ?: emptyList()
+                val restrictedKanji = kanaElement.restricted_kanji?.split(DELIMITER) ?: emptyList()
                 restrictedKanji.isEmpty() || restrictedKanji.contains(kanjiElement.reading)
             }
 
-            val infoList = kanjiElement.informations?.split(delimiter)?.toSet() ?: emptySet()
+            val infoList = kanjiElement.informations?.split(DELIMITER)?.toSet() ?: emptySet()
 
             matchingKanaElements.map { kanaElement ->
                 val kanji = kanjiElement.reading
@@ -236,7 +251,7 @@ class SqlDelightAppDataRepository(
                     kanji = kanji,
                     kana = kana,
                     furigana = searchFurigana(kanji, kana).executeAsOneOrNull()?.parseDBFurigana(),
-                    irregular = infoList.contains(infoIrregularKanji),
+                    irregular = infoList.contains(VOCAB_INFO_IRREGULAR_KANJI),
                     rare = false,
                     outdated = false
                 )
@@ -255,7 +270,7 @@ class SqlDelightAppDataRepository(
         }
 
         val senseList = senseElements.map {
-            val senseKanjiRestrictions = it.kanji_restrictions?.split(delimiter)
+            val senseKanjiRestrictions = it.kanji_restrictions?.split(DELIMITER)
                 ?.toSet()
                 ?: emptySet()
 
@@ -264,7 +279,7 @@ class SqlDelightAppDataRepository(
                 else -> kanaReadings.filter { senseKanjiRestrictions.contains(it.kanji) }
             }
 
-            val senseKanaRestrictions = it.kana_restrictions?.split(delimiter)
+            val senseKanaRestrictions = it.kana_restrictions?.split(DELIMITER)
                 ?.toSet()
                 ?: emptySet()
 
@@ -274,8 +289,8 @@ class SqlDelightAppDataRepository(
             }
 
             DetailedVocabSense(
-                glossary = it.glosses?.split(delimiter) ?: emptyList(),
-                partOfSpeechList = it.pos?.split(delimiter) ?: emptyList(),
+                glossary = it.glosses?.split(DELIMITER) ?: emptyList(),
+                partOfSpeechList = it.explanations?.split(DELIMITER) ?: emptyList(),
                 readings = senseKanjiReadings + senseKanaReadings
             )
         }
@@ -377,5 +392,10 @@ class SqlDelightAppDataRepository(
         .fromJsonString(this)
         .map { FuriganaStringCompound(it.text, it.annotation) }
         .let { FuriganaString(it) }
+
+    companion object {
+        private const val DELIMITER = "|||"
+        private const val VOCAB_INFO_IRREGULAR_KANJI = "iK"
+    }
 
 }

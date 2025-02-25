@@ -27,7 +27,7 @@ private fun BasePreview(
             navigateBack = {},
             submitSearch = {},
             dismissSearchResult = {},
-            onCharacterInfoClick = {},
+            onItemClick = {},
             toggleRemoval = {},
             saveChanges = {},
             deleteDeck = {},

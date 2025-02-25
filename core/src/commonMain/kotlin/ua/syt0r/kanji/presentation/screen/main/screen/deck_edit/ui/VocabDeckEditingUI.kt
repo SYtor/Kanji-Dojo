@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ua.syt0r.kanji.core.app_data.data.formattedVocabStringReading
 import ua.syt0r.kanji.presentation.common.ExtraListSpacerState
@@ -47,22 +49,33 @@ import ua.syt0r.kanji.presentation.screen.main.screen.deck_edit.VocabDeckEditLis
 fun VocabDeckEditingUI(
     screenState: ScreenState.VocabDeckEditing,
     extraListSpacerState: ExtraListSpacerState,
+    onItemClick: (VocabDeckEditListItem) -> Unit,
     toggleRemoval: (VocabDeckEditListItem) -> Unit
 ) {
 
     var editListItem by remember { mutableStateOf<VocabDeckEditListItem?>(null) }
     editListItem?.let {
         VocabEditDialog(
-            state = rememberVocabEditDialogState(it),
+            dialogState = rememberVocabEditDialogState(it),
             onDismissRequest = { editListItem = null }
         )
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth()
-            .wrapContentWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(horizontal = 20.dp)
     ) {
+
+        if (screenState.list.isEmpty()) {
+            ScreenMessage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize()
+                    .width(200.dp)
+            )
+            return@Column
+        }
 
         LazyVerticalGrid(
             columns = GridCells.Adaptive(400.dp),
@@ -72,48 +85,25 @@ fun VocabDeckEditingUI(
                 .onGloballyPositioned { extraListSpacerState.updateList(it) }
         ) {
 
-            if (screenState.list.isEmpty()) {
-                item {
-                    Text(
-                        text = "No words in the deck",
-                        modifier = Modifier.fillMaxWidth().wrapContentWidth()
-                    )
-                }
-            }
-
             itemsIndexed(screenState.list) { index, listItem ->
+                val displayCardData = listItem.displayCardData.value
 
-                val title: String
-                val subtitle: String
-                val buttonIcon: ImageVector
-
-                when (val modifiedData = listItem.card.modifiedData.value) {
-                    null -> {
-                        val card = listItem.card.data
-                        title = formattedVocabStringReading(card.kanaReading, card.kanjiReading)
-                        subtitle = listItem.card.meaning
-                    }
-
-                    else -> {
-                        title = formattedVocabStringReading(
-                            modifiedData.kanaReading,
-                            modifiedData.kanjiReading
-                        )
-                        subtitle = listItem.card.meaning
-                    }
-                }
-
-                when (listItem.action.value) {
+                val title: String = formattedVocabStringReading(
+                    displayCardData.kanaReading,
+                    displayCardData.kanjiReading
+                )
+                val subtitle: String = listItem.displayMeaning.value
+                val buttonIcon: ImageVector = when (listItem.action.value) {
                     DeckEditItemAction.Nothing -> {
-                        buttonIcon = Icons.Default.Delete
+                        Icons.Default.Delete
                     }
 
                     DeckEditItemAction.Add -> {
-                        buttonIcon = Icons.Default.Delete
+                        Icons.Default.Delete
                     }
 
                     DeckEditItemAction.Remove -> {
-                        buttonIcon = Icons.AutoMirrored.Filled.Redo
+                        Icons.AutoMirrored.Filled.Redo
                     }
                 }
 
@@ -137,7 +127,7 @@ fun VocabDeckEditingUI(
                     },
                     modifier = Modifier.fillMaxSize()
                         .clip(MaterialTheme.shapes.medium)
-                        .clickable { TODO() }
+                        .clickable { onItemClick(listItem) }
                 )
 
             }
@@ -151,9 +141,9 @@ fun VocabDeckEditingUI(
 }
 
 @Composable
-private fun ScreenMessage() {
+private fun ScreenMessage(modifier: Modifier) {
     Text(
-        text = resolveString { deckEdit.vocabDetailsMessage(InlineIconId) },
+        text = resolveString { deckEdit.vocabDetailsEmptyMessage(InlineIconId) },
         inlineContent = mapOf(
             InlineIconId to InlineTextContent(
                 Placeholder(
@@ -170,7 +160,8 @@ private fun ScreenMessage() {
                 }
             )
         ),
-        style = MaterialTheme.typography.bodySmall
+        modifier = modifier,
+        textAlign = TextAlign.Center
     )
 }
 

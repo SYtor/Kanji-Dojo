@@ -68,7 +68,7 @@ fun LetterDeckEditingUI(
     screenState: ScreenState.LetterDeckEditing,
     extraListSpacerState: ExtraListSpacerState,
     submitSearch: (String) -> Unit,
-    showCharacterInfo: (String) -> Unit,
+    onItemClick: (DeckEditListItem) -> Unit,
     toggleRemoval: (DeckEditListItem) -> Unit,
 ) {
 
@@ -131,7 +131,7 @@ fun LetterDeckEditingUI(
                     item = it,
                     onClick = {
                         when (deckEditingMode.value) {
-                            LetterDeckEditingMode.Search -> showCharacterInfo(it.character)
+                            LetterDeckEditingMode.Search -> onItemClick(it)
                             LetterDeckEditingMode.Removal -> toggleRemoval(it)
                             LetterDeckEditingMode.ResetSrs -> TODO()
                         }

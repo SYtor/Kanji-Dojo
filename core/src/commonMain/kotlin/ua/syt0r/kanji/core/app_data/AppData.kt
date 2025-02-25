@@ -61,6 +61,19 @@ interface AppDataRepository {
         limit: Int = Int.MAX_VALUE
     ): List<Sentence>
 
+    suspend fun getWordSenses(idList: Set<Long>): List<VocabSenseGroup>
+
+}
+
+class VocabSenseGroup(
+    val wordId: Long,
+    val senseList: List<Sense>
+) {
+    data class Sense(
+        val glossary: List<String>,
+        val kanjiRestrictions: List<String>,
+        val kanaRestrictions: List<String>
+    )
 }
 
 data class Sentence(

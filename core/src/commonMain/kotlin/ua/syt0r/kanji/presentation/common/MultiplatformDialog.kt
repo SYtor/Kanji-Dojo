@@ -70,7 +70,6 @@ fun ExperimentalMultiplatformDialog(
 
         Column(
             modifier = Modifier
-                .animateContentSize()
                 .height(IntrinsicSize.Max)
                 .padding(top = 20.dp, bottom = 10.dp)
         ) {

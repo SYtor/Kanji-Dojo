@@ -469,7 +469,7 @@ interface DeckEditStrings {
     val editingModeRemovalTitle: String
 
     val editingModeDetailsTitle: String
-    val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString
+    val vocabDetailsEmptyMessage: (inlineIconId: String) -> AnnotatedString
 
     val completeMessage: String
 

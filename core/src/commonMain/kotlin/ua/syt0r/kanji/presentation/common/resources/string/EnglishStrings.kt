@@ -466,9 +466,9 @@ object EnglishDeckEditStrings : DeckEditStrings {
     override val editingModeSearchTitle: String = "Search"
     override val editingModeRemovalTitle: String = "Removal"
     override val editingModeDetailsTitle: String = "Details"
-    override val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString = {
+    override val vocabDetailsEmptyMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
-            append("To add a word from dictionary use ")
+            append("No cards. To add new cards save this deck and use ")
             appendInlineContent(it)
             append(" icon on search screen, during writing reviews and other places in the app")
         }

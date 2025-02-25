@@ -25,8 +25,19 @@ fun DeckEditScreen(
         navigateBack = { mainNavigationState.navigateBack() },
         submitSearch = { viewModel.searchCharacters(it) },
         dismissSearchResult = { viewModel.dismissSearchResult() },
-        onCharacterInfoClick = {
-            val screenData = InfoScreenData.Letter(it)
+        onItemClick = {
+
+            val screenData = when (it) {
+                is LetterDeckEditListItem -> InfoScreenData.Letter(it.character)
+                is VocabDeckEditListItem -> {
+                    val cardData = it.displayCardData.value
+                    InfoScreenData.Vocab(
+                        id = cardData.dictionaryId,
+                        kanjiReading = cardData.kanjiReading,
+                        kanaReading = cardData.kanaReading
+                    )
+                }
+            }
             mainNavigationState.navigate(MainDestination.Info(screenData))
         },
         toggleRemoval = { viewModel.toggleRemoval(it) },

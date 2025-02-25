@@ -1,8 +1,11 @@
 package ua.syt0r.kanji.presentation.screen.main.screen.deck_edit
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import kotlinx.serialization.Serializable
+import ua.syt0r.kanji.core.app_data.VocabSenseGroup
 import ua.syt0r.kanji.core.app_data.WordClassification
 import ua.syt0r.kanji.core.japanese.CharacterClassification
 import ua.syt0r.kanji.core.user_data.database.SavedVocabCard
@@ -70,20 +73,34 @@ data class LetterDeckEditListItem(
     override val action: MutableState<DeckEditItemAction>
 ) : DeckEditListItem
 
-
-data class DeckEditVocabCard(
-    val data: VocabCardData,
-    val savedVocabCard: SavedVocabCard?,
-    val meaning: String
-) {
-    val modifiedData: MutableState<VocabCardData?> = mutableStateOf(null)
-}
-
 data class VocabDeckEditListItem(
-    val card: DeckEditVocabCard,
-    override val initialAction: DeckEditItemAction,
-    override val action: MutableState<DeckEditItemAction>
-) : DeckEditListItem
+    val cardData: VocabCardData,
+    val savedVocabCard: SavedVocabCard?,
+    val dictionarySenseList: List<VocabSenseGroup.Sense>,
+    override val initialAction: DeckEditItemAction
+) : DeckEditListItem {
+
+    override val action: MutableState<DeckEditItemAction> = mutableStateOf(initialAction)
+    val modifiedData: MutableState<VocabCardData?> = mutableStateOf(null)
+
+    val displayCardData: State<VocabCardData> = derivedStateOf { modifiedData.value ?: cardData }
+    val displayMeaning: State<String> = derivedStateOf {
+        val cardData = modifiedData.value ?: cardData
+        cardData.meaning ?: getDictionaryMeaning(cardData.kanjiReading, cardData.kanaReading)
+    }
+
+    fun getDictionaryMeaning(kanjiReading: String?, kanaReading: String): String {
+        val matchingSense = dictionarySenseList.first {
+            val kanjiCheck = it.kanjiRestrictions.isEmpty() ||
+                    it.kanjiRestrictions.contains(kanjiReading)
+            val kanaCheck = it.kanaRestrictions.isEmpty() ||
+                    it.kanaRestrictions.contains(kanaReading)
+            kanjiCheck && kanaCheck
+        }
+        return matchingSense.glossary.joinToString()
+    }
+
+}
 
 enum class DeckEditItemAction { Nothing, Add, Remove }
 

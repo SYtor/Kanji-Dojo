@@ -54,7 +54,7 @@ class DefaultSaveDeckUseCase(
                 vocabPracticeRepository.createDeck(
                     title = title,
                     words = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
-                        .map { it.card.data }
+                        .map { it.cardData }
                 )
             }
 
@@ -63,15 +63,15 @@ class DefaultSaveDeckUseCase(
                     id = configuration.vocabDeckId,
                     title = title,
                     cardsToAdd = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Add)
-                        .map { it.card.modifiedData.value ?: it.card.data },
+                        .map { it.modifiedData.value ?: it.cardData },
                     cardsToUpdate = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Nothing)
                         .mapNotNull {
-                            it.card.savedVocabCard?.copy(
-                                data = it.card.modifiedData.value ?: return@mapNotNull null
+                            it.savedVocabCard?.copy(
+                                data = it.modifiedData.value ?: return@mapNotNull null
                             )
                         },
                     cardsToRemove = list.filter<VocabDeckEditListItem>(DeckEditItemAction.Remove)
-                        .mapNotNull { it.card.savedVocabCard?.cardId }
+                        .mapNotNull { it.savedVocabCard?.cardId }
                 )
             }
         }

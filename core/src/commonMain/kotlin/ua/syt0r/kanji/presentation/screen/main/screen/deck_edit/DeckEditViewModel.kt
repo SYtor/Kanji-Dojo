@@ -73,19 +73,16 @@ class DeckEditViewModel(
                 }
 
                 is DeckEditScreenConfiguration.VocabDeck -> {
-                    val vocabData = loadDeckEditVocabDataUseCase(configuration)
+                    val vocabData = loadDeckEditVocabDataUseCase(
+                        configuration,
+                        defaultListItemAction
+                    )
                     deckTitle.value = vocabData.title ?: ""
 
                     vocabDeckEditingState = MutableVocabDeckEditingState(
                         title = deckTitle,
                         confirmExit = wasDeckEdited,
-                        list = vocabData.words.map {
-                            VocabDeckEditListItem(
-                                card = it,
-                                initialAction = defaultListItemAction,
-                                action = mutableStateOf(defaultListItemAction)
-                            )
-                        }
+                        list = vocabData.items
                     )
                     _state.value = vocabDeckEditingState
                 }

@@ -440,11 +440,11 @@ object JapaneseDeckEditStrings : DeckEditStrings {
     override val editingModeSearchTitle: String = "検索"
     override val editingModeDetailsTitle: String = "詳細"
     override val editingModeRemovalTitle: String = "削除"
-    override val vocabDetailsMessage: (inlineIconId: String) -> AnnotatedString = {
+    override val vocabDetailsEmptyMessage: (inlineIconId: String) -> AnnotatedString = {
         buildAnnotatedString {
-            append("下のボタンをクリックしてデッキを保存してください。新しい単語を追加するには、検索画面や、書く練習中、アプリ内の他の場所で ")
+            append("カードなし。新しいカードを追加するには、このデッキを保存して、")
             appendInlineContent(it)
-            append(" アイコンを使用してください。")
+            append(" アイコンを検索画面や書き取り練習中、アプリ内の他の場所などで使用してください。")
         }
     }
     override val completeMessage: String = "完了"
